@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "project": "japan-travel-mcp",
+  "license": {
+    "data": "CC BY 4.0",
+    "code": "MIT"
+  },
+  "attribution": "Japan Travel MCP by KJ Sunada / KabuK Style Inc.",
+  "sources": [
+    {
+      "name": "全国地方公共団体コード",
+      "publisher": "総務省 (Ministry of Internal Affairs and Communications)",
+      "url": "https://www.soumu.go.jp/denshijiti/code.html",
+      "type": "official_registry",
+      "license": "public_domain"
+    },
+    {
+      "name": "Wikidata",
+      "publisher": "Wikimedia Foundation",
+      "url": "https://www.wikidata.org/",
+      "type": "open_data",
+      "license": "CC0"
+    },
+    {
+      "name": "Municipal tourism pages",
+      "publisher": "Each municipality (varies)",
+      "type": "self_published",
+      "note": "robots.txt is read on every domain. See DATA_POLICY.md."
+    }
+  ],
+  "coverage": {
+    "prefectures_total": 47,
+    "municipalities_total": 1741,
+    "municipalities_in_official_code_list": 1938,
+    "note": "Official code list includes ~197 政令指定都市の行政区 (designated-city wards) which are not counted in the public 1,741 figure."
+  },
+  "schedule": {
+    "monthly_cycle": "Each municipality re-scraped at most once per 30 days",
+    "daily_batch": "GitHub Actions cron at 03:00 JST processes the 58 stalest municipalities",
+    "rate_limit": "5 seconds minimum between requests to the same domain (steady-state); pilot uses 2s for initial coverage"
+  },
+  "data_freshness_promise": "No record left stale beyond 30 days under steady-state operation."
+}

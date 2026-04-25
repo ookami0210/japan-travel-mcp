@@ -1,0 +1,52 @@
+name: Daily Scrape
+
+on:
+  schedule:
+    # 03:00 JST = 18:00 UTC (previous day)
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: "Municipalities to process this run"
+        required: false
+        default: "58"
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run daily scrape
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DAILY_BATCH_SIZE: ${{ github.event.inputs.batch_size || '58' }}
+        run: npx tsx scrapers/daily.ts
+
+      - name: Commit data updates
+        run: |
+          git config user.name "japan-travel-mcp-bot"
+          git config user.email "noreply@github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No data changes to commit"
+          else
+            git commit -m "data: daily incremental scrape $(date -u +%Y-%m-%d)"
+            git push
+          fi
