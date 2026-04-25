@@ -13,6 +13,9 @@ import { rateLimitedFetch, ErrorCounter } from "../lib/fetcher.js";
 import { shouldCrawl } from "../lib/robots.js";
 import { extract } from "../lib/extractor.js";
 import { discoverTourismPages } from "../lib/discover.js";
+import { pickCanonical } from "../lib/canonical.js";
+import { passesSpotFilter } from "../lib/spot_filter.js";
+import { geocodeAddress } from "../lib/geocode.js";
 import type {
   MunicipalityInput,
   MunicipalityScrapeResult,
@@ -69,10 +72,11 @@ export async function scrapeOneMunicipality(
   }
   result.tourism_pages_found = discovery.pages.length;
 
-  // Phase 2: extract per-page details. We already fetched these once during
-  // discovery, but discovery only kept titles. Re-fetching is wasteful; in v0
-  // we accept the inefficiency to keep the code simple. The rate limiter
-  // de-duplicates pacing per domain, so the extra requests are spaced.
+  // Phase 2: extract per-page details and emit canonical-deduplicated spots.
+  // discovery.pages are already canonicalised, but we re-check after fetch in
+  // case the page declared a different canonical via <link rel="canonical">.
+  const seenSpotIds = new Set<string>();
+
   for (const page of discovery.pages) {
     const decision = await shouldCrawl(page.url, opts);
     if (!decision.allowed) {
@@ -94,21 +98,49 @@ export async function scrapeOneMunicipality(
     result.pages_fetched += 1;
 
     const ext = extract(res.body, res.finalUrl);
-    const name = ext.headings[0] || ext.title || page.title || page.url;
+    const canonical = pickCanonical(res.finalUrl, ext.canonical, res.finalUrl);
+    const id = spotIdFromUrl(canonical);
+    if (seenSpotIds.has(id)) {
+      // Same canonical URL produced by a different fetched URL. Skip.
+      continue;
+    }
+
+    const name = ext.headings[0] || ext.title || page.title || canonical;
+
+    const filter = passesSpotFilter({
+      url: canonical,
+      title: name,
+      description: ext.description,
+    });
+    if (!filter.ok) {
+      result.errors.push({
+        url: canonical,
+        reason: `spot filter: ${filter.reason}`,
+      });
+      continue;
+    }
+
+    seenSpotIds.add(id);
+
+    // Coordinate fallback: og:latitude / JSON-LD GeoCoordinates → GSI geocode
+    let coordinates = ext.geo;
+    if (!coordinates && ext.address) {
+      coordinates = await geocodeAddress(ext.address, opts, counter);
+    }
 
     const spot: TouristSpot = {
-      id: spotIdFromUrl(res.finalUrl),
-      url: res.finalUrl,
+      id,
+      url: canonical,
       name,
       description: ext.description,
       category: null,
       address: ext.address,
-      coordinates: ext.geo,
+      coordinates,
       images: [
         ...(ext.ogImage ? [ext.ogImage] : []),
         ...ext.images.filter((u) => u !== ext.ogImage).slice(0, 4),
       ],
-      source_url: res.finalUrl,
+      source_url: canonical,
       language: ext.language,
       last_scraped_at: new Date().toISOString(),
     };

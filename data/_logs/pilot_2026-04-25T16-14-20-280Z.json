@@ -1,0 +1,26 @@
+{
+  "run_type": "pilot",
+  "prefectures": [
+    {
+      "code": "31",
+      "slug": "tottori",
+      "name": "鳥取県"
+    },
+    {
+      "code": "39",
+      "slug": "kochi",
+      "name": "高知県"
+    }
+  ],
+  "started_at": "2026-04-25T16:03:33.178Z",
+  "finished_at": "2026-04-25T16:14:20.281Z",
+  "elapsed_seconds": 647,
+  "aborted": false,
+  "abort_reason": null,
+  "http": {
+    "success": 1454,
+    "fivexx": 33,
+    "fourxx": 497,
+    "network_errors": 23
+  }
+}

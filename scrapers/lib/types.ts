@@ -28,7 +28,7 @@ export const DEFAULT_OPTIONS: ScrapeOptions = {
     "JapanTravelMCP/0.0.1 (+https://github.com/ookami0210/japan-travel-mcp; OSS travel data for AI agents)",
   timeoutMs: 30_000,
   retries: 2,
-  maxPagesPerMunicipality: 25,
+  maxPagesPerMunicipality: 35,
   consecutive5xxAbort: 100,
   consecutive4xxAbort: 200,
 };

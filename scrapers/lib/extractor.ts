@@ -25,6 +25,7 @@ export interface ExtractedPage {
   ogImage: string | null;
   geo: { lat: number; lng: number } | null;
   address: string | null;
+  canonical: string | null;
 }
 
 function detectLang(htmlLang: string | undefined): Lang {
@@ -120,6 +121,12 @@ export function extract(html: string, baseUrl: string): ExtractedPage {
   const ogImageRaw = $('meta[property="og:image"]').attr("content")?.trim();
   const ogImage = ogImageRaw ? safeUrl(ogImageRaw, baseUrl) : null;
 
+  const canonicalRaw =
+    $('link[rel="canonical"]').attr("href")?.trim() ||
+    $('meta[property="og:url"]').attr("content")?.trim() ||
+    null;
+  const canonical = canonicalRaw ? safeUrl(canonicalRaw, baseUrl) : null;
+
   let geo: { lat: number; lng: number } | null = null;
   const ogLat = $(
     'meta[property="og:latitude"], meta[property="place:location:latitude"]',
@@ -162,5 +169,6 @@ export function extract(html: string, baseUrl: string): ExtractedPage {
     ogImage,
     geo,
     address,
+    canonical,
   };
 }
