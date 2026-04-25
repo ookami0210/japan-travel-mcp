@@ -24,8 +24,11 @@ const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
 const USER_AGENT =
   "JapanTravelMCP/0.0.1 (+https://github.com/ookami0210/japan-travel-mcp)";
 
-// 2-digit prefecture prefixes to fetch.
-const PREFECTURE_PREFIXES = ["31", "39", "47"]; // Tottori, Kochi, Okinawa
+// 2-digit prefecture prefixes to fetch. By default all 47.
+// Override with WD_PREFECTURES="31,39" for a subset.
+const PREFECTURE_PREFIXES =
+  process.env.WD_PREFECTURES?.split(",").map((s) => s.trim()).filter(Boolean) ??
+  Array.from({ length: 47 }, (_, i) => String(i + 1).padStart(2, "0"));
 
 // Wikidata QIDs we treat as tourist-spot-like instances.
 const ATTRACTION_TYPES = [
@@ -140,20 +143,10 @@ function qidFromUri(uri: string): string {
   return uri.split("/").pop() ?? "";
 }
 
-async function main(): Promise<void> {
-  const filter = PREFECTURE_PREFIXES.map(
-    (p) => `STRSTARTS(?adminCode, "${p}")`,
-  ).join(" || ");
-  const query = buildQuery(filter, ATTRACTION_TYPES);
-
-  console.error(
-    `[wikidata_attractions] querying for prefectures ${PREFECTURE_PREFIXES.join(", ")}...`,
-  );
-  const bindings = await querySparql(query);
-  console.error(`[wikidata_attractions] received ${bindings.length} bindings`);
-
-  // Aggregate by QID; keep best-quality fields across rows of the same item.
-  const byQid = new Map<string, AttractionRecord>();
+function processBindings(
+  bindings: SparqlBinding[],
+  byQid: Map<string, AttractionRecord>,
+): void {
   for (const b of bindings) {
     const qid = qidFromUri(b.item?.value ?? "");
     if (!qid) continue;
@@ -180,7 +173,6 @@ async function main(): Promise<void> {
         types: typeQid ? [typeQid] : [],
       });
     } else {
-      // Prefer non-null fields.
       if (!existing.name_ja && b.label_ja) existing.name_ja = b.label_ja.value;
       if (!existing.name_en && b.label_en) existing.name_en = b.label_en.value;
       if (!existing.name_zh && b.label_zh) existing.name_zh = b.label_zh.value;
@@ -201,12 +193,47 @@ async function main(): Promise<void> {
       }
     }
   }
+}
+
+async function main(): Promise<void> {
+  const byQid = new Map<string, AttractionRecord>();
+
+  // Fetch one prefecture at a time. Wikidata times out on 47-way unions.
+  // Keep query small + retry on transient failures.
+  for (const prefix of PREFECTURE_PREFIXES) {
+    const filter = `STRSTARTS(?adminCode, "${prefix}")`;
+    const query = buildQuery(filter, ATTRACTION_TYPES);
+
+    let attempt = 0;
+    while (attempt < 3) {
+      try {
+        const bindings = await querySparql(query);
+        processBindings(bindings, byQid);
+        console.error(
+          `[wikidata_attractions] pref ${prefix}: ${bindings.length} bindings (running total: ${byQid.size})`,
+        );
+        break;
+      } catch (err) {
+        attempt += 1;
+        console.error(
+          `  pref ${prefix} attempt ${attempt} failed: ${(err as Error).message}`,
+        );
+        if (attempt >= 3) {
+          console.error(`  pref ${prefix} GAVE UP after 3 attempts`);
+        } else {
+          await new Promise((r) => setTimeout(r, 2000 * attempt));
+        }
+      }
+    }
+
+    // Be nice to the public Wikidata endpoint.
+    await new Promise((r) => setTimeout(r, 400));
+  }
 
   const records = Array.from(byQid.values()).sort((a, b) =>
     a.qid.localeCompare(b.qid),
   );
 
-  // Stats
   const byPref: Record<string, number> = {};
   let withEn = 0,
     withZh = 0,
@@ -219,10 +246,7 @@ async function main(): Promise<void> {
     if (r.name_ko) withKo += 1;
     if (r.coordinates) withCoord += 1;
   }
-  console.error(`[wikidata_attractions] unique attractions: ${records.length}`);
-  for (const [pref, n] of Object.entries(byPref)) {
-    console.error(`  pref ${pref}: ${n}`);
-  }
+  console.error(`[wikidata_attractions] TOTAL unique: ${records.length}`);
   console.error(
     `  with EN: ${withEn}, ZH: ${withZh}, KO: ${withKo}, coord: ${withCoord}`,
   );

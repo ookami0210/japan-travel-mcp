@@ -29,6 +29,10 @@ import {
 const ROOT = new URL("../", import.meta.url);
 const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
 const URLS_PATH = new URL("data/_state/official_urls.json", ROOT);
+const CENTROIDS_PATH = new URL(
+  "data/_state/municipality_centroids.json",
+  ROOT,
+);
 const PREFECTURES_DIR = new URL("data/prefectures/", ROOT);
 const LOG_DIR = new URL("data/_logs/", ROOT);
 
@@ -109,6 +113,15 @@ async function main(): Promise<void> {
   const urlsFile = JSON.parse(
     await readFile(fileURLToPath(URLS_PATH), "utf8"),
   ) as { entries: { code: string; official_url: string | null }[] };
+  let centroids: Record<string, { lat: number; lng: number }> = {};
+  try {
+    const f = JSON.parse(
+      await readFile(fileURLToPath(CENTROIDS_PATH), "utf8"),
+    ) as { centroids: Record<string, { lat: number; lng: number }> };
+    centroids = f.centroids ?? {};
+  } catch {
+    /* missing centroids file — fallback chain will skip the centroid step */
+  }
 
   const urlByCode = new Map<string, string>();
   for (const e of urlsFile.entries) {
@@ -168,6 +181,7 @@ async function main(): Promise<void> {
           },
           opts,
           counter,
+          centroids,
         );
         if (!byPref.has(m.prefecture_code)) byPref.set(m.prefecture_code, []);
         byPref.get(m.prefecture_code)!.push(r);

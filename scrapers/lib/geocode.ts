@@ -40,7 +40,8 @@ export async function geocodeAddress(
   if (cache.has(cleaned)) return cache.get(cleaned) ?? null;
 
   const url = `${GSI_ENDPOINT}?q=${encodeURIComponent(cleaned)}`;
-  const opts: ScrapeOptions = { ...baseOpts, rateLimitMs: 1000 };
+  // GSI is a stable public service. 500ms is well within polite use.
+  const opts: ScrapeOptions = { ...baseOpts, rateLimitMs: 500 };
   const res = await rateLimitedFetch(url, opts, counter);
   if (!res.body || res.status !== 200) {
     cache.set(cleaned, null);

@@ -1,0 +1,106 @@
+{
+  "id": "df4b1fa49638",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 15m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/368601210",
+      "source_url": "https://www.openstreetmap.org/node/368601210",
+      "name": "북촌게스트하우스",
+      "name_en": "Bukchon Guest House",
+      "name_zh": null,
+      "name_ko": "북촌게스트하우스",
+      "coordinates": {
+        "lat": 37.5813359,
+        "lng": 126.9865747
+      },
+      "phone": null,
+      "street": "계동길",
+      "postal_code": "03056",
+      "website": null,
+      "type": "guest_house",
+      "prefecture_code": null,
+      "raw": {
+        "osm_id": "node/368601210",
+        "osm_url": "https://www.openstreetmap.org/node/368601210",
+        "type": "guest_house",
+        "name": "북촌게스트하우스",
+        "name_en": "Bukchon Guest House",
+        "name_zh": null,
+        "name_ko": "북촌게스트하우스",
+        "coordinates": {
+          "lat": 37.5813359,
+          "lng": 126.9865747
+        },
+        "postal_code": "03056",
+        "full_address": null,
+        "city": "서울특별시",
+        "street": "계동길",
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:city": "서울특별시",
+          "addr:district": "종로구",
+          "addr:housenumber": "89",
+          "addr:postcode": "03056",
+          "addr:street": "계동길",
+          "addr:subdistrict": "계동",
+          "name": "북촌게스트하우스",
+          "name:en": "Bukchon Guest House",
+          "name:ja": "プクチョン(北村) ゲスト ハウス",
+          "name:ko": "북촌게스트하우스",
+          "name:ko-Latn": "Bukchongeseuteuhauseu",
+          "tourism": "guest_house"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/13682342983",
+      "source_url": "https://www.openstreetmap.org/node/13682342983",
+      "name": "다온게스트하우스",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 37.5812422,
+        "lng": 126.9864503
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "motel",
+      "prefecture_code": null,
+      "raw": {
+        "osm_id": "node/13682342983",
+        "osm_url": "https://www.openstreetmap.org/node/13682342983",
+        "type": "motel",
+        "name": "다온게스트하우스",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 37.5812422,
+          "lng": 126.9864503
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "다온게스트하우스",
+          "tourism": "motel"
+        }
+      }
+    }
+  ]
+}

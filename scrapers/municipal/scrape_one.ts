@@ -31,6 +31,7 @@ export async function scrapeOneMunicipality(
   m: MunicipalityInput,
   opts: ScrapeOptions,
   counter: ErrorCounter,
+  centroids?: Record<string, { lat: number; lng: number }>,
 ): Promise<MunicipalityScrapeResult> {
   const startedAt = new Date().toISOString();
   const result: MunicipalityScrapeResult = {
@@ -122,10 +123,24 @@ export async function scrapeOneMunicipality(
 
     seenSpotIds.add(id);
 
-    // Coordinate fallback: og:latitude / JSON-LD GeoCoordinates → GSI geocode
+    // Coordinate fallback chain (best precision wins):
+    //   1. exact:                page-declared og:geo / schema.org GeoCoordinates
+    //   2. address_geocoded:     extracted address → 国土地理院 lookup
+    //   3. municipality_centroid: Wikidata P625 of the municipality (approximate)
     let coordinates = ext.geo;
-    if (!coordinates && ext.address) {
-      coordinates = await geocodeAddress(ext.address, opts, counter);
+    let coordinate_precision: TouristSpot["coordinate_precision"] = null;
+    if (coordinates) {
+      coordinate_precision = "exact";
+    } else if (ext.address) {
+      const geo = await geocodeAddress(ext.address, opts, counter);
+      if (geo) {
+        coordinates = geo;
+        coordinate_precision = "address_geocoded";
+      }
+    }
+    if (!coordinates && centroids && centroids[m.code]) {
+      coordinates = centroids[m.code];
+      coordinate_precision = "municipality_centroid";
     }
 
     const spot: TouristSpot = {
@@ -136,6 +151,7 @@ export async function scrapeOneMunicipality(
       category: null,
       address: ext.address,
       coordinates,
+      coordinate_precision,
       images: [
         ...(ext.ogImage ? [ext.ogImage] : []),
         ...ext.images.filter((u) => u !== ext.ogImage).slice(0, 4),

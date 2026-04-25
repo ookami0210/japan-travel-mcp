@@ -1,0 +1,107 @@
+{
+  "id": "06a905208304",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 10m",
+    "name similarity 0.80 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111406673",
+      "source_url": "https://www.wikidata.org/wiki/Q111406673",
+      "name": "セルリアンタワー東急ホテル",
+      "name_en": "Cerulean Tower Tokyu Hotel",
+      "name_zh": "東急澀谷藍塔大飯店",
+      "name_ko": "세를리앙 타워 도큐 호텔",
+      "coordinates": {
+        "lat": 35.65641,
+        "lng": 139.69922
+      },
+      "phone": null,
+      "street": "150-8512 東京都渋谷区桜丘町26-1",
+      "postal_code": null,
+      "website": "https://www.tokyuhotels.co.jp/cerulean-h/",
+      "type": null,
+      "prefecture_code": "13",
+      "raw": {
+        "qid": "Q111406673",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111406673",
+        "name_ja": "セルリアンタワー東急ホテル",
+        "name_en": "Cerulean Tower Tokyu Hotel",
+        "name_zh": "東急澀谷藍塔大飯店",
+        "name_ko": "세를리앙 타워 도큐 호텔",
+        "description_en": "Hotel in Shibuya, Tokyo, Japan",
+        "coordinates": {
+          "lat": 35.65641,
+          "lng": 139.69922
+        },
+        "prefecture_code": "13",
+        "admin_code": "131130",
+        "admin_name": "渋谷区",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.tokyuhotels.co.jp/cerulean-h/",
+        "phone": null,
+        "street_address": "150-8512 東京都渋谷区桜丘町26-1",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/55441040",
+      "source_url": "https://www.openstreetmap.org/way/55441040",
+      "name": "セルリアンタワー",
+      "name_en": "Cerulean Tower Tokyo Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.6563584,
+        "lng": 139.6993159
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "way/55441040",
+        "osm_url": "https://www.openstreetmap.org/way/55441040",
+        "type": "hotel",
+        "name": "セルリアンタワー",
+        "name_en": "Cerulean Tower Tokyo Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.6563584,
+          "lng": 139.6993159
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "assembly_point:unable_to_move": "yes",
+          "building": "yes",
+          "building:levels": "47",
+          "emergency": "assembly_point",
+          "height": "184",
+          "internet_access": "wlan",
+          "internet_access:fee": "no",
+          "internet_access:ssid": "-SHIBUYA-Wi-Wi-Fi-",
+          "name": "セルリアンタワー",
+          "name:en": "Cerulean Tower Tokyo Hotel",
+          "tourism": "hotel",
+          "wikidata": "Q5065298",
+          "wikimedia_commons": "Category:Cerulean Tower",
+          "wikipedia": "en:Cerulean Tower"
+        }
+      }
+    }
+  ]
+}

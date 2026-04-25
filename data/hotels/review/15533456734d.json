@@ -1,0 +1,100 @@
+{
+  "id": "15533456734d",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 19m",
+    "name similarity 0.67 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q11521119",
+      "source_url": "https://www.wikidata.org/wiki/Q11521119",
+      "name": "札幌プリンスホテルタワー",
+      "name_en": "Sapporo Prince Hotel Tower",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.05605,
+        "lng": 141.34106
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": null,
+      "prefecture_code": "01",
+      "raw": {
+        "qid": "Q11521119",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q11521119",
+        "name_ja": "札幌プリンスホテルタワー",
+        "name_en": "Sapporo Prince Hotel Tower",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "building in Chuo-ku, Hokkaido Prefecture, Japan",
+        "coordinates": {
+          "lat": 43.05605,
+          "lng": 141.34106
+        },
+        "prefecture_code": "01",
+        "admin_code": "010006",
+        "admin_name": "北海道",
+        "types": [
+          "Q27686"
+        ],
+        "website": null,
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/474294227",
+      "source_url": "https://www.openstreetmap.org/way/474294227",
+      "name": "札幌プリンスホテル",
+      "name_en": "Sapporo Prince Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.055882,
+        "lng": 141.3409959
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.princehotels.co.jp/sapporo/",
+      "type": "hotel",
+      "prefecture_code": "01",
+      "raw": {
+        "osm_id": "way/474294227",
+        "osm_url": "https://www.openstreetmap.org/way/474294227",
+        "type": "hotel",
+        "name": "札幌プリンスホテル",
+        "name_en": "Sapporo Prince Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 43.055882,
+          "lng": 141.3409959
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": "https://www.princehotels.co.jp/sapporo/",
+        "stars": null,
+        "raw_tags": {
+          "name": "札幌プリンスホテル",
+          "name:en": "Sapporo Prince Hotel",
+          "name:ja": "札幌プリンスホテル",
+          "tourism": "hotel",
+          "website": "https://www.princehotels.co.jp/sapporo/",
+          "wheelchair": "yes",
+          "wikidata": "Q11521119"
+        }
+      }
+    }
+  ]
+}

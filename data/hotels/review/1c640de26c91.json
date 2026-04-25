@@ -1,0 +1,95 @@
+{
+  "id": "1c640de26c91",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 4m",
+    "name similarity 0.67 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q112864759",
+      "source_url": "https://www.wikidata.org/wiki/Q112864759",
+      "name": "ベッセルイン栄駅前",
+      "name_en": "Vessel Inn Sakae Ekimae",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.171246782,
+        "lng": 136.906296811
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.vessel-hotel.jp/inn/sakae/",
+      "type": null,
+      "prefecture_code": "23",
+      "raw": {
+        "qid": "Q112864759",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q112864759",
+        "name_ja": "ベッセルイン栄駅前",
+        "name_en": "Vessel Inn Sakae Ekimae",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": null,
+        "coordinates": {
+          "lat": 35.171246782,
+          "lng": 136.906296811
+        },
+        "prefecture_code": "23",
+        "admin_code": "230006",
+        "admin_name": "愛知県",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.vessel-hotel.jp/inn/sakae/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/11306428031",
+      "source_url": "https://www.openstreetmap.org/node/11306428031",
+      "name": "ベッセルイン",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.1712603,
+        "lng": 136.9063331
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "23",
+      "raw": {
+        "osm_id": "node/11306428031",
+        "osm_url": "https://www.openstreetmap.org/node/11306428031",
+        "type": "hotel",
+        "name": "ベッセルイン",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.1712603,
+          "lng": 136.9063331
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "ベッセルイン",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

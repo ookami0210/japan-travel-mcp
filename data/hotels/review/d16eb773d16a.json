@@ -1,0 +1,99 @@
+{
+  "id": "d16eb773d16a",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 27m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q114399017",
+      "source_url": "https://www.wikidata.org/wiki/Q114399017",
+      "name": "三交イン名古屋新幹線口",
+      "name_en": "Sanco Inn Nagoya Shinkansenguchi",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.169780392,
+        "lng": 136.879797127
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.sanco-inn.co.jp/nagoya/",
+      "type": null,
+      "prefecture_code": "23",
+      "raw": {
+        "qid": "Q114399017",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q114399017",
+        "name_ja": "三交イン名古屋新幹線口",
+        "name_en": "Sanco Inn Nagoya Shinkansenguchi",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": null,
+        "coordinates": {
+          "lat": 35.169780392,
+          "lng": 136.879797127
+        },
+        "prefecture_code": "23",
+        "admin_code": "231053",
+        "admin_name": "中村区",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.sanco-inn.co.jp/nagoya/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/725877978",
+      "source_url": "https://www.openstreetmap.org/node/725877978",
+      "name": "東横イン 名古屋駅新幹線口",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.1695529,
+        "lng": 136.8796913
+      },
+      "phone": "+81 52-856-1045",
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "23",
+      "raw": {
+        "osm_id": "node/725877978",
+        "osm_url": "https://www.openstreetmap.org/node/725877978",
+        "type": "hotel",
+        "name": "東横イン 名古屋駅新幹線口",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.1695529,
+          "lng": 136.8796913
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": "+81 52-856-1045",
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "fax": "+81 52-856-1046",
+          "name": "東横イン 名古屋駅新幹線口",
+          "operator": "東横イン",
+          "phone": "+81 52-856-1045",
+          "ref": "94",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

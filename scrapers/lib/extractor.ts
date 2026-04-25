@@ -155,8 +155,60 @@ export function extract(html: string, baseUrl: string): ExtractedPage {
   }
 
   const text = $("body").text();
-  const addrMatch = text.match(/〒\s*\d{3}[-‐ー]?\d{4}[\s\S]{1,80}?(?=\s|$)/);
-  const address = addrMatch ? addrMatch[0].replace(/\s+/g, " ").trim() : null;
+
+  // Address extraction priority chain:
+  //   1. schema.org JSON-LD PostalAddress (highest confidence)
+  //   2. 〒XXX-XXXX postal-code prefix (strong signal)
+  //   3. Labelled patterns: 住所:, 所在地:, Address: (heuristic)
+  let address: string | null = null;
+
+  $('script[type="application/ld+json"]').each((_, el) => {
+    if (address) return;
+    try {
+      const data = JSON.parse($(el).text());
+      const items: unknown[] = Array.isArray(data) ? data : [data];
+      for (const raw of items) {
+        if (typeof raw !== "object" || raw === null) continue;
+        const item = raw as Record<string, unknown>;
+        const addr = item.address;
+        if (typeof addr === "string" && addr.length > 5) {
+          address = addr.trim();
+          return;
+        }
+        if (typeof addr === "object" && addr !== null) {
+          const a = addr as Record<string, unknown>;
+          const parts = [
+            a.postalCode ? `〒${String(a.postalCode)}` : "",
+            String(a.addressRegion ?? ""),
+            String(a.addressLocality ?? ""),
+            String(a.streetAddress ?? ""),
+          ]
+            .filter((s) => s && s.length > 0)
+            .map((s) => s.trim());
+          if (parts.length >= 2) {
+            address = parts.join(" ").trim();
+            return;
+          }
+        }
+      }
+    } catch {
+      // skip malformed JSON-LD
+    }
+  });
+
+  if (!address) {
+    const addrMatch = text.match(/〒\s*\d{3}[-‐ー]?\d{4}[\s\S]{1,80}?(?=\s|$)/);
+    if (addrMatch) address = addrMatch[0].replace(/\s+/g, " ").trim();
+  }
+
+  if (!address) {
+    const labelRe =
+      /(?:住所|所在地|アドレス|Address|ADDRESS)[\s::]+([^\n\r。]{5,80})/;
+    const m = text.match(labelRe);
+    if (m) {
+      address = m[1].replace(/\s+/g, " ").trim();
+    }
+  }
 
   return {
     title,

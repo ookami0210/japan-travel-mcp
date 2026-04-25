@@ -50,6 +50,8 @@ export interface RobotsDecision {
 
 export type Lang = "ja" | "en" | "zh" | "ko" | "unknown";
 
+export type CoordinatePrecision = "exact" | "address_geocoded" | "municipality_centroid";
+
 export interface TouristSpot {
   id: string;
   url: string;
@@ -58,6 +60,10 @@ export interface TouristSpot {
   category: string | null;
   address: string | null;
   coordinates: { lat: number; lng: number } | null;
+  /** Provenance of the coordinates. "exact" = page-declared (og:geo or schema.org).
+   *  "address_geocoded" = derived from address via 国土地理院.
+   *  "municipality_centroid" = approximate, from municipality location. */
+  coordinate_precision: CoordinatePrecision | null;
   images: string[];
   source_url: string;
   language: Lang;

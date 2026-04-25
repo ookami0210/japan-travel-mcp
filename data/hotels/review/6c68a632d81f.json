@@ -1,0 +1,98 @@
+{
+  "id": "6c68a632d81f",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 15m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111866306",
+      "source_url": "https://www.wikidata.org/wiki/Q111866306",
+      "name": "コンフォートホテル成田",
+      "name_en": "Comfort Hotel Narita",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.77666,
+        "lng": 140.31773
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.choice-hotels.jp/hotel/narita/",
+      "type": null,
+      "prefecture_code": "12",
+      "raw": {
+        "qid": "Q111866306",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111866306",
+        "name_ja": "コンフォートホテル成田",
+        "name_en": "Comfort Hotel Narita",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Narita, Japan",
+        "coordinates": {
+          "lat": 35.77666,
+          "lng": 140.31773
+        },
+        "prefecture_code": "12",
+        "admin_code": "122114",
+        "admin_name": "成田市",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.choice-hotels.jp/hotel/narita/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/11630327924",
+      "source_url": "https://www.openstreetmap.org/node/11630327924",
+      "name": "コンフォートホテル",
+      "name_en": "Comfort Hotel Narita",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.7767815,
+        "lng": 140.3178136
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "12",
+      "raw": {
+        "osm_id": "node/11630327924",
+        "osm_url": "https://www.openstreetmap.org/node/11630327924",
+        "type": "hotel",
+        "name": "コンフォートホテル",
+        "name_en": "Comfort Hotel Narita",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.7767815,
+          "lng": 140.3178136
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "branch": "成田",
+          "name": "コンフォートホテル",
+          "name:en": "Comfort Hotel Narita",
+          "source": "Bing",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

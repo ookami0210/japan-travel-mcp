@@ -77,19 +77,50 @@ interface PrefectureFile {
   wikidata_attractions?: WikidataAttraction[];
 }
 
-function findDataDir(): string {
+interface HotelRecord {
+  id: string;
+  confidence: "confirmed" | "singleton";
+  name: string | null;
+  name_en: string | null;
+  name_zh: string | null;
+  name_ko: string | null;
+  coordinates: { lat: number; lng: number } | null;
+  phone: string | null;
+  website: string | null;
+  type: string | null;
+  postal_code: string | null;
+  street: string | null;
+  prefecture_code: string | null;
+  sources: { source: "wikidata" | "osm"; id: string; url: string }[];
+}
+
+interface HotelsFile {
+  generated_at: string;
+  hotels: HotelRecord[];
+}
+
+function findRepoRoot(): string {
   let dir = dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 6; i++) {
     const candidate = resolve(dir, "data/prefectures");
-    if (existsSync(candidate)) return candidate;
+    if (existsSync(candidate)) return dir;
     const parent = resolve(dir, "..");
     if (parent === dir) break;
     dir = parent;
   }
-  throw new Error("data/prefectures directory not found");
+  throw new Error("repository root (data/prefectures parent) not found");
+}
+
+function findDataDir(): string {
+  return resolve(findRepoRoot(), "data/prefectures");
+}
+
+function findHotelsMasterPath(): string {
+  return resolve(findRepoRoot(), "data/hotels/master.json");
 }
 
 let cachedData: PrefectureFile[] | null = null;
+let cachedHotels: HotelsFile | null = null;
 
 async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   if (cachedData) return cachedData;
@@ -106,6 +137,18 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   }
   cachedData = out;
   return out;
+}
+
+async function loadHotels(): Promise<HotelsFile | null> {
+  if (cachedHotels) return cachedHotels;
+  try {
+    const path = findHotelsMasterPath();
+    const content = await readFile(path, "utf8");
+    cachedHotels = JSON.parse(content) as HotelsFile;
+    return cachedHotels;
+  } catch {
+    return null;
+  }
 }
 
 function dataAsOf(prefs: PrefectureFile[]): string | null {
@@ -261,12 +304,125 @@ async function getSpots(args: {
 // ──────────────────────────────────────────────────────────────────────
 // Tool: get_hotels (pending)
 
-async function getHotels(_args: unknown): Promise<unknown> {
+const EARTH_R = 6_371_000;
+function haversine(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const la1 = toRad(a.lat);
+  const la2 = toRad(b.lat);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_R * Math.asin(Math.sqrt(h));
+}
+
+async function getHotels(args: {
+  city?: string;
+  prefecture?: string;
+  lat?: number;
+  lng?: number;
+  radius?: number;
+  limit?: number;
+}): Promise<unknown> {
+  const file = await loadHotels();
+  if (!file) {
+    return {
+      status: "pending_data",
+      message:
+        "Hotel master file not yet generated. Run `npx tsx scrapers/matcher/match_hotels.ts` after the source fetchers (fetch_wikidata_hotels.ts, fetch_osm_hotels.ts) have populated data/hotels/raw/.",
+      hotels: [],
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  const limit = Math.min(Math.max(args.limit ?? 50, 1), 500);
+  let hotels = file.hotels;
+
+  // Resolve prefecture name/slug/code → 2-digit code
+  let prefCode: string | null = null;
+  if (args.prefecture) {
+    const q = args.prefecture.trim().toLowerCase();
+    if (/^\d{1,2}$/.test(q)) {
+      prefCode = q.padStart(2, "0");
+    } else {
+      const prefs = await loadAllPrefectures();
+      const match = prefs.find(
+        (p) =>
+          p.prefecture.name.toLowerCase() === q ||
+          p.prefecture.name_en?.toLowerCase() === q,
+      );
+      if (match) prefCode = match.prefecture.code;
+    }
+    if (!prefCode) {
+      return {
+        hotels: [],
+        count: 0,
+        error: `unknown prefecture: ${args.prefecture}`,
+        hint: "Use Japanese name (e.g. '沖縄県'), slug (e.g. 'okinawa'), or 2-digit code (e.g. '47').",
+        disclaimer: DISCLAIMER,
+      };
+    }
+    hotels = hotels.filter((h) => h.prefecture_code === prefCode);
+  }
+
+  // Filter by city (substring match in name)
+  if (args.city) {
+    const q = args.city.toLowerCase();
+    hotels = hotels.filter(
+      (h) =>
+        (h.name && h.name.includes(args.city!)) ||
+        (h.street && h.street.includes(args.city!)) ||
+        (h.name_en && h.name_en.toLowerCase().includes(q)),
+    );
+  }
+
+  // Coordinates-based filter
+  if (
+    typeof args.lat === "number" &&
+    typeof args.lng === "number" &&
+    typeof args.radius === "number"
+  ) {
+    const center = { lat: args.lat, lng: args.lng };
+    const r = args.radius;
+    hotels = hotels.filter(
+      (h) => h.coordinates && haversine(h.coordinates, center) <= r,
+    );
+    // Sort by distance
+    hotels.sort((a, b) => {
+      const da = a.coordinates ? haversine(a.coordinates, center) : Infinity;
+      const db = b.coordinates ? haversine(b.coordinates, center) : Infinity;
+      return da - db;
+    });
+  }
+
+  const out = hotels.slice(0, limit).map((h) => ({
+    id: h.id,
+    confidence: h.confidence,
+    name: h.name,
+    name_en: h.name_en,
+    name_zh: h.name_zh,
+    name_ko: h.name_ko,
+    type: h.type,
+    coordinates: h.coordinates,
+    phone: h.phone,
+    website: h.website,
+    postal_code: h.postal_code,
+    street: h.street,
+    prefecture_code: h.prefecture_code,
+    sources: h.sources,
+  }));
+
   return {
-    status: "pending_implementation",
-    message:
-      "Hotel master list is part of  Step 2 (multi-source merge of 旅館業許可リスト, JNTO, OpenStreetMap, Wikidata, municipal pages). Returns no results until that source layer ships.",
-    hotels: [],
+    hotels: out,
+    count: out.length,
+    truncated: hotels.length > limit,
+    total_matching: hotels.length,
+    note: "Information only — does NOT include availability or pricing. For bookings, visit the hotel's official website.",
+    data_as_of: file.generated_at,
     disclaimer: DISCLAIMER,
   };
 }
@@ -400,14 +556,28 @@ const TOOLS = [
   {
     name: "get_hotels",
     description:
-      "Returns accommodations (hotels, ryokan) in a given area.\n\nNote: pending implementation — currently returns no results. The hotel master list is part of an upcoming source-merge step ( Step 2).\n\nDoes NOT return availability or pricing.",
+      "Returns accommodations (hotels, ryokan, hostels, guest houses) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, and website where available. Confirmed clusters (same property in both sources) are flagged.\n\nFilter by prefecture, city (substring match), or coordinate radius. lat+lng+radius (metres) is the most precise — sorted by distance.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
     inputSchema: {
       type: "object",
       properties: {
-        city: { type: "string" },
-        lat: { type: "number" },
-        lng: { type: "number" },
-        radius: { type: "number", description: "Search radius in metres" },
+        prefecture: {
+          type: "string",
+          description: "Prefecture (Japanese name, English slug, or 2-digit code)",
+        },
+        city: {
+          type: "string",
+          description: "City / municipality name (substring match)",
+        },
+        lat: { type: "number", description: "Centre latitude for radius search" },
+        lng: { type: "number", description: "Centre longitude for radius search" },
+        radius: {
+          type: "number",
+          description: "Radius in metres (used with lat+lng)",
+        },
+        limit: {
+          type: "number",
+          description: "Max results (1–500, default 50)",
+        },
       },
     },
   },
@@ -499,7 +669,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         });
         break;
       case "get_hotels":
-        result = await getHotels(args);
+        result = await getHotels({
+          prefecture: args.prefecture as string | undefined,
+          city: args.city as string | undefined,
+          lat: typeof args.lat === "number" ? args.lat : undefined,
+          lng: typeof args.lng === "number" ? args.lng : undefined,
+          radius: typeof args.radius === "number" ? args.radius : undefined,
+          limit:
+            typeof args.limit === "number" ? args.limit : args.limit ? Number(args.limit) : undefined,
+        });
         break;
       case "get_transport":
         result = await getTransport({ spot_id: String(args.spot_id ?? "") });

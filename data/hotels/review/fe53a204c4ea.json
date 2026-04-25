@@ -1,0 +1,100 @@
+{
+  "id": "fe53a204c4ea",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 11m",
+    "name similarity 0.71 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/3345303265",
+      "source_url": "https://www.openstreetmap.org/node/3345303265",
+      "name": "ルートイン",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.3135077,
+        "lng": 135.6004927
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "30",
+      "raw": {
+        "osm_id": "node/3345303265",
+        "osm_url": "https://www.openstreetmap.org/node/3345303265",
+        "type": "hotel",
+        "name": "ルートイン",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.3135077,
+          "lng": 135.6004927
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "ルートイン",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/332487934",
+      "source_url": "https://www.openstreetmap.org/way/332487934",
+      "name": "ルートイン橋本",
+      "name_en": "Hotel Route Inn Hashimoto",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.3136077,
+        "lng": 135.6004918
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "30",
+      "raw": {
+        "osm_id": "way/332487934",
+        "osm_url": "https://www.openstreetmap.org/way/332487934",
+        "type": "hotel",
+        "name": "ルートイン橋本",
+        "name_en": "Hotel Route Inn Hashimoto",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.3136077,
+          "lng": 135.6004918
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "building": "hotel",
+          "building:levels": "10",
+          "name": "ルートイン橋本",
+          "name:en": "Hotel Route Inn Hashimoto",
+          "source": "survey",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

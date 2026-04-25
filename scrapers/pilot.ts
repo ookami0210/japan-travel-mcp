@@ -27,30 +27,36 @@ import {
   type ScrapeOptions,
 } from "./lib/types.js";
 
-const ALL_PREFECTURES: Record<string, { slug: string; name: string }> = {
-  "01": { slug: "hokkaido", name: "北海道" },
-  "31": { slug: "tottori", name: "鳥取県" },
-  "32": { slug: "shimane", name: "島根県" },
-  "39": { slug: "kochi", name: "高知県" },
-  "46": { slug: "kagoshima", name: "鹿児島県" },
-  "47": { slug: "okinawa", name: "沖縄県" },
-};
+import {
+  PREFECTURE_SLUGS,
+  PREFECTURE_NAMES_JA,
+  ALL_PREFECTURE_CODES,
+} from "./lib/prefectures.js";
 
-const PILOT_PREFECTURES: { code: string; slug: string; name: string }[] = (
-  process.env.PILOT_PREFECTURES ?? "31,39"
-)
-  .split(",")
-  .map((s) => s.trim())
-  .filter((c) => ALL_PREFECTURES[c])
-  .map((code) => ({
+// PILOT_PREFECTURES env var:
+//   "31,39"   → just those two
+//   "all"     → all 47 prefectures (initial bootstrap)
+//   unset     → defaults to 31,39
+const PILOT_ENV = process.env.PILOT_PREFECTURES ?? "31,39";
+const PILOT_CODES =
+  PILOT_ENV.toLowerCase() === "all"
+    ? ALL_PREFECTURE_CODES
+    : PILOT_ENV.split(",").map((s) => s.trim()).filter(Boolean);
+
+const PILOT_PREFECTURES: { code: string; slug: string; name: string }[] =
+  PILOT_CODES.filter((c) => PREFECTURE_SLUGS[c]).map((code) => ({
     code,
-    slug: ALL_PREFECTURES[code].slug,
-    name: ALL_PREFECTURES[code].name,
+    slug: PREFECTURE_SLUGS[code],
+    name: PREFECTURE_NAMES_JA[code] ?? code,
   }));
 
 const ROOT = new URL("../", import.meta.url);
 const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
 const URLS_PATH = new URL("data/_state/official_urls.json", ROOT);
+const CENTROIDS_PATH = new URL(
+  "data/_state/municipality_centroids.json",
+  ROOT,
+);
 const PREFECTURES_DIR = new URL("data/prefectures/", ROOT);
 const LOG_DIR = new URL("data/_logs/", ROOT);
 
@@ -76,6 +82,20 @@ async function main(): Promise<void> {
   const urlsFile = JSON.parse(
     await readFile(fileURLToPath(URLS_PATH), "utf8"),
   ) as UrlsFile;
+  let centroids: Record<string, { lat: number; lng: number }> = {};
+  try {
+    const centroidFile = JSON.parse(
+      await readFile(fileURLToPath(CENTROIDS_PATH), "utf8"),
+    ) as { centroids: Record<string, { lat: number; lng: number }> };
+    centroids = centroidFile.centroids ?? {};
+    console.error(
+      `[pilot] loaded ${Object.keys(centroids).length} municipality centroids`,
+    );
+  } catch {
+    console.error(
+      "[pilot] no municipality_centroids.json — coord fallback chain will skip the centroid step",
+    );
+  }
 
   const urlByCode = new Map<string, string>();
   for (const e of urlsFile.entries) {
@@ -126,7 +146,7 @@ async function main(): Promise<void> {
           return null;
         }
         try {
-          const r = await scrapeOneMunicipality(input, opts, counter);
+          const r = await scrapeOneMunicipality(input, opts, counter, centroids);
           processed += 1;
           if (processed % 5 === 0) {
             console.error(

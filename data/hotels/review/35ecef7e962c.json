@@ -1,0 +1,99 @@
+{
+  "id": "35ecef7e962c",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 27m",
+    "name similarity 0.71 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111406808",
+      "source_url": "https://www.wikidata.org/wiki/Q111406808",
+      "name": "金沢白鳥路ホテル山楽",
+      "name_en": "Kanazawa Hakuchoro Hotel Sanraku",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.56818,
+        "lng": 136.66212
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://sanraku.kenhotels.com/hakuchoro/",
+      "type": null,
+      "prefecture_code": "17",
+      "raw": {
+        "qid": "Q111406808",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111406808",
+        "name_ja": "金沢白鳥路ホテル山楽",
+        "name_en": "Kanazawa Hakuchoro Hotel Sanraku",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Kanazawa, Japan",
+        "coordinates": {
+          "lat": 36.56818,
+          "lng": 136.66212
+        },
+        "prefecture_code": "17",
+        "admin_code": "170003",
+        "admin_name": "石川県",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://sanraku.kenhotels.com/hakuchoro/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/303554936",
+      "source_url": "https://www.openstreetmap.org/way/303554936",
+      "name": "金沢白鳥路ホテル",
+      "name_en": "Hakuchoro Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.5679344,
+        "lng": 136.6621009
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "17",
+      "raw": {
+        "osm_id": "way/303554936",
+        "osm_url": "https://www.openstreetmap.org/way/303554936",
+        "type": "hotel",
+        "name": "金沢白鳥路ホテル",
+        "name_en": "Hakuchoro Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 36.5679344,
+          "lng": 136.6621009
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "building": "yes",
+          "name": "金沢白鳥路ホテル",
+          "name:en": "Hakuchoro Hotel",
+          "source": "GSI/KIBAN 2500; NARO",
+          "source_ref": "http://wiki.osm.org/wiki/GSI_KIBAN",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}
