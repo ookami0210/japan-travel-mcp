@@ -1,7 +1,7 @@
 # Japan Travel MCP
 
 > The most comprehensive Japanese travel data server for AI agents.  
-> 47 prefectures · 1,741 municipalities · Hotels & Ryokan · Multilingual · Built from public sources.
+> 47 prefectures · 1,938 local-government entities · Hotels & Ryokan · Multilingual · Built from public sources.
 
 ---
 
@@ -63,7 +63,7 @@ curl https://japan-travel-mcp.com/api/hotels?city=onomichi
 curl https://japan-travel-mcp.com/api/spots?id=12345&lang=en
 ```
 
-> All 47 prefectures and all 1,741 municipalities are covered in parallel.
+> All 47 prefectures and all 1,938 entities (1,741 municipalities + 197 designated-city wards) are covered in parallel — no prioritization by population, fame, or tourism volume.
 > Tokyo and Kyoto are here too — but the point of this dataset is everywhere else.
 
 ---
@@ -89,7 +89,7 @@ This is the dataset nobody else has.
 ### Data layers
 
 ```
-Layer 1: Municipal tourism pages     — all 1,741 municipalities
+Layer 1: Municipal tourism pages     — all 1,938 entities (incl. designated-city wards)
 Layer 2: Prefecture tourism offices  — all 47 prefectures
 Layer 3: Hotel & ryokan master list  — built from 7 sources (see below)
 Layer 4: JNTO official data          — multilingual, inbound-focused
@@ -145,8 +145,9 @@ I think it contradicts it.
 You may disagree. That's a fair conversation to have.
 
 **What I commit to:**  
-- One domain visited at most once per month  
-- 5-second minimum interval between page requests — slower than Googlebot, by design  
+- Each domain refreshed at most once every ~30 days (rolling cycle)  
+- Steady-state: 5-second minimum interval between requests to the same domain — slower than Googlebot, by design  
+- Initial bootstrap may run faster (down to 2 seconds per domain) to complete the first build in hours, never less than that  
 - Static caching only — source sites are never hit at query time  
 - 48-hour response to any removal request (open an issue)
 
@@ -156,12 +157,16 @@ You may disagree. That's a fair conversation to have.
 
 ## Data freshness
 
-Each domain is visited at most once per month.  
-We are not a continuous crawler — we are a periodic snapshot.  
-Tourism information changes slowly. Monthly is enough.
+We aim to keep every record fresh within 30 days.  
+That's the freshness target — not a server-load mitigation.  
+We are not a continuous crawler. Tourism information changes slowly; 30 days is enough.
 
-Initial dataset: collected over 30 days to avoid server impact.  
-Update schedule: monthly, via GitHub Actions.  
+**How the 30 days target is achieved:**  
+GitHub Actions runs a daily cron at 03:00 JST and refreshes ~58 entities per run  
+(1,938 entities ÷ ~33 days ≈ 58/day). Each domain is hit at most once per cycle.
+
+Initial dataset: bootstrapped in a single run (a few hours, 2-second per-domain interval).  
+Steady-state schedule: rolling 30-day cycle, daily cron, 5-second per-domain interval.  
 Last updated: see `data/metadata.json`
 
 ---

@@ -45,19 +45,32 @@ open an issue and we will act within 48 hours.
 
 ## How we crawl
 
-- Each domain is visited **at most once per month**
-- Minimum **5-second interval** between page requests within a session
-- This is slower than Googlebot, by design
+- Each domain is refreshed **at most once every ~30 days** (rolling cycle)
+- **Steady-state**: minimum **5-second interval** between requests to the same domain — slower than Googlebot, by design
+- **Initial bootstrap**: may run faster, down to a 2-second per-domain interval, to finish the first build in hours
 - We are a periodic snapshot, not a continuous crawler
 - All data is cached statically in this repository
 - Source sites are **never hit at query time**
 
 ---
 
-## Initial dataset
+## How freshness works
 
-The initial dataset was collected over **30 days**,  
-spreading requests across time to minimize any impact on source servers.
+We aim to keep every record fresh within **30 days**.  
+That's the freshness target — not a server-load mitigation.
+
+**Implementation:**  
+A GitHub Actions cron job runs daily at 03:00 JST and re-scrapes ~58 entities  
+each run (1,938 entities ÷ ~33 days ≈ 58/day). Over the cycle, every entity  
+is touched once. Concretely:
+
+- 1 daily cron run
+- ~58 entities per run, picked as the 58 oldest by `last_scraped_at`
+- Each domain hit once per cycle, with a 5-second per-domain interval
+- ~33-day full cycle
+
+The initial dataset is bootstrapped in a single run (a few hours, 2-second  
+per-domain interval) — after that, the rolling 30-day cycle takes over.
 
 ---
 
