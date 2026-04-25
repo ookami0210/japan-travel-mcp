@@ -19,7 +19,10 @@ const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
 const USER_AGENT =
   "JapanTravelMCP/0.0.1 (+https://github.com/ookami0210/japan-travel-mcp; OSS travel data for AI agents)";
 
-const PREFECTURE_CODES_TO_FETCH = ["31", "39"]; // Tottori, Kochi
+// All 47 prefecture codes — fetched in one SPARQL call to support any pilot.
+const PREFECTURE_CODES_TO_FETCH = Array.from({ length: 47 }, (_, i) =>
+  String(i + 1).padStart(2, "0"),
+);
 
 const OUTPUT_PATH = new URL("../../data/_state/official_urls.json", import.meta.url);
 

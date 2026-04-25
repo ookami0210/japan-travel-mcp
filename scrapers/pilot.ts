@@ -27,10 +27,26 @@ import {
   type ScrapeOptions,
 } from "./lib/types.js";
 
-const PILOT_PREFECTURES: { code: string; slug: string; name: string }[] = [
-  { code: "31", slug: "tottori", name: "鳥取県" },
-  { code: "39", slug: "kochi", name: "高知県" },
-];
+const ALL_PREFECTURES: Record<string, { slug: string; name: string }> = {
+  "01": { slug: "hokkaido", name: "北海道" },
+  "31": { slug: "tottori", name: "鳥取県" },
+  "32": { slug: "shimane", name: "島根県" },
+  "39": { slug: "kochi", name: "高知県" },
+  "46": { slug: "kagoshima", name: "鹿児島県" },
+  "47": { slug: "okinawa", name: "沖縄県" },
+};
+
+const PILOT_PREFECTURES: { code: string; slug: string; name: string }[] = (
+  process.env.PILOT_PREFECTURES ?? "31,39"
+)
+  .split(",")
+  .map((s) => s.trim())
+  .filter((c) => ALL_PREFECTURES[c])
+  .map((code) => ({
+    code,
+    slug: ALL_PREFECTURES[code].slug,
+    name: ALL_PREFECTURES[code].name,
+  }));
 
 const ROOT = new URL("../", import.meta.url);
 const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
