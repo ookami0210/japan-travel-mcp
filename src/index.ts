@@ -119,8 +119,59 @@ function findHotelsMasterPath(): string {
   return resolve(findRepoRoot(), "data/hotels/master.json");
 }
 
+function findDescriptionsPath(): string {
+  return resolve(
+    findRepoRoot(),
+    "data/translations/descriptions_complete.jsonl",
+  );
+}
+
+function findMultilingualNamesPath(): string {
+  return resolve(
+    findRepoRoot(),
+    "data/translations/multilingual_complete.jsonl",
+  );
+}
+
+const SUPPORTED_LANGUAGES = [
+  "en",
+  "ja",
+  "zh",
+  "ko",
+  "fr",
+  "es",
+  "de",
+  "it",
+  "pt",
+  "ru",
+  "th",
+  "vi",
+  "id",
+  "ms",
+  "ar",
+  "hi",
+  "tl",
+] as const;
+type SupportedLang = (typeof SUPPORTED_LANGUAGES)[number];
+
+interface DescriptionRecord {
+  qid: string;
+  descriptions: Partial<Record<SupportedLang, string>>;
+  confidence: "high" | "medium" | "low";
+  source: string;
+  generated_at?: string;
+}
+
+interface MultilingualNameRecord {
+  qid: string;
+  translations: Partial<Record<SupportedLang | "ja", string | null>>;
+  sources?: Partial<Record<SupportedLang | "ja", string>>;
+}
+
 let cachedData: PrefectureFile[] | null = null;
 let cachedHotels: HotelsFile | null = null;
+let cachedDescriptions: Map<string, DescriptionRecord> | null = null;
+let cachedNames: Map<string, MultilingualNameRecord> | null = null;
 
 async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   if (cachedData) return cachedData;
@@ -149,6 +200,50 @@ async function loadHotels(): Promise<HotelsFile | null> {
   } catch {
     return null;
   }
+}
+
+async function loadDescriptions(): Promise<Map<string, DescriptionRecord>> {
+  if (cachedDescriptions) return cachedDescriptions;
+  const map = new Map<string, DescriptionRecord>();
+  try {
+    const content = await readFile(findDescriptionsPath(), "utf8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      try {
+        const rec = JSON.parse(trimmed) as DescriptionRecord;
+        if (rec.qid) map.set(rec.qid, rec);
+      } catch {
+        // skip malformed lines
+      }
+    }
+  } catch {
+    // file missing → return empty map (tool degrades gracefully)
+  }
+  cachedDescriptions = map;
+  return map;
+}
+
+async function loadNames(): Promise<Map<string, MultilingualNameRecord>> {
+  if (cachedNames) return cachedNames;
+  const map = new Map<string, MultilingualNameRecord>();
+  try {
+    const content = await readFile(findMultilingualNamesPath(), "utf8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      try {
+        const rec = JSON.parse(trimmed) as MultilingualNameRecord;
+        if (rec.qid) map.set(rec.qid, rec);
+      } catch {
+        // skip malformed
+      }
+    }
+  } catch {
+    // file missing → return empty map
+  }
+  cachedNames = map;
+  return map;
 }
 
 function dataAsOf(prefs: PrefectureFile[]): string | null {
@@ -428,28 +523,323 @@ async function getHotels(args: {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Tool: get_transport (pending)
+// Tool: get_transport
+//
+// Minimal-but-useful implementation: looks up the spot, returns its
+// coordinates + the official URL where the property documents access info.
+// Full station-database integration (P197 adjacent_station, OSM railway
+// stations) is a future enhancement.
+
+interface SpotLocation {
+  spot_id: string;
+  source: "wikidata" | "municipal_scrape";
+  name: string | null;
+  coordinates: { lat: number; lng: number } | null;
+  prefecture: string | null;
+  prefecture_code: string | null;
+  municipality: string | null;
+  source_url: string | null;
+}
+
+async function findSpot(spotId: string): Promise<SpotLocation | null> {
+  const prefs = await loadAllPrefectures();
+  for (const p of prefs) {
+    for (const a of p.wikidata_attractions ?? []) {
+      if (a.qid === spotId) {
+        return {
+          spot_id: a.qid,
+          source: "wikidata",
+          name: a.name_ja || a.name_en,
+          coordinates: a.coordinates,
+          prefecture: p.prefecture.name,
+          prefecture_code: p.prefecture.code,
+          municipality: a.admin_name,
+          source_url: a.wikidata_url,
+        };
+      }
+    }
+    for (const m of p.municipalities) {
+      for (const s of m.spots) {
+        if (s.id === spotId) {
+          return {
+            spot_id: s.id,
+            source: "municipal_scrape",
+            name: s.name,
+            coordinates: s.coordinates,
+            prefecture: p.prefecture.name,
+            prefecture_code: p.prefecture.code,
+            municipality: m.municipality.name,
+            source_url: s.url,
+          };
+        }
+      }
+    }
+  }
+  return null;
+}
 
 async function getTransport(args: { spot_id: string }): Promise<unknown> {
+  if (!args.spot_id) {
+    return { error: "spot_id required", disclaimer: DISCLAIMER };
+  }
+  const spot = await findSpot(args.spot_id);
+  if (!spot) {
+    return {
+      error: "spot_not_found",
+      spot_id: args.spot_id,
+      hint: "Use search_area or get_spots to obtain a valid spot_id.",
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  // Find the closest hotel cluster as a proxy for "nearby developed area"
+  // (hotels concentrate near stations / town centres in Japan).
+  let nearestHotel: { name: string | null; distance_m: number } | null = null;
+  if (spot.coordinates) {
+    const file = await loadHotels();
+    if (file) {
+      let best: { hotel: HotelRecord; d: number } | null = null;
+      for (const h of file.hotels) {
+        if (!h.coordinates) continue;
+        if (h.prefecture_code && h.prefecture_code !== spot.prefecture_code) continue;
+        const d = haversine(spot.coordinates, h.coordinates);
+        if (!best || d < best.d) best = { hotel: h, d };
+      }
+      if (best) {
+        nearestHotel = {
+          name: best.hotel.name_en || best.hotel.name,
+          distance_m: Math.round(best.d),
+        };
+      }
+    }
+  }
+
   return {
-    status: "pending_implementation",
-    message:
-      "Transport / access information is part of  Step 4 (official HP enrichment). Pending.",
-    spot_id: args.spot_id,
-    transport: null,
+    spot_id: spot.spot_id,
+    name: spot.name,
+    coordinates: spot.coordinates,
+    prefecture: spot.prefecture,
+    municipality: spot.municipality,
+    access: {
+      official_source_url: spot.source_url,
+      note: "Detailed transit (nearest station, walk time, bus routes) is documented on the linked source. This MCP returns coordinates and source URL only; future versions will add station data from OpenStreetMap.",
+      nearest_developed_area_proxy: nearestHotel,
+    },
+    data_source: spot.source,
     disclaimer: DISCLAIMER,
   };
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Tool: get_events (pending)
+// Tool: get_events
+//
+// Fetches festivals (祭) for a given prefecture from Wikidata SPARQL at
+// request time. Results are cached in-memory per prefecture-code.
 
-async function getEvents(_args: unknown): Promise<unknown> {
+const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
+const SPARQL_USER_AGENT =
+  "JapanTravelMCP/0.0.1 (+https://github.com/ookami0210/japan-travel-mcp)";
+const FESTIVAL_TYPES = [
+  "Q132241", // festival
+  "Q1445650", // matsuri
+  "Q175331", // religious festival
+];
+
+const cachedFestivals = new Map<string, unknown[]>();
+
+interface FestivalSparqlBinding {
+  item?: { value: string };
+  itemLabel_ja?: { value: string };
+  itemLabel_en?: { value: string };
+  pointInTime?: { value: string };
+  startTime?: { value: string };
+  coord?: { value: string };
+  adminLabel?: { value: string };
+}
+
+function parseWktPoint(
+  v: string,
+): { lat: number; lng: number } | null {
+  const m = v.match(/Point\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i);
+  if (!m) return null;
+  return { lng: parseFloat(m[1]), lat: parseFloat(m[2]) };
+}
+
+async function fetchFestivals(prefCode: string): Promise<unknown[]> {
+  if (cachedFestivals.has(prefCode)) {
+    return cachedFestivals.get(prefCode)!;
+  }
+  const typesValues = FESTIVAL_TYPES.map((q) => `wd:${q}`).join(" ");
+  const query = `
+SELECT DISTINCT ?item ?itemLabel_ja ?itemLabel_en ?pointInTime ?startTime ?coord ?adminLabel WHERE {
+  ?adminEntity wdt:P429 ?adminCode .
+  FILTER(STRSTARTS(STR(?adminCode), "${prefCode}"))
+  ?item wdt:P31/wdt:P279* ?type .
+  VALUES ?type { ${typesValues} }
+  ?item wdt:P276 ?adminEntity .
+  OPTIONAL { ?item wdt:P585 ?pointInTime . }
+  OPTIONAL { ?item wdt:P580 ?startTime . }
+  OPTIONAL { ?item wdt:P625 ?coord . }
+  OPTIONAL { ?item rdfs:label ?itemLabel_ja . FILTER(LANG(?itemLabel_ja) = "ja") }
+  OPTIONAL { ?item rdfs:label ?itemLabel_en . FILTER(LANG(?itemLabel_en) = "en") }
+  OPTIONAL { ?adminEntity rdfs:label ?adminLabel . FILTER(LANG(?adminLabel) = "ja") }
+}
+LIMIT 200
+`.trim();
+
+  try {
+    const url = `${SPARQL_ENDPOINT}?query=${encodeURIComponent(query)}&format=json`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": SPARQL_USER_AGENT,
+        Accept: "application/sparql-results+json",
+      },
+    });
+    if (!res.ok) {
+      cachedFestivals.set(prefCode, []);
+      return [];
+    }
+    const json = (await res.json()) as {
+      results: { bindings: FestivalSparqlBinding[] };
+    };
+    const out = json.results.bindings.map((b) => ({
+      qid: b.item?.value.split("/").pop(),
+      name_ja: b.itemLabel_ja?.value ?? null,
+      name_en: b.itemLabel_en?.value ?? null,
+      coordinates: b.coord ? parseWktPoint(b.coord.value) : null,
+      municipality: b.adminLabel?.value ?? null,
+      point_in_time: b.pointInTime?.value ?? null,
+      start_time: b.startTime?.value ?? null,
+      wikidata_url: b.item?.value,
+    }));
+    cachedFestivals.set(prefCode, out);
+    return out;
+  } catch {
+    cachedFestivals.set(prefCode, []);
+    return [];
+  }
+}
+
+async function resolvePrefectureCode(input: string): Promise<string | null> {
+  const q = input.trim().toLowerCase();
+  if (/^\d{1,2}$/.test(q)) return q.padStart(2, "0");
+  const prefs = await loadAllPrefectures();
+  const match = prefs.find(
+    (p) =>
+      p.prefecture.name.toLowerCase() === q ||
+      p.prefecture.name_en?.toLowerCase() === q,
+  );
+  return match?.prefecture.code ?? null;
+}
+
+async function getEvents(args: {
+  prefecture?: string;
+  month?: number;
+}): Promise<unknown> {
+  if (!args.prefecture) {
+    return {
+      error: "prefecture required",
+      hint: "Provide prefecture as Japanese name (e.g. '京都府'), English slug, or 2-digit JIS code.",
+      disclaimer: DISCLAIMER,
+    };
+  }
+  const prefCode = await resolvePrefectureCode(args.prefecture);
+  if (!prefCode) {
+    return {
+      error: `unknown_prefecture: ${args.prefecture}`,
+      hint: "Use Japanese name (e.g. '京都府'), English slug (e.g. 'kyoto'), or 2-digit JIS code (e.g. '26').",
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  const festivals = (await fetchFestivals(prefCode)) as Array<{
+    qid?: string;
+    name_ja: string | null;
+    name_en: string | null;
+    coordinates: { lat: number; lng: number } | null;
+    municipality: string | null;
+    point_in_time: string | null;
+    start_time: string | null;
+    wikidata_url?: string;
+  }>;
+
+  let filtered = festivals;
+  if (typeof args.month === "number" && args.month >= 1 && args.month <= 12) {
+    filtered = festivals.filter((f) => {
+      const dt = f.point_in_time ?? f.start_time;
+      if (!dt) return false;
+      const m = dt.match(/-(\d{2})-/);
+      if (!m) return false;
+      return parseInt(m[1], 10) === args.month;
+    });
+  }
+
   return {
-    status: "pending_implementation",
-    message:
-      "Event/festival data is not yet part of the ingestion pipeline. Will be sourced from municipal events pages and 観光協会 in a later iteration.",
-    events: [],
+    prefecture_code: prefCode,
+    month_filter: args.month ?? null,
+    count: filtered.length,
+    events: filtered,
+    source: "Wikidata SPARQL (live query, cached in-memory per prefecture)",
+    note: "Festivals registered in Wikidata. Coverage is uneven — small local festivals may be missing. For comprehensive listings consult prefectural tourism associations directly.",
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Tool: get_description
+//
+// Returns the AI-generated 17-language tourism description for a given
+// Wikidata QID. Sourced from data/translations/descriptions_complete.jsonl
+// (generated 2026-04-26 via Claude Sonnet 4.6 batch).
+
+async function getDescription(args: {
+  qid: string;
+  lang?: string;
+}): Promise<unknown> {
+  if (!args.qid) {
+    return { error: "qid required", disclaimer: DISCLAIMER };
+  }
+  const map = await loadDescriptions();
+  const rec = map.get(args.qid);
+  if (!rec) {
+    return {
+      error: "not_found",
+      qid: args.qid,
+      hint: "Description coverage is limited to entities with a Japanese-language Wikipedia anchor (~13,400 spots). Use get_multilingual for sparse coverage with names only.",
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  // Also fetch the canonical names (Phase 4 names output)
+  const nameRec = (await loadNames()).get(args.qid);
+  const names: Partial<Record<string, string | null>> = nameRec?.translations ?? {};
+
+  // If lang specified and supported, return only that language (still include name in same lang for context)
+  if (args.lang && (SUPPORTED_LANGUAGES as readonly string[]).includes(args.lang)) {
+    const lang = args.lang as SupportedLang;
+    return {
+      qid: args.qid,
+      lang,
+      name: names[lang] ?? null,
+      description: rec.descriptions[lang] ?? null,
+      confidence: rec.confidence,
+      generated_at: rec.generated_at ?? null,
+      source: "ai_generated",
+      model: "claude-sonnet-4-6",
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  // Otherwise return all 17 languages
+  return {
+    qid: args.qid,
+    languages_returned: Object.keys(rec.descriptions),
+    names,
+    descriptions: rec.descriptions,
+    confidence: rec.confidence,
+    generated_at: rec.generated_at ?? null,
+    source: "ai_generated",
+    model: "claude-sonnet-4-6",
     disclaimer: DISCLAIMER,
   };
 }
@@ -584,13 +974,13 @@ const TOOLS = [
   {
     name: "get_transport",
     description:
-      "Returns access and transit information for a tourist spot. Pending implementation.",
+      "Returns access information for a tourist spot: coordinates, prefecture, municipality, and the official URL where the property documents how to get there.\n\nThis tool returns location + source URL. It does NOT (yet) return parsed station names or walk times — for that, follow the official URL. Future versions will add OpenStreetMap-derived railway station data.",
     inputSchema: {
       type: "object",
       properties: {
         spot_id: {
           type: "string",
-          description: "Spot ID returned by search_area or get_spots",
+          description: "Spot ID from search_area or get_spots (Wikidata QID or municipal ID)",
         },
       },
       required: ["spot_id"],
@@ -599,19 +989,29 @@ const TOOLS = [
   {
     name: "get_events",
     description:
-      "Returns festivals and seasonal events in a prefecture / month. Pending implementation.",
+      "Returns festivals (祭) registered in Wikidata for a given Japanese prefecture, with optional month filter.\n\nFetches from Wikidata SPARQL on first request per prefecture, then cached in-memory. Coverage is uneven — small local festivals may not be in Wikidata. For comprehensive listings, also consult the prefecture tourism association.",
     inputSchema: {
       type: "object",
       properties: {
-        prefecture: { type: "string" },
-        month: { type: "number", minimum: 1, maximum: 12 },
+        prefecture: {
+          type: "string",
+          description:
+            "Prefecture (Japanese name like '京都府', English slug 'kyoto', or 2-digit JIS code '26')",
+        },
+        month: {
+          type: "number",
+          minimum: 1,
+          maximum: 12,
+          description: "Optional 1-12 month filter (matches P585 point_in_time / P580 start_time)",
+        },
       },
+      required: ["prefecture"],
     },
   },
   {
     name: "get_multilingual",
     description:
-      "SIGNATURE TOOL. Returns multilingual labels and content (Japanese / English / Chinese / Korean) for a tourist spot.\n\nUse this when the user wants information for non-Japanese-speaking travellers. Multilingual content is sourced primarily from Wikidata (CC0) — call search_area or get_spots first to obtain a spot_id (typically a Wikidata QID for richest coverage).",
+      "Returns multilingual NAMES (Japanese / English / Chinese / Korean) for a tourist spot, plus coordinates and Wikidata link.\n\nThis is the lightweight name-lookup tool. For rich 200-300 character DESCRIPTIONS in 17 languages, use get_description instead.",
     inputSchema: {
       type: "object",
       properties: {
@@ -624,10 +1024,49 @@ const TOOLS = [
           type: "string",
           enum: ["ja", "en", "zh", "ko"],
           description:
-            "Specific language to highlight in the response (all languages are still returned)",
+            "Specific language to highlight in the response (all four languages are still returned)",
         },
       },
       required: ["spot_id"],
+    },
+  },
+  {
+    name: "get_description",
+    description:
+      "SIGNATURE TOOL. Returns a 200-300 character tourism description in any of 17 languages for a tourist spot, generated for global tourist consumption.\n\nLanguages: en, ja, zh, ko, fr, es, de, it, pt, ru, th, vi, id, ms, ar, hi, tl. If `lang` is omitted, all 17 are returned. Coverage: ~13,400 entities (those with Japanese Wikipedia anchor). Use search_area to obtain a Wikidata QID, then pass it as `qid`.\n\nDescriptions are AI-generated by Claude Sonnet 4.6, grounded in entity name + Wikidata metadata. Each entry carries a `confidence` field (high / medium / low) reflecting the quality of the source signal.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        qid: {
+          type: "string",
+          description: "Wikidata QID (e.g. 'Q5854' for Itsukushima Shrine)",
+        },
+        lang: {
+          type: "string",
+          enum: [
+            "en",
+            "ja",
+            "zh",
+            "ko",
+            "fr",
+            "es",
+            "de",
+            "it",
+            "pt",
+            "ru",
+            "th",
+            "vi",
+            "id",
+            "ms",
+            "ar",
+            "hi",
+            "tl",
+          ],
+          description:
+            "Optional. If specified, returns only that language. If omitted, returns all 17.",
+        },
+      },
+      required: ["qid"],
     },
   },
 ];
@@ -683,11 +1122,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = await getTransport({ spot_id: String(args.spot_id ?? "") });
         break;
       case "get_events":
-        result = await getEvents(args);
+        result = await getEvents({
+          prefecture: args.prefecture as string | undefined,
+          month:
+            typeof args.month === "number"
+              ? args.month
+              : args.month
+                ? Number(args.month)
+                : undefined,
+        });
         break;
       case "get_multilingual":
         result = await getMultilingual({
           spot_id: String(args.spot_id ?? ""),
+          lang: args.lang as string | undefined,
+        });
+        break;
+      case "get_description":
+        result = await getDescription({
+          qid: String(args.qid ?? ""),
           lang: args.lang as string | undefined,
         });
         break;
