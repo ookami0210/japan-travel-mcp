@@ -4,16 +4,16 @@
  * Inputs:  data/hotels/raw/wikidata.json
  *          data/hotels/raw/osm.json
  *
- * Algorithm (per  Step 3):
+ * Algorithm:
  *   1st pass: group records within ~100m by coordinates (grid bucketing)
  *   2nd pass: name similarity within each group
  *   Confirmed match: phone match OR very-high name similarity (≥0.90)
  *   Likely match:    name similarity 0.65–0.90
  *   Unmatched:       singletons, written as standalone entries
  *
- * Postal codes are intentionally NOT used for confirmation — the
- *  flags that multiple distinct properties commonly share a
- * postal code (or the same building).
+ * Postal codes are intentionally NOT used for confirmation — multiple
+ * distinct properties commonly share a postal code (or the same building),
+ * which produces false positives.
  *
  * Outputs: data/hotels/master.json   (confirmed-or-singleton entries)
  *          data/hotels/review/<id>.json  (likely matches needing human review)

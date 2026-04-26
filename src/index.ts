@@ -5,15 +5,18 @@
  * Tools:
  *   - search_area:      search by name/keyword across prefectures, municipalities, attractions
  *   - get_spots:        tourist spots by area (combines municipal scrape + Wikidata)
- *   - get_hotels:       accommodations (pending — Step 2 of )
- *   - get_transport:    access / transit info (pending)
- *   - get_events:       festivals / events (pending)
- *   - get_multilingual: signature tool — returns EN/ZH/KO labels for a spot
+ *   - get_hotels:       accommodations (Wikidata + OpenStreetMap merged)
+ *   - get_transport:    spot location + official URL where access is documented
+ *   - get_events:       festivals from Wikidata SPARQL (live, in-memory cache)
+ *   - get_multilingual: lightweight name lookup in EN/ZH/KO
+ *   - get_description:  signature tool — 17-language tourism descriptions
  *
  * Data sources:
  *   data/prefectures/<slug>.json   — per-prefecture JSON, two parallel layers:
  *     municipalities[].spots[]      from official-site scraping
  *     wikidata_attractions[]        from Wikidata SPARQL (multilingual + coords)
+ *   data/hotels/master.json        — merged hotel master list
+ *   data/translations/             — 17-language names + descriptions
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";

@@ -23,7 +23,6 @@
     "scrape:daily": "tsx scrapers/daily.ts",
     "scrape:pilot": "tsx scrapers/pilot.ts",
     "fetch:municipalities": "tsx scrapers/sources/fetch_municipalities.ts",
-    "report:morning": "tsx scrapers/report.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
