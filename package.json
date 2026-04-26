@@ -1,6 +1,6 @@
 {
   "name": "japan-travel-mcp",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Comprehensive Japanese travel data for AI agents — 47 prefectures, 1,741 municipalities, multilingual content, all from public sources.",
   "type": "module",
   "main": "dist/src/index.js",
@@ -8,7 +8,7 @@
     "japan-travel-mcp": "dist/src/index.js"
   },
   "files": [
-    "dist",
+    "dist/src",
     "data",
     "README.md",
     "DATA_POLICY.md",
@@ -16,14 +16,22 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/src/index.js",
     "start": "node dist/src/index.js",
     "dev": "tsx watch src/index.ts",
     "scrape:municipality": "tsx scrapers/municipal/run.ts",
     "scrape:daily": "tsx scrapers/daily.ts",
     "scrape:pilot": "tsx scrapers/pilot.ts",
+    "scrape:r3": "tsx scrapers/r3_refresh.ts",
+    "translate:r3": "tsx scrapers/translate/translate_r3.ts",
     "fetch:municipalities": "tsx scrapers/sources/fetch_municipalities.ts",
-    "typecheck": "tsc --noEmit"
+    "fetch:maff_gi": "tsx scrapers/sources/fetch_maff_gi.ts",
+    "fetch:meti_densan": "tsx scrapers/sources/fetch_meti_densan.ts",
+    "fetch:japan_heritage": "tsx scrapers/sources/fetch_japan_heritage.ts",
+    "fetch:bunka_intangible": "tsx scrapers/sources/fetch_bunka_intangible.ts",
+    "fetch:unesco_japan": "tsx scrapers/sources/fetch_unesco_japan.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:all": "tsc --project tsconfig.scrapers.json"
   },
   "keywords": [
     "mcp",
@@ -36,6 +44,14 @@
   ],
   "author": "KJ Sunada",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ookami0210/japan-travel-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ookami0210/japan-travel-mcp/issues"
+  },
+  "homepage": "https://github.com/ookami0210/japan-travel-mcp#readme",
   "engines": {
     "node": ">=20"
   },

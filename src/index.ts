@@ -171,10 +171,121 @@ interface MultilingualNameRecord {
   sources?: Partial<Record<SupportedLang | "ja", string>>;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// R-3 (specialty / traditional arts / japan heritage) — official-source records.
+// All written by scrapers/sources/fetch_*.ts, refreshed on a 30-day cadence.
+
+interface MaffGiRecord {
+  source: "maff_gi";
+  authority: string;
+  registration_number: number;
+  name_ja: string;
+  registration_date: string | null;
+  production_area_text: string | null;
+  prefecture_codes: string[];
+  producer_group: string | null;
+  characteristics_ja: string | null;
+  detail_url: string;
+  fetched_at: string;
+}
+
+interface MetiDensanRecord {
+  source: "meti_densan";
+  authority: string;
+  craft_id: string;
+  industry_category: string;
+  industry_slug: string;
+  name_ja: string;
+  designation_date: string | null;
+  production_area_text: string | null;
+  prefecture_codes: string[];
+  features_ja: string | null;
+  detail_url: string;
+  fetched_at: string;
+}
+
+interface JapanHeritageRecord {
+  source: "japan_heritage";
+  authority: string;
+  story_id: string;
+  title_ja: string;
+  subtitle_ja: string | null;
+  themes: string[];
+  periods: string[];
+  related_areas_text: string | null;
+  prefecture_codes: string[];
+  summary_ja: string | null;
+  body_ja: string | null;
+  story_url: string;
+  info_url: string;
+  fetched_at: string;
+}
+
+interface BunkaIntangibleRecord {
+  source: "bunka_intangible";
+  authority: string;
+  qid: string;
+  wikidata_url: string;
+  designation: string;
+  designation_qid: string;
+  name_ja: string | null;
+  name_en: string | null;
+  description_ja: string | null;
+  description_en: string | null;
+  inception: string | null;
+  bunca_id: string | null;
+  fetched_at: string;
+}
+
+interface UnescoJapanRecord {
+  source: "unesco_japan";
+  authority: string;
+  qid: string;
+  wikidata_url: string;
+  designation_qid: string;
+  name_ja: string | null;
+  name_en: string | null;
+  description_ja: string | null;
+  description_en: string | null;
+  inscription_year: number | null;
+  unesco_id: string | null;
+  fetched_at: string;
+}
+
+interface R3SourceFile<T> {
+  source: { name: string; authority: string; url?: string; license: string };
+  fetched_at: string;
+  total: number;
+  records: T[];
+}
+
+/**
+ * R-3 translation record. Keys are formatted "<source>:<record-id>", e.g.:
+ *   maff_gi:1, meti_densan:0101, japan_heritage:001,
+ *   bunka_intangible:Q1037119, unesco_japan:Q243170
+ *
+ * `name` and `description` are translated separately so callers can pick
+ * either form. `confidence` reflects how grounded the translation is.
+ */
+interface R3TranslationRecord {
+  key: string;
+  name?: Partial<Record<SupportedLang, string>>;
+  description?: Partial<Record<SupportedLang, string>>;
+  confidence: "high" | "medium" | "low";
+  source: string;
+  generated_at?: string;
+}
+
 let cachedData: PrefectureFile[] | null = null;
 let cachedHotels: HotelsFile | null = null;
 let cachedDescriptions: Map<string, DescriptionRecord> | null = null;
 let cachedNames: Map<string, MultilingualNameRecord> | null = null;
+let cachedMaffGi: R3SourceFile<MaffGiRecord> | null = null;
+let cachedMetiDensan: R3SourceFile<MetiDensanRecord> | null = null;
+let cachedJapanHeritage: R3SourceFile<JapanHeritageRecord> | null = null;
+let cachedBunkaIntangible: R3SourceFile<BunkaIntangibleRecord> | null = null;
+let cachedUnescoJapan: R3SourceFile<UnescoJapanRecord> | null = null;
+let cachedR3Translations: Map<string, R3TranslationRecord> | null = null;
 
 async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   if (cachedData) return cachedData;
@@ -848,6 +959,433 @@ async function getDescription(args: {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// R-3 data loaders (specialty / traditional arts / japan heritage)
+
+function findR3Path(file: string): string {
+  return resolve(findRepoRoot(), `data/r3/${file}`);
+}
+
+async function loadR3Json<T>(file: string): Promise<R3SourceFile<T> | null> {
+  try {
+    const content = await readFile(findR3Path(file), "utf8");
+    return JSON.parse(content) as R3SourceFile<T>;
+  } catch {
+    return null;
+  }
+}
+
+async function loadMaffGi(): Promise<R3SourceFile<MaffGiRecord> | null> {
+  if (cachedMaffGi) return cachedMaffGi;
+  cachedMaffGi = await loadR3Json<MaffGiRecord>("maff_gi.json");
+  return cachedMaffGi;
+}
+
+async function loadMetiDensan(): Promise<R3SourceFile<MetiDensanRecord> | null> {
+  if (cachedMetiDensan) return cachedMetiDensan;
+  cachedMetiDensan = await loadR3Json<MetiDensanRecord>("meti_densan.json");
+  return cachedMetiDensan;
+}
+
+async function loadJapanHeritage(): Promise<
+  R3SourceFile<JapanHeritageRecord> | null
+> {
+  if (cachedJapanHeritage) return cachedJapanHeritage;
+  cachedJapanHeritage =
+    await loadR3Json<JapanHeritageRecord>("japan_heritage.json");
+  return cachedJapanHeritage;
+}
+
+async function loadBunkaIntangible(): Promise<
+  R3SourceFile<BunkaIntangibleRecord> | null
+> {
+  if (cachedBunkaIntangible) return cachedBunkaIntangible;
+  cachedBunkaIntangible =
+    await loadR3Json<BunkaIntangibleRecord>("bunka_intangible.json");
+  return cachedBunkaIntangible;
+}
+
+async function loadUnescoJapan(): Promise<
+  R3SourceFile<UnescoJapanRecord> | null
+> {
+  if (cachedUnescoJapan) return cachedUnescoJapan;
+  cachedUnescoJapan = await loadR3Json<UnescoJapanRecord>("unesco_japan.json");
+  return cachedUnescoJapan;
+}
+
+async function loadR3Translations(): Promise<Map<string, R3TranslationRecord>> {
+  if (cachedR3Translations) return cachedR3Translations;
+  const map = new Map<string, R3TranslationRecord>();
+  try {
+    const content = await readFile(
+      findR3Path("translations/r3_translations.jsonl"),
+      "utf8",
+    );
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      try {
+        const rec = JSON.parse(trimmed) as R3TranslationRecord;
+        if (rec.key) map.set(rec.key, rec);
+      } catch {
+        // skip malformed
+      }
+    }
+  } catch {
+    // file missing → empty map; tools degrade gracefully to ja-only output
+  }
+  cachedR3Translations = map;
+  return map;
+}
+
+/** Return the best-available name in `lang` for an R-3 record. */
+function pickR3Name(
+  fallback: string | null,
+  rec: R3TranslationRecord | undefined,
+  lang: string | undefined,
+): string | null {
+  if (lang && rec?.name?.[lang as SupportedLang]) {
+    return rec.name[lang as SupportedLang]!;
+  }
+  return fallback;
+}
+
+/** Return the best-available description in `lang` for an R-3 record. */
+function pickR3Description(
+  fallbackJa: string | null,
+  rec: R3TranslationRecord | undefined,
+  lang: string | undefined,
+): string | null {
+  if (lang && rec?.description?.[lang as SupportedLang]) {
+    return rec.description[lang as SupportedLang]!;
+  }
+  if (!lang || lang === "ja") return fallbackJa;
+  return fallbackJa; // fallback to ja when target lang missing
+}
+
+function r3Translation(
+  rec: R3TranslationRecord | undefined,
+  lang: string | undefined,
+): {
+  source: "official_translated" | "official_only";
+  generated_at: string | null;
+  confidence: "high" | "medium" | "low" | null;
+} {
+  if (lang && rec?.description?.[lang as SupportedLang]) {
+    return {
+      source: "official_translated",
+      generated_at: rec.generated_at ?? null,
+      confidence: rec.confidence ?? null,
+    };
+  }
+  return { source: "official_only", generated_at: null, confidence: null };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Tool: get_local_specialty
+//
+// Returns regional specialties (food + crafts) for a Japanese prefecture,
+// drawn ONLY from official designation systems:
+//   - 農林水産省 GI (geographical indication of agricultural products)
+//   - 経済産業省 伝統的工芸品 (METI-designated traditional crafts)
+// No editorial or AI-curated picks. Items the official authorities have not
+// designated will not appear here.
+
+async function getLocalSpecialty(args: {
+  prefecture?: string;
+  category?: string; // "food" | "craft" | undefined (both)
+  lang?: string;
+  include_overseas?: boolean;
+}): Promise<unknown> {
+  const wantFood = !args.category || args.category === "food";
+  const wantCraft = !args.category || args.category === "craft";
+  // The MAFF GI registry includes a small number of foreign-country GIs
+  // (Italy / Vietnam / Thailand etc.) that Japan recognises under bilateral
+  // protection. They have empty prefecture_codes. Default to hiding them so
+  // the tool returns Japan-domestic items only; callers can opt in.
+  const includeOverseas = args.include_overseas === true;
+
+  let prefCode: string | null = null;
+  if (args.prefecture) {
+    prefCode = await resolvePrefectureCode(args.prefecture);
+    if (!prefCode) {
+      return {
+        error: `unknown_prefecture: ${args.prefecture}`,
+        hint: "Use Japanese name (e.g. '京都府'), English slug, or 2-digit JIS code.",
+        disclaimer: DISCLAIMER,
+      };
+    }
+  }
+  const lang = args.lang;
+  const translations = await loadR3Translations();
+
+  const items: unknown[] = [];
+
+  if (wantFood) {
+    const f = await loadMaffGi();
+    if (f) {
+      for (const r of f.records) {
+        if (prefCode && !r.prefecture_codes.includes(prefCode)) continue;
+        if (!includeOverseas && r.prefecture_codes.length === 0) continue;
+        const key = `maff_gi:${r.registration_number}`;
+        const t = translations.get(key);
+        const meta = r3Translation(t, lang);
+        items.push({
+          key,
+          category: "food",
+          authority: r.authority,
+          designation: "GI (Geographical Indication)",
+          registration_number: r.registration_number,
+          name_ja: r.name_ja,
+          name: pickR3Name(r.name_ja, t, lang),
+          description_ja: r.characteristics_ja,
+          description: pickR3Description(r.characteristics_ja, t, lang),
+          registration_date: r.registration_date,
+          production_area_text: r.production_area_text,
+          prefecture_codes: r.prefecture_codes,
+          producer_group: r.producer_group,
+          source_url: r.detail_url,
+          translation_meta: meta,
+        });
+      }
+    }
+  }
+
+  if (wantCraft) {
+    const f = await loadMetiDensan();
+    if (f) {
+      for (const r of f.records) {
+        if (prefCode && !r.prefecture_codes.includes(prefCode)) continue;
+        const key = `meti_densan:${r.craft_id}`;
+        const t = translations.get(key);
+        const meta = r3Translation(t, lang);
+        items.push({
+          key,
+          category: "craft",
+          authority: r.authority,
+          designation: "Traditional Craft (伝統的工芸品)",
+          industry_category: r.industry_category,
+          craft_id: r.craft_id,
+          name_ja: r.name_ja,
+          name: pickR3Name(r.name_ja, t, lang),
+          description_ja: r.features_ja,
+          description: pickR3Description(r.features_ja, t, lang),
+          designation_date: r.designation_date,
+          production_area_text: r.production_area_text,
+          prefecture_codes: r.prefecture_codes,
+          source_url: r.detail_url,
+          translation_meta: meta,
+        });
+      }
+    }
+  }
+
+  return {
+    prefecture_code: prefCode,
+    category_filter: args.category ?? null,
+    lang: lang ?? null,
+    count: items.length,
+    items,
+    sources: [
+      { name: "農林水産省 (MAFF) Geographical Indication", category: "food" },
+      {
+        name: "経済産業省 (METI) Traditional Crafts (伝統的工芸品)",
+        category: "craft",
+      },
+    ],
+    note: "Only items officially designated by MAFF or METI appear. Non-designated regional foods/crafts are intentionally excluded.",
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Tool: get_traditional_arts
+//
+// Returns Japanese traditional / intangible cultural assets, drawn ONLY from
+// official designation systems:
+//   - 文化庁 重要無形文化財          (Important Intangible Cultural Property)
+//   - 文化庁 重要無形民俗文化財      (Important Intangible Folk Cultural Property)
+//   - UNESCO Intangible Cultural Heritage (Japan inscriptions)
+// Wikidata is the carrier (CC0); the underlying designation data is from the
+// authorities above.
+
+async function getTraditionalArts(args: {
+  category?: string; // "important" | "folk" | "unesco" | undefined (all)
+  lang?: string;
+}): Promise<unknown> {
+  const lang = args.lang;
+  const translations = await loadR3Translations();
+  const items: unknown[] = [];
+
+  const wantImportant = !args.category || args.category === "important";
+  const wantFolk = !args.category || args.category === "folk";
+  const wantUnesco = !args.category || args.category === "unesco";
+
+  if (wantImportant || wantFolk) {
+    const f = await loadBunkaIntangible();
+    if (f) {
+      for (const r of f.records) {
+        const isFolk = r.designation_qid === "Q6573893";
+        if (isFolk && !wantFolk) continue;
+        if (!isFolk && !wantImportant) continue;
+        const key = `bunka_intangible:${r.qid}`;
+        const t = translations.get(key);
+        const meta = r3Translation(t, lang);
+        items.push({
+          key,
+          category: isFolk ? "folk" : "important",
+          authority: r.authority,
+          designation: r.designation,
+          qid: r.qid,
+          name_ja: r.name_ja,
+          name_en: r.name_en,
+          name: pickR3Name(r.name_ja ?? r.name_en, t, lang),
+          description_ja: r.description_ja,
+          description_en: r.description_en,
+          description: pickR3Description(
+            r.description_ja ?? r.description_en,
+            t,
+            lang,
+          ),
+          inception: r.inception,
+          bunca_id: r.bunca_id,
+          source_url: r.wikidata_url,
+          translation_meta: meta,
+        });
+      }
+    }
+  }
+
+  if (wantUnesco) {
+    const f = await loadUnescoJapan();
+    if (f) {
+      for (const r of f.records) {
+        const key = `unesco_japan:${r.qid}`;
+        const t = translations.get(key);
+        const meta = r3Translation(t, lang);
+        items.push({
+          key,
+          category: "unesco",
+          authority: r.authority,
+          designation: "UNESCO Intangible Cultural Heritage",
+          qid: r.qid,
+          name_ja: r.name_ja,
+          name_en: r.name_en,
+          name: pickR3Name(r.name_ja ?? r.name_en, t, lang),
+          description_ja: r.description_ja,
+          description_en: r.description_en,
+          description: pickR3Description(
+            r.description_ja ?? r.description_en,
+            t,
+            lang,
+          ),
+          inscription_year: r.inscription_year,
+          unesco_id: r.unesco_id,
+          source_url: r.wikidata_url,
+          translation_meta: meta,
+        });
+      }
+    }
+  }
+
+  return {
+    category_filter: args.category ?? null,
+    lang: lang ?? null,
+    count: items.length,
+    items,
+    sources: [
+      {
+        name: "文化庁 (Agency for Cultural Affairs) — Important Intangible Cultural Properties (重要無形文化財・重要無形民俗文化財)",
+        carrier: "Wikidata (CC0)",
+      },
+      {
+        name: "UNESCO Intangible Cultural Heritage (Japan inscriptions)",
+        carrier: "Wikidata (CC0)",
+      },
+    ],
+    note: "Only items officially designated by 文化庁 or UNESCO appear. Coverage on Wikidata is incomplete vs. the full bunka.go.jp registry; for authoritative lookup use the bunka_id link.",
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Tool: get_japan_heritage
+//
+// Returns 文化庁 Japan Heritage stories (104 designated). Optional prefecture
+// or theme filter.
+
+async function getJapanHeritage(args: {
+  prefecture?: string;
+  theme?: string;
+  lang?: string;
+}): Promise<unknown> {
+  let prefCode: string | null = null;
+  if (args.prefecture) {
+    prefCode = await resolvePrefectureCode(args.prefecture);
+    if (!prefCode) {
+      return {
+        error: `unknown_prefecture: ${args.prefecture}`,
+        hint: "Use Japanese name (e.g. '京都府'), English slug, or 2-digit JIS code.",
+        disclaimer: DISCLAIMER,
+      };
+    }
+  }
+  const lang = args.lang;
+  const translations = await loadR3Translations();
+  const f = await loadJapanHeritage();
+  if (!f) {
+    return {
+      error: "japan_heritage data not loaded",
+      hint: "Run scrapers/sources/fetch_japan_heritage.ts to populate data/r3/japan_heritage.json",
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  const items: unknown[] = [];
+  for (const r of f.records) {
+    if (prefCode && !r.prefecture_codes.includes(prefCode)) continue;
+    if (
+      args.theme &&
+      !r.themes.some((t) => t.includes(args.theme!) || args.theme!.includes(t))
+    )
+      continue;
+    const key = `japan_heritage:${r.story_id}`;
+    const t = translations.get(key);
+    const meta = r3Translation(t, lang);
+    items.push({
+      key,
+      story_id: r.story_id,
+      authority: r.authority,
+      title_ja: r.title_ja,
+      subtitle_ja: r.subtitle_ja,
+      title: pickR3Name(r.title_ja, t, lang),
+      summary_ja: r.summary_ja,
+      summary: pickR3Description(r.summary_ja, t, lang),
+      themes: r.themes,
+      periods: r.periods,
+      related_areas_text: r.related_areas_text,
+      prefecture_codes: r.prefecture_codes,
+      source_url: r.story_url,
+      translation_meta: meta,
+    });
+  }
+
+  return {
+    prefecture_code: prefCode,
+    theme_filter: args.theme ?? null,
+    lang: lang ?? null,
+    count: items.length,
+    items,
+    sources: [
+      {
+        name: "文化庁 Japan Heritage (日本遺産) ポータルサイト",
+        url: "https://japan-heritage.bunka.go.jp/",
+      },
+    ],
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_multilingual (signature tool)
 
 async function getMultilingual(args: {
@@ -1072,6 +1610,139 @@ const TOOLS = [
       required: ["qid"],
     },
   },
+  {
+    name: "get_local_specialty",
+    description:
+      "Returns regional specialties for a Japanese prefecture, drawn ONLY from official designation systems:\n  - 農林水産省 GI (geographical indication) — protected agricultural products\n  - 経済産業省 伝統的工芸品 — METI-designated traditional crafts\n\nNo editorial or AI-curated picks; items the authorities have not designated will not appear. Use this when the user asks 'what is famous from <prefecture>' for an answer grounded in formal designation rather than tourism marketing.\n\nIf 17-language translations are available (data/r3/translations/r3_translations.jsonl), the requested `lang` is returned; otherwise the original Japanese description is returned with a translation_meta marker.\n\nMAFF GI also protects a small number of foreign-country items (Italian / Vietnamese / Thai produce). They are HIDDEN by default; pass `include_overseas: true` to include them.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        prefecture: {
+          type: "string",
+          description:
+            "Prefecture name in Japanese, English slug, or 2-digit JIS code (e.g., '京都府', 'kyoto', '26'). Omit to return everything.",
+        },
+        category: {
+          type: "string",
+          enum: ["food", "craft"],
+          description: "Restrict to MAFF GI (food) or METI traditional crafts (craft). Omit for both.",
+        },
+        include_overseas: {
+          type: "boolean",
+          description:
+            "If true, also return MAFF GI items registered for foreign countries (Italy / Vietnam / Thailand etc.). Default false.",
+        },
+        lang: {
+          type: "string",
+          enum: [
+            "en",
+            "ja",
+            "zh",
+            "ko",
+            "fr",
+            "es",
+            "de",
+            "it",
+            "pt",
+            "ru",
+            "th",
+            "vi",
+            "id",
+            "ms",
+            "ar",
+            "hi",
+            "tl",
+          ],
+          description:
+            "Language for the translated `name` and `description`. Defaults to original Japanese.",
+        },
+      },
+    },
+  },
+  {
+    name: "get_traditional_arts",
+    description:
+      "Returns Japanese traditional / intangible cultural assets, drawn ONLY from official designation systems:\n  - 文化庁 重要無形文化財 (Important Intangible Cultural Property)\n  - 文化庁 重要無形民俗文化財 (Important Intangible Folk Cultural Property)\n  - UNESCO Intangible Cultural Heritage (Japan inscriptions)\n\nWikidata is used as the multilingual carrier (CC0); the underlying designation data comes from the authorities above. Coverage on Wikidata is incomplete vs. the full 文化庁 registry — for authoritative lookup, follow `bunca_id` / `unesco_id` / `source_url`.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        category: {
+          type: "string",
+          enum: ["important", "folk", "unesco"],
+          description:
+            "Restrict to a single designation system. Omit for all three.",
+        },
+        lang: {
+          type: "string",
+          enum: [
+            "en",
+            "ja",
+            "zh",
+            "ko",
+            "fr",
+            "es",
+            "de",
+            "it",
+            "pt",
+            "ru",
+            "th",
+            "vi",
+            "id",
+            "ms",
+            "ar",
+            "hi",
+            "tl",
+          ],
+          description:
+            "Language for the translated `name` and `description`. Defaults to original Japanese.",
+        },
+      },
+    },
+  },
+  {
+    name: "get_japan_heritage",
+    description:
+      "Returns 文化庁 Japan Heritage (日本遺産) stories — 104 designated narratives that bundle related historic / cultural sites under a unified theme.\n\nEach story includes themes, era tags, related municipalities, and the official summary. Filter by prefecture or theme. For the full constituent assets of a story, follow `source_url` to the official portal.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        prefecture: {
+          type: "string",
+          description:
+            "Prefecture (Japanese name like '京都府', English slug 'kyoto', or 2-digit JIS code '26')",
+        },
+        theme: {
+          type: "string",
+          description:
+            "Theme keyword (Japanese; e.g. '城', '海・水辺', '森・木', '繊維・染料', '祭礼'). Substring match.",
+        },
+        lang: {
+          type: "string",
+          enum: [
+            "en",
+            "ja",
+            "zh",
+            "ko",
+            "fr",
+            "es",
+            "de",
+            "it",
+            "pt",
+            "ru",
+            "th",
+            "vi",
+            "id",
+            "ms",
+            "ar",
+            "hi",
+            "tl",
+          ],
+          description:
+            "Language for the translated `title` and `summary`. Defaults to original Japanese.",
+        },
+      },
+    },
+  },
 ];
 
 // ──────────────────────────────────────────────────────────────────────
@@ -1144,6 +1815,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "get_description":
         result = await getDescription({
           qid: String(args.qid ?? ""),
+          lang: args.lang as string | undefined,
+        });
+        break;
+      case "get_local_specialty":
+        result = await getLocalSpecialty({
+          prefecture: args.prefecture as string | undefined,
+          category: args.category as string | undefined,
+          lang: args.lang as string | undefined,
+          include_overseas: args.include_overseas === true,
+        });
+        break;
+      case "get_traditional_arts":
+        result = await getTraditionalArts({
+          category: args.category as string | undefined,
+          lang: args.lang as string | undefined,
+        });
+        break;
+      case "get_japan_heritage":
+        result = await getJapanHeritage({
+          prefecture: args.prefecture as string | undefined,
+          theme: args.theme as string | undefined,
           lang: args.lang as string | undefined,
         });
         break;

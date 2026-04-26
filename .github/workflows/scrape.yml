@@ -39,6 +39,17 @@ jobs:
           DAILY_BATCH_SIZE: ${{ github.event.inputs.batch_size || '70' }}
         run: npx tsx scrapers/daily.ts
 
+      - name: R-3 source refresh + incremental translation
+        # R-3 sources (MAFF GI, METI traditional crafts, Japan Heritage,
+        # 文化庁 intangible registry, UNESCO ICH) refresh on a 7-day rotation
+        # so every official designation source is touched within a week.
+        # Errors are isolated — a failure here does NOT block the daily commit.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        continue-on-error: true
+        run: npx tsx scrapers/r3_refresh.ts
+
       - name: Commit data updates
         run: |
           git config user.name "japan-travel-mcp-bot"
@@ -47,6 +58,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No data changes to commit"
           else
-            git commit -m "data: daily incremental scrape $(date -u +%Y-%m-%d)"
+            git commit -m "data: daily incremental scrape + R-3 refresh $(date -u +%Y-%m-%d)"
             git push
           fi

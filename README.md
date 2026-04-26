@@ -80,6 +80,9 @@ curl https://japan-travel-mcp.com/api/spots?id=12345&lang=en
 | `get_events` | Festivals registered in Wikidata for a given prefecture, with optional month filter (live SPARQL, in-memory cache) |
 | `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |
 | **`get_description`** | **SIGNATURE TOOL.** 200-300 character tourism descriptions in **17 languages** for 13,000+ spots, generated for global tourist consumption |
+| `get_local_specialty` | Regional specialties (food + crafts) by prefecture, drawn from official designation systems: 農林水産省 GI (172 items) + 経済産業省 伝統的工芸品 (231 items) |
+| `get_traditional_arts` | Intangible cultural assets from 文化庁 重要無形(民俗)文化財 (125 items) + UNESCO ICH inscriptions for Japan (58 items) |
+| `get_japan_heritage` | All 104 文化庁 Japan Heritage (日本遺産) stories, with theme / era / prefecture filters |
 
 **Signature tool: `get_description`**
 This MCP exposes 17-language tourism descriptions — English, Japanese, Chinese, Korean,
@@ -100,7 +103,26 @@ Layer 2: Prefecture tourism offices  — all 47 prefectures
 Layer 3: Hotel & ryokan master list  — built from 7 sources (see below)
 Layer 4: JNTO official data          — multilingual, inbound-focused
 Layer 5: OpenStreetMap               — coordinates and POI
+Layer 6: Official designation systems — MAFF GI / METI 伝統的工芸品 /
+         文化庁 重要無形文化財 / UNESCO ICH / 文化庁 日本遺産 (R-3 sources)
 ```
+
+### R-3 official designation sources (`data/r3/`)
+
+This MCP only surfaces what authorities have officially designated — no editorial
+or AI-curated picks. Each record carries the source URL and authority so
+provenance is verifiable.
+
+| Source | Records | Authority | Refresh |
+|:---|---:|:---|:---|
+| MAFF Geographical Indications | 172 | 農林水産省 | Mon (weekly) |
+| METI Traditional Crafts (伝統的工芸品) | 231 | 経済産業省 | Tue (weekly) |
+| Japan Heritage (日本遺産) | 104 | 文化庁 | Wed (weekly) |
+| Important Intangible Cultural Properties (重要無形文化財・民俗) | 125 | 文化庁 (via Wikidata) | Thu (weekly) |
+| UNESCO Intangible Cultural Heritage — Japan inscriptions | 58 | UNESCO (via Wikidata) | Thu (weekly) |
+
+All R-3 records are translated to the same 17 languages by an incremental
+Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
 
 ---
 
@@ -167,12 +189,19 @@ We aim to keep every record fresh within 30 days.
 That's the freshness target — not a server-load mitigation.  
 We are not a continuous crawler. Tourism information changes slowly; 30 days is enough.
 
-**How the 30 days target is achieved:**  
-GitHub Actions runs a daily cron at 03:00 JST and refreshes ~70 entities per run  
-(1,938 entities ÷ ~28 days ≈ 70/day). Each domain is hit at most once per cycle.
+**Two refresh tracks (both run by the same daily GitHub Actions cron at 03:00 JST):**
+
+| Track | Items | Cycle | Per-day work |
+|:---|:---|:---|:---|
+| Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
+| R-3 official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
+
+Each domain is hit at most once per cycle. R-3 sources update infrequently
+(annual / quarterly), so the 7-day rotation keeps every record fresh well within
+its real upstream cadence.
 
 Initial dataset: bootstrapped in a single run (a few hours, 2-second per-domain interval).  
-Steady-state schedule: rolling 30-day cycle, daily cron, 5-second per-domain interval.  
+Steady-state schedule: daily cron, 5-second per-domain interval.  
 Last updated: see `data/metadata.json`
 
 ---
