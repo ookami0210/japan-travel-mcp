@@ -9,7 +9,7 @@ on:
       batch_size:
         description: "Municipalities to process this run"
         required: false
-        default: "58"
+        default: "70"
 
 concurrency:
   group: scrape
@@ -36,7 +36,7 @@ jobs:
       - name: Run daily scrape
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          DAILY_BATCH_SIZE: ${{ github.event.inputs.batch_size || '58' }}
+          DAILY_BATCH_SIZE: ${{ github.event.inputs.batch_size || '70' }}
         run: npx tsx scrapers/daily.ts
 
       - name: Commit data updates

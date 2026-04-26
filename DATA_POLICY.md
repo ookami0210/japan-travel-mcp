@@ -60,14 +60,14 @@ We aim to keep every record fresh within **30 days**.
 That's the freshness target — not a server-load mitigation.
 
 **Implementation:**  
-A GitHub Actions cron job runs daily at 03:00 JST and re-scrapes ~58 entities  
-each run (1,938 entities ÷ ~33 days ≈ 58/day). Over the cycle, every entity  
+A GitHub Actions cron job runs daily at 03:00 JST and re-scrapes ~70 entities  
+each run (1,938 entities ÷ ~28 days ≈ 70/day). Over the cycle, every entity  
 is touched once. Concretely:
 
 - 1 daily cron run
-- ~58 entities per run, picked as the 58 oldest by `last_scraped_at`
+- ~70 entities per run, picked as the 70 oldest by `last_scraped_at`
 - Each domain hit once per cycle, with a 5-second per-domain interval
-- ~33-day full cycle
+- ~28-day full cycle (fits within the 30-day freshness target)
 
 The initial dataset is bootstrapped in a single run (a few hours, 2-second  
 per-domain interval) — after that, the rolling 30-day cycle takes over.

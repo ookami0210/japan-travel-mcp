@@ -1,8 +1,10 @@
 /**
  * Daily incremental scrape — invoked by GitHub Actions cron.
  *
- * Picks the ~58 stalest municipalities (last_scraped_at oldest) and runs
- * the same pipeline as pilot.ts. Over 30 days this covers all 1,741.
+ * Picks the ~70 stalest municipalities (last_scraped_at oldest) and runs
+ * the same pipeline as pilot.ts. Over ~28 days this covers all 1,938
+ * entities (1,741 municipalities + 197 designated-city wards) within the
+ * 30-day freshness target.
  *
  * Output: appends to data/prefectures/<slug>.json by merging municipalities
  *         in-place by code (existing entries overwritten with fresh ones).
@@ -37,7 +39,7 @@ const PREFECTURES_DIR = new URL("data/prefectures/", ROOT);
 const LOG_DIR = new URL("data/_logs/", ROOT);
 
 const DAILY_BATCH_SIZE = parseInt(
-  process.env.DAILY_BATCH_SIZE ?? "58",
+  process.env.DAILY_BATCH_SIZE ?? "70",
   10,
 );
 

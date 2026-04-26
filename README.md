@@ -169,8 +169,8 @@ That's the freshness target — not a server-load mitigation.
 We are not a continuous crawler. Tourism information changes slowly; 30 days is enough.
 
 **How the 30 days target is achieved:**  
-GitHub Actions runs a daily cron at 03:00 JST and refreshes ~58 entities per run  
-(1,938 entities ÷ ~33 days ≈ 58/day). Each domain is hit at most once per cycle.
+GitHub Actions runs a daily cron at 03:00 JST and refreshes ~70 entities per run  
+(1,938 entities ÷ ~28 days ≈ 70/day). Each domain is hit at most once per cycle.
 
 Initial dataset: bootstrapped in a single run (a few hours, 2-second per-domain interval).  
 Steady-state schedule: rolling 30-day cycle, daily cron, 5-second per-domain interval.  
