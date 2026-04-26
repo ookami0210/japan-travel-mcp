@@ -74,6 +74,29 @@ per-domain interval) — after that, the rolling 30-day cycle takes over.
 
 ---
 
+## Educational reference materials (knowledge taxonomy)
+
+For the cultural/historical knowledge layer in `data/knowledge/`,  
+we use the syllabus of the **全国通訳案内士試験**  
+(National Government Licensed Guide Interpreter Exam, administered by 観光庁/JNTO)  
+as a taxonomic backbone.
+
+Commercially-published study guides for this exam were **purchased legitimately**  
+and consulted to validate that our entity coverage matches what professional  
+guides are actually expected to know. We use only:
+
+- The taxonomic structure (region/era/topic groupings — not the publisher's invention)
+- Canonical entity names (place names, historical figures, cultural concepts — facts that exist in the world)
+- Publicly known category labels
+
+We do **not** reproduce: verbatim exam questions, answer explanations,  
+original prose, vocabulary lists, model presentation answers, or audio materials.
+
+Full disclosure of consulted books and the boundary between reference and  
+content lives in [`data/knowledge/KNOWLEDGE_SOURCES.md`](data/knowledge/KNOWLEDGE_SOURCES.md).
+
+---
+
 ## Licensing
 
 We attribute all data to its original source.  
