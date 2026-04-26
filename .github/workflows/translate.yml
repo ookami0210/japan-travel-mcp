@@ -53,12 +53,15 @@ jobs:
           echo "ANTHROPIC_API_KEY secret is configured."
 
       - name: Notify Slack — start
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           LANG_CODE: ${{ github.event.inputs.target_language }}
           LIMIT: ${{ github.event.inputs.ai_limit }}
         run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set, skipping start notification"
+            exit 0
+          fi
           curl -s -X POST -H 'Content-Type: application/json' \
             --data "{\"text\":\"🌐 Translation batch started (lang=${LANG_CODE}, limit=${LIMIT}). Sonnet 4.6 Batch API; ETA 1-4 hours.\"}" \
             "$SLACK_WEBHOOK_URL"
@@ -82,19 +85,27 @@ jobs:
           fi
 
       - name: Notify Slack — success
-        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        if: success()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set, skipping notification"
+            exit 0
+          fi
           curl -s -X POST -H 'Content-Type: application/json' \
             --data "{\"text\":\"✅ Translation batch complete. See data/translations/jp_en.jsonl for the dataset.\"}" \
             "$SLACK_WEBHOOK_URL"
 
       - name: Notify Slack — failure
-        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set, skipping notification"
+            exit 0
+          fi
           curl -s -X POST -H 'Content-Type: application/json' \
             --data "{\"text\":\"🚨 Translation batch FAILED. Check the GitHub Actions log.\"}" \
             "$SLACK_WEBHOOK_URL"
