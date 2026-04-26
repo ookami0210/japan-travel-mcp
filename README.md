@@ -15,7 +15,7 @@ This project exists because I believe Japan deserves to be better represented in
 
 Not a business. A contribution.
 
-— **KJ Sunada**, Founder & CEO, [KabuK Style](https://kabuk.com) / [HafH](https://hafh.com)  
+— **KJ Sunada**, Founder & CEO, [KabuK Style](https://kabuk.co.jp/) / [HafH](https://hafh.com)  
 Japan's leading travel-tech startup.
 
 ---
