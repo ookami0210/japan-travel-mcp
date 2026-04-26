@@ -47,10 +47,5 @@ __pycache__/
 .venv/
 venv/
 
-# Reference materials — copyrighted study guides (purchased, not redistributable)
-# These are KJ's personal copies used as taxonomy reference only.
-# See data/knowledge/KNOWLEDGE_SOURCES.md for citation policy.
-reference/_0426/
-
 # Translation batch state (contains Anthropic batch IDs, no secrets but transient)
 data/_state/translation_batch*.json

@@ -1,0 +1,567 @@
+{
+  "schema_version": 1,
+  "title": "Japanese Geographical Regions and Prefectures",
+  "purpose": "Standard taxonomic reference for Japanese geography. Used as a validation dictionary for entity meta-tags (e.g. region, prefecture_code) and as a discovery view (list prefectures by region).",
+  "source": {
+    "type": "public_administrative_data",
+    "authority": "総務省 (Ministry of Internal Affairs and Communications, Japan)",
+    "url": "https://www.soumu.go.jp/",
+    "note": "Prefecture codes follow JIS X 0401. Regional groupings are the conventional 8-region division taught in Japanese geography curriculum."
+  },
+  "license": "CC BY 4.0 (this compilation); underlying facts are public-domain administrative codes",
+  "regions_8": [
+    {
+      "id": "hokkaido",
+      "name_en": "Hokkaido Region",
+      "name_ja": "北海道地方",
+      "prefecture_codes": [
+        "01"
+      ]
+    },
+    {
+      "id": "tohoku",
+      "name_en": "Tohoku Region",
+      "name_ja": "東北地方",
+      "prefecture_codes": [
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "id": "kanto",
+      "name_en": "Kanto Region",
+      "name_ja": "関東地方",
+      "prefecture_codes": [
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ]
+    },
+    {
+      "id": "chubu",
+      "name_en": "Chubu Region",
+      "name_ja": "中部地方",
+      "prefecture_codes": [
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23"
+      ]
+    },
+    {
+      "id": "kinki",
+      "name_en": "Kinki (Kansai) Region",
+      "name_ja": "近畿地方",
+      "prefecture_codes": [
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30"
+      ]
+    },
+    {
+      "id": "chugoku",
+      "name_en": "Chugoku Region",
+      "name_ja": "中国地方",
+      "prefecture_codes": [
+        "31",
+        "32",
+        "33",
+        "34",
+        "35"
+      ]
+    },
+    {
+      "id": "shikoku",
+      "name_en": "Shikoku Region",
+      "name_ja": "四国地方",
+      "prefecture_codes": [
+        "36",
+        "37",
+        "38",
+        "39"
+      ]
+    },
+    {
+      "id": "kyushu_okinawa",
+      "name_en": "Kyushu and Okinawa Region",
+      "name_ja": "九州・沖縄地方",
+      "prefecture_codes": [
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47"
+      ]
+    }
+  ],
+  "regions_7_alternate": {
+    "note": "Some sources combine Chugoku and Shikoku into a single region. This mapping supports the 7-region view.",
+    "differences": [
+      {
+        "id": "chugoku_shikoku",
+        "name_en": "Chugoku and Shikoku Region",
+        "name_ja": "中国・四国地方",
+        "prefecture_codes": [
+          "31",
+          "32",
+          "33",
+          "34",
+          "35",
+          "36",
+          "37",
+          "38",
+          "39"
+        ],
+        "replaces": [
+          "chugoku",
+          "shikoku"
+        ]
+      }
+    ]
+  },
+  "prefectures": [
+    {
+      "code": "01",
+      "name_en": "Hokkaido",
+      "name_ja": "北海道",
+      "kana": "ほっかいどう",
+      "capital_en": "Sapporo",
+      "capital_ja": "札幌市",
+      "region_id": "hokkaido"
+    },
+    {
+      "code": "02",
+      "name_en": "Aomori",
+      "name_ja": "青森県",
+      "kana": "あおもりけん",
+      "capital_en": "Aomori",
+      "capital_ja": "青森市",
+      "region_id": "tohoku"
+    },
+    {
+      "code": "03",
+      "name_en": "Iwate",
+      "name_ja": "岩手県",
+      "kana": "いわてけん",
+      "capital_en": "Morioka",
+      "capital_ja": "盛岡市",
+      "region_id": "tohoku"
+    },
+    {
+      "code": "04",
+      "name_en": "Miyagi",
+      "name_ja": "宮城県",
+      "kana": "みやぎけん",
+      "capital_en": "Sendai",
+      "capital_ja": "仙台市",
+      "region_id": "tohoku"
+    },
+    {
+      "code": "05",
+      "name_en": "Akita",
+      "name_ja": "秋田県",
+      "kana": "あきたけん",
+      "capital_en": "Akita",
+      "capital_ja": "秋田市",
+      "region_id": "tohoku"
+    },
+    {
+      "code": "06",
+      "name_en": "Yamagata",
+      "name_ja": "山形県",
+      "kana": "やまがたけん",
+      "capital_en": "Yamagata",
+      "capital_ja": "山形市",
+      "region_id": "tohoku"
+    },
+    {
+      "code": "07",
+      "name_en": "Fukushima",
+      "name_ja": "福島県",
+      "kana": "ふくしまけん",
+      "capital_en": "Fukushima",
+      "capital_ja": "福島市",
+      "region_id": "tohoku"
+    },
+    {
+      "code": "08",
+      "name_en": "Ibaraki",
+      "name_ja": "茨城県",
+      "kana": "いばらきけん",
+      "capital_en": "Mito",
+      "capital_ja": "水戸市",
+      "region_id": "kanto"
+    },
+    {
+      "code": "09",
+      "name_en": "Tochigi",
+      "name_ja": "栃木県",
+      "kana": "とちぎけん",
+      "capital_en": "Utsunomiya",
+      "capital_ja": "宇都宮市",
+      "region_id": "kanto"
+    },
+    {
+      "code": "10",
+      "name_en": "Gunma",
+      "name_ja": "群馬県",
+      "kana": "ぐんまけん",
+      "capital_en": "Maebashi",
+      "capital_ja": "前橋市",
+      "region_id": "kanto"
+    },
+    {
+      "code": "11",
+      "name_en": "Saitama",
+      "name_ja": "埼玉県",
+      "kana": "さいたまけん",
+      "capital_en": "Saitama",
+      "capital_ja": "さいたま市",
+      "region_id": "kanto"
+    },
+    {
+      "code": "12",
+      "name_en": "Chiba",
+      "name_ja": "千葉県",
+      "kana": "ちばけん",
+      "capital_en": "Chiba",
+      "capital_ja": "千葉市",
+      "region_id": "kanto"
+    },
+    {
+      "code": "13",
+      "name_en": "Tokyo",
+      "name_ja": "東京都",
+      "kana": "とうきょうと",
+      "capital_en": "Tokyo",
+      "capital_ja": "東京",
+      "region_id": "kanto"
+    },
+    {
+      "code": "14",
+      "name_en": "Kanagawa",
+      "name_ja": "神奈川県",
+      "kana": "かながわけん",
+      "capital_en": "Yokohama",
+      "capital_ja": "横浜市",
+      "region_id": "kanto"
+    },
+    {
+      "code": "15",
+      "name_en": "Niigata",
+      "name_ja": "新潟県",
+      "kana": "にいがたけん",
+      "capital_en": "Niigata",
+      "capital_ja": "新潟市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "16",
+      "name_en": "Toyama",
+      "name_ja": "富山県",
+      "kana": "とやまけん",
+      "capital_en": "Toyama",
+      "capital_ja": "富山市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "17",
+      "name_en": "Ishikawa",
+      "name_ja": "石川県",
+      "kana": "いしかわけん",
+      "capital_en": "Kanazawa",
+      "capital_ja": "金沢市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "18",
+      "name_en": "Fukui",
+      "name_ja": "福井県",
+      "kana": "ふくいけん",
+      "capital_en": "Fukui",
+      "capital_ja": "福井市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "19",
+      "name_en": "Yamanashi",
+      "name_ja": "山梨県",
+      "kana": "やまなしけん",
+      "capital_en": "Kofu",
+      "capital_ja": "甲府市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "20",
+      "name_en": "Nagano",
+      "name_ja": "長野県",
+      "kana": "ながのけん",
+      "capital_en": "Nagano",
+      "capital_ja": "長野市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "21",
+      "name_en": "Gifu",
+      "name_ja": "岐阜県",
+      "kana": "ぎふけん",
+      "capital_en": "Gifu",
+      "capital_ja": "岐阜市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "22",
+      "name_en": "Shizuoka",
+      "name_ja": "静岡県",
+      "kana": "しずおかけん",
+      "capital_en": "Shizuoka",
+      "capital_ja": "静岡市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "23",
+      "name_en": "Aichi",
+      "name_ja": "愛知県",
+      "kana": "あいちけん",
+      "capital_en": "Nagoya",
+      "capital_ja": "名古屋市",
+      "region_id": "chubu"
+    },
+    {
+      "code": "24",
+      "name_en": "Mie",
+      "name_ja": "三重県",
+      "kana": "みえけん",
+      "capital_en": "Tsu",
+      "capital_ja": "津市",
+      "region_id": "kinki"
+    },
+    {
+      "code": "25",
+      "name_en": "Shiga",
+      "name_ja": "滋賀県",
+      "kana": "しがけん",
+      "capital_en": "Otsu",
+      "capital_ja": "大津市",
+      "region_id": "kinki"
+    },
+    {
+      "code": "26",
+      "name_en": "Kyoto",
+      "name_ja": "京都府",
+      "kana": "きょうとふ",
+      "capital_en": "Kyoto",
+      "capital_ja": "京都市",
+      "region_id": "kinki"
+    },
+    {
+      "code": "27",
+      "name_en": "Osaka",
+      "name_ja": "大阪府",
+      "kana": "おおさかふ",
+      "capital_en": "Osaka",
+      "capital_ja": "大阪市",
+      "region_id": "kinki"
+    },
+    {
+      "code": "28",
+      "name_en": "Hyogo",
+      "name_ja": "兵庫県",
+      "kana": "ひょうごけん",
+      "capital_en": "Kobe",
+      "capital_ja": "神戸市",
+      "region_id": "kinki"
+    },
+    {
+      "code": "29",
+      "name_en": "Nara",
+      "name_ja": "奈良県",
+      "kana": "ならけん",
+      "capital_en": "Nara",
+      "capital_ja": "奈良市",
+      "region_id": "kinki"
+    },
+    {
+      "code": "30",
+      "name_en": "Wakayama",
+      "name_ja": "和歌山県",
+      "kana": "わかやまけん",
+      "capital_en": "Wakayama",
+      "capital_ja": "和歌山市",
+      "region_id": "kinki"
+    },
+    {
+      "code": "31",
+      "name_en": "Tottori",
+      "name_ja": "鳥取県",
+      "kana": "とっとりけん",
+      "capital_en": "Tottori",
+      "capital_ja": "鳥取市",
+      "region_id": "chugoku"
+    },
+    {
+      "code": "32",
+      "name_en": "Shimane",
+      "name_ja": "島根県",
+      "kana": "しまねけん",
+      "capital_en": "Matsue",
+      "capital_ja": "松江市",
+      "region_id": "chugoku"
+    },
+    {
+      "code": "33",
+      "name_en": "Okayama",
+      "name_ja": "岡山県",
+      "kana": "おかやまけん",
+      "capital_en": "Okayama",
+      "capital_ja": "岡山市",
+      "region_id": "chugoku"
+    },
+    {
+      "code": "34",
+      "name_en": "Hiroshima",
+      "name_ja": "広島県",
+      "kana": "ひろしまけん",
+      "capital_en": "Hiroshima",
+      "capital_ja": "広島市",
+      "region_id": "chugoku"
+    },
+    {
+      "code": "35",
+      "name_en": "Yamaguchi",
+      "name_ja": "山口県",
+      "kana": "やまぐちけん",
+      "capital_en": "Yamaguchi",
+      "capital_ja": "山口市",
+      "region_id": "chugoku"
+    },
+    {
+      "code": "36",
+      "name_en": "Tokushima",
+      "name_ja": "徳島県",
+      "kana": "とくしまけん",
+      "capital_en": "Tokushima",
+      "capital_ja": "徳島市",
+      "region_id": "shikoku"
+    },
+    {
+      "code": "37",
+      "name_en": "Kagawa",
+      "name_ja": "香川県",
+      "kana": "かがわけん",
+      "capital_en": "Takamatsu",
+      "capital_ja": "高松市",
+      "region_id": "shikoku"
+    },
+    {
+      "code": "38",
+      "name_en": "Ehime",
+      "name_ja": "愛媛県",
+      "kana": "えひめけん",
+      "capital_en": "Matsuyama",
+      "capital_ja": "松山市",
+      "region_id": "shikoku"
+    },
+    {
+      "code": "39",
+      "name_en": "Kochi",
+      "name_ja": "高知県",
+      "kana": "こうちけん",
+      "capital_en": "Kochi",
+      "capital_ja": "高知市",
+      "region_id": "shikoku"
+    },
+    {
+      "code": "40",
+      "name_en": "Fukuoka",
+      "name_ja": "福岡県",
+      "kana": "ふくおかけん",
+      "capital_en": "Fukuoka",
+      "capital_ja": "福岡市",
+      "region_id": "kyushu_okinawa"
+    },
+    {
+      "code": "41",
+      "name_en": "Saga",
+      "name_ja": "佐賀県",
+      "kana": "さがけん",
+      "capital_en": "Saga",
+      "capital_ja": "佐賀市",
+      "region_id": "kyushu_okinawa"
+    },
+    {
+      "code": "42",
+      "name_en": "Nagasaki",
+      "name_ja": "長崎県",
+      "kana": "ながさきけん",
+      "capital_en": "Nagasaki",
+      "capital_ja": "長崎市",
+      "region_id": "kyushu_okinawa"
+    },
+    {
+      "code": "43",
+      "name_en": "Kumamoto",
+      "name_ja": "熊本県",
+      "kana": "くまもとけん",
+      "capital_en": "Kumamoto",
+      "capital_ja": "熊本市",
+      "region_id": "kyushu_okinawa"
+    },
+    {
+      "code": "44",
+      "name_en": "Oita",
+      "name_ja": "大分県",
+      "kana": "おおいたけん",
+      "capital_en": "Oita",
+      "capital_ja": "大分市",
+      "region_id": "kyushu_okinawa"
+    },
+    {
+      "code": "45",
+      "name_en": "Miyazaki",
+      "name_ja": "宮崎県",
+      "kana": "みやざきけん",
+      "capital_en": "Miyazaki",
+      "capital_ja": "宮崎市",
+      "region_id": "kyushu_okinawa"
+    },
+    {
+      "code": "46",
+      "name_en": "Kagoshima",
+      "name_ja": "鹿児島県",
+      "kana": "かごしまけん",
+      "capital_en": "Kagoshima",
+      "capital_ja": "鹿児島市",
+      "region_id": "kyushu_okinawa"
+    },
+    {
+      "code": "47",
+      "name_en": "Okinawa",
+      "name_ja": "沖縄県",
+      "kana": "おきなわけん",
+      "capital_en": "Naha",
+      "capital_ja": "那覇市",
+      "region_id": "kyushu_okinawa"
+    }
+  ]
+}
