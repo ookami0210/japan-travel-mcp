@@ -363,7 +363,9 @@ function buildBatchRequest(
     custom_id: sanitizeCustomId(item.key),
     params: {
       model: MODEL,
-      max_tokens: 4096,
+      // 17 langs × (name + ~250-char description) → ~10k output tokens worst case.
+      // 4096 truncated long records and caused JSON parse failures; 8192 leaves headroom.
+      max_tokens: 8192,
       system: [
         {
           type: "text",
