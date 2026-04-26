@@ -49,3 +49,4 @@ venv/
 
 # Translation batch state (contains Anthropic batch IDs, no secrets but transient)
 data/_state/translation_batch*.json
+data/_state/r3_parse_failures_*.jsonl
