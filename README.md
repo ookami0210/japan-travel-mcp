@@ -15,8 +15,7 @@ This project exists because I believe Japan deserves to be better represented in
 
 Not a business. A contribution.
 
-— **KJ Sunada**, Founder & CEO, [KabuK Style](https://kabuk.co.jp/) / [HafH](https://hafh.com)  
-Japan's leading travel-tech startup.
+— **KJ Sunada**, founder of [KabuK Style](https://kabuk.co.jp/), building products for Japan's travel industry since 2019.
 
 ---
 
@@ -268,4 +267,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 Data: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)  
 Code: [MIT](./LICENSE)
 
-Attribution: **Japan Travel MCP** by KJ Sunada / KabuK Style Inc.
+Attribution: **Japan Travel MCP** by KJ Sunada
