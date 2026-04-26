@@ -201,6 +201,30 @@ japan-travel-mcp/
 
 ---
 
+## Multilingual data and translation policy
+
+This project aims for **complete English coverage** as Layer A, with Chinese, Korean, and other languages added through community contribution as Layer B.
+
+**Translation source hierarchy** (highest authority first):
+
+1. **Wikipedia article titles** (via Wikidata sitelinks) — human-curated, peer-reviewed.
+2. **Project canonical glossary** (`data/glossary/seed_canonical.json`) — house style for suffix rules (神社→Shrine, 寺→Temple, 城→Castle), Hepburn romanization, and proper-noun handling.
+3. **Sonnet 4.6 batch translation** — used to fill remaining gaps, constrained by the cached glossary above for consistency.
+
+The translation pipeline is in `scrapers/translate/`. Translation pairs are exported to `data/translations/jp_en.jsonl` in Hugging Face dataset format (`{qid, ja, en, source, confidence, domain}`) — this is itself a publishable resource for the community.
+
+### Other languages — PRs welcome
+
+Chinese (simplified and traditional) and Korean translations exist for ~9% and ~2% of attractions respectively from Wikidata. We welcome PRs adding:
+- Translations using the same source hierarchy (Wikipedia first, then AI-assisted with our glossary)
+- Translation glossaries for additional languages (Spanish, French, Thai, Indonesian, etc.)
+- Improvements to the canonical glossary itself
+- Better translation tooling (alternative LLMs, post-editing UI, translator tooling)
+
+If you contribute a translation pipeline using a different model or service (DeepL, Google Translate, Gemini, etc.), please document the source so consumers can choose by provenance.
+
+---
+
 ## Contributing
 
 PRs are not just welcome — they're the whole point.  
