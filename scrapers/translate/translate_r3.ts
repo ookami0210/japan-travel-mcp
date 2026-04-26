@@ -180,11 +180,12 @@ async function loadInputs(): Promise<TranslateInput[]> {
     >(new URL("japan_heritage.json", DATA_DIR));
     for (const r of f.records) {
       if (!r.title_ja) continue;
-      // Prefer body for summary translation when present (richer context),
-      // but cap to keep token cost bounded.
-      const desc = r.body_ja
-        ? r.body_ja.slice(0, 1200)
-        : r.summary_ja;
+      // Use the short `summary_ja` (official meta description, ~150-200 chars)
+      // as the translation source — NOT the long `body_ja`. The full body
+      // averaged ~2000 chars per record; translating that × 17 languages
+      // exceeded max_tokens=8192 and broke JSON output for every JH record.
+      // The body remains available in data/r3/japan_heritage.json if a
+      // downstream consumer needs deeper context.
       inputs.push({
         key: `japan_heritage:${r.story_id}`,
         source: "japan_heritage",
@@ -193,7 +194,7 @@ async function loadInputs(): Promise<TranslateInput[]> {
         name_ja: r.subtitle_ja
           ? `${r.title_ja}　${r.subtitle_ja}`
           : r.title_ja,
-        description_ja: desc,
+        description_ja: r.summary_ja,
         context: [
           `themes: ${r.themes.join(", ") || "n/a"}`,
           `periods: ${r.periods.join(", ") || "n/a"}`,
@@ -332,7 +333,21 @@ Respond with valid JSON ONLY:
   "confidence": "high" | "medium" | "low"
 }
 
-Include EXACTLY the requested target languages. If description is null, OMIT the "description" key entirely.`;
+Include EXACTLY the requested target languages. If description is null, OMIT the "description" key entirely.
+
+# CRITICAL JSON-safety rules (read carefully — past output broke JSON parsing)
+
+1. Do NOT wrap the output in markdown code fences. Output the bare JSON object only — no \`\`\`json, no \`\`\`, no preamble like "Here is the translation:".
+2. Inside any string value, NEVER use unescaped double-quote characters (\`"\`).
+   - Wrong: \`"zh": "品种为"青森黑加仑"。"\`         ← inner " breaks JSON
+   - Right: \`"zh": "品种为「青森黑加仑」。"\`        ← use 「」 in zh / ja
+   - Right: \`"en": "The variety is 'Aomori Cassis'."\` ← use ' or proper unicode quotes ('') in en
+   - Right: \`"fr": "La variété est « Aomori Cassis »."\` ← use « » in fr / es / it / pt
+   - Right: \`"de": "Die Sorte ist „Aomori Cassis""\`   ← use „" in de
+   - Right: \`"ru": "Сорт «Аомори Кассис»."\`            ← use « » in ru
+   For all other languages, use the conventional quotation marks of that language, NOT \`"\`.
+3. If you must include a literal \`"\` inside a string, escape it as \`\\"\`.
+4. Do not add comments inside the JSON.`;
 }
 
 // Anthropic Batch API requires custom_id to match ^[a-zA-Z0-9_-]{1,64}$.
@@ -477,6 +492,130 @@ interface TranslationResult {
   confidence: "high" | "medium" | "low";
 }
 
+/**
+ * Robust JSON extraction tuned to the failure shapes we observed in batches
+ * 1 and 2 of the R-3 translation:
+ *
+ *   1. Models often wrap the JSON in a ```json ... ``` markdown fence
+ *      despite the prompt saying not to. → strip fences first.
+ *   2. Some descriptions contain unescaped double-quote characters inside
+ *      string values (e.g. zh wrapping a proper noun in literal "...").
+ *      → on first parse failure, attempt a heuristic repair that re-escapes
+ *        stray quotes inside obvious string-value positions.
+ *
+ * Returns null if every recovery path fails.
+ */
+function extractJson(text: string): unknown | null {
+  // 1. strip optional ```json ... ``` (or ``` ... ```) fence
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  let candidate = fenced ? fenced[1].trim() : text.trim();
+
+  // 2. if the model added preamble, take from the first { to the matching }
+  const firstBrace = candidate.indexOf("{");
+  const lastBrace = candidate.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    candidate = candidate.slice(firstBrace, lastBrace + 1);
+  }
+
+  // 3a. straight parse
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    /* fall through to repair */
+  }
+
+  // 3b. repair: walk the string, tracking position, and re-escape any "
+  //     that appears inside a string value but isn't actually closing the
+  //     value. Heuristic: a closing " is followed by , } ] : or whitespace
+  //     leading to one of those. A lone " inside the value should be \".
+  const repaired = repairJsonStringQuotes(candidate);
+  if (repaired !== candidate) {
+    try {
+      return JSON.parse(repaired);
+    } catch {
+      /* give up */
+    }
+  }
+
+  return null;
+}
+
+function repairJsonStringQuotes(s: string): string {
+  // Strategy: track whether we are currently inside a JSON string AND whether
+  // that string is a value (started right after `:`) or a key (started after
+  // `{` or `,`). The closing rule differs:
+  //   - key strings close on the next `:`
+  //   - value strings close on `,` (followed by `"|}|]`), `}`, or `]`
+  // A `"` followed by `:` mid-value is therefore a stray inner quote (e.g.
+  // German „größten Piraten Japans": Die Geiyo-Inseln — the model used ASCII
+  // " for the closing quotation mark instead of U+201C). We escape it.
+  const out: string[] = [];
+  let i = 0;
+  let inString = false;
+  let escapeNext = false;
+  let isValue = false;
+  while (i < s.length) {
+    const ch = s[i];
+    if (escapeNext) {
+      out.push(ch);
+      escapeNext = false;
+      i += 1;
+      continue;
+    }
+    if (ch === "\\") {
+      out.push(ch);
+      escapeNext = true;
+      i += 1;
+      continue;
+    }
+    if (ch === '"') {
+      if (!inString) {
+        inString = true;
+        // Look back to last non-whitespace structural char to decide key vs value.
+        let p = out.length - 1;
+        while (p >= 0 && /[ \t\r\n]/.test(out[p])) p -= 1;
+        const prev = p >= 0 ? out[p] : "";
+        isValue = prev === ":";
+        out.push(ch);
+        i += 1;
+        continue;
+      }
+      let j = i + 1;
+      while (j < s.length && /[ \t\r\n]/.test(s[j])) j += 1;
+      let isClosing = false;
+      if (j >= s.length) {
+        isClosing = true;
+      } else if (isValue) {
+        const next = s[j];
+        if (next === "}" || next === "]") {
+          isClosing = true;
+        } else if (next === ",") {
+          let k = j + 1;
+          while (k < s.length && /[ \t\r\n]/.test(s[k])) k += 1;
+          if (k >= s.length || s[k] === '"' || s[k] === "}" || s[k] === "]") {
+            isClosing = true;
+          }
+        }
+      } else {
+        // key string — closes on `:`
+        if (s[j] === ":") isClosing = true;
+      }
+      if (isClosing) {
+        inString = false;
+        out.push(ch);
+      } else {
+        out.push("\\");
+        out.push(ch);
+      }
+      i += 1;
+      continue;
+    }
+    out.push(ch);
+    i += 1;
+  }
+  return out.join("");
+}
+
 async function processResults(
   client: Anthropic,
   batchId: string,
@@ -485,6 +624,10 @@ async function processResults(
   let succeeded = 0,
     errored = 0,
     parseFailed = 0;
+  const failedDumpPath = fileURLToPath(
+    new URL(`data/_state/r3_parse_failures_${batchId}.jsonl`, ROOT),
+  );
+  const failedDump: string[] = [];
   for await (const r of await client.messages.batches.results(batchId)) {
     if (r.result.type !== "succeeded") {
       errored += 1;
@@ -496,29 +639,38 @@ async function processResults(
     );
     if (!textBlock) {
       parseFailed += 1;
+      failedDump.push(
+        JSON.stringify({ custom_id: r.custom_id, reason: "no text block" }),
+      );
       continue;
     }
-    let parsed: TranslationResult | null = null;
-    try {
-      const m = textBlock.text.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error("no JSON");
-      parsed = JSON.parse(m[0]) as TranslationResult;
-    } catch {
+    const obj = extractJson(textBlock.text) as TranslationResult | null;
+    if (!obj || !obj.name || typeof obj.name !== "object") {
       parseFailed += 1;
+      failedDump.push(
+        JSON.stringify({
+          custom_id: r.custom_id,
+          reason: !obj ? "json extract failed" : "no name field",
+          raw: textBlock.text.slice(0, 4000),
+        }),
+      );
       continue;
     }
-    if (!parsed.name || typeof parsed.name !== "object") {
-      parseFailed += 1;
-      continue;
-    }
-    parsed.key = unsanitizeCustomId(r.custom_id);
-    if (!parsed.confidence) parsed.confidence = "medium";
-    out.push(parsed);
+    obj.key = unsanitizeCustomId(r.custom_id);
+    if (!obj.confidence) obj.confidence = "medium";
+    out.push(obj);
     succeeded += 1;
   }
   process.stderr.write(
     `[r3_translate] results: succeeded=${succeeded}, errored=${errored}, parse_failed=${parseFailed}\n`,
   );
+  if (failedDump.length > 0) {
+    await mkdir(dirname(failedDumpPath), { recursive: true });
+    await writeFile(failedDumpPath, failedDump.join("\n") + "\n", "utf8");
+    process.stderr.write(
+      `[r3_translate] dumped ${failedDump.length} failures → ${failedDumpPath}\n`,
+    );
+  }
   return out;
 }
 
