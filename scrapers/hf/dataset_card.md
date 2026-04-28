@@ -68,14 +68,14 @@ prefectures/                      # 47 prefecture files: municipal-scrape spots
 hotels/
   master.json                     # 40,128 accommodations (Wikidata + OSM merged)
 
-r3/                               # Official designation registries (R-3 sources)
+r3/                               # Official designation registries
   maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
   meti_densan.json                # 231 METI-designated Traditional Crafts (Dentō Kōgeihin)
   japan_heritage.json             # 104 Japan Heritage stories (Nihon Isan)
   bunka_intangible.json           # 125 Important Intangible Cultural Properties
   unesco_japan.json               # 58 UNESCO ICH inscriptions for Japan
   translations/
-    r3_translations.jsonl         # 690 R-3 records × 17 languages
+    r3_translations.jsonl         # 690 designation records × 17 languages
 
 glossary/
   seed_canonical.json             # House style for translations
@@ -125,7 +125,7 @@ refreshes data on two tracks and re-publishes to this dataset:
 | Track | Items | Cycle | Per-day work |
 |:---|:---|:---|:---|
 | Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
-| R-3 official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
+| Official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
 
 Each domain is hit at most once per cycle.
 

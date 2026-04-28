@@ -115,7 +115,7 @@ Layer 6: Official designation systems      — MAFF Geographical Indications,
          Important Intangible Cultural Properties, UNESCO ICH (Japan)
 ```
 
-### R-3 official designation sources (`data/r3/`)
+### Official designation sources (`data/r3/`)
 
 This MCP only surfaces what authorities have officially designated — no editorial
 or AI-curated picks. Each record carries the source URL and authority so
@@ -129,8 +129,8 @@ provenance is verifiable.
 | Important Intangible Cultural Properties + Folk | 125 | Agency for Cultural Affairs (文化庁) — mirrored via Wikidata | Thu (weekly) |
 | UNESCO Intangible Cultural Heritage — Japan inscriptions | 58 | UNESCO — mirrored via Wikidata | Thu (weekly) |
 
-All 690 R-3 records are translated to the same 17 languages by an incremental
-Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
+All 690 designation records are translated to the same 17 languages by an
+incremental Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
 
 ---
 
@@ -206,11 +206,11 @@ We are not a continuous crawler. Tourism information changes slowly; 30 days is 
 | Track | Items | Cycle | Per-day work |
 |:---|:---|:---|:---|
 | Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
-| R-3 official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
+| Official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
 
-Each domain is hit at most once per cycle. R-3 sources update infrequently
-(annual / quarterly), so the 7-day rotation keeps every record fresh well within
-its real upstream cadence.
+Each domain is hit at most once per cycle. The designation sources update
+infrequently (annual / quarterly), so the 7-day rotation keeps every record
+fresh well within their real upstream cadence.
 
 Initial dataset: bootstrapped in a single run (a few hours, 2-second per-domain interval).  
 Steady-state schedule: daily cron, 5-second per-domain interval.  
@@ -275,7 +275,7 @@ The project ships **17 languages** as a first-class feature, not an afterthought
 | Attraction names | Canonical entity name in 17 languages | 13,961 entities × 17 langs (237,337 pairs) | Wikipedia sitelinks + Sonnet 4.6 batch |
 | Attraction descriptions | 200-300 char tourism description in 17 languages | 13,394 entities × 17 langs (227,698 descriptions) | Sonnet 4.6 batch, glossary-grounded |
 | Wikipedia-anchored names (raw) | Sitelinks-only subset | 41,404 entities, sparse cross-language | Wikidata SPARQL sitelinks |
-| R-3 designation translations | Names + descriptions for every officially-designated record | **690 records × 17 langs (100% coverage)** | Sonnet 4.6 batch from official Japanese text |
+| Designation-source translations | Names + descriptions for every officially-designated record | **690 records × 17 langs (100% coverage)** | Sonnet 4.6 batch from official Japanese text |
 
 **17 supported languages:** English (en), Japanese (ja), Chinese (zh), Korean (ko),
 French (fr), Spanish (es), German (de), Italian (it), Portuguese (pt), Russian (ru),
@@ -291,11 +291,11 @@ Tagalog (tl).
    romanization, proper-noun handling. Loaded as a cached system prompt for AI consistency.
 3. **Claude Sonnet 4.6 batch translation** — fills gaps that Wikipedia doesn't cover,
    constrained by the canonical glossary above. 50% batch-API discount; all 13,961
-   names + 13,394 descriptions + 690 R-3 records generated for ~$111 total.
+   names + 13,394 descriptions + 690 designation records generated for ~$111 total.
 
 **Output:** published as `translations/multilingual_complete.jsonl` (names),
 `translations/descriptions_complete.jsonl` (attraction descriptions), and
-`r3/translations/r3_translations.jsonl` (R-3 records) on the
+`r3/translations/r3_translations.jsonl` (designation-source records) on the
 [HF dataset](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data),
 all in JSONL.
 
