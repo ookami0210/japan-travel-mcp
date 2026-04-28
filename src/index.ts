@@ -29,6 +29,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { resolveDataRoot } from "./lib/hf_data.js";
 
 const DISCLAIMER =
   "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.";
@@ -102,38 +103,48 @@ interface HotelsFile {
   hotels: HotelRecord[];
 }
 
-function findRepoRoot(): string {
+// Resolved at startup by initDataRoot(). Either points at a populated data/
+// in a development checkout, or at the HF cache (~/.japan-travel-mcp/data/).
+let DATA_ROOT: string | null = null;
+
+function findPackageRoot(): string {
+  // Walk up from this file until we find package.json — works whether running
+  // from src/ (dev) or dist/ (built).
   let dir = dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 6; i++) {
-    const candidate = resolve(dir, "data/prefectures");
-    if (existsSync(candidate)) return dir;
+    if (existsSync(resolve(dir, "package.json"))) return dir;
     const parent = resolve(dir, "..");
     if (parent === dir) break;
     dir = parent;
   }
-  throw new Error("repository root (data/prefectures parent) not found");
+  throw new Error("package root (package.json parent) not found");
+}
+
+async function initDataRoot(): Promise<void> {
+  DATA_ROOT = await resolveDataRoot(findPackageRoot());
+}
+
+function dataRoot(): string {
+  if (!DATA_ROOT) {
+    throw new Error("data root not initialized — call initDataRoot() first");
+  }
+  return DATA_ROOT;
 }
 
 function findDataDir(): string {
-  return resolve(findRepoRoot(), "data/prefectures");
+  return resolve(dataRoot(), "prefectures");
 }
 
 function findHotelsMasterPath(): string {
-  return resolve(findRepoRoot(), "data/hotels/master.json");
+  return resolve(dataRoot(), "hotels/master.json");
 }
 
 function findDescriptionsPath(): string {
-  return resolve(
-    findRepoRoot(),
-    "data/translations/descriptions_complete.jsonl",
-  );
+  return resolve(dataRoot(), "translations/descriptions_complete.jsonl");
 }
 
 function findMultilingualNamesPath(): string {
-  return resolve(
-    findRepoRoot(),
-    "data/translations/multilingual_complete.jsonl",
-  );
+  return resolve(dataRoot(), "translations/multilingual_complete.jsonl");
 }
 
 const SUPPORTED_LANGUAGES = [
@@ -962,7 +973,7 @@ async function getDescription(args: {
 // R-3 data loaders (specialty / traditional arts / japan heritage)
 
 function findR3Path(file: string): string {
-  return resolve(findRepoRoot(), `data/r3/${file}`);
+  return resolve(dataRoot(), `r3/${file}`);
 }
 
 async function loadR3Json<T>(file: string): Promise<R3SourceFile<T> | null> {
@@ -1864,6 +1875,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 async function main(): Promise<void> {
+  // Resolve the data root before serving any tool calls. On a fresh install
+  // this downloads ~270 MB from huggingface.co/datasets/kjsunada/japan-travel-mcp-data
+  // to ~/.japan-travel-mcp/data/ once.
+  await initDataRoot();
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("[japan-travel-mcp] MCP server running on stdio");
