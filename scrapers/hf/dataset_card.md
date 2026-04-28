@@ -69,17 +69,17 @@ hotels/
   master.json                     # 40,128 accommodations (Wikidata + OSM merged)
 
 r3/                               # Official designation registries (R-3 sources)
-  maff_gi.json                    # 172 MAFF Geographical Indications (food)
-  meti_densan.json                # 231 METI traditional crafts (伝統的工芸品)
-  japan_heritage.json             # 104 Japan Heritage stories (日本遺産)
+  maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
+  meti_densan.json                # 231 METI-designated Traditional Crafts (Dentō Kōgeihin)
+  japan_heritage.json             # 104 Japan Heritage stories (Nihon Isan)
   bunka_intangible.json           # 125 Important Intangible Cultural Properties
-  unesco_japan.json               # 58 UNESCO ICH Japan inscriptions
+  unesco_japan.json               # 58 UNESCO ICH inscriptions for Japan
   translations/
     r3_translations.jsonl         # 690 R-3 records × 17 languages
 
 glossary/
   seed_canonical.json             # House style for translations
-  mlit_canonical.json             # MLIT (観光庁) official terminology
+  mlit_canonical.json             # Japan Tourism Agency (MLIT) official terminology
   wikipedia_multilingual.json     # 17-language Wikipedia sitelinks (build-time)
 
 _state/
@@ -97,15 +97,15 @@ no AI-curated lists, no UGC.
 
 | Layer | Authority | License of source |
 |:---|:---|:---|
-| Municipal tourism pages | 1,938 city/town/ward governments | Public information; per-page robots.txt respected |
-| Wikidata attractions | Wikidata (Wikimedia Foundation) | CC0 |
+| Municipal tourism pages | 1,938 city / town / ward governments of Japan | Public information; per-page robots.txt respected |
+| Wikidata attractions | Wikidata, Wikimedia Foundation | CC0 |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
 | Tourist descriptions (17-lang) | AI-translated from Wikidata + project glossary | CC BY 4.0 (this compilation) |
-| MAFF GI | 農林水産省 | 政府標準利用規約 2.0 (CC BY 4.0 互換) |
-| METI 伝統的工芸品 | 経済産業省 / 伝統的工芸品産業振興協会 | Public designation; cited |
-| Japan Heritage (日本遺産) | 文化庁 | Public designation; cited |
-| Important Intangible Cultural Properties (重要無形文化財・民俗) | 文化庁 (via Wikidata) | CC0 (Wikidata mirror) |
-| UNESCO ICH (Japan inscriptions) | UNESCO (via Wikidata) | CC0 (Wikidata mirror) |
+| Geographical Indications (GI) | Ministry of Agriculture, Forestry and Fisheries (農林水産省, MAFF) | Government Standard Terms of Use 2.0 (CC BY 4.0 compatible) |
+| Traditional Crafts (Dentō Kōgeihin) | Ministry of Economy, Trade and Industry (経済産業省, METI) / Association for the Promotion of Traditional Craft Industries (伝統的工芸品産業振興協会) | Public designation; cited |
+| Japan Heritage (Nihon Isan) | Agency for Cultural Affairs (文化庁) | Public designation; cited |
+| Important Intangible Cultural Properties (Jūyō Mukei Bunkazai / Folk) | Agency for Cultural Affairs (文化庁) — mirrored via Wikidata | CC0 (Wikidata mirror) |
+| UNESCO ICH inscriptions for Japan | UNESCO — mirrored via Wikidata | CC0 (Wikidata mirror) |
 
 ## 17 supported languages
 
