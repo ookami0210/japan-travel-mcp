@@ -24,8 +24,7 @@ Not a business. A contribution.
 | Interface | Who it's for | How to use |
 |-----------|-------------|------------|
 | **MCP Server** | Claude, Cursor, Windsurf | Add to MCP config — see below |
-| **REST API** | OpenAI, Gemini, LangChain, any LLM | `fetch` any endpoint |
-| **Raw JSON** | All developers | Download directly from `/data` |
+| **Raw data** | All developers, ML / data folks | Download from [Hugging Face](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data) |
 
 No API key required. No account. Just use it.
 
@@ -38,28 +37,36 @@ No API key required. No account. Just use it.
   "mcpServers": {
     "japan-travel": {
       "command": "npx",
-      "args": ["japan-travel-mcp"]
+      "args": ["-y", "japan-travel-mcp"]
     }
   }
 }
 ```
 
+On first run, the server downloads ~270 MB of travel data from
+[huggingface.co/datasets/kjsunada/japan-travel-mcp-data](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data)
+to `~/.japan-travel-mcp/data/` (override the cache location with the
+`JAPAN_TRAVEL_MCP_CACHE` env var). Subsequent runs use the local cache.
+
 ---
 
-## Quick start (REST API)
+## Get the raw data directly
+
+If you'd rather work with the JSON / JSONL files yourself (e.g. fine-tune a
+model, embed everything into a vector store, run analytics), download from
+the dataset repo:
+
+```python
+from huggingface_hub import snapshot_download
+local_dir = snapshot_download(
+    repo_id="kjsunada/japan-travel-mcp-data",
+    repo_type="dataset",
+)
+```
 
 ```bash
-# Search a region — try the places you've never heard of
-curl https://japan-travel-mcp.com/api/area?q=tottori
-
-# Get spots in an area — Naoshima, art island in the Seto Inland Sea
-curl https://japan-travel-mcp.com/api/spots?city=naoshima
-
-# Get hotels — Onomichi, a hillside port town in Hiroshima
-curl https://japan-travel-mcp.com/api/hotels?city=onomichi
-
-# Multilingual content — English, Chinese, Korean from official sources
-curl https://japan-travel-mcp.com/api/spots?id=12345&lang=en
+# or via plain git
+git clone https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data
 ```
 
 > All 47 prefectures and all 1,938 entities (1,741 municipalities + 197 designated-city wards) are covered in parallel — no prioritization by population, fame, or tourism volume.
@@ -98,13 +105,14 @@ no API key required.
 ### Data layers
 
 ```
-Layer 1: Municipal tourism pages     — all 1,938 entities (incl. designated-city wards)
-Layer 2: Prefecture tourism offices  — all 47 prefectures
-Layer 3: Hotel & ryokan master list  — built from 7 sources (see below)
-Layer 4: JNTO official data          — multilingual, inbound-focused
-Layer 5: OpenStreetMap               — coordinates and POI
-Layer 6: Official designation systems — MAFF GI / METI 伝統的工芸品 /
-         文化庁 重要無形文化財 / UNESCO ICH / 文化庁 日本遺産 (R-3 sources)
+Layer 1: Municipal tourism pages           — all 1,938 entities (incl. designated-city wards)
+Layer 2: Prefecture tourism offices        — all 47 prefectures
+Layer 3: Hotel & ryokan master list        — built from Wikidata + OSM (see below)
+Layer 4: Wikidata attractions              — 41,404 ja-anchored entities
+Layer 5: 17-language translation layer     — Wikipedia sitelinks + Sonnet 4.6 batch
+Layer 6: Official designation systems      — MAFF Geographical Indications,
+         METI Traditional Crafts (Dentō Kōgeihin), Japan Heritage (Nihon Isan),
+         Important Intangible Cultural Properties, UNESCO ICH (Japan)
 ```
 
 ### R-3 official designation sources (`data/r3/`)
@@ -209,30 +217,46 @@ Last updated: see `data/metadata.json`
 ## Repository structure
 
 ```
-japan-travel-mcp/
+japan-travel-mcp/                          # this repo — code + lightweight metadata only
 ├── README.md
 ├── CONTRIBUTING.md
 ├── DATA_POLICY.md
 ├── src/
-│   ├── index.ts              # MCP server
-│   ├── api/                  # REST API endpoints
-│   └── tools/                # MCP tool definitions
-├── data/
-│   ├── prefectures/          # Tourism data by prefecture
-│   ├── hotels/
-│   │   ├── master.json       # Unified hotel list
-│   │   ├── raw/              # Per-source raw data
-│   │   └── review/           # Unresolved matches — PRs welcome
-│   └── metadata.json         # Source list, update timestamps
-├── scrapers/
-│   ├── municipal/            # Per-municipality scrapers
-│   ├── hotel/                # Hotel HP scrapers
-│   ├── sources/              # JNTO, OSM, license registries
-│   └── matcher/              # Entity resolution engine
-└── .github/
-    └── workflows/
-        └── scrape.yml        # Monthly update automation
+│   ├── index.ts                           # MCP server (10 tools)
+│   └── lib/hf_data.ts                     # HF dataset bootstrap (first-run download)
+├── data/                                  # only what readers / contributors need to see
+│   ├── _logs/                             # daily scrape run summaries (transparency)
+│   ├── _state/
+│   │   ├── scrape_state.json              # live operational state (Actions updates)
+│   │   ├── translation_batch.json         # historical Anthropic batch IDs
+│   │   └── r3_translation_batch.json
+│   ├── hotels/review/                     # unresolved matches — PRs welcome
+│   ├── knowledge/taxonomies/              # regions + eras (lightweight reference)
+│   └── metadata.json                      # source list
+├── scrapers/                              # producers of the dataset
+│   ├── daily.ts                           # municipal-page rolling refresh
+│   ├── r3_refresh.ts                      # official-designation 7-day rotation
+│   ├── municipal/, hotel/, sources/, matcher/
+│   ├── translate/                         # Sonnet 4.6 batch translators
+│   └── hf/                                # uploads data to the HF dataset
+└── .github/workflows/
+    └── scrape.yml                         # daily 03:00 JST cron
 ```
+
+**Bulk runtime data lives separately on Hugging Face:**
+[huggingface.co/datasets/kjsunada/japan-travel-mcp-data](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data)
+
+```
+data/translations/    # 17-language names + 200-300 char descriptions
+data/prefectures/     # 47 prefectures of municipal-scrape + Wikidata spots
+data/hotels/master    # 40,128 unified hotels & ryokan
+data/hotels/raw/      # OSM + Wikidata pre-merge sources
+data/glossary/        # canonical terms used at translation time
+data/_state/wikidata_attractions.json + 3 muni files
+data/r3/              # MAFF GI / METI crafts / Japan Heritage / 文化庁 / UNESCO
+```
+
+The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data/`).
 
 ---
 

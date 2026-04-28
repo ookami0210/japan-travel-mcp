@@ -50,14 +50,36 @@ jobs:
         continue-on-error: true
         run: npx tsx scrapers/r3_refresh.ts
 
-      - name: Commit data updates
+      - name: Commit data updates (operational state only)
+        # Only the lightweight files we keep in git get committed here:
+        #   data/_logs/, data/_state/scrape_state.json, data/_state/translation_batch*.json,
+        #   data/_state/r3_translation_batch.json, data/hotels/review/, etc.
+        # Bulk runtime data (translations/, prefectures/, hotels/master.json,
+        # hotels/raw/, glossary/, _state/wikidata_attractions, _state/muni*, r3/*)
+        # is gitignored — the next step pushes those to HF instead.
         run: |
           git config user.name "japan-travel-mcp-bot"
           git config user.email "noreply@github.com"
           git add data/
           if git diff --cached --quiet; then
-            echo "No data changes to commit"
+            echo "No state changes to commit"
           else
-            git commit -m "data: daily incremental scrape + R-3 refresh $(date -u +%Y-%m-%d)"
+            git commit -m "data: daily scrape state $(date -u +%Y-%m-%d)"
             git push
           fi
+
+      - name: Sync bulk data to Hugging Face dataset
+        # The HF dataset (kjsunada/japan-travel-mcp-data) is the canonical
+        # home for bulk runtime data. Push every non-gitignored file under
+        # data/ that's been refreshed today. Errors don't block the workflow
+        # — the data is still on disk for the next run to pick up.
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: kjsunada/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        continue-on-error: true
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Daily refresh $(date -u +%Y-%m-%d)" \
+            --no-card
