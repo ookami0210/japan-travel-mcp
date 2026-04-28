@@ -3,5 +3,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*", "scrapers/**/*"]
+  "include": ["src/**/*", "scrapers/**/*", "tests/**/*", "vitest.config.ts"]
 }
