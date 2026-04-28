@@ -48,6 +48,25 @@ On first run, the server downloads ~270 MB of travel data from
 to `~/.japan-travel-mcp/data/` (override the cache location with the
 `JAPAN_TRAVEL_MCP_CACHE` env var). Subsequent runs use the local cache.
 
+> ⚠️ **During the pre-launch review period the HF dataset is private**, so
+> the first-run download requires an `HF_TOKEN` env var. Get a read-scope
+> token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+> after KJ has added you as a collaborator. Once the dataset is made public
+> (Phase D, alongside `npm publish`), the token is no longer needed.
+
+```jsonc
+// claude_desktop_config.json (during private-review period)
+{
+  "mcpServers": {
+    "japan-travel": {
+      "command": "npx",
+      "args": ["-y", "japan-travel-mcp"],
+      "env": { "HF_TOKEN": "hf_..." }
+    }
+  }
+}
+```
+
 ---
 
 ## Get the raw data directly

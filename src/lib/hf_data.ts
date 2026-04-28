@@ -88,7 +88,12 @@ async function downloadOne(
   if (!res.ok) {
     let hint = "";
     if (res.status === 401 || res.status === 403) {
-      hint = " — set HF_TOKEN in your environment if the dataset is still private";
+      hint =
+        "\n  → The dataset is currently private. Get a read-scope HF token at" +
+        "\n    https://huggingface.co/settings/tokens and pass it as HF_TOKEN," +
+        "\n    e.g. HF_TOKEN=hf_xxx npx japan-travel-mcp" +
+        "\n  → If you reach this from Claude Desktop, add `\"env\": { \"HF_TOKEN\": \"hf_...\" }`" +
+        "\n    to the mcpServers entry in claude_desktop_config.json.";
     } else if (res.status === 404) {
       hint = " — file not found on HF (dataset version mismatch?)";
     }
