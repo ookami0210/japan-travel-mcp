@@ -40,9 +40,9 @@
     "freshness_target_note": "We aim to refresh every record within 30 days. This is the freshness target, not a load mitigation.",
     "implementation": {
       "cron": "GitHub Actions, 03:00 JST daily",
-      "batch_size": 58,
-      "selection": "58 entities with the oldest last_scraped_at",
-      "full_cycle_days": 33
+      "batch_size": 70,
+      "selection": "70 entities with the oldest last_scraped_at",
+      "full_cycle_days": 28
     },
     "rate_limit": {
       "steady_state": "5 seconds minimum between requests to the same domain",

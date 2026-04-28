@@ -87,9 +87,9 @@ git clone https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data
 | `get_events` | Festivals registered in Wikidata for a given prefecture, with optional month filter (live SPARQL, in-memory cache) |
 | `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |
 | **`get_description`** | **SIGNATURE TOOL.** 200-300 character tourism descriptions in **17 languages** for 13,000+ spots, generated for global tourist consumption |
-| `get_local_specialty` | Regional specialties (food + crafts) by prefecture, drawn from official designation systems: 農林水産省 GI (172 items) + 経済産業省 伝統的工芸品 (231 items) |
-| `get_traditional_arts` | Intangible cultural assets from 文化庁 重要無形(民俗)文化財 (125 items) + UNESCO ICH inscriptions for Japan (58 items) |
-| `get_japan_heritage` | All 104 文化庁 Japan Heritage (日本遺産) stories, with theme / era / prefecture filters |
+| `get_local_specialty` | Regional specialties (food + crafts) by prefecture, drawn from official designation systems: MAFF Geographical Indications (172 items) + METI-designated Traditional Crafts / Dentō Kōgeihin (231 items) |
+| `get_traditional_arts` | Intangible cultural assets from the Agency for Cultural Affairs — Important Intangible Cultural Properties + Folk (125 items) + UNESCO ICH inscriptions for Japan (58 items) |
+| `get_japan_heritage` | All 104 Japan Heritage (Nihon Isan) stories from the Agency for Cultural Affairs, with theme / era / prefecture filters |
 
 **Signature tool: `get_description`**
 This MCP exposes 17-language tourism descriptions — English, Japanese, Chinese, Korean,
@@ -123,44 +123,48 @@ provenance is verifiable.
 
 | Source | Records | Authority | Refresh |
 |:---|---:|:---|:---|
-| MAFF Geographical Indications | 172 | 農林水産省 | Mon (weekly) |
-| METI Traditional Crafts (伝統的工芸品) | 231 | 経済産業省 | Tue (weekly) |
-| Japan Heritage (日本遺産) | 104 | 文化庁 | Wed (weekly) |
-| Important Intangible Cultural Properties (重要無形文化財・民俗) | 125 | 文化庁 (via Wikidata) | Thu (weekly) |
-| UNESCO Intangible Cultural Heritage — Japan inscriptions | 58 | UNESCO (via Wikidata) | Thu (weekly) |
+| Geographical Indications (GI) | 172 | Ministry of Agriculture, Forestry and Fisheries (農林水産省, MAFF) | Mon (weekly) |
+| Traditional Crafts (Dentō Kōgeihin) | 231 | Ministry of Economy, Trade and Industry (経済産業省, METI) | Tue (weekly) |
+| Japan Heritage (Nihon Isan) | 104 | Agency for Cultural Affairs (文化庁) | Wed (weekly) |
+| Important Intangible Cultural Properties + Folk | 125 | Agency for Cultural Affairs (文化庁) — mirrored via Wikidata | Thu (weekly) |
+| UNESCO Intangible Cultural Heritage — Japan inscriptions | 58 | UNESCO — mirrored via Wikidata | Thu (weekly) |
 
-All R-3 records are translated to the same 17 languages by an incremental
+All 690 R-3 records are translated to the same 17 languages by an incremental
 Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
 
 ---
 
 ## How the hotel master list is built
 
-No single source covers all of Japan's accommodations.  
-We combine multiple public datasets and resolve duplicates by location and name.
+No single source covers all of Japan's accommodations. We merge two public
+open-data sources and resolve duplicates by location and name.
 
 ```
-Sources → Raw data → Entity matching → Master list → Official HP crawl
+Wikidata + OpenStreetMap → entity matching → master.json
 ```
 
 **Sources used:**
-- Prefectural ryokan business license registries (旅館業許可リスト)
-- JNTO official accommodation data
-- OpenStreetMap Japan
-- Wikidata
-- Municipal tourism websites
-- Official hotel homepages
-- 観光庁 (Japan Tourism Agency) accommodation statistics
+- **Wikidata** — accommodation entities tagged in Japan (CC0). Multilingual labels.
+- **OpenStreetMap** — `tourism=hotel|hostel|guest_house|motel` and `tourism=apartment` nodes/ways inside Japan (ODbL).
 
-**Matching logic:**  
-Two records are considered the same property if they fall within 100 meters of each other  
-AND share a sufficiently similar name (accounting for kanji / kana / romaji variations).  
-Final confirmation uses phone number or street-level address match.
+**Matching logic:**
+Two records are considered the same property if they fall within 100 meters of each other
+AND share a sufficiently similar name (accounting for kanji / kana / romaji variations).
+Singleton records (only one source) are kept with `confidence: "singleton"`; merged
+clusters get `confidence: "confirmed"`.
 
-Uncertain matches go into `/data/review/` — open for community resolution.
+Uncertain matches (similar names, slightly different positions, or one-sided
+metadata) are written to `data/hotels/review/` — open for community resolution.
 
-**This pipeline is fully open source.**  
-The matching engine is in `/scrapers/matcher/`. Imperfect matches are PRs waiting to happen.
+**This pipeline is fully open source.** The matching engine is in
+`scrapers/matcher/`. Imperfect matches are PRs waiting to happen — drop a
+`{ "id": "...", "decision": "merge" | "split", "rationale": "..." }` next to
+the file you've reviewed.
+
+> **Roadmap.** Adding the prefectural ryokan business-license registries
+> (旅館業許可リスト) is on the wishlist — those are the authoritative national
+> registry — but each prefecture publishes its list in a different format and
+> we haven't unified the parsing yet. PRs welcome.
 
 ---
 
@@ -264,13 +268,14 @@ The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data
 
 The project ships **17 languages** as a first-class feature, not an afterthought.
 
-**Coverage matrix (2026-04-26):**
+**Coverage matrix (2026-04-27):**
 
 | Layer | What | Coverage | Source |
 |:---|:---|:---|:---|
-| Names | Canonical entity name in 17 languages | 13,961 entities × 17 langs (237,337 pairs) | Wikipedia sitelinks + Sonnet 4.6 batch |
-| Descriptions | 200-300 char tourism description in 17 languages | 13,394 entities × 17 langs (227,698 descriptions) | Sonnet 4.6 batch, glossary-grounded |
-| Names — extended | Wikipedia-sourced names (gold-standard subset) | 41,404 entities, sparse cross-language | Wikidata SPARQL sitelinks |
+| Attraction names | Canonical entity name in 17 languages | 13,961 entities × 17 langs (237,337 pairs) | Wikipedia sitelinks + Sonnet 4.6 batch |
+| Attraction descriptions | 200-300 char tourism description in 17 languages | 13,394 entities × 17 langs (227,698 descriptions) | Sonnet 4.6 batch, glossary-grounded |
+| Wikipedia-anchored names (raw) | Sitelinks-only subset | 41,404 entities, sparse cross-language | Wikidata SPARQL sitelinks |
+| R-3 designation translations | Names + descriptions for every officially-designated record | **690 records × 17 langs (100% coverage)** | Sonnet 4.6 batch from official Japanese text |
 
 **17 supported languages:** English (en), Japanese (ja), Chinese (zh), Korean (ko),
 French (fr), Spanish (es), German (de), Italian (it), Portuguese (pt), Russian (ru),
@@ -286,11 +291,13 @@ Tagalog (tl).
    romanization, proper-noun handling. Loaded as a cached system prompt for AI consistency.
 3. **Claude Sonnet 4.6 batch translation** — fills gaps that Wikipedia doesn't cover,
    constrained by the canonical glossary above. 50% batch-API discount; all 13,961
-   names + 13,394 descriptions generated for ~$105 total.
+   names + 13,394 descriptions + 690 R-3 records generated for ~$111 total.
 
-**Output:** `data/translations/multilingual_complete.jsonl` (names) and
-`data/translations/descriptions_complete.jsonl` (descriptions), in JSONL format
-suitable for Hugging Face datasets publishing.
+**Output:** published as `translations/multilingual_complete.jsonl` (names),
+`translations/descriptions_complete.jsonl` (attraction descriptions), and
+`r3/translations/r3_translations.jsonl` (R-3 records) on the
+[HF dataset](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data),
+all in JSONL.
 
 **English-first principle:** While the source data is Japanese, this dataset is
 designed for global consumption. Field ordering, default tool responses, and
