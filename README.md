@@ -315,6 +315,35 @@ We welcome PRs improving:
 
 ---
 
+## Tests
+
+The project ships a [Vitest](https://vitest.dev) suite covering the pure
+helpers and the Hugging Face bootstrap. Tests run **fully offline** — the
+HF download path is exercised against a stubbed `fetch`, so no network
+access (and no `HF_TOKEN`) is required.
+
+```bash
+npm test              # run once
+npm run test:watch    # watch mode
+npm run test:coverage # v8 coverage report (text + html)
+```
+
+What's covered today:
+
+- `src/lib/hf_data.ts` — HF bootstrap (cold cache, idempotency, missing-only refetch, auth header, 401/404/500 paths, local checkout fallback)
+- `scrapers/lib/canonical.ts` — URL canonicalisation
+- `scrapers/lib/spot_filter.ts` — spot quality filter
+- `scrapers/lib/extractor.ts` — HTML → structured page data
+- `scrapers/lib/prefecture_match.ts` — prefecture / municipality name matching (sync paths)
+- `scrapers/lib/discover.ts` — `isTourismLike` keyword detection
+- `scrapers/lib/state.ts` — `pickStaleMunicipalities` rotation logic
+
+Test files live under `tests/`, fixtures under `tests/fixtures/`. Tests are
+type-checked alongside the rest of the project — `npm run typecheck:all`
+covers `src/`, `scrapers/`, and `tests/`.
+
+---
+
 ## Contributing
 
 PRs are not just welcome — they're the whole point.  
