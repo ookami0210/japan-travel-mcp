@@ -747,10 +747,17 @@ async function getSpots(args: {
   /** Alias for `city` — accepted because LLM clients sometimes invent it. */
   municipality?: string;
   limit?: number;
+  /** Filter scraped spots by minimum quality score (0-1). Default 0.30 —
+   *  drops admin-page noise (city-office news, "新着情報" widgets etc.).
+   *  Set to 0 to see all scraped spots regardless of completeness. */
+  min_quality?: number;
 }): Promise<unknown> {
   const prefs = await loadAllPrefectures();
   const limit = Math.min(Math.max(args.limit ?? 50, 1), 500);
-  const spots: Array<Record<string, unknown>> = [];
+  const minQuality =
+    typeof args.min_quality === "number"
+      ? Math.max(0, Math.min(1, args.min_quality))
+      : 0.30;
 
   const matchesPrefecture = (p: PrefectureFile): boolean => {
     if (!args.prefecture) return true;
@@ -762,63 +769,117 @@ async function getSpots(args: {
     );
   };
 
-  // Tolerant municipality matching — see src/lib/match.ts. The dispatcher
-  // forwards both `city` and `municipality` so LLM clients calling either
-  // name reach the same logic.
   const cityRaw = args.city ?? args.municipality ?? null;
+
+  // Collect with score so we can sort. Scraped spots use the same per-spot
+  // quality rubric we use for the dataset audit (scrapers/lib/quality_score):
+  // description / body_paragraphs / address / coordinates / Schema.org / image.
+  type Scored = { score: number; record: Record<string, unknown> };
+  const scored: Scored[] = [];
 
   for (const p of prefs) {
     if (!matchesPrefecture(p)) continue;
     for (const m of p.municipalities) {
       if (!matchesMunicipality(m.municipality.name, cityRaw)) continue;
       for (const s of m.spots) {
-        spots.push({
-          source: "municipal_scrape",
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          coordinates: s.coordinates,
-          address: s.address,
-          url: s.url,
-          municipality: m.municipality.name,
-          municipality_code: m.municipality.code,
-          prefecture: p.prefecture.name,
-          language: s.language,
+        const q = scoreSpotQuality(s);
+        if (q < minQuality) continue;
+        scored.push({
+          score: q,
+          record: {
+            source: "municipal_scrape",
+            id: s.id,
+            name: s.name,
+            description: s.description,
+            coordinates: s.coordinates,
+            address: s.address,
+            url: s.url,
+            municipality: m.municipality.name,
+            municipality_code: m.municipality.code,
+            prefecture: p.prefecture.name,
+            language: s.language,
+            quality_score: Math.round(q * 100) / 100,
+          },
         });
-        if (spots.length >= limit) break;
       }
-      if (spots.length >= limit) break;
     }
-    if (spots.length >= limit) break;
     if (!cityRaw) {
       for (const a of p.wikidata_attractions ?? []) {
-        spots.push({
-          source: "wikidata",
-          id: a.qid,
-          name: a.name_ja || a.name_en,
-          name_en: a.name_en,
-          name_zh: a.name_zh,
-          name_ko: a.name_ko,
-          description_en: a.description_en,
-          coordinates: a.coordinates,
-          url: a.wikidata_url,
-          municipality: a.admin_name,
-          municipality_code: a.admin_code,
-          prefecture: p.prefecture.name,
+        // Wikidata entities all pass min_quality (they are curated by
+        // Wikipedia / Wikidata contributors, equivalent to a "designated"
+        // quality floor). We give them a fixed score above 0.5 so they
+        // mix with high-quality scraped spots.
+        scored.push({
+          score: 0.6,
+          record: {
+            source: "wikidata",
+            id: a.qid,
+            name: a.name_ja || a.name_en,
+            name_en: a.name_en,
+            name_zh: a.name_zh,
+            name_ko: a.name_ko,
+            description_en: a.description_en,
+            coordinates: a.coordinates,
+            url: a.wikidata_url,
+            municipality: a.admin_name,
+            municipality_code: a.admin_code,
+            prefecture: p.prefecture.name,
+            quality_score: 0.6,
+          },
         });
-        if (spots.length >= limit) break;
       }
-      if (spots.length >= limit) break;
     }
   }
 
+  scored.sort((a, b) => b.score - a.score);
+  const top = scored.slice(0, limit);
+
   return {
-    spots,
-    count: spots.length,
-    truncated: spots.length === limit,
+    spots: top.map((x) => x.record),
+    count: top.length,
+    total_before_limit: scored.length,
+    truncated: scored.length > limit,
+    min_quality_applied: minQuality,
     data_as_of: dataAsOf(prefs),
     disclaimer: DISCLAIMER,
+    note:
+      "Spots ranked by completeness (description, body paragraphs, " +
+      "coordinates, Schema.org metadata). Increase `min_quality` to " +
+      "tighten further or set to 0 to see admin-page-style entries.",
   };
+}
+
+// Quality scoring — mirrors scrapers/lib/quality_score.ts but inlined
+// here because the runtime can't reach the scrapers/ directory once
+// shipped. The two MUST stay in sync; tests in tests/lib/quality_score.test.ts
+// pin the rubric.
+function scoreSpotQuality(s: {
+  description?: string | null;
+  body_paragraphs?: string[];
+  address?: string | null;
+  coordinates?: { lat: number; lng: number } | null;
+  coordinate_precision?: string | null;
+  images?: string[];
+  schema_events?: unknown[];
+  schema_places?: unknown[];
+}): number {
+  let score = 0;
+  if (s.description) {
+    score += 0.2;
+    score += Math.min(0.15, ((s.description.length ?? 0) / 120) * 0.15);
+  }
+  const bodies = s.body_paragraphs ?? [];
+  score += Math.min(0.2, (bodies.length / 2) * 0.2);
+  if (s.address) score += 0.1;
+  if (s.coordinates) {
+    if (s.coordinate_precision === "exact") score += 0.1;
+    else if (s.coordinate_precision === "address_geocoded") score += 0.07;
+    else score += 0.04;
+  }
+  const sn = (s.schema_events?.length ?? 0) + (s.schema_places?.length ?? 0);
+  if (sn > 0) score += 0.15;
+  if ((s.images?.length ?? 0) > 0) score += 0.1;
+  return score;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -2153,6 +2214,11 @@ const TOOLS = [
           type: "string",
           description: "Alias for `city`. Same partial-match semantics.",
         },
+        min_quality: {
+          type: "number",
+          description:
+            "Minimum quality score (0-1) for scraped spots. Default 0.30 — drops admin-page noise (city-office news / 新着情報-style placeholder titles). Set to 0 to see all entries regardless of completeness.",
+        },
         limit: {
           type: "number",
           description: "Max spots to return (1–500, default 50)",
@@ -2516,6 +2582,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           prefecture: args.prefecture as string | undefined,
           city: args.city as string | undefined,
           municipality: args.municipality as string | undefined,
+          min_quality:
+            typeof args.min_quality === "number" ? args.min_quality : undefined,
           limit:
             typeof args.limit === "number"
               ? args.limit
