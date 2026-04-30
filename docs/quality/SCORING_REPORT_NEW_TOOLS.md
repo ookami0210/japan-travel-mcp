@@ -1,57 +1,30 @@
-# New-tools quality test — preliminary scoring (2026-05-01)
+# Quality test scoring — new-tools (post-scrape)
 
-This report scores the 11-case `test_calls_new_tools.json` corpus against
-the post-Phase 1/2/3 build. Embeddings were built against the **pre-scrape**
-corpus (HF cache snapshot from 2026-04-30); the post-scrape rerun is the
-launch-prep gate that needs to land in the next session.
+Generated: 2026-04-30 17:47:07 UTC
+Cases: 11
+Judge: claude-sonnet-4-5 (LLM judge against KJ × Nancy 0/1/2 rubric)
 
-Build: `49a0a48` + new-tools harness `523ab80`.
-Index: `data/embeddings/spots.f16.bin` — 66,994 entries, multilingual-e5-small q8.
+## Totals
 
-## Score rubric (KJ × Nancy original 100-case scoring)
+- score-2 (strong):  **  5** / 11
+- score-1 (partial): **  2** / 11
+- score-0 (off):     **  4** / 11
+- judge-failed:      0 / 11
 
-- **2** — strong: tool returned what a human would have hand-picked
-- **1** — partial: returned something useful but missed the central asset
-- **0** — empty / off-topic
+**Raw points: 12 / 22 (54.5%)**
 
-## Per-case scoring
+## Per-case detail
 
-| ID | Tool | Query | Result | Score | Notes |
-|:---|:-----|:------|:------|:-----:|:------|
-| S1 | search_hybrid | "endangered traditional craft" | 益子参考館 / 葛城地蔵尊 (top 3 hybrid hits) | **1** | Surfaced a Mashiko reference center (traditional pottery heritage), but didn't pull a 失われゆく / 後継者 phrase explicitly because they're rare in the pre-scrape corpus. Will re-test post-scrape. |
-| S2 | search_hybrid | "겨울 축제 홋카이도" (Korean) + Hokkaido | "イベント案内" / "イベント" listings | **0** | Korean tokens never tokenised by BM25, vec retrieval pulled generic event-listing pages from the noise floor. Real Hokkaido winter festival assets need a richer scrape. |
-| S3 | search_hybrid | "lantern festival temple" | 御柱祭 / 西隆寺 / 普門院 | **2** | Solid: a major festival + two temples. RRF boosted these because BM25 found "祭"/"寺" and vec liked the embedding. |
-| S4 | search_semantic | "fermented Japanese food" | 松浜軒 / 日本料理 / 保食神社 | **1** | Top hits are a tea house and a food-related shrine. Misses the obvious miso/sake/natto hits — corpus needs the fermentation-specific MAFF GI items mixed into the index more aggressively. |
-| K1 | get_festivals | keyword=花火 | 0 | **0** | No formal-designation festival has 花火 in its bunka/UNESCO name. Schema events from scrape will fix this once enriched scrape lands. |
-| K2 | get_traditional_arts | keyword=歌舞伎 | 2 hits (歌舞伎 / 歌舞伎) | **2** | Returns the two designated kabuki entries. ✓ |
-| K3 | get_local_food | keyword=発酵 | 5 hits (黒酢 / すんき / 紀州金山寺味噌 etc.) | **2** | All canonical fermented foods. ✓ |
-| K4 | get_local_food | prefecture=kyoto + keyword=tofu | 0 | **0** | Latin keyword doesn't match Japanese "豆腐". Add bilingual translation pre-pass in next iteration, or document that keyword should be in source language. |
-| D1 | get_dmo | prefecture=yamagata | 3 (東北観光推進機構 / 山形県観光物産協会 / おもてなし山形) | **2** | Correct broad → prefectural → regional cascade. ✓ |
-| D2 | get_dmo | status=candidate | 24 hits | **2** | Matches official 候補DMO一覧 PDF row count. ✓ |
-| D3 | get_dmo | type=broad | 10 hits | **2** | Matches official 広域連携DMO count (10 法人). ✓ |
-
-**Total**: 14/22 (64%) — see also "Total possible" raw points = 22.
-
-## Observations
-
-1. **DMO + keyword-filter tools are gates we cleared** — D1/D2/D3 + K2/K3 all land **2** because they read directly from the canonical-source data. No further model improvement needed; this is a "done" tier.
-
-2. **Hybrid retrieval is bottlenecked on corpus quality, not on the retrieval algorithm**. S3 (lantern festival temple) lands solidly because the targets exist in the index. S1 / S4 score only 1 because 失われゆく / 発酵 phrases are sparse in the pre-scrape data — the Phase 1 body_paragraphs widening (8→30) plus the in-flight enriched scrape will surface much more of this content.
-
-3. **Cross-lingual queries (S2)** need either:
-   - Better cross-lingual embeddings (e5-large, ~280MB → not for alpha)
-   - OR a query-side language-detect + translate pass before retrieval (cheap, MVP-friendly)
-
-4. **K1 (花火) and K4 (tofu)** failed for predictable, fixable reasons: keyword needs to be in the source language. Document this in the tool description, or add a bilingual seed list for common terms in a follow-up.
-
-## Next session — what to verify
-
-After the enriched scrape (Tasks 4) completes and `npm run embed:build` reruns:
-
-- Re-run `python3 docs/quality/run_tests.py` against the 100-case set; expect uplift from 13/100 baseline driven by:
-  - Phase 1 body widening (more spots have informative descriptions)
-  - DMO entries surface in `search_area` once seeded into the lookup tables
-  - Schema.org Event objects from the scrape now flow into get_festivals
-- Re-run `python3 docs/quality/run_tests_new_tools.py` against the 11-case set; expect S1 / S4 / K1 to improve to **1** or **2** as the corpus gains "失われゆく" / "発酵" / "花火" body content.
-
-Done state for launch: ≥75/100 on the original corpus, ≥17/22 on the new-tools corpus.
+| ID | Tool | Score | Reason |
+|:---|:-----|:-----:|:-------|
+| S1 | search_hybrid | 1 | Top result mentions traditional arts and crafts from Edo period, which is relevant. However, results are scattered (folk craft museum, stela |
+| S2 | search_hybrid | 0 | Query asks for Hokkaido winter festivals (겨울 축제 = winter festival) but all results are generic event category pages with null descriptions.  |
+| S3 | search_hybrid | 0 | Query seeks lantern festivals at temples, but results return unrelated temples and a festival (御柱祭) with no lantern connection. No actual la |
+| S4 | search_semantic | 1 | Response includes '日本料理' (Japanese cuisine) at rank 2, which is broadly relevant to fermented Japanese food. However, the top result is an u |
+| K1 | get_festivals | 0 | Empty result list (count=0) for a common query term '花火' (fireworks), which should return multiple Japanese festivals. No explanation given  |
+| K2 | get_traditional_arts | 2 | Perfect response for a keyword filter query on '歌舞伎'. Returns exactly 2 canonical kabuki entries: the Important Intangible Cultural Property |
+| K3 | get_local_food | 2 | Strong response. The keyword "発酵" (fermentation) filters correctly, returning 5 GI-designated foods that prominently feature fermentation in |
+| K4 | get_local_food | 0 | Empty result list (count=0, items=[]) for a valid query about Kyoto tofu, a famous local food. The response provides no content to help answ |
+| D1 | get_dmo | 2 | Response returns exactly what a DMO lookup for Yamagata should provide: 3 registered DMOs operating in Yamagata Prefecture (1 broad regional |
+| D2 | get_dmo | 2 | Query explicitly requests DMOs with status='candidate'. Response returns exactly that: 24 candidate DMOs with complete metadata (names, pref |
+| D3 | get_dmo | 2 | Query requested broad-region DMOs with type='broad' filter. Response returns exactly 10 registered 広域連携 (broad regional alliance) DMOs with  |
