@@ -451,6 +451,8 @@ async function searchArea(args: {
 async function getSpots(args: {
   prefecture?: string;
   city?: string;
+  /** Alias for `city` — accepted because LLM clients sometimes invent it. */
+  municipality?: string;
   limit?: number;
 }): Promise<unknown> {
   const prefs = await loadAllPrefectures();
@@ -467,10 +469,31 @@ async function getSpots(args: {
     );
   };
 
+  // Tolerant municipality matching:
+  //   - exact JA match wins
+  //   - bare-name (with 市/町/村/区 suffix stripped on either side)
+  //   - partial inclusion either way (so "南山城" matches "南山城村" and
+  //     vice-versa)
+  // We deliberately leave romaji-to-kanji unsupported here — that's what
+  // search_area is for, and a romaji query would resolve to a list of
+  // municipality codes the caller can pass through.
+  const cityRaw = args.city ?? args.municipality;
+  const cityKey = cityRaw?.trim().toLowerCase() ?? null;
+  const cityBare = cityKey?.replace(/[市町村区]$/u, "") ?? null;
+  const matchesCity = (muniName: string): boolean => {
+    if (!cityKey) return true;
+    const ja = muniName.toLowerCase();
+    const jaBare = ja.replace(/[市町村区]$/u, "");
+    if (ja === cityKey || jaBare === cityKey) return true;
+    if (cityBare && (jaBare === cityBare || ja.includes(cityBare))) return true;
+    if (jaBare.includes(cityKey)) return true;
+    return false;
+  };
+
   for (const p of prefs) {
     if (!matchesPrefecture(p)) continue;
     for (const m of p.municipalities) {
-      if (args.city && m.municipality.name !== args.city) continue;
+      if (!matchesCity(m.municipality.name)) continue;
       for (const s of m.spots) {
         spots.push({
           source: "municipal_scrape",
@@ -490,7 +513,7 @@ async function getSpots(args: {
       if (spots.length >= limit) break;
     }
     if (spots.length >= limit) break;
-    if (!args.city) {
+    if (!cityRaw) {
       for (const a of p.wikidata_attractions ?? []) {
         spots.push({
           source: "wikidata",
@@ -855,6 +878,26 @@ async function resolvePrefectureCode(input: string): Promise<string | null> {
       p.prefecture.name_en?.toLowerCase() === q,
   );
   return match?.prefecture.code ?? null;
+}
+
+// Bare prefecture name (e.g. "山梨" without "県") — used to text-match
+// against records whose schema doesn't carry a prefecture_code (bunka
+// intangible, free-form descriptions).
+async function bareNameForPref(prefCode: string): Promise<string | null> {
+  const prefs = await loadAllPrefectures();
+  const p = prefs.find((x) => x.prefecture.code === prefCode);
+  if (!p) return null;
+  return p.prefecture.name.replace(/[都道府県]$/u, "");
+}
+
+async function textMentionsPrefecture(
+  text: string | null | undefined,
+  prefCode: string,
+): Promise<boolean> {
+  if (!text) return false;
+  const bare = await bareNameForPref(prefCode);
+  if (!bare) return false;
+  return text.includes(bare);
 }
 
 async function getEvents(args: {
@@ -1371,6 +1414,13 @@ async function getJapanHeritage(args: {
       title: pickR3Name(r.title_ja, t, lang),
       summary_ja: r.summary_ja,
       summary: pickR3Description(r.summary_ja, t, lang),
+      // The full Japan Heritage story body is much richer (typically
+      // 1,500-3,500 chars) than the summary. We don't have it translated
+      // yet — translation cost ~$10 for all 104 stories × 17 langs is on
+      // the to-do list — so we expose `body_ja` directly. A multilingual
+      // LLM client can summarise / translate at query time, which is much
+      // better than leaving the rich content hidden behind the summary.
+      body_ja: r.body_ja ?? null,
       themes: r.themes,
       periods: r.periods,
       related_areas_text: r.related_areas_text,
@@ -1585,10 +1635,28 @@ async function getFestivals(args: {
   const items: unknown[] = [];
 
   // ── source 1: bunka_intangible (designated folk rituals)
+  // bunka records carry no prefecture_code, but their description_ja
+  // almost always mentions the prefecture by name (e.g. "山梨県富士吉田市
+  // で行われる祭り"). When the caller filters by prefecture, we honour it
+  // by text-matching the bare prefecture name against name + description.
+  const bareName = prefCode ? await bareNameForPref(prefCode) : null;
+  const matchesPref = (text: string | null | undefined): boolean => {
+    if (!prefCode) return true;
+    if (!bareName) return true;
+    return !!text && text.includes(bareName);
+  };
   const bunka = await loadBunkaIntangible();
   if (bunka) {
     for (const r of bunka.records) {
       if (!isFestivalText(r.name_ja) && !isFestivalText(r.name_en)) continue;
+      if (
+        prefCode &&
+        !matchesPref(r.name_ja) &&
+        !matchesPref(r.description_ja) &&
+        !matchesPref(r.description_en)
+      ) {
+        continue;
+      }
       const key = `bunka_intangible:${r.qid}`;
       const t = translations.get(key);
       const meta = r3Translation(t, lang);
@@ -1684,30 +1752,17 @@ async function getFestivals(args: {
     }
   }
 
-  // Filter by prefecture if requested. For bunka/unesco entries we don't
-  // carry a prefecture_code (the data set spans the whole country), so the
-  // prefecture filter on those sources is best-effort: we don't drop them
-  // unless the user explicitly opts into "scraped_only".
-  let filtered = items;
-  if (prefCode) {
-    filtered = items.filter((it) => {
-      const item = it as { source?: string; prefecture?: string };
-      if (item.source === "scraped_schema_event") {
-        // already prefecture-scoped above
-        return true;
-      }
-      // bunka / unesco: keep them in the response — most festivals attract
-      // visitors from outside their prefecture anyway, and dropping them
-      // would silently lose UNESCO-level events.
-      return true;
-    });
-  }
+  // bunka was filtered inline by prefecture name match;
+  // unesco_japan stays unfiltered (UNESCO ICH inscriptions are national-
+  // level cultural assets — 歌舞伎, 文楽, 和食 etc. — so a visitor planning
+  // a trip to Yamanashi should still see them);
+  // scraped_schema_event is already prefecture-scoped at iteration time.
 
   return {
     prefecture_code: prefCode,
     lang: lang ?? null,
-    count: filtered.length,
-    items: filtered,
+    count: items.length,
+    items,
     sources: [
       { name: "文化庁 重要無形民俗文化財 (via Wikidata, CC0)" },
       { name: "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)" },
@@ -1812,7 +1867,15 @@ const TOOLS = [
           description:
             "Prefecture name in Japanese, English, or 2-digit JIS code (e.g., '鳥取県', 'tottori', '31')",
         },
-        city: { type: "string", description: "Municipality name in Japanese" },
+        city: {
+          type: "string",
+          description:
+            "Municipality name in Japanese (e.g., '南山城村', '宇治市'). Partial match supported — '南山城' will hit '南山城村'.",
+        },
+        municipality: {
+          type: "string",
+          description: "Alias for `city`. Same partial-match semantics.",
+        },
         limit: {
           type: "number",
           description: "Max spots to return (1–500, default 50)",
@@ -2175,6 +2238,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = await getSpots({
           prefecture: args.prefecture as string | undefined,
           city: args.city as string | undefined,
+          municipality: args.municipality as string | undefined,
           limit:
             typeof args.limit === "number"
               ? args.limit
