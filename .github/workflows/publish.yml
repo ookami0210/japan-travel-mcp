@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write   # required for `npm publish --provenance`
 
 jobs:
   publish:
