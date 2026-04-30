@@ -53,19 +53,26 @@ export async function scrapeOneMunicipality(
     data_as_of: startedAt,
   };
 
-  if (!m.official_url) {
-    result.errors.push({ url: "", reason: "no official URL resolved" });
+  // Build the seed list: primary city-hall URL + any tourism-association
+  // URLs we know about (ADR 0001 / workstream A — multi-source seeds).
+  const seeds: string[] = [];
+  if (m.official_url) seeds.push(m.official_url);
+  for (const u of m.tourism_org_urls ?? []) {
+    if (u && !seeds.includes(u)) seeds.push(u);
+  }
+  if (seeds.length === 0) {
+    result.errors.push({ url: "", reason: "no seed URL (no official_url and no tourism_org_urls)" });
     result.finished_at = new Date().toISOString();
     return result;
   }
 
-  // Phase 1: discover tourism pages.
+  // Phase 1: discover tourism pages from all seeds.
   let discovery: { pages: { url: string; title: string }[]; visited_count: number };
   try {
-    discovery = await discoverTourismPages(m.official_url, opts, counter);
+    discovery = await discoverTourismPages(seeds, opts, counter);
   } catch (err) {
     result.errors.push({
-      url: m.official_url,
+      url: seeds[0],
       reason: `discovery failed: ${(err as Error).message}`,
     });
     result.finished_at = new Date().toISOString();

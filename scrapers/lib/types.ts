@@ -114,7 +114,15 @@ export interface MunicipalityInput {
   name: string;
   prefecture_code: string;
   prefecture_name: string;
+  /** City-hall / primary administrative URL. Existing seed since v0.x. */
   official_url: string | null;
+  /**
+   * Additional crawl seeds — typically the municipality's tourism-association
+   * site(s) plus the prefecture-level tourism portal it lives under.
+   * Populated from data/_state/tourism_org_urls.json (ADR 0001 / workstream A).
+   * Backwards-compatible: omitted = behaves as before.
+   */
+  tourism_org_urls?: string[];
 }
 
 export interface MunicipalityScrapeResult {
