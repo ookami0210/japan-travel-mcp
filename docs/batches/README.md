@@ -134,3 +134,26 @@ python3 scrapers/hf/upload_dataset.py \
 Then re-run the demo queries (Yoshida fire festival, Minamiyamashiro tea
 fields, Tajima beef) against a fresh local checkout to confirm the
 quality target is hit before resuming the launch plan.
+
+---
+
+## Hosted demo refresh (HF Space)
+
+The HF Space is built from this repo's `Dockerfile` + `src/`. The
+HTTP entrypoint (`src/index_http.ts`) re-uses `buildServer()` from
+`src/index.ts`, so any new MCP tool added to the stdio entrypoint is
+picked up automatically — no Space-side code change required.
+
+To ship the latest tool surface to the hosted demo, rebuild the Space:
+
+1. Open the Space settings on huggingface.co.
+2. Click **Settings → Factory rebuild** (or push an empty commit to the
+   Space repo).
+3. Smoke-test:
+   ```bash
+   curl -s https://<space-url>/healthz   # → ok
+   curl -s -X POST https://<space-url>/mcp \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools | length'
+   # should match the count in src/index.ts (currently 12)
+   ```

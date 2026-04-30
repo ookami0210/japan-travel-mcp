@@ -33,8 +33,8 @@
 
 import { readFile, writeFile, readdir, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { scoreSpot as rubricScoreSpot } from "../lib/quality_score.js";
 
 const REPO_ROOT = new URL("../../", import.meta.url);
 const LOG_DIR = new URL("data/_logs/", REPO_ROOT);
@@ -122,38 +122,16 @@ function scoreSpot(
   prefCode: string,
   muniName: string,
 ): SpotScore {
-  const comp: Record<string, number> = {};
-  comp.has_description = s.description ? 0.2 : 0;
-  comp.description_length = s.description
-    ? Math.min(0.15, ((s.description.length ?? 0) / 120) * 0.15)
-    : 0;
-  const bodies = s.body_paragraphs ?? [];
-  comp.has_body_paragraphs = Math.min(0.2, (bodies.length / 2) * 0.2);
-  comp.has_address = s.address ? 0.1 : 0;
-  if (s.coordinates) {
-    if (s.coordinate_precision === "exact") comp.has_coordinates = 0.1;
-    else if (s.coordinate_precision === "address_geocoded") comp.has_coordinates = 0.07;
-    else comp.has_coordinates = 0.04;
-  } else {
-    comp.has_coordinates = 0;
-  }
-  const schemaCount =
-    (s.schema_events?.length ?? 0) + (s.schema_places?.length ?? 0);
-  comp.has_schema_data = Math.min(0.15, (schemaCount / 1) * 0.15);
-  comp.has_image = (s.images?.length ?? 0) > 0 ? 0.1 : 0;
-  const score = Object.values(comp).reduce((a, b) => a + b, 0);
-  let band: SpotScore["band"] = "low";
-  if (score >= 0.65) band = "high";
-  else if (score >= 0.3) band = "medium";
+  const r = rubricScoreSpot(s);
   return {
     spot_id: s.id,
     spot_name: s.name,
     url: s.url,
     prefecture_code: prefCode,
     municipality_name: muniName,
-    score: Math.round(score * 1000) / 1000,
-    band,
-    components: comp,
+    score: r.score,
+    band: r.band,
+    components: r.components as unknown as Record<string, number>,
   };
 }
 
