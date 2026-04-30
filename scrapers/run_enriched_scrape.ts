@@ -196,17 +196,38 @@ function selectTargetPrefectures(): string[] {
 
 async function main(): Promise<void> {
   const isDryRun = process.env.DRY_RUN === "1";
+  // RESUME=1: skip prefectures whose per-prefecture file already exists.
+  // Designed for the post-Mac-sleep restart pattern (added 2026-05-01) —
+  // pair with per-prefecture flushing so each completed prefecture is
+  // checkpointed and never re-fetched.
+  const resume = process.env.RESUME === "1";
   const opts: ScrapeOptions = {
     ...DEFAULT_OPTIONS,
     rateLimitMs: 5000, // respect the steady-state per-domain policy
   };
 
-  const targetPrefs = selectTargetPrefectures();
-  const batchLabel = process.env.BATCH ?? `prefs-${targetPrefs.join("-")}`;
+  const requestedPrefs = selectTargetPrefectures();
+  const targetPrefs = resume
+    ? requestedPrefs.filter((code) => {
+        const slug = PREFECTURE_SLUGS[code];
+        if (!slug) return true;
+        const path = new URL(`${slug}.json`, PREFECTURES_DIR);
+        return !existsSync(fileURLToPath(path));
+      })
+    : requestedPrefs;
+  const skippedPrefs = resume
+    ? requestedPrefs.filter((c) => !targetPrefs.includes(c))
+    : [];
+  const batchLabel = process.env.BATCH ?? `prefs-${requestedPrefs.join("-")}`;
 
   process.stderr.write(
-    `[enriched] batch=${batchLabel}, prefectures=${targetPrefs.join(",")}, dry_run=${isDryRun}\n`,
+    `[enriched] batch=${batchLabel}, prefectures=${targetPrefs.join(",")}, dry_run=${isDryRun}, resume=${resume}${skippedPrefs.length > 0 ? `, skipped=${skippedPrefs.join(",")}` : ""}\n`,
   );
+
+  if (targetPrefs.length === 0) {
+    process.stderr.write(`[enriched] all prefectures already complete (RESUME=1) — nothing to do\n`);
+    return;
+  }
 
   const muniPath = findStateFile("_state/municipalities.json");
   if (!muniPath) {
@@ -283,6 +304,33 @@ async function main(): Promise<void> {
   let abortReason = "";
 
   const byPref = new Map<string, MunicipalityScrapeResult[]>();
+  // Per-prefecture flushing — added 2026-05-01 after a Mac sleep killed
+  // 6h of work because the original code only flushed at the very end.
+  // Track how many municipalities we expect per prefecture; flush each
+  // prefecture's file as soon as its last municipality completes.
+  const expectedPerPref = new Map<string, number>();
+  const completedPerPref = new Map<string, number>();
+  const flushedPrefs = new Set<string>();
+  for (const m of targetMunis) {
+    expectedPerPref.set(m.prefecture_code, (expectedPerPref.get(m.prefecture_code) ?? 0) + 1);
+  }
+
+  async function flushPrefectureIfReady(prefCode: string): Promise<void> {
+    if (flushedPrefs.has(prefCode)) return;
+    const expected = expectedPerPref.get(prefCode) ?? 0;
+    const done = completedPerPref.get(prefCode) ?? 0;
+    if (done < expected) return;
+    const slug = PREFECTURE_SLUGS[prefCode];
+    if (!slug) return;
+    const results = byPref.get(prefCode) ?? [];
+    if (results.length === 0) return;
+    const prefName = results[0]?.municipality.prefecture_name ?? prefCode;
+    await writePrefectureFile(slug, prefCode, prefName, results);
+    flushedPrefs.add(prefCode);
+    process.stderr.write(
+      `[enriched] flushed ${slug} (${results.length} munis, ${results.reduce((s, r) => s + r.spots.length, 0)} spots) — ${flushedPrefs.size}/${expectedPerPref.size} prefectures done\n`,
+    );
+  }
 
   const tasks = targetMunis.map((m) =>
     limit(async () => {
@@ -309,18 +357,26 @@ async function main(): Promise<void> {
         process.stderr.write(
           `[enriched] ${m.name} threw: ${(err as Error).message}\n`,
         );
+      } finally {
+        completedPerPref.set(m.prefecture_code, (completedPerPref.get(m.prefecture_code) ?? 0) + 1);
+        await flushPrefectureIfReady(m.prefecture_code);
       }
     }),
   );
 
   await Promise.all(tasks);
 
-  // Flush per-prefecture files
-  for (const [prefCode, results] of byPref) {
+  // Safety net: flush anything that didn't reach its expected count (e.g.
+  // because the run aborted before all municipalities finished).
+  for (const prefCode of byPref.keys()) {
+    if (flushedPrefs.has(prefCode)) continue;
     const slug = PREFECTURE_SLUGS[prefCode];
     if (!slug) continue;
+    const results = byPref.get(prefCode) ?? [];
+    if (results.length === 0) continue;
     const prefName = results[0]?.municipality.prefecture_name ?? prefCode;
     await writePrefectureFile(slug, prefCode, prefName, results);
+    flushedPrefs.add(prefCode);
   }
 
   const totalSpots = Array.from(byPref.values())
