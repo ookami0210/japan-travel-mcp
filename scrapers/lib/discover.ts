@@ -15,8 +15,11 @@ import { shouldCrawl } from "./robots.js";
 import { canonicalize, pickCanonical } from "./canonical.js";
 import type { ScrapeOptions } from "./types.js";
 
+// Vocabulary expanded 2026-04-30 (see docs/decisions/0001-multi-source-tourism-data.md).
+// Earlier we missed feature pages that used "祭礼" / "催事" / "特産" / "名物" / "guide"
+// / "things-to-do" etc., even though tourism-association sites lean on those words.
 const TOURISM_PATTERNS = [
-  // English
+  // ── English: tourism / sightseeing core ─────────────────────────
   /kanko/i,
   /kankou/i,
   /sightseeing/i,
@@ -26,7 +29,31 @@ const TOURISM_PATTERNS = [
   /visit/i,
   /spot/i,
   /poi/i,
-  // Japanese — high-precision tourism words
+  /things[-_]?to[-_]?do/i,
+  /must[-_]?see/i,
+  /must[-_]?visit/i,
+  /experience/i,
+  /guide/i,
+  /\btour\b/i,
+  /\btours\b/i,
+  /itinerary/i,
+  /destination/i,
+  /explore/i,
+  /discover/i,
+  /trip/i,
+  // ── English: events / festivals / culture ───────────────────────
+  /festival/i,
+  /event/i,
+  /matsuri/i,
+  /cultural/i,
+  /heritage/i,
+  // ── English: food / specialty ───────────────────────────────────
+  /cuisine/i,
+  /gourmet/i,
+  /local[-_]?food/i,
+  /specialt(?:y|ies)/i,
+  /souvenir/i,
+  // ── Japanese: tourism / sightseeing core ────────────────────────
   /観光/,
   /見どころ/,
   /名所/,
@@ -38,11 +65,42 @@ const TOURISM_PATTERNS = [
   /史跡/,
   /文化財/,
   /景観/,
-  // Events / festivals — typically curated for visitors
+  /巡り/,
+  /モデルコース/,
+  /体験/,
+  /絶景/,
+  /特集/,
+  /ガイド/,
+  /楽しみ方/,
+  /\bおすすめ\b/,
+  // ── Japanese: festivals / events / rituals ──────────────────────
   /イベント/,
   /祭り/,
-  /festival/i,
-  /event/i,
+  /祭礼/,
+  /催事/,
+  /催し/,
+  /神事/,
+  /行事/,
+  /年中行事/,
+  /縁日/,
+  /花火/,
+  /まつり/,
+  // ── Japanese: regional food / specialties / crafts ──────────────
+  /特産/,
+  /名物/,
+  /名産/,
+  /ご当地/,
+  /グルメ/,
+  /銘菓/,
+  /銘酒/,
+  /地酒/,
+  /お土産/,
+  /土産/,
+  /逸品/,
+  /工芸/,
+  /伝統工芸/,
+  /和菓子/,
+  /郷土料理/,
 ];
 
 // Multilingual landing paths. We seed these explicitly per municipality so
