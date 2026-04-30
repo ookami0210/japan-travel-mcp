@@ -55,11 +55,36 @@ export type Lang = "ja" | "en" | "zh" | "ko" | "unknown";
 
 export type CoordinatePrecision = "exact" | "address_geocoded" | "municipality_centroid";
 
+export interface TouristSpotEvent {
+  type: string;
+  name: string | null;
+  description: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  location: string | null;
+  url: string | null;
+}
+
+export interface TouristSpotPlace {
+  type: string;
+  name: string | null;
+  description: string | null;
+  address: string | null;
+  url: string | null;
+  geo: { lat: number; lng: number } | null;
+}
+
 export interface TouristSpot {
   id: string;
   url: string;
   name: string;
   description: string | null;
+  /**
+   * First N substantive paragraphs of the article body, preserved when the
+   * scrape reaches a feature/article page (added 2026-04-30, ADR 0001 / C1).
+   * Empty array when the page is index/menu only.
+   */
+  body_paragraphs: string[];
   category: string | null;
   address: string | null;
   coordinates: { lat: number; lng: number } | null;
@@ -68,6 +93,17 @@ export interface TouristSpot {
    *  "municipality_centroid" = approximate, from municipality location. */
   coordinate_precision: CoordinatePrecision | null;
   images: string[];
+  /**
+   * Schema.org Event objects parsed from JSON-LD on this page (ADR 0001 / C2).
+   * Useful for festivals / annual events with start/end dates.
+   */
+  schema_events: TouristSpotEvent[];
+  /**
+   * Schema.org Place / TouristAttraction / FoodEstablishment objects parsed
+   * from JSON-LD on this page (ADR 0001 / C2). Useful for venue / food /
+   * accommodation pages with structured address + geo.
+   */
+  schema_places: TouristSpotPlace[];
   source_url: string;
   language: Lang;
   last_scraped_at: string;

@@ -9,14 +9,47 @@
  *   - language (html[lang], hreflang alternates)
  *   - geo (og:latitude, schema.org JSON-LD GeoCoordinates)
  *   - postal address (heuristic: 〒XXX-XXXX prefix)
+ *   - body paragraphs — first N substantive <p> elements after layout
+ *     chrome is stripped. Added 2026-04-30 (ADR 0001 / workstream C1):
+ *     before this, even when the BFS reached a rich feature page (a
+ *     festival write-up, a tea-garden article), we kept only the meta
+ *     description — discarding the actual narrative content.
+ *   - schemaOrg events / places — JSON-LD Event / TouristAttraction /
+ *     Place / FoodEstablishment objects. Added 2026-04-30 (ADR 0001 /
+ *     workstream C2): these capture date, location, and structured
+ *     metadata that meta tags can't.
  */
 
 import * as cheerio from "cheerio";
 import type { Lang } from "./types.js";
 
+const MAX_BODY_PARAGRAPHS = 8;
+const MIN_PARAGRAPH_CHARS = 50;
+const MAX_PARAGRAPH_CHARS = 1200;
+
+export interface SchemaOrgEvent {
+  type: "Event" | string;
+  name: string | null;
+  description: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  location: string | null;
+  url: string | null;
+}
+
+export interface SchemaOrgPlace {
+  type: string; // TouristAttraction | Place | LocalBusiness | FoodEstablishment | Restaurant | etc.
+  name: string | null;
+  description: string | null;
+  address: string | null;
+  url: string | null;
+  geo: { lat: number; lng: number } | null;
+}
+
 export interface ExtractedPage {
   title: string;
   description: string | null;
+  body_paragraphs: string[];
   headings: string[];
   links: { href: string; text: string }[];
   images: string[];
@@ -26,6 +59,8 @@ export interface ExtractedPage {
   geo: { lat: number; lng: number } | null;
   address: string | null;
   canonical: string | null;
+  schema_events: SchemaOrgEvent[];
+  schema_places: SchemaOrgPlace[];
 }
 
 function detectLang(htmlLang: string | undefined): Lang {
@@ -44,6 +79,164 @@ function safeUrl(href: string, baseUrl: string): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Extract the article's body as a sequence of paragraphs. We strip layout
+ * chrome (header / footer / nav / aside / .menu / .nav / .breadcrumb) so
+ * what remains is the actual story / write-up. We then take <p> nodes
+ * that look like prose (>= 50 chars, dedup), capped at the first 8.
+ */
+function extractBodyParagraphs($: cheerio.CheerioAPI): string[] {
+  const body = $.html();
+  const $$ = cheerio.load(body);
+  $$(
+    [
+      "header", "footer", "nav", "aside",
+      "script", "style", "noscript",
+      ".header", ".footer", ".nav", ".navigation", ".navbar",
+      ".breadcrumb", ".breadcrumbs", ".pankuzu",
+      ".menu", ".side", ".sidebar", ".side-menu",
+      ".gnav", ".lnav", ".global-nav", ".local-nav",
+      ".pagetop", ".back-to-top", ".search",
+      ".banner", ".ad", ".ads", ".advertisement",
+      ".social", ".share", ".sns",
+      ".cookie", ".consent",
+      ".pagination", ".pager",
+    ].join(", "),
+  ).remove();
+  const paragraphs: string[] = [];
+  const seen = new Set<string>();
+  $$("p, .article-body, .entry-content, article div").each((_, el) => {
+    if (paragraphs.length >= MAX_BODY_PARAGRAPHS) return false;
+    const t = $$(el).text().replace(/\s+/g, " ").trim();
+    if (t.length < MIN_PARAGRAPH_CHARS) return;
+    if (t.length > MAX_PARAGRAPH_CHARS) return; // skip giant blobs (= still nav / list dump)
+    if (seen.has(t)) return;
+    seen.add(t);
+    paragraphs.push(t);
+  });
+  return paragraphs;
+}
+
+/**
+ * Parse JSON-LD Event objects out of <script type="application/ld+json">.
+ * Walks both single objects and arrays, and the @graph wrapper Schema.org
+ * sometimes uses.
+ */
+function* walkJsonLd($: cheerio.CheerioAPI): Generator<Record<string, unknown>> {
+  const scripts: string[] = [];
+  $('script[type="application/ld+json"]').each((_, el) => {
+    const t = $(el).text();
+    if (t) scripts.push(t);
+  });
+  for (const s of scripts) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(s);
+    } catch {
+      continue;
+    }
+    const queue: unknown[] = [parsed];
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      if (Array.isArray(cur)) {
+        queue.push(...cur);
+        continue;
+      }
+      if (typeof cur !== "object" || cur === null) continue;
+      const obj = cur as Record<string, unknown>;
+      if (Array.isArray(obj["@graph"])) {
+        queue.push(...(obj["@graph"] as unknown[]));
+        continue;
+      }
+      yield obj;
+    }
+  }
+}
+
+function asString(v: unknown): string | null {
+  if (typeof v === "string" && v.trim()) return v.trim();
+  if (typeof v === "object" && v !== null) {
+    const o = v as Record<string, unknown>;
+    if (typeof o.name === "string") return o.name.trim();
+    if (typeof o["@id"] === "string") return (o["@id"] as string).trim();
+  }
+  return null;
+}
+
+function asAddress(v: unknown): string | null {
+  if (typeof v === "string" && v.trim().length > 5) return v.trim();
+  if (typeof v === "object" && v !== null) {
+    const a = v as Record<string, unknown>;
+    const parts = [
+      a.postalCode ? `〒${String(a.postalCode)}` : "",
+      String(a.addressRegion ?? ""),
+      String(a.addressLocality ?? ""),
+      String(a.streetAddress ?? ""),
+    ]
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    if (parts.length >= 2) return parts.join(" ");
+  }
+  return null;
+}
+
+function asGeo(v: unknown): { lat: number; lng: number } | null {
+  if (typeof v !== "object" || v === null) return null;
+  const g = v as Record<string, unknown>;
+  const lat = parseFloat(String(g.latitude ?? ""));
+  const lng = parseFloat(String(g.longitude ?? ""));
+  if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+  return null;
+}
+
+function isType(obj: Record<string, unknown>, ...wanted: string[]): boolean {
+  const t = obj["@type"];
+  if (typeof t === "string") return wanted.includes(t);
+  if (Array.isArray(t)) return t.some((x) => typeof x === "string" && wanted.includes(x));
+  return false;
+}
+
+function extractSchemaOrg($: cheerio.CheerioAPI): {
+  events: SchemaOrgEvent[];
+  places: SchemaOrgPlace[];
+} {
+  const events: SchemaOrgEvent[] = [];
+  const places: SchemaOrgPlace[] = [];
+  for (const obj of walkJsonLd($)) {
+    if (
+      isType(obj, "Event", "Festival", "MusicEvent", "TheaterEvent",
+        "VisualArtsEvent", "FoodEvent", "SportsEvent", "ExhibitionEvent",
+        "SocialEvent")
+    ) {
+      events.push({
+        type: String(obj["@type"] ?? "Event"),
+        name: asString(obj.name),
+        description: asString(obj.description),
+        start_date: asString(obj.startDate),
+        end_date: asString(obj.endDate),
+        location: asString(obj.location),
+        url: asString(obj.url),
+      });
+    } else if (
+      isType(obj, "TouristAttraction", "Place", "LocalBusiness",
+        "FoodEstablishment", "Restaurant", "LandmarksOrHistoricalBuildings",
+        "Museum", "Park", "PlaceOfWorship", "BuddhistTemple", "Church",
+        "HinduTemple", "Mosque", "Synagogue", "TouristDestination",
+        "Accommodation", "Hotel", "LodgingBusiness")
+    ) {
+      places.push({
+        type: String(obj["@type"] ?? "Place"),
+        name: asString(obj.name),
+        description: asString(obj.description),
+        address: asAddress(obj.address),
+        url: asString(obj.url),
+        geo: asGeo(obj.geo),
+      });
+    }
+  }
+  return { events, places };
 }
 
 function parseGeoFromJsonLd(scriptText: string): { lat: number; lng: number } | null {
@@ -210,9 +403,13 @@ export function extract(html: string, baseUrl: string): ExtractedPage {
     }
   }
 
+  const body_paragraphs = extractBodyParagraphs($);
+  const schema = extractSchemaOrg($);
+
   return {
     title,
     description,
+    body_paragraphs,
     headings,
     links,
     images: images.slice(0, 30),
@@ -222,5 +419,7 @@ export function extract(html: string, baseUrl: string): ExtractedPage {
     geo,
     address,
     canonical,
+    schema_events: schema.events,
+    schema_places: schema.places,
   };
 }
