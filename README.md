@@ -1,32 +1,34 @@
 # Japan Travel MCP
 
-> The most comprehensive Japanese travel data server for AI agents.  
-> 47 prefectures · 1,938 local-government entities · Hotels & Ryokan · Multilingual · Built from public sources.
+> **Open Japanese tourism dataset + Model Context Protocol (MCP) server** —
+> 13,394 tourist spots × 17 languages, 40,128 accommodations, 690
+> officially-designated cultural records (MAFF GI, METI traditional crafts,
+> Japan Heritage, UNESCO ICH). **Free, no API key, no account.** All data is
+> downloadable as JSON/JSONL from [Hugging Face](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data).
 
----
+[![npm version](https://img.shields.io/npm/v/japan-travel-mcp.svg)](https://www.npmjs.com/package/japan-travel-mcp)
+[![🤗 Dataset](https://img.shields.io/badge/🤗-Dataset-yellow)](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data)
+[![Code: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE)
+[![Data: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-## Why this exists
+## What you can do in 60 seconds
 
-Japan has incredible destinations, rich local culture, and tourism information  
-published across thousands of municipal websites — almost none of it accessible to AI agents.
+**1. Use it from any MCP client (Claude Desktop, Cursor, Windsurf):**
 
-I've spent years in Japan's travel industry. I know how much the world is missing.  
-This project exists because I believe Japan deserves to be better represented in the AI era.
+```json
+{ "mcpServers": { "japan-travel": { "command": "npx", "args": ["-y", "japan-travel-mcp"] } } }
+```
 
-Not a business. A contribution.
+Then ask the model anything like "What's special about Tottori, in Russian?" — it gets a 17-language tourism description from official Japanese sources.
 
-— **KJ Sunada**, founder of [KabuK Style](https://kabuk.co.jp/), building products for Japan's travel industry since 2019.
+**2. Or grab the raw dataset for your own pipeline:**
 
----
+```python
+from huggingface_hub import snapshot_download
+snapshot_download(repo_id="kjsunada/japan-travel-mcp-data", repo_type="dataset")
+```
 
-## Works with any AI
-
-| Interface | Who it's for | How to use |
-|-----------|-------------|------------|
-| **MCP Server** | Claude, Cursor, Windsurf | Add to MCP config — see below |
-| **Raw data** | All developers, ML / data folks | Download from [Hugging Face](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data) |
-
-No API key required. No account. Just use it.
+**See also:** [🤗 Dataset card](https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data) · [Live demo (coming soon)](#) · [arXiv preprint (coming soon)](#)
 
 ---
 
@@ -90,6 +92,36 @@ git clone https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data
 
 > All 47 prefectures and all 1,938 entities (1,741 municipalities + 197 designated-city wards) are covered in parallel — no prioritization by population, fame, or tourism volume.
 > Tokyo and Kyoto are here too — but the point of this dataset is everywhere else.
+
+---
+
+## Why this exists
+
+Japan has incredible destinations, rich local culture, and tourism information
+published across thousands of municipal websites — almost none of it accessible
+to AI agents.
+
+I've spent years in Japan's travel industry. I know how much the world is
+missing. This project exists because I believe Japan deserves to be better
+represented in the AI era.
+
+Not a business. A contribution.
+
+— **KJ Sunada**, founder of [KabuK Style](https://kabuk.co.jp/), building products for Japan's travel industry since 2019.
+
+### Why not just use Wikipedia / Google Places / JNTO?
+
+|                                                  | **japan-travel-mcp** | Wikipedia        | Google Places  | JNTO open data |
+|:-------------------------------------------------|:--------------------:|:----------------:|:--------------:|:--------------:|
+| Coverage of all 47 prefectures × 1,938 entities  |          ✅          |     partial      |      ✅        |    partial     |
+| 17-language tourism descriptions (200-300 chars) |     ✅ 13K spots     |      sparse      |  name only     |  EN + a few    |
+| Official designation registries (MAFF GI etc.)   |   ✅ 690 records     |     partial      |      ❌        |    partial     |
+| MCP server out of the box                        |          ✅          |       ❌         |      ❌        |       ❌       |
+| Open dataset (CC BY 4.0)                         |          ✅          | ✅ (CC BY-SA)    |      ❌        |    varies      |
+| Free / no API key / no quota                     |          ✅          |        ✅        |  ❌ (paid)     | ❌ (key)       |
+| Refreshed daily on a 30-day rolling cycle        |          ✅          |   community      | ✅ (proprietary)|     varies     |
+
+The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo and Kyoto fine. The point is that *AI agents* need a single, structured, multilingual, license-clear source for **everywhere else in Japan**, and that didn't exist until now.
 
 ---
 
