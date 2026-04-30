@@ -144,6 +144,10 @@ function findDescriptionsPath(): string {
   return resolve(dataRoot(), "translations/descriptions_complete.jsonl");
 }
 
+function findWikidataAttractionsMasterPath(): string {
+  return resolve(dataRoot(), "_state/wikidata_attractions.json");
+}
+
 function findMultilingualNamesPath(): string {
   return resolve(dataRoot(), "translations/multilingual_complete.jsonl");
 }
@@ -312,8 +316,46 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
       // skip malformed
     }
   }
+  // The municipal-scrape pipeline merges wikidata_attractions into each
+  // prefecture file at write-time, but we discovered Hokkaido (and
+  // possibly others) ship with that field empty. Backfill from the
+  // master `_state/wikidata_attractions.json` so search and per-pref
+  // tools see the full Wikidata corpus regardless of merge errors.
+  await supplementWikidataAttractions(out);
   cachedData = out;
   return out;
+}
+
+async function supplementWikidataAttractions(
+  prefs: PrefectureFile[],
+): Promise<void> {
+  const masterPath = findWikidataAttractionsMasterPath();
+  if (!existsSync(masterPath)) return;
+  let master: { attractions: WikidataAttraction[] };
+  try {
+    const content = await readFile(masterPath, "utf8");
+    master = JSON.parse(content) as { attractions: WikidataAttraction[] };
+  } catch {
+    return;
+  }
+  const byPref = new Map<string, WikidataAttraction[]>();
+  for (const a of master.attractions ?? []) {
+    const code = a.prefecture_code;
+    if (!code) continue;
+    let bucket = byPref.get(code);
+    if (!bucket) {
+      bucket = [];
+      byPref.set(code, bucket);
+    }
+    bucket.push(a);
+  }
+  for (const p of prefs) {
+    const have = (p.wikidata_attractions ?? []).length;
+    const supplement = byPref.get(p.prefecture.code) ?? [];
+    if (have === 0 && supplement.length > 0) {
+      p.wikidata_attractions = supplement;
+    }
+  }
 }
 
 async function loadHotels(): Promise<HotelsFile | null> {
@@ -383,52 +425,127 @@ function dataAsOf(prefs: PrefectureFile[]): string | null {
 async function searchArea(args: {
   q: string;
   lang?: string;
+  limit?: number;
 }): Promise<unknown> {
   const prefs = await loadAllPrefectures();
   const q = args.q.trim().toLowerCase();
   if (q.length === 0) {
     return { error: "empty_query", disclaimer: DISCLAIMER };
   }
-  const matches: Array<Record<string, unknown>> = [];
+  const limit = Math.min(Math.max(args.limit ?? 50, 1), 200);
 
-  const matchesText = (s: string | null | undefined): boolean =>
+  // Score model:
+  //   100  exact name match (any language)
+  //    50  name substring match (any language)
+  //    20  description / body substring match
+  //   + small notability boost (sitelink / officially-designated / multi-lang)
+  type Match = {
+    score: number;
+    record: Record<string, unknown>;
+  };
+  const matches: Match[] = [];
+
+  const exactMatch = (s: string | null | undefined): boolean =>
+    !!s && s.toLowerCase() === q;
+  const partialMatch = (s: string | null | undefined): boolean =>
     !!s && s.toLowerCase().includes(q);
 
+  const addMatch = (score: number, record: Record<string, unknown>): void => {
+    matches.push({ score, record });
+  };
+
+  // ── prefectures (47)
   for (const p of prefs) {
-    if (
-      matchesText(p.prefecture.name) ||
-      matchesText(p.prefecture.name_en)
-    ) {
-      matches.push({
+    let s = 0;
+    if (exactMatch(p.prefecture.name) || exactMatch(p.prefecture.name_en)) s = 110;
+    else if (partialMatch(p.prefecture.name) || partialMatch(p.prefecture.name_en)) s = 60;
+    if (s > 0) {
+      addMatch(s, {
         type: "prefecture",
         code: p.prefecture.code,
         name: p.prefecture.name,
         name_en: p.prefecture.name_en ?? null,
       });
     }
+  }
+
+  // ── municipalities + scraped spots
+  for (const p of prefs) {
     for (const m of p.municipalities) {
-      if (matchesText(m.municipality.name)) {
-        matches.push({
+      let muniScore = 0;
+      if (exactMatch(m.municipality.name)) muniScore = 105;
+      else if (partialMatch(m.municipality.name)) muniScore = 55;
+      if (muniScore > 0) {
+        addMatch(muniScore, {
           type: "municipality",
           code: m.municipality.code,
           name: m.municipality.name,
           prefecture: p.prefecture.name,
         });
       }
+      // Scraped spots: name first, then description/body fallback
+      for (const spot of m.spots ?? []) {
+        let sScore = 0;
+        if (exactMatch(spot.name)) sScore = 100;
+        else if (partialMatch(spot.name)) sScore = 50;
+        else if (
+          partialMatch(spot.description) ||
+          partialMatch(((spot as { body_paragraphs?: string[] }).body_paragraphs ?? []).join(" "))
+        ) {
+          sScore = 20;
+        }
+        if (sScore > 0) {
+          addMatch(sScore, {
+            type: "spot",
+            source: "municipal_scrape",
+            id: spot.id,
+            name: spot.name,
+            description: spot.description,
+            url: spot.url,
+            municipality: m.municipality.name,
+            prefecture: p.prefecture.name,
+            language: spot.language,
+          });
+        }
+      }
     }
+  }
+
+  // ── Wikidata attractions (41,000+; supplement loader fills missing
+  //    per-prefecture data from the master file)
+  for (const p of prefs) {
     for (const a of p.wikidata_attractions ?? []) {
+      let s = 0;
       if (
-        matchesText(a.name_ja) ||
-        matchesText(a.name_en) ||
-        matchesText(a.name_zh) ||
-        matchesText(a.name_ko)
+        exactMatch(a.name_ja) ||
+        exactMatch(a.name_en) ||
+        exactMatch(a.name_zh) ||
+        exactMatch(a.name_ko)
       ) {
-        matches.push({
+        s = 100;
+      } else if (
+        partialMatch(a.name_ja) ||
+        partialMatch(a.name_en) ||
+        partialMatch(a.name_zh) ||
+        partialMatch(a.name_ko)
+      ) {
+        s = 50;
+      } else if (partialMatch(a.description_en)) {
+        s = 20;
+      }
+      if (s > 0) {
+        // Notability boost: shorter Q-id ≈ older / more notable in Wikidata.
+        // It's a proxy, not perfect, but it ranks Q170181 (Himeji Castle)
+        // above Q116606456 (Himeji City Archaeological Research Center).
+        const qNum = parseInt((a.qid ?? "Q9999999999").replace(/^Q/, ""), 10);
+        const notability = isFinite(qNum) ? Math.max(0, 10 - Math.log10(qNum)) : 0;
+        addMatch(s + notability, {
           type: "attraction",
           source: "wikidata",
           qid: a.qid,
           name_ja: a.name_ja,
           name_en: a.name_en,
+          description_en: a.description_en ?? null,
           coordinates: a.coordinates,
           prefecture_code: a.prefecture_code,
         });
@@ -436,14 +553,189 @@ async function searchArea(args: {
     }
   }
 
+  // ── R-3 designation registries (MAFF GI / METI crafts / Japan Heritage /
+  //    bunka intangible / UNESCO ICH) — official records, ranked above
+  //    Wikidata when names match exactly because they're authoritative.
+  const r3Hits = await searchR3Registries(args.q, q, exactMatch, partialMatch);
+  for (const m of r3Hits) matches.push(m);
+
+  matches.sort((a, b) => b.score - a.score);
+  const top = matches.slice(0, limit);
+
   return {
     query: args.q,
     match_count: matches.length,
-    results: matches.slice(0, 50),
-    truncated: matches.length > 50,
+    results: top.map((m) => m.record),
+    truncated: matches.length > limit,
     data_as_of: dataAsOf(prefs),
     disclaimer: DISCLAIMER,
+    note:
+      "Results sorted by relevance: exact name match > name substring > description match. Wikidata notability is approximated by Q-id age (lower = older/more cited).",
   };
+}
+
+async function searchR3Registries(
+  qOriginal: string,
+  qLower: string,
+  exactMatch: (s: string | null | undefined) => boolean,
+  partialMatch: (s: string | null | undefined) => boolean,
+): Promise<Array<{ score: number; record: Record<string, unknown> }>> {
+  const out: Array<{ score: number; record: Record<string, unknown> }> = [];
+
+  type Stuff = { name_ja?: string | null; name_en?: string | null;
+    description_ja?: string | null; description_en?: string | null;
+    summary_ja?: string | null; characteristics_ja?: string | null };
+  const scoreOne = (r: Stuff): number => {
+    if (
+      exactMatch(r.name_ja) ||
+      exactMatch(r.name_en)
+    ) return 115; // top — official-designation exact name
+    if (
+      partialMatch(r.name_ja) ||
+      partialMatch(r.name_en)
+    ) return 65;
+    if (
+      partialMatch(r.description_ja) ||
+      partialMatch(r.description_en) ||
+      partialMatch(r.summary_ja) ||
+      partialMatch(r.characteristics_ja)
+    ) return 25;
+    return 0;
+  };
+
+  const maff = await loadMaffGi();
+  if (maff) {
+    for (const r of maff.records) {
+      const s = scoreOne({
+        name_ja: r.name_ja,
+        description_ja: r.characteristics_ja,
+        characteristics_ja: r.characteristics_ja,
+      });
+      if (s > 0) {
+        out.push({
+          score: s,
+          record: {
+            type: "designation",
+            source: "maff_gi",
+            key: `maff_gi:${r.registration_number}`,
+            name_ja: r.name_ja,
+            description_ja: r.characteristics_ja,
+            production_area_text: r.production_area_text,
+            prefecture_codes: r.prefecture_codes,
+            source_url: r.detail_url,
+          },
+        });
+      }
+    }
+  }
+
+  const meti = await loadMetiDensan();
+  if (meti) {
+    for (const r of meti.records) {
+      const s = scoreOne({
+        name_ja: r.name_ja,
+        description_ja: r.features_ja,
+        characteristics_ja: r.features_ja,
+      });
+      if (s > 0) {
+        out.push({
+          score: s,
+          record: {
+            type: "designation",
+            source: "meti_densan",
+            key: `meti_densan:${r.craft_id}`,
+            name_ja: r.name_ja,
+            description_ja: r.features_ja,
+            production_area_text: r.production_area_text,
+            prefecture_codes: r.prefecture_codes,
+            source_url: r.detail_url,
+          },
+        });
+      }
+    }
+  }
+
+  const jh = await loadJapanHeritage();
+  if (jh) {
+    for (const r of jh.records) {
+      const s = scoreOne({
+        name_ja: r.title_ja,
+        description_ja: r.body_ja ?? r.summary_ja,
+        summary_ja: r.summary_ja,
+      });
+      if (s > 0) {
+        out.push({
+          score: s,
+          record: {
+            type: "designation",
+            source: "japan_heritage",
+            key: `japan_heritage:${r.story_id}`,
+            title_ja: r.title_ja,
+            summary_ja: r.summary_ja,
+            related_areas_text: r.related_areas_text,
+            prefecture_codes: r.prefecture_codes,
+            themes: r.themes,
+            source_url: r.story_url,
+          },
+        });
+      }
+    }
+  }
+
+  const bunka = await loadBunkaIntangible();
+  if (bunka) {
+    for (const r of bunka.records) {
+      const s = scoreOne({
+        name_ja: r.name_ja,
+        name_en: r.name_en,
+        description_ja: r.description_ja,
+        description_en: r.description_en,
+      });
+      if (s > 0) {
+        out.push({
+          score: s,
+          record: {
+            type: "designation",
+            source: "bunka_intangible",
+            key: `bunka_intangible:${r.qid}`,
+            name_ja: r.name_ja,
+            name_en: r.name_en,
+            description_ja: r.description_ja,
+            source_url: r.wikidata_url,
+          },
+        });
+      }
+    }
+  }
+
+  const unesco = await loadUnescoJapan();
+  if (unesco) {
+    for (const r of unesco.records) {
+      const s = scoreOne({
+        name_ja: r.name_ja,
+        name_en: r.name_en,
+        description_ja: r.description_ja,
+        description_en: r.description_en,
+      });
+      if (s > 0) {
+        out.push({
+          score: s,
+          record: {
+            type: "designation",
+            source: "unesco_japan",
+            key: `unesco_japan:${r.qid}`,
+            name_ja: r.name_ja,
+            name_en: r.name_en,
+            description_ja: r.description_ja,
+            inscription_year: r.inscription_year,
+            source_url: r.wikidata_url,
+          },
+        });
+      }
+    }
+  }
+
+  return out;
 }
 
 // ──────────────────────────────────────────────────────────────────────
