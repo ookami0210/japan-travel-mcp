@@ -15,10 +15,11 @@
 2. **No personal curation** — we do not add entries based on personal
    taste. "Lesser-known", "hidden", "off-the-beaten-path" selections
    are explicitly out of scope as primary content.
-3. **Faithful interpretation IS allowed** — if an official source describes
-   something with specific language ("徐々に失われつつある漆掻きの技"), tagging
-   that record `dying-craft` is faithful integration, not curation. The line
-   is whether the language came from the source or from us.
+3. **Faithful interpretation IS allowed** — if an official source
+   describes a craft as "gradually disappearing" or its skill base as
+   "without successors", tagging that record `dying-craft` is faithful
+   integration, not curation. The line is whether the language came
+   from the source or from us.
 4. **Search infrastructure is content-neutral** — BM25 indexing, vector
    embeddings, and ranking algorithms are retrieval tools. They reorder
    official content; they do not select or suppress it.
@@ -75,29 +76,30 @@ We accept content from these source classes:
 
 ### Officially-recognised public bodies
 
-- Tourism associations (観光協会, 観光連盟) registered with their
-  prefecture
+- Tourism associations registered with their prefecture
 - **DMOs (Destination Management Organizations)** registered with the
-  Japan Tourism Agency (観光庁登録法人). The agency maintains a public
-  list at https://www.mlit.go.jp/kankocho/seisaku_seido/dmo/ichiran.html
-  and 328 organisations were registered as of 2026-04-01 (registered:
-  10 broad-area + 38 prefectural + 280 regional; candidate: 24
-  regional). Each DMO files a 形成確立計画 (formation plan) with the
-  agency, which is published as a PDF and is considered official
-  content.
-- Chambers of commerce (商工会議所) as authoritative for craft industry
+  Japan Tourism Agency. The agency maintains a public list at
+  https://www.mlit.go.jp/kankocho/seisaku_seido/dmo/ichiran.html and
+  328 organisations were registered as of 2026-04-01 (registered: 10
+  broad-area + 38 prefectural + 280 regional; candidate: 24 regional).
+  Each DMO files a formation plan (形成確立計画 — the official Japanese
+  title; the document is filed under that name) with the agency. The
+  plan is published as a PDF and is considered official content.
+- Chambers of commerce (商工会議所 — kept in Japanese because the formal
+  entity name is in Japanese and the English term is generic)
 - JNTO (Japan National Tourism Organization)
 - Universities and museum institutions for academic / cultural records
 
 ### Official designation registries
 
 - Geographical Indications (MAFF GI) — 172 records
-- Traditional Crafts / Dentō Kōgeihin (METI) — 231 records
-- Japan Heritage / Nihon Isan (Bunka-cho) — 104 stories
+- Traditional Crafts (METI Dentō Kōgeihin) — 231 records
+- Japan Heritage stories (Bunka-cho Nihon Isan) — 104 stories
 - Important Intangible Cultural Properties + Folk (Bunka-cho) — 125 records
 - UNESCO Intangible Cultural Heritage (Japan inscriptions) — 58 records
 - UNESCO World Heritage (Japan) — to be added
-- 重要伝統的建造物群保存地区 / Jūden-ken (Bunka-cho) — to be added
+- Important Preservation Districts for Groups of Traditional Buildings
+  (Bunka-cho — official name 重要伝統的建造物群保存地区) — to be added
 - Ramsar Convention Japanese sites — to be added when relevant
 
 ### Wikidata (CC0)
@@ -113,8 +115,8 @@ of public information, the same way we treat OpenStreetMap.
 
 ### What is NOT official
 
-- Personal blogs, food review sites (食べログ, トリップアドバイザー), SNS
-  posts
+- Personal blogs, user-review sites (Tabelog, TripAdvisor and similar),
+  SNS posts
 - Lists where we (or any process we run, including AI) selected the
   entries based on taste rather than from an official source
 - Aggregated review rankings as primary content
@@ -135,26 +137,26 @@ This is the most-asked question and deserves precision.
 
 ### Allowed (faithful integration)
 
-If an official source describes a craft with the exact phrase _"徐々に失われ
-つつある"_ (gradually being lost), tagging that record with a
-machine-readable label such as `endangered-tradition` is **faithful
-integration**. The judgment came from the source; we only normalised the
-language for retrieval.
+If an official source describes a craft as "gradually being lost"
+(Japanese: 徐々に失われつつある), tagging that record with a machine-readable
+label such as `endangered-tradition` is **faithful integration**. The
+judgment came from the source; we only normalised the language for
+retrieval.
 
 If MAFF GI organises records into food / craft / fish / fruit / vegetable
 / etc. categories, copying those category labels into a `category` field
 is **faithful integration**. MAFF made the call; we lifted the call into
 a structured form.
 
-If Wikidata classifies an entity as `instance-of: 磨崖仏` (Q606960),
-adopting that classification as a tag is **faithful integration**.
-Wikidata made the call; we normalised it.
+If Wikidata classifies an entity as `instance-of: cliff-carved Buddha
+statue` (Q606960, 磨崖仏), adopting that classification as a tag is
+**faithful integration**. Wikidata made the call; we normalised it.
 
-If a tourism-association page calls a festival "山梨県下最大の火祭り"
-(the largest fire festival in Yamanashi prefecture), recording the text
-verbatim in a `description` and tagging the record `festival-fire` is
-**faithful integration**. The official source labelled it; we kept that
-labelling discoverable.
+If a tourism-association page calls a festival "the largest fire
+festival in Yamanashi prefecture" (Japanese: 山梨県下最大の火祭り), recording
+the text verbatim in a `description` and tagging the record
+`festival-fire` is **faithful integration**. The official source
+labelled it; we kept that labelling discoverable.
 
 ### Forbidden (personal curation)
 
@@ -205,18 +207,23 @@ not a content judgment. We will note the embedding model used (e.g.
 
 Query: _"Show me Japanese crafts that are dying out"_
 
-The dataset has 231 traditional craft records. None has a `dying` tag we
-authored. Each has a long description from METI which sometimes contains
-phrases like _"後継者不足"_ or _"技術伝承が課題"_.
+The dataset has 231 traditional craft records. None has a `dying` tag
+we authored. Each has a long Japanese-language description from METI
+that sometimes mentions things like "shortage of successors" or "skills
+transmission at risk".
 
-- A keyword search for "dying" returns nothing — the word does not appear
+- A keyword search for "dying" returns nothing — the word does not
+  appear in any record
 - A vector embedding search ranks records whose descriptions discuss
-  succession problems higher
-- A hybrid retrieval surfaces the right cluster: 漆掻き, 紙漉き, 桶結, 組子, 木綿絞り
+  succession problems higher, even though the search query is in
+  English
+- A hybrid retrieval surfaces the right cluster: lacquer-sap tapping
+  (漆掻き), washi paper-making (紙漉き), wooden cooperage (桶結),
+  kumiko lattice woodwork (組子), and Arimatsu cotton tie-dye (木綿絞り)
 
 We have not curated. We have not selected. We have made the existing
-official text retrievable through a richer query model. The records, the
-attributions, the descriptions all came from METI.
+official text retrievable through a richer query model. The records,
+the attributions, the descriptions all came from METI.
 
 ---
 
@@ -304,13 +311,15 @@ unilaterally.
 These will be decided case by case, with the call recorded in the
 [ADR directory](decisions/):
 
-- Academic research outputs (大学の地域研究センター): treat as official,
-  or only when a public dataset is released?
-- Religious bodies (寺社の自社サイト): yes (the institution is the
-  authority on itself), but with care around proselytising content
-- Tourism trade unions / brand collectives (e.g. 日本酒蔵元会): yes when
-  they are an officially-recognised industry body, no when they are a
-  marketing collective
+- Academic research outputs from regional studies centres at
+  universities: treat as official, or only when a public dataset is
+  released?
+- Religious institutions' own websites (shrines and temples): yes,
+  because the institution is the authority on itself, but with care
+  around proselytising content
+- Industry bodies and brand collectives (for example, a nationwide
+  association of sake brewers): yes when they are an officially-
+  recognised industry body, no when they are a marketing collective
 
 ---
 
