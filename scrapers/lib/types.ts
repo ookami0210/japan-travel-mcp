@@ -30,8 +30,10 @@ export const DEFAULT_OPTIONS: ScrapeOptions = {
   retries: 2,
   // Raised from 35 to 100 in the multi-source sprint (ADR 0001). At 35 the
   // BFS only reached the first index layer of a typical tourism site and
-  // never followed feature-page links into individual articles.
-  maxPagesPerMunicipality: 100,
+  // never followed feature-page links into individual articles. Raised
+  // again from 100 to 150 in Phase 1 (2026-05-01) — at 100 we still
+  // truncate before reaching deeper feature pages on larger portals.
+  maxPagesPerMunicipality: 150,
   consecutive5xxAbort: 100,
   consecutive4xxAbort: 200,
 };

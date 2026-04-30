@@ -23,8 +23,12 @@
 import * as cheerio from "cheerio";
 import type { Lang } from "./types.js";
 
-const MAX_BODY_PARAGRAPHS = 8;
-const MIN_PARAGRAPH_CHARS = 50;
+// Phase 1 (2026-05-01): widened from 8 → 30 paragraphs and 50 → 30 chars min
+// so that "失われゆく", "後継者不足", endangered-tradition phrases that live in
+// short headings or sub-paragraphs survive into body_paragraphs. Max stays at
+// 1200 to keep nav-list dumps out.
+const MAX_BODY_PARAGRAPHS = 30;
+const MIN_PARAGRAPH_CHARS = 30;
 const MAX_PARAGRAPH_CHARS = 1200;
 
 export interface SchemaOrgEvent {
