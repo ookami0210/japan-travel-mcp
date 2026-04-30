@@ -9,9 +9,9 @@
 
 ## TL;DR
 
-1. **Content principle** — "公式の積み上げ" (kōshiki no tsumiage, _stacking
-   official sources_). Every record traces back to a government body, an
-   official designation registry, or an officially-recognised public body.
+1. **Content principle** — _stacking official sources_. Every record
+   traces back to a government body, an official designation registry,
+   or an officially-recognised public body.
 2. **No personal curation** — neither KJ nor any AI assistant adds entries
    based on personal taste. "Lesser-known", "hidden", "off-the-beaten-path"
    selections are explicitly out of scope as primary content.
@@ -43,12 +43,11 @@ AI-curated list looks like the training data's biases. A list of
 official designations looks like the country's own institutional view of
 what matters — that's the asset class no other open dataset offers.
 
-The project's value is **"yatta-mongachi" (やったもんがち)** — the work
-that has been done is the moat. Translating 690+ designation records into
-17 languages, scraping 1,938 municipalities, normalising the schema:
-nobody else has done this end-to-end. Adding KJ's taste on top would
-add nothing the world wants, and would dilute the institutional
-authority the dataset rests on.
+The project's value is in **the work that has been done**: translating
+690+ designation records into 17 languages, scraping 1,938 municipalities,
+normalising the schema. Nobody else has done this end-to-end. Adding KJ's
+taste on top would add nothing the world wants, and would dilute the
+institutional authority the dataset rests on.
 
 KJ is a business operator, not a tourism content expert. The project's
 positioning has to reflect that honestly.
@@ -77,6 +76,14 @@ We accept content from these source classes:
 
 - Tourism associations (観光協会, 観光連盟) registered with their
   prefecture
+- **DMOs (Destination Management Organizations)** registered with the
+  Japan Tourism Agency (観光庁登録法人). The agency maintains a public
+  list at https://www.mlit.go.jp/kankocho/seisaku_seido/dmo/ichiran.html
+  and 328 organisations were registered as of 2026-04-01 (registered:
+  10 broad-area + 38 prefectural + 280 regional; candidate: 24
+  regional). Each DMO files a 形成確立計画 (formation plan) with the
+  agency, which is published as a PDF and is considered official
+  content.
 - Chambers of commerce (商工会議所) as authoritative for craft industry
 - JNTO (Japan National Tourism Organization)
 - Universities and museum institutions for academic / cultural records
@@ -110,6 +117,14 @@ of public information, the same way we treat OpenStreetMap.
 - AI-generated entity lists where the AI selects which entities to include
 - Lists curated by KJ or any AI assistant from personal taste
 - Aggregated review rankings as primary content
+- **Media** — newspapers, magazines, TV programmes, regional editorial
+  outlets. Excluded for two reasons: (1) editorial articles are
+  subjective by design, and (2) coverage is non-comprehensive — different
+  outlets cover different things based on their editorial agenda. Mixing
+  media coverage into a "stack of officials" dataset would muddy what
+  is fact vs. what is one editor's choice. We accept that this excludes
+  some valuable content; the cost of ambiguity is higher than the
+  benefit of inclusion.
 
 ---
 
@@ -288,8 +303,6 @@ unilaterally.
 These will be decided case by case, with the call recorded in the
 [ADR directory](decisions/):
 
-- Local newspaper feature articles (大手新聞社の地方版): treat as official
-  for tourism purposes, or exclude as editorial?
 - Academic research outputs (大学の地域研究センター): treat as official,
   or only when a public dataset is released?
 - Religious bodies (寺社の自社サイト): yes (the institution is the
@@ -304,7 +317,7 @@ These will be decided case by case, with the call recorded in the
 
 | Date | Decision | Reference |
 |:---|:---|:---|
-| 2026-04-27 | "公式の積み上げ" set as the data-source principle. Personal curation by KJ or any AI is forbidden as a primary content source. | KJ chat, project_japan_travel_mcp_data_principle.md |
+| 2026-04-27 | _Stacking official sources_ set as the data-source principle. Personal curation by KJ or any AI is forbidden as a primary content source. | KJ chat, project_japan_travel_mcp_data_principle.md |
 | 2026-04-30 | Multi-source acquisition (city hall + tourism org URLs in parallel) approved. Per-municipality coverage targets were set after the acquisition strategy was clarified, not the other way around. | docs/decisions/0001-multi-source-tourism-data.md |
 | 2026-04-30 | Strategy 4 (city-hall outbound link + internal kanko subpage harvest) added. The internal kanko subpage on a city-hall domain counts as a tourism seed because the city's own publication identifies it as such. | commit `be1d009` |
 | 2026-05-01 | Faithful integration vs. curation line clarified. Tags whose language is sourced from the official text are faithful integration; tags requiring KJ/AI judgment are curation and forbidden. | KJ chat, this document |
