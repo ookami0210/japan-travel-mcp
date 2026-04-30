@@ -268,6 +268,37 @@ interface UnescoJapanRecord {
   fetched_at: string;
 }
 
+// 観光庁 (Japan Tourism Agency) registered + candidate DMOs.
+// File shape differs from the other R-3 sources because the fetcher writes
+// `entries[]` rather than `records[]` and carries a top-level summary block.
+interface DmoRecord {
+  id: string;
+  name: string;
+  name_normalized: string;
+  registration_class: string; // 広域連携 / 都道府県 / 地域 / 候補・地域 / 地域(地域連携)
+  status: "registered" | "candidate";
+  prefectures: string[];
+  municipalities: string[];
+  raw_area_text: string;
+  plan_pdf_url: string | null;
+  source: string;
+  authority: string;
+}
+
+interface DmoFile {
+  fetched_at: string;
+  source: string;
+  authority: string;
+  license: string;
+  summary: {
+    registered: number;
+    candidate: number;
+    total: number;
+    with_plan_url: number;
+  };
+  entries: DmoRecord[];
+}
+
 interface R3SourceFile<T> {
   source: { name: string; authority: string; url?: string; license: string };
   fetched_at: string;
@@ -301,6 +332,7 @@ let cachedMetiDensan: R3SourceFile<MetiDensanRecord> | null = null;
 let cachedJapanHeritage: R3SourceFile<JapanHeritageRecord> | null = null;
 let cachedBunkaIntangible: R3SourceFile<BunkaIntangibleRecord> | null = null;
 let cachedUnescoJapan: R3SourceFile<UnescoJapanRecord> | null = null;
+let cachedDmo: DmoFile | null = null;
 let cachedR3Translations: Map<string, R3TranslationRecord> | null = null;
 
 async function loadAllPrefectures(): Promise<PrefectureFile[]> {
@@ -1221,6 +1253,32 @@ async function resolvePrefectureCode(input: string): Promise<string | null> {
 // Bare prefecture name (e.g. "山梨" without "県") — used to text-match
 // against records whose schema doesn't carry a prefecture_code (bunka
 // intangible, free-form descriptions).
+/**
+ * Compile a case-insensitive substring matcher for the optional `keyword`
+ * argument used by aggregator tools (get_festivals / get_traditional_arts /
+ * get_local_food). Returns a function that returns true iff any of the
+ * passed-in fields contains the keyword. When `keyword` is missing/empty
+ * the function always returns true.
+ *
+ * Added 2026-05-01 (Phase 1 GAP_ANALYSIS L4) so callers can narrow large
+ * result sets like `get_festivals(prefecture='秋田県', keyword='花火')`.
+ */
+function compileKeywordMatcher(
+  keyword: string | undefined,
+): (...fields: (string | null | undefined)[]) => boolean {
+  const k = (keyword ?? "").trim();
+  if (!k) return () => true;
+  const lower = k.toLowerCase();
+  return (...fields: (string | null | undefined)[]): boolean => {
+    for (const f of fields) {
+      if (!f) continue;
+      if (f.includes(k)) return true;
+      if (f.toLowerCase().includes(lower)) return true;
+    }
+    return false;
+  };
+}
+
 async function bareNameForPref(prefCode: string): Promise<string | null> {
   const prefs = await loadAllPrefectures();
   const p = prefs.find((x) => x.prefecture.code === prefCode);
@@ -1354,7 +1412,15 @@ async function getDescription(args: {
 // R-3 data loaders (specialty / traditional arts / japan heritage)
 
 function findR3Path(file: string): string {
-  return resolve(dataRoot(), `r3/${file}`);
+  // Primary: the resolved DATA_ROOT (typically HF cache when running from a
+  // user install). Fallback: repo-local data/r3/ — useful for newly-added
+  // R-3 files that haven't been pushed to the HF dataset yet (e.g. dmo.json
+  // before the next dataset upload).
+  const primary = resolve(dataRoot(), `r3/${file}`);
+  if (existsSync(primary)) return primary;
+  const repoLocal = resolve(findPackageRoot(), "data", "r3", file);
+  if (existsSync(repoLocal)) return repoLocal;
+  return primary; // returns missing-path so caller can readFile→catch
 }
 
 async function loadR3Json<T>(file: string): Promise<R3SourceFile<T> | null> {
@@ -1402,6 +1468,17 @@ async function loadUnescoJapan(): Promise<
   if (cachedUnescoJapan) return cachedUnescoJapan;
   cachedUnescoJapan = await loadR3Json<UnescoJapanRecord>("unesco_japan.json");
   return cachedUnescoJapan;
+}
+
+async function loadDmo(): Promise<DmoFile | null> {
+  if (cachedDmo) return cachedDmo;
+  try {
+    const content = await readFile(findR3Path("dmo.json"), "utf8");
+    cachedDmo = JSON.parse(content) as DmoFile;
+  } catch {
+    cachedDmo = null;
+  }
+  return cachedDmo;
 }
 
 async function loadR3Translations(): Promise<Map<string, R3TranslationRecord>> {
@@ -1602,6 +1679,7 @@ async function getLocalSpecialty(args: {
 
 async function getTraditionalArts(args: {
   category?: string; // "important" | "folk" | "unesco" | undefined (all)
+  keyword?: string;
   lang?: string;
 }): Promise<unknown> {
   const lang = args.lang;
@@ -1612,6 +1690,8 @@ async function getTraditionalArts(args: {
   const wantFolk = !args.category || args.category === "folk";
   const wantUnesco = !args.category || args.category === "unesco";
 
+  const keywordRe = compileKeywordMatcher(args.keyword);
+
   if (wantImportant || wantFolk) {
     const f = await loadBunkaIntangible();
     if (f) {
@@ -1619,6 +1699,7 @@ async function getTraditionalArts(args: {
         const isFolk = r.designation_qid === "Q6573893";
         if (isFolk && !wantFolk) continue;
         if (!isFolk && !wantImportant) continue;
+        if (!keywordRe(r.name_ja, r.name_en, r.description_ja, r.description_en)) continue;
         const key = `bunka_intangible:${r.qid}`;
         const t = translations.get(key);
         const meta = r3Translation(t, lang);
@@ -1651,6 +1732,7 @@ async function getTraditionalArts(args: {
     const f = await loadUnescoJapan();
     if (f) {
       for (const r of f.records) {
+        if (!keywordRe(r.name_ja, r.name_en, r.description_ja, r.description_en)) continue;
         const key = `unesco_japan:${r.qid}`;
         const t = translations.get(key);
         const meta = r3Translation(t, lang);
@@ -1785,6 +1867,98 @@ async function getJapanHeritage(args: {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Tool: get_dmo
+//
+// Returns 観光庁 (Japan Tourism Agency) registered + candidate DMO
+// (Destination Management Organization) entities. Source of truth is the
+// agency's published registry — see scrapers/sources/fetch_dmo.py for the
+// fetcher.
+
+async function getDmo(args: {
+  prefecture?: string;
+  type?: string; // "broad" | "prefectural" | "regional" | "candidate"
+  status?: string; // "registered" | "candidate"
+  lang?: string;
+}): Promise<unknown> {
+  let prefCode: string | null = null;
+  let prefName: string | null = null;
+  if (args.prefecture) {
+    prefCode = await resolvePrefectureCode(args.prefecture);
+    if (!prefCode) {
+      return {
+        error: `unknown_prefecture: ${args.prefecture}`,
+        hint: "Use Japanese name (e.g. '京都府'), English slug, or 2-digit JIS code.",
+        disclaimer: DISCLAIMER,
+      };
+    }
+    prefName = (await bareNameForPref(prefCode)) ?? null;
+  }
+
+  const f = await loadDmo();
+  if (!f) {
+    return {
+      error: "dmo data not loaded",
+      hint: "Run scrapers/sources/fetch_dmo.py to populate data/r3/dmo.json",
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  const TYPE_MAP: Record<string, string[]> = {
+    broad: ["広域連携"],
+    prefectural: ["都道府県"],
+    regional: ["地域", "地域(地域連携)"],
+    candidate: ["地域", "地域(地域連携)"], // candidate-status, any class
+  };
+  const wantClasses = args.type ? TYPE_MAP[args.type] : null;
+
+  const items: unknown[] = [];
+  for (const r of f.entries) {
+    if (args.status && r.status !== args.status) continue;
+    if (args.type === "candidate" && r.status !== "candidate") continue;
+    if (wantClasses && !wantClasses.some((c) => r.registration_class.includes(c))) {
+      continue;
+    }
+    if (prefCode) {
+      const matchesPref =
+        r.prefectures.some((p) => p === prefName + "県" || p.startsWith(prefName ?? "__")) ||
+        (prefName ? r.prefectures.some((p) => p.includes(prefName!)) : false);
+      if (!matchesPref) continue;
+    }
+    items.push({
+      id: r.id,
+      name: r.name,
+      name_normalized: r.name_normalized,
+      registration_class: r.registration_class,
+      status: r.status,
+      prefectures: r.prefectures,
+      municipalities: r.municipalities,
+      area_text: r.raw_area_text,
+      plan_pdf_url: r.plan_pdf_url,
+      authority: r.authority,
+      source_url: r.source,
+    });
+  }
+
+  return {
+    prefecture_code: prefCode,
+    type_filter: args.type ?? null,
+    status_filter: args.status ?? null,
+    lang: args.lang ?? null,
+    count: items.length,
+    items,
+    sources: [
+      {
+        name: "観光庁 登録DMO一覧 + 候補DMO一覧",
+        url: f.source,
+      },
+    ],
+    note:
+      "DMOs (Destination Management Organizations) are the official tourism-coordination bodies registered with 観光庁. `plan_pdf_url` links to each DMO's 形成確立計画 PDF — the foundational document explaining their target area, mission, and stakeholder structure.",
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_local_food
 //
 // Like get_local_specialty (food + craft) but food-only AND wider — beyond
@@ -1820,6 +1994,7 @@ function isFoodText(text: string | null | undefined): boolean {
 
 async function getLocalFood(args: {
   prefecture?: string;
+  keyword?: string;
   lang?: string;
   include_overseas?: boolean;
 }): Promise<unknown> {
@@ -1836,6 +2011,7 @@ async function getLocalFood(args: {
   }
   const includeOverseas = args.include_overseas === true;
   const lang = args.lang;
+  const keywordRe = compileKeywordMatcher(args.keyword);
   const translations = await loadR3Translations();
   const items: unknown[] = [];
 
@@ -1845,6 +2021,7 @@ async function getLocalFood(args: {
     for (const r of maff.records) {
       if (prefCode && !r.prefecture_codes.includes(prefCode)) continue;
       if (!includeOverseas && r.prefecture_codes.length === 0) continue;
+      if (!keywordRe(r.name_ja, r.characteristics_ja)) continue;
       const key = `maff_gi:${r.registration_number}`;
       const t = translations.get(key);
       const meta = r3Translation(t, lang);
@@ -1881,6 +2058,7 @@ async function getLocalFood(args: {
         ) {
           continue;
         }
+        if (!keywordRe(s.name, s.description, bodyJoin)) continue;
         items.push({
           source: "scraped_local_food",
           category: "regional_dish",
@@ -1955,6 +2133,7 @@ function isFestivalText(text: string | null | undefined): boolean {
 
 async function getFestivals(args: {
   prefecture?: string;
+  keyword?: string;
   lang?: string;
 }): Promise<unknown> {
   let prefCode: string | null = null;
@@ -1969,6 +2148,7 @@ async function getFestivals(args: {
     }
   }
   const lang = args.lang;
+  const keywordRe = compileKeywordMatcher(args.keyword);
   const translations = await loadR3Translations();
   const items: unknown[] = [];
 
@@ -1995,6 +2175,7 @@ async function getFestivals(args: {
       ) {
         continue;
       }
+      if (!keywordRe(r.name_ja, r.name_en, r.description_ja, r.description_en)) continue;
       const key = `bunka_intangible:${r.qid}`;
       const t = translations.get(key);
       const meta = r3Translation(t, lang);
@@ -2025,6 +2206,7 @@ async function getFestivals(args: {
   if (unesco) {
     for (const r of unesco.records) {
       if (!isFestivalText(r.name_ja) && !isFestivalText(r.name_en)) continue;
+      if (!keywordRe(r.name_ja, r.name_en, r.description_ja, r.description_en)) continue;
       const key = `unesco_japan:${r.qid}`;
       const t = translations.get(key);
       const meta = r3Translation(t, lang);
@@ -2069,6 +2251,7 @@ async function getFestivals(args: {
           ) {
             continue;
           }
+          if (!keywordRe(name, desc, s.name, s.description)) continue;
           items.push({
             source: "scraped_schema_event",
             name_ja: name,
@@ -2404,7 +2587,7 @@ const TOOLS = [
   {
     name: "get_traditional_arts",
     description:
-      "Returns Japanese traditional / intangible cultural assets, drawn ONLY from official designation systems:\n  - 文化庁 重要無形文化財 (Important Intangible Cultural Property)\n  - 文化庁 重要無形民俗文化財 (Important Intangible Folk Cultural Property)\n  - UNESCO Intangible Cultural Heritage (Japan inscriptions)\n\nWikidata is used as the multilingual carrier (CC0); the underlying designation data comes from the authorities above. Coverage on Wikidata is incomplete vs. the full 文化庁 registry — for authoritative lookup, follow `bunca_id` / `unesco_id` / `source_url`.",
+      "Returns Japanese traditional / intangible cultural assets, drawn ONLY from official designation systems:\n  - 文化庁 重要無形文化財 (Important Intangible Cultural Property)\n  - 文化庁 重要無形民俗文化財 (Important Intangible Folk Cultural Property)\n  - UNESCO Intangible Cultural Heritage (Japan inscriptions)\n\nWikidata is used as the multilingual carrier (CC0); the underlying designation data comes from the authorities above. Coverage on Wikidata is incomplete vs. the full 文化庁 registry — for authoritative lookup, follow `bunca_id` / `unesco_id` / `source_url`.\n\nUse the optional `keyword` arg to narrow the result set by substring match against name + description (e.g. `keyword='kabuki'`, `keyword='発酵'`, `keyword='舞'`).",
     inputSchema: {
       type: "object",
       properties: {
@@ -2413,6 +2596,11 @@ const TOOLS = [
           enum: ["important", "folk", "unesco"],
           description:
             "Restrict to a single designation system. Omit for all three.",
+        },
+        keyword: {
+          type: "string",
+          description:
+            "Optional substring filter applied to name + description (case-insensitive). Examples: 'kabuki', '発酵', '舞'.",
         },
         lang: {
           type: "string",
@@ -2444,7 +2632,7 @@ const TOOLS = [
   {
     name: "get_local_food",
     description:
-      "Returns Japan's regional foods (ご当地グルメ / 郷土料理 / 銘菓 / 地酒) aggregated from two sources: (1) MAFF Geographical Indications — officially-designated agricultural products with full provenance; (2) the municipal / tourism-association scrape, surfacing the everyday-famous dishes that aren't formally designated but are what the prefecture's tourism portals promote.\n\nUse this when the user asks 'what should I eat in <prefecture>' for an answer that mixes the formally-protected names with the popular local dishes. For crafts as well as food, use `get_local_specialty`.",
+      "Returns Japan's regional foods (ご当地グルメ / 郷土料理 / 銘菓 / 地酒) aggregated from two sources: (1) MAFF Geographical Indications — officially-designated agricultural products with full provenance; (2) the municipal / tourism-association scrape, surfacing the everyday-famous dishes that aren't formally designated but are what the prefecture's tourism portals promote.\n\nUse this when the user asks 'what should I eat in <prefecture>' for an answer that mixes the formally-protected names with the popular local dishes. For crafts as well as food, use `get_local_specialty`.\n\nUse the optional `keyword` arg to narrow large result sets by substring match (e.g. `keyword='発酵'`, `keyword='ramen'`).",
     inputSchema: {
       type: "object",
       properties: {
@@ -2452,6 +2640,11 @@ const TOOLS = [
           type: "string",
           description:
             "Prefecture (Japanese name like '京都府', English slug 'kyoto', or 2-digit JIS code '26'). Omit to return all.",
+        },
+        keyword: {
+          type: "string",
+          description:
+            "Optional substring filter applied to name + description + body (case-insensitive). Examples: '発酵', 'ramen', '日本酒'.",
         },
         include_overseas: {
           type: "boolean",
@@ -2473,7 +2666,7 @@ const TOOLS = [
   {
     name: "get_festivals",
     description:
-      "Returns Japanese festivals (祭り / matsuri) and traditional rituals aggregated from multiple official sources: 文化庁 Important Intangible Folk Cultural Properties, UNESCO Intangible Cultural Heritage inscriptions for Japan, and any Schema.org Event objects we found in the municipal scrape.\n\nUse this when the user asks about a festival in a specific prefecture — coverage is much wider than `get_events` (which only queries Wikidata live). 17-language translations are returned via `name` / `description` when available.\n\nFor real-time Wikidata SPARQL queries with month filtering, use `get_events` instead.",
+      "Returns Japanese festivals (祭り / matsuri) and traditional rituals aggregated from multiple official sources: 文化庁 Important Intangible Folk Cultural Properties, UNESCO Intangible Cultural Heritage inscriptions for Japan, and any Schema.org Event objects we found in the municipal scrape.\n\nUse this when the user asks about a festival in a specific prefecture — coverage is much wider than `get_events` (which only queries Wikidata live). 17-language translations are returned via `name` / `description` when available.\n\nFor real-time Wikidata SPARQL queries with month filtering, use `get_events` instead.\n\nUse the optional `keyword` arg to narrow large result sets by substring match (e.g. `keyword='花火'` for fireworks-themed festivals).",
     inputSchema: {
       type: "object",
       properties: {
@@ -2481,6 +2674,11 @@ const TOOLS = [
           type: "string",
           description:
             "Prefecture (Japanese name like '京都府', English slug 'kyoto', or 2-digit JIS code '26'). Omit to return all.",
+        },
+        keyword: {
+          type: "string",
+          description:
+            "Optional substring filter applied to name + description (case-insensitive). Examples: '花火', 'fire', '神楽'.",
         },
         lang: {
           type: "string",
@@ -2534,6 +2732,41 @@ const TOOLS = [
           ],
           description:
             "Language for the translated `title` and `summary`. Defaults to original Japanese.",
+        },
+      },
+    },
+  },
+  {
+    name: "get_dmo",
+    description:
+      "Returns 観光庁 (Japan Tourism Agency) registered + candidate DMO (Destination Management Organization) entities — the official tourism-coordination bodies for each region.\n\nEach DMO is the authoritative point of contact for stakeholder coordination, marketing, and visitor experience design in its target area. Each entry includes the registration class (広域連携 / 都道府県 / 地域 / 地域連携), the prefectures and municipalities the DMO covers, and a link to the official 形成確立計画 PDF (formation/establishment plan).\n\nUse this when the user asks about who is responsible for a region's tourism, or wants to learn the strategic framing of a destination as written by the body that coordinates it.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        prefecture: {
+          type: "string",
+          description:
+            "Prefecture (Japanese name like '京都府', English slug 'kyoto', or 2-digit JIS code '26'). Returns DMOs whose target area includes this prefecture.",
+        },
+        type: {
+          type: "string",
+          enum: ["broad", "prefectural", "regional", "candidate"],
+          description:
+            "Restrict to a registration class: broad (広域連携), prefectural (都道府県), regional (地域 / 地域連携), or candidate (any class with status=candidate). Omit for all.",
+        },
+        status: {
+          type: "string",
+          enum: ["registered", "candidate"],
+          description: "Filter by registry status. Omit for both.",
+        },
+        lang: {
+          type: "string",
+          enum: [
+            "en", "ja", "zh", "ko", "fr", "es", "de", "it", "pt", "ru",
+            "th", "vi", "id", "ms", "ar", "hi", "tl",
+          ],
+          description:
+            "Reserved — DMO entries are currently Japanese-only; translations will land in a future release.",
         },
       },
     },
@@ -2640,12 +2873,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "get_traditional_arts":
         result = await getTraditionalArts({
           category: args.category as string | undefined,
+          keyword: args.keyword as string | undefined,
           lang: args.lang as string | undefined,
         });
         break;
       case "get_local_food":
         result = await getLocalFood({
           prefecture: args.prefecture as string | undefined,
+          keyword: args.keyword as string | undefined,
           lang: args.lang as string | undefined,
           include_overseas: args.include_overseas === true,
         });
@@ -2653,6 +2888,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "get_festivals":
         result = await getFestivals({
           prefecture: args.prefecture as string | undefined,
+          keyword: args.keyword as string | undefined,
           lang: args.lang as string | undefined,
         });
         break;
@@ -2660,6 +2896,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = await getJapanHeritage({
           prefecture: args.prefecture as string | undefined,
           theme: args.theme as string | undefined,
+          lang: args.lang as string | undefined,
+        });
+        break;
+      case "get_dmo":
+        result = await getDmo({
+          prefecture: args.prefecture as string | undefined,
+          type: args.type as string | undefined,
+          status: args.status as string | undefined,
           lang: args.lang as string | undefined,
         });
         break;

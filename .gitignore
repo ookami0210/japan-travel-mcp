@@ -38,6 +38,7 @@ coverage/
 # Scraper runtime artifacts
 scrapers/.cache/
 scrapers/.state/
+data/_cache/
 *.tmp
 *.lock
 
@@ -66,6 +67,7 @@ data/_state/wikidata_attractions.json
 data/_state/municipalities.json
 data/_state/municipality_centroids.json
 data/_state/official_urls.json
+data/_state/dmo_seed_urls.json
 data/r3/*.json
 data/r3/translations/
 
