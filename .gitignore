@@ -75,3 +75,6 @@ data/_logs/quality_scores_*.jsonl
 
 # Discover-script run state — internal marker only, regenerated each run.
 data/_state/tourism_org_discovery_state.json
+
+# Test harness raw output — large (~8MB), regenerable by re-running the harness.
+docs/quality/test_results.jsonl
