@@ -72,3 +72,6 @@ data/r3/translations/
 # Quality observability — per-spot scores are big (~10MB / 25k spots).
 # The summary md/json are kept (they're snapshot baselines worth diffing).
 data/_logs/quality_scores_*.jsonl
+
+# Discover-script run state — internal marker only, regenerated each run.
+data/_state/tourism_org_discovery_state.json
