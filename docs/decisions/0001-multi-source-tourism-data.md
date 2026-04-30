@@ -46,11 +46,16 @@ together produce the observed coverage gap:
    page; we never get there.
 
 3. **Tourism-keyword vocabulary is index-page level.** `discover.ts`
-   recognises "観光", "見どころ", "イベント", "祭り", "festival", "event",
-   etc. — but not "祭礼", "催事", "年中行事", "神事", "行事", "特集",
-   "特産", "名物", "銘菓", "土産", "逸品", and not "things-to-do",
-   "must-see", "guide", "experience" in English. Many feature pages on
-   tourism-association sites use exactly those terms and are skipped.
+   recognises a narrow set of broad terms — 観光 (sightseeing),
+   見どころ (highlights), イベント (events), 祭り (festival), plus
+   English "festival" and "event". It does NOT recognise the longer
+   tail of feature-page vocabulary that tourism-association sites
+   actually use: 祭礼 / 催事 / 年中行事 / 神事 / 行事 (variants of
+   ritual / festival / annual event), 特産 / 名物 / 銘菓 / 土産 / 逸品
+   (regional speciality / famous local product / renowned confection /
+   souvenir / exceptional item), 特集 (feature article), and English
+   "things-to-do" / "must-see" / "guide" / "experience". Many of the
+   pages we want to reach use exactly those terms and get skipped.
 
 4. **The extractor only stores page-level metadata.** Each scraped page
    contributes `name / description / address / coordinates / language`,
