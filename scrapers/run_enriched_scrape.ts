@@ -44,18 +44,27 @@ import {
 } from "./lib/types.js";
 
 const ROOT = new URL("../", import.meta.url);
-const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
-const URLS_PATH = new URL("data/_state/official_urls.json", ROOT);
-const TOURISM_ORGS_PATH = new URL(
-  "data/_state/tourism_org_urls.json",
-  ROOT,
-);
-const CENTROIDS_PATH = new URL(
-  "data/_state/municipality_centroids.json",
-  ROOT,
-);
 const PREFECTURES_DIR = new URL("data/prefectures/", ROOT);
 const LOG_DIR = new URL("data/_logs/", ROOT);
+
+// State files (municipalities.json etc.) are gitignored after the Phase C
+// HF migration — they live on the HF dataset and are mirrored into the
+// per-user cache on `npx japan-travel-mcp` first run. Resolve them through
+// the same fallback chain used by quality_report.ts so a fresh checkout +
+// HF cache is enough to run the enriched scrape locally.
+const STATE_DATA_ROOTS: URL[] = [
+  new URL("data/", ROOT),
+  new URL("file://" + (process.env.HOME ?? "") + "/.japan-travel-mcp/data/"),
+  new URL("file:///tmp/jtm-e2e-cache/"),
+];
+
+function findStateFile(relPath: string): URL | null {
+  for (const root of STATE_DATA_ROOTS) {
+    const candidate = new URL(relPath, root);
+    if (existsSync(fileURLToPath(candidate))) return candidate;
+  }
+  return null;
+}
 
 const PREFECTURE_SLUGS: Record<string, string> = {
   "01": "hokkaido", "02": "aomori", "03": "iwate", "04": "miyagi",
@@ -136,8 +145,10 @@ async function writePrefectureFile(
 
 async function loadOfficialUrls(): Promise<Map<string, string>> {
   const out = new Map<string, string>();
+  const path = findStateFile("_state/official_urls.json");
+  if (!path) return out;
   try {
-    const f = JSON.parse(await readFile(fileURLToPath(URLS_PATH), "utf8")) as {
+    const f = JSON.parse(await readFile(fileURLToPath(path), "utf8")) as {
       entries: { code: string; official_url: string | null }[];
     };
     for (const e of f.entries) {
@@ -151,12 +162,11 @@ async function loadOfficialUrls(): Promise<Map<string, string>> {
 
 async function loadTourismOrgUrls(): Promise<Map<string, string[]>> {
   const out = new Map<string, string[]>();
-  if (!existsSync(fileURLToPath(TOURISM_ORGS_PATH))) {
-    return out;
-  }
+  const path = findStateFile("_state/tourism_org_urls.json");
+  if (!path) return out;
   try {
     const f = JSON.parse(
-      await readFile(fileURLToPath(TOURISM_ORGS_PATH), "utf8"),
+      await readFile(fileURLToPath(path), "utf8"),
     ) as { entries: TourismOrgEntry[] };
     for (const e of f.entries ?? []) {
       const urls: string[] = [];
@@ -198,25 +208,36 @@ async function main(): Promise<void> {
     `[enriched] batch=${batchLabel}, prefectures=${targetPrefs.join(",")}, dry_run=${isDryRun}\n`,
   );
 
+  const muniPath = findStateFile("_state/municipalities.json");
+  if (!muniPath) {
+    throw new Error(
+      "Could not find _state/municipalities.json in repo, ~/.japan-travel-mcp/data, " +
+        "or /tmp/jtm-e2e-cache. Run `npm run fetch:municipalities` first or " +
+        "ensure the HF cache is populated.",
+    );
+  }
   const muniFile = JSON.parse(
-    await readFile(fileURLToPath(MUNI_PATH), "utf8"),
+    await readFile(fileURLToPath(muniPath), "utf8"),
   ) as { municipalities: MunicipalityRaw[] };
 
   const officialByCode = await loadOfficialUrls();
   const tourismOrgsByCode = await loadTourismOrgUrls();
 
   process.stderr.write(
-    `[enriched] official_urls: ${officialByCode.size} muni, tourism_org_urls: ${tourismOrgsByCode.size} muni\n`,
+    `[enriched] municipalities: ${muniFile.municipalities.length} (from ${muniPath.href}), official_urls: ${officialByCode.size} muni, tourism_org_urls: ${tourismOrgsByCode.size} muni\n`,
   );
 
   let centroids: Record<string, { lat: number; lng: number }> = {};
-  try {
-    const f = JSON.parse(
-      await readFile(fileURLToPath(CENTROIDS_PATH), "utf8"),
-    ) as { centroids: Record<string, { lat: number; lng: number }> };
-    centroids = f.centroids ?? {};
-  } catch {
-    // missing centroids → fallback chain skips the centroid step
+  const centroidsPath = findStateFile("_state/municipality_centroids.json");
+  if (centroidsPath) {
+    try {
+      const f = JSON.parse(
+        await readFile(fileURLToPath(centroidsPath), "utf8"),
+      ) as { centroids: Record<string, { lat: number; lng: number }> };
+      centroids = f.centroids ?? {};
+    } catch {
+      // missing centroids → fallback chain skips the centroid step
+    }
   }
 
   // All municipalities in the target prefecture set that have AT LEAST ONE
