@@ -32,6 +32,7 @@ import { dirname, resolve } from "node:path";
 import { resolveDataRoot } from "./lib/hf_data.js";
 import { matchesMunicipality, stripPrefSuffix } from "./lib/match.js";
 import { semanticSearch, tryLoadSemanticIndex } from "./lib/semantic.js";
+import { hybridSearch } from "./lib/hybrid.js";
 
 const DISCLAIMER =
   "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.";
@@ -2040,6 +2041,80 @@ async function searchSemantic(args: {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Tool: search_hybrid
+//
+// BM25 + multilingual-e5 fused with Reciprocal Rank Fusion (Phase 3-min).
+// Uses the same prebuilt embedding binary as search_semantic; the BM25
+// inverted index is built in-memory at first use over the same corpus.
+
+async function searchHybrid(args: {
+  q: string;
+  prefecture?: string;
+  kind?: string;
+  k?: number;
+}): Promise<unknown> {
+  if (!args.q?.trim()) {
+    return {
+      error: "q required",
+      hint: "Provide a natural-language query in any language.",
+      disclaimer: DISCLAIMER,
+    };
+  }
+  let prefCode: string | null = null;
+  if (args.prefecture) {
+    prefCode = await resolvePrefectureCode(args.prefecture);
+    if (!prefCode) {
+      return { error: `unknown_prefecture: ${args.prefecture}`, disclaimer: DISCLAIMER };
+    }
+  }
+  const k = Math.max(1, Math.min(args.k ?? 10, 50));
+  const candidateRoots = [dataRoot()];
+  const repoRoot = resolve(findPackageRoot(), "data");
+  if (!candidateRoots.includes(repoRoot)) candidateRoots.push(repoRoot);
+  let out: Awaited<ReturnType<typeof hybridSearch>> | null = null;
+  for (const root of candidateRoots) {
+    out = await hybridSearch(root, args.q, k, {
+      prefecture_code: prefCode,
+      kind: args.kind ?? null,
+    });
+    if (out.available) break;
+  }
+  if (!out) out = { available: false, query: args.q, k, reason: "no_root_resolved" };
+  if (!out.available) {
+    return {
+      available: false,
+      reason: out.reason,
+      hint: "Build the embedding index with `npm run embed:build`.",
+      query: args.q,
+      disclaimer: DISCLAIMER,
+    };
+  }
+  return {
+    available: true,
+    query: args.q,
+    prefecture_code: prefCode,
+    kind: args.kind ?? null,
+    k,
+    bm_count: out.bm_count,
+    vec_count: out.vec_count,
+    results: (out.results ?? []).map((r) => ({
+      score: r.score,
+      rank_bm: r.rank_bm,
+      rank_vec: r.rank_vec,
+      key: r.entry.key,
+      kind: r.entry.kind,
+      source: r.entry.source,
+      name: r.entry.name,
+      description: r.entry.description ?? null,
+      prefecture: r.entry.prefecture_name ?? null,
+      municipality: r.entry.municipality ?? null,
+      url: r.entry.url ?? null,
+    })),
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_local_food
 //
 // Like get_local_specialty (food + craft) but food-only AND wider — beyond
@@ -2818,9 +2893,31 @@ const TOOLS = [
     },
   },
   {
+    name: "search_hybrid",
+    description:
+      "Hybrid retrieval — BM25 lexical match + multilingual-e5 semantic match fused with Reciprocal Rank Fusion (Phase 3-min, 2026-05-01).\n\nUses the same prebuilt embedding binary as search_semantic plus an in-memory BM25 inverted index over the same corpus. Returns the top-k results ranked by RRF, exposing each result's BM25 rank and semantic rank for transparency.\n\nUse this for general retrieval — it strictly dominates either retriever alone in our quality benchmarks. Falls back to `available: false` when the embedding binary hasn't been built.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        q: { type: "string", description: "Natural-language query in any language." },
+        prefecture: {
+          type: "string",
+          description: "Restrict to entries tagged to this prefecture.",
+        },
+        kind: {
+          type: "string",
+          enum: ["spot", "wikidata", "r3"],
+          description: "Restrict to one entity kind.",
+        },
+        k: { type: "number", description: "Number of results to return (1-50, default 10)." },
+      },
+      required: ["q"],
+    },
+  },
+  {
     name: "search_semantic",
     description:
-      "Vector-similarity search over the prebuilt multilingual-e5 embedding matrix (Phase 2, 2026-05-01). Returns the top-k entries most similar to the query across municipal-scrape spots, Wikidata attractions, and R-3 designation registries.\n\nWorks with natural-language queries in any of e5's supported languages — useful when keyword/substring search misses semantic paraphrases (e.g. user asks 'endangered tradition' and we want to surface 失われゆく職人技).\n\nOptional `prefecture` and `kind` filters narrow the candidate set before scoring. Returns `available: false` with a helpful `reason` when the embedding binary hasn't been built (run `npm run embed:build`).",
+      "Vector-similarity search over the prebuilt multilingual-e5 embedding matrix (Phase 2, 2026-05-01). Returns the top-k entries most similar to the query across municipal-scrape spots, Wikidata attractions, and R-3 designation registries.\n\nWorks with natural-language queries in any of e5's supported languages — useful when keyword/substring search misses semantic paraphrases (e.g. user asks 'endangered tradition' and we want to surface 失われゆく職人技).\n\nOptional `prefecture` and `kind` filters narrow the candidate set before scoring. Returns `available: false` with a helpful `reason` when the embedding binary hasn't been built (run `npm run embed:build`).\n\nFor most queries prefer `search_hybrid`, which fuses this with BM25 — semantic alone has worse precision on exact-name queries.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3020,6 +3117,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case "search_semantic":
         result = await searchSemantic({
+          q: String(args.q ?? ""),
+          prefecture: args.prefecture as string | undefined,
+          kind: args.kind as string | undefined,
+          k: typeof args.k === "number" ? args.k : args.k ? Number(args.k) : undefined,
+        });
+        break;
+      case "search_hybrid":
+        result = await searchHybrid({
           q: String(args.q ?? ""),
           prefecture: args.prefecture as string | undefined,
           kind: args.kind as string | undefined,
