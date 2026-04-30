@@ -139,6 +139,8 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 | `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |
 | **`get_description`** | **SIGNATURE TOOL.** 200-300 character tourism descriptions in **17 languages** for 13,000+ spots, generated for global tourist consumption |
 | `get_local_specialty` | Regional specialties (food + crafts) by prefecture, drawn from official designation systems: MAFF Geographical Indications (172 items) + METI-designated Traditional Crafts / Dentō Kōgeihin (231 items) |
+| `get_local_food` | Regional cuisine — MAFF GI food rows + scraped tourism-association ご当地グルメ / 名物 / 郷土料理 listings, deduplicated and prefecture-scoped |
+| `get_festivals` | Festivals (祭 / 神事 / 行事) — UNESCO ICH + Important Intangible Cultural Properties + scraped municipal & tourism-association festival pages, with Schema.org Event metadata where present |
 | `get_traditional_arts` | Intangible cultural assets from the Agency for Cultural Affairs — Important Intangible Cultural Properties + Folk (125 items) + UNESCO ICH inscriptions for Japan (58 items) |
 | `get_japan_heritage` | All 104 Japan Heritage (Nihon Isan) stories from the Agency for Cultural Affairs, with theme / era / prefecture filters |
 
@@ -157,7 +159,9 @@ no API key required.
 
 ```
 Layer 1: Municipal tourism pages           — all 1,938 entities (incl. designated-city wards)
-Layer 2: Prefecture tourism offices        — all 47 prefectures
+Layer 2: Tourism-association portals       — all 47 prefectures + municipal/regional bodies
+                                             (city-hall + tourism-org URLs scraped in parallel,
+                                             see docs/decisions/0001)
 Layer 3: Hotel & ryokan master list        — built from Wikidata + OSM (see below)
 Layer 4: Wikidata attractions              — 41,404 ja-anchored entities
 Layer 5: 17-language translation layer     — Wikipedia sitelinks + Sonnet 4.6 batch
@@ -165,6 +169,13 @@ Layer 6: Official designation systems      — MAFF Geographical Indications,
          METI Traditional Crafts (Dentō Kōgeihin), Japan Heritage (Nihon Isan),
          Important Intangible Cultural Properties, UNESCO ICH (Japan)
 ```
+
+The municipal-page layer extracts plain prose paragraphs and any
+embedded `Schema.org` `Event` / `Place` JSON-LD blocks, so festival
+dates, venues, and place metadata feed `get_festivals` / `get_spots`
+without depending on freeform descriptions alone. See
+[docs/decisions/0001-multi-source-tourism-data.md](./docs/decisions/0001-multi-source-tourism-data.md)
+for the rationale.
 
 ### Official designation sources (`data/r3/`)
 
@@ -277,7 +288,7 @@ japan-travel-mcp/                          # this repo — code + lightweight me
 ├── CONTRIBUTING.md
 ├── DATA_POLICY.md
 ├── src/
-│   ├── index.ts                           # MCP server (10 tools)
+│   ├── index.ts                           # MCP server (12 tools)
 │   └── lib/hf_data.ts                     # HF dataset bootstrap (first-run download)
 ├── data/                                  # only what readers / contributors need to see
 │   ├── _logs/                             # daily scrape run summaries (transparency)
@@ -392,6 +403,15 @@ What's covered today:
 Test files live under `tests/`, fixtures under `tests/fixtures/`. Tests are
 type-checked alongside the rest of the project — `npm run typecheck:all`
 covers `src/`, `scrapers/`, and `tests/`.
+
+### Quality report
+
+Beyond unit tests, `npm run quality:report` audits the *contents* of the
+dataset: a per-prefecture coverage matrix (spots / hotels / festivals /
+local food / heritage) plus a per-spot quality score (description, body
+paragraphs, address, coordinates, Schema.org metadata, image) banded
+low / medium / high. Outputs land in `data/_logs/quality_report_*.md`
+and are the baseline we measure the multi-source sprint against.
 
 ---
 
