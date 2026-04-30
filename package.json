@@ -31,6 +31,7 @@
     "fetch:bunka_intangible": "tsx scrapers/sources/fetch_bunka_intangible.ts",
     "fetch:unesco_japan": "tsx scrapers/sources/fetch_unesco_japan.ts",
     "discover:tourism_orgs": "tsx scrapers/sources/discover_tourism_orgs.ts",
+    "scrape:enriched": "tsx scrapers/run_enriched_scrape.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:all": "tsc --project tsconfig.scrapers.json",
     "test": "vitest run",
