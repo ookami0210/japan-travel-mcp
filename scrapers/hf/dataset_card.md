@@ -117,6 +117,20 @@ Arabic (ar), Hindi (hi), Tagalog (tl).
 The 17 were chosen to cover the JNTO inbound-tourism priority languages plus
 major source markets across Asia-Pacific, Europe, and the Middle East.
 
+## Coverage
+
+All 47 prefectures are populated; every entity has descriptions in **all 17
+languages** (no per-language gaps inside the 13,394-entity description set).
+The chart shows the per-prefecture entity count — the long tail outside Kyoto
+/ Tokyo / Hokkaido is the actual point of this dataset.
+
+![Coverage by prefecture](coverage_chart.png)
+
+**13,394 attractions × 17 languages = 227,698 description cells.** Plus 690
+official-designation records (MAFF GI / METI crafts / Japan Heritage / 文化庁
+intangible / UNESCO ICH) translated to the same 17 languages = 11,730 more
+cells. Plus 13,961 canonical names × 17 languages = 237,337 more cells.
+
 ## Refresh cadence
 
 The GitHub Actions cron in the [code repo](https://github.com/ookami0210/japan-travel-mcp)

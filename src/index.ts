@@ -1758,12 +1758,25 @@ const TOOLS = [
 
 // ──────────────────────────────────────────────────────────────────────
 // Server bootstrap
+//
+// `buildServer()` and `initDataRoot` are exported so the HTTP entrypoint
+// (src/index_http.ts) can reuse the exact same tool registry without
+// duplicating the switch table or the data-bootstrap logic.
 
-const server = new Server(
-  { name: "japan-travel-mcp", version: "0.0.1" },
-  { capabilities: { tools: {} } },
-);
+export { initDataRoot };
 
+export function buildServer(): Server {
+  const server = new Server(
+    { name: "japan-travel-mcp", version: "1.0.0" },
+    { capabilities: { tools: {} } },
+  );
+  registerHandlers(server);
+  return server;
+}
+
+const server = buildServer();
+
+function registerHandlers(server: Server): void {
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: TOOLS,
 }));
@@ -1873,18 +1886,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     };
   }
 });
+}  // end registerHandlers
 
-async function main(): Promise<void> {
-  // Resolve the data root before serving any tool calls. On a fresh install
-  // this downloads ~270 MB from huggingface.co/datasets/kjsunada/japan-travel-mcp-data
-  // to ~/.japan-travel-mcp/data/ once.
+// stdio entrypoint — only runs when this file is executed directly,
+// not when it is imported by src/index_http.ts.
+async function mainStdio(): Promise<void> {
   await initDataRoot();
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("[japan-travel-mcp] MCP server running on stdio");
 }
 
-main().catch((err) => {
-  console.error("[japan-travel-mcp] FATAL:", err);
-  process.exit(1);
-});
+const isMain = import.meta.url === `file://${process.argv[1]}`;
+if (isMain) {
+  mainStdio().catch((err) => {
+    console.error("[japan-travel-mcp] FATAL:", err);
+    process.exit(1);
+  });
+}
