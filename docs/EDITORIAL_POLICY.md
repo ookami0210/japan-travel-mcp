@@ -12,9 +12,9 @@
 1. **Content principle** — _stacking official sources_. Every record
    traces back to a government body, an official designation registry,
    or an officially-recognised public body.
-2. **No personal curation** — neither KJ nor any AI assistant adds entries
-   based on personal taste. "Lesser-known", "hidden", "off-the-beaten-path"
-   selections are explicitly out of scope as primary content.
+2. **No personal curation** — we do not add entries based on personal
+   taste. "Lesser-known", "hidden", "off-the-beaten-path" selections
+   are explicitly out of scope as primary content.
 3. **Faithful interpretation IS allowed** — if an official source describes
    something with specific language ("徐々に失われつつある漆掻きの技"), tagging
    that record `dying-craft` is faithful integration, not curation. The line
@@ -38,18 +38,18 @@ travellers. The opportunity is to translate and distribute it openly,
 not to second-guess it.
 
 The risk in any "best of Japan" project is that the curator's perspective
-narrows the dataset. A KJ-curated list looks like KJ's preferences; an
-AI-curated list looks like the training data's biases. A list of
-official designations looks like the country's own institutional view of
-what matters — that's the asset class no other open dataset offers.
+narrows the dataset. A curated list looks like the curator's preferences.
+A list of official designations looks like the country's own
+institutional view of what matters — that's the asset class no other
+open dataset offers.
 
 The project's value is in **the work that has been done**: translating
 690+ designation records into 17 languages, scraping 1,938 municipalities,
-normalising the schema. Nobody else has done this end-to-end. Adding KJ's
-taste on top would add nothing the world wants, and would dilute the
+normalising the schema. Nobody else has done this end-to-end. Adding our
+own taste on top would add nothing the world wants, and would dilute the
 institutional authority the dataset rests on.
 
-KJ is a business operator, not a tourism content expert. The project's
+We are not a tourism editorial team and do not aspire to be. The project's
 positioning has to reflect that honestly.
 
 ---
@@ -115,7 +115,7 @@ of public information, the same way we treat OpenStreetMap.
 - Personal blogs, food review sites (食べログ, トリップアドバイザー), SNS
   posts
 - AI-generated entity lists where the AI selects which entities to include
-- Lists curated by KJ or any AI assistant from personal taste
+- Lists curated from personal taste
 - Aggregated review rankings as primary content
 - **Media** — newspapers, magazines, TV programmes, regional editorial
   outlets. Excluded for two reasons: (1) editorial articles are
@@ -317,8 +317,8 @@ These will be decided case by case, with the call recorded in the
 
 | Date | Decision | Reference |
 |:---|:---|:---|
-| 2026-04-27 | _Stacking official sources_ set as the data-source principle. Personal curation by KJ or any AI is forbidden as a primary content source. | KJ chat, project_japan_travel_mcp_data_principle.md |
+| 2026-04-27 | _Stacking official sources_ set as the data-source principle. Personal curation is forbidden as a primary content source. | KJ chat, project_japan_travel_mcp_data_principle.md |
 | 2026-04-30 | Multi-source acquisition (city hall + tourism org URLs in parallel) approved. Per-municipality coverage targets were set after the acquisition strategy was clarified, not the other way around. | docs/decisions/0001-multi-source-tourism-data.md |
 | 2026-04-30 | Strategy 4 (city-hall outbound link + internal kanko subpage harvest) added. The internal kanko subpage on a city-hall domain counts as a tourism seed because the city's own publication identifies it as such. | commit `be1d009` |
-| 2026-05-01 | Faithful integration vs. curation line clarified. Tags whose language is sourced from the official text are faithful integration; tags requiring KJ/AI judgment are curation and forbidden. | KJ chat, this document |
+| 2026-05-01 | Faithful integration vs. curation line clarified. Tags whose language is sourced from the official text are faithful integration; tags requiring our judgment are curation and forbidden. | KJ chat, this document |
 | 2026-05-01 | Phase 1 (more raw text) + Phase 2 (vector embeddings) + Phase 3 (BM25+vector hybrid) accepted as principle-compliant retrieval infrastructure. The LLM client is the explicit reframing layer for subjective queries. | KJ chat, this document |
