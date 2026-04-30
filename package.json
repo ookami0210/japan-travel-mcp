@@ -30,6 +30,7 @@
     "fetch:japan_heritage": "tsx scrapers/sources/fetch_japan_heritage.ts",
     "fetch:bunka_intangible": "tsx scrapers/sources/fetch_bunka_intangible.ts",
     "fetch:unesco_japan": "tsx scrapers/sources/fetch_unesco_japan.ts",
+    "discover:tourism_orgs": "tsx scrapers/sources/discover_tourism_orgs.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:all": "tsc --project tsconfig.scrapers.json",
     "test": "vitest run",
