@@ -95,21 +95,25 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--new-tools", action="store_true",
                         help="Score the 11-case new-tools corpus instead of the 100-case set")
+    parser.add_argument("--label", default="post-scrape",
+                        help="Label this run (e.g. 'pre-scrape', 'post-scrape'). "
+                             "Used in the report title and the output filename suffix.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print prompts but don't call API")
     args = parser.parse_args()
 
+    label_slug = re.sub(r"[^a-z0-9]+", "_", args.label.lower()).strip("_") or "run"
     if args.new_tools:
         results_path = REPO / "docs" / "quality" / "test_results_new_tools.jsonl"
         calls_path = REPO / "docs" / "quality" / "test_calls_new_tools.json"
-        scored_path = REPO / "docs" / "quality" / "test_results_new_tools_scored.jsonl"
-        report_path = REPO / "docs" / "quality" / "SCORING_REPORT_NEW_TOOLS.md"
+        scored_path = REPO / "docs" / "quality" / f"test_results_new_tools_scored.{label_slug}.jsonl"
+        report_path = REPO / "docs" / "quality" / f"SCORING_REPORT_NEW_TOOLS.{label_slug}.md"
         case_total = 22  # 11 cases × 2pts max
     else:
         results_path = REPO / "docs" / "quality" / "test_results.jsonl"
         calls_path = REPO / "docs" / "quality" / "test_calls.json"
-        scored_path = REPO / "docs" / "quality" / "test_results_scored.jsonl"
-        report_path = REPO / "docs" / "quality" / "SCORING_REPORT.md"
+        scored_path = REPO / "docs" / "quality" / f"test_results_scored.{label_slug}.jsonl"
+        report_path = REPO / "docs" / "quality" / f"SCORING_REPORT.{label_slug}.md"
         case_total = 200  # 100 cases × 2pts max
 
     if not results_path.exists():
@@ -192,10 +196,10 @@ def main() -> None:
     print(f"wrote {scored_path}", file=sys.stderr)
 
     # Build markdown report
-    write_report(scored, report_path, case_total, args.new_tools)
+    write_report(scored, report_path, case_total, args.new_tools, args.label)
 
 
-def write_report(scored: list[dict], path: Path, case_total: int, new_tools: bool) -> None:
+def write_report(scored: list[dict], path: Path, case_total: int, new_tools: bool, label: str) -> None:
     n = len(scored)
     counts = {0: 0, 1: 0, 2: 0, None: 0}
     for s in scored:
@@ -204,8 +208,8 @@ def write_report(scored: list[dict], path: Path, case_total: int, new_tools: boo
     raw_total = counts[2] * 2 + counts[1]
     pct = (raw_total / case_total) * 100 if case_total else 0
 
-    title = "Quality test scoring — new-tools (post-scrape)" if new_tools \
-        else "Quality test scoring — 100-case (post-scrape)"
+    title = f"Quality test scoring — new-tools ({label})" if new_tools \
+        else f"Quality test scoring — 100-case ({label})"
 
     lines = [
         f"# {title}",
