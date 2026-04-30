@@ -101,10 +101,10 @@ no AI-curated lists, no UGC.
 | Wikidata attractions | Wikidata, Wikimedia Foundation | CC0 |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
 | Tourist descriptions (17-lang) | AI-translated from Wikidata + project glossary | CC BY 4.0 (this compilation) |
-| Geographical Indications (GI) | Ministry of Agriculture, Forestry and Fisheries (農林水産省, MAFF) | Government Standard Terms of Use 2.0 (CC BY 4.0 compatible) |
-| Traditional Crafts (Dentō Kōgeihin) | Ministry of Economy, Trade and Industry (経済産業省, METI) / Association for the Promotion of Traditional Craft Industries (伝統的工芸品産業振興協会) | Public designation; cited |
-| Japan Heritage (Nihon Isan) | Agency for Cultural Affairs (文化庁) | Public designation; cited |
-| Important Intangible Cultural Properties (Jūyō Mukei Bunkazai / Folk) | Agency for Cultural Affairs (文化庁) — mirrored via Wikidata | CC0 (Wikidata mirror) |
+| Geographical Indications (GI) | Ministry of Agriculture, Forestry and Fisheries (MAFF) | Government Standard Terms of Use 2.0 (CC BY 4.0 compatible) |
+| Traditional Crafts (Dentō Kōgeihin) | Ministry of Economy, Trade and Industry (METI) / Association for the Promotion of Traditional Craft Industries | Public designation; cited |
+| Japan Heritage (Nihon Isan) | Agency for Cultural Affairs | Public designation; cited |
+| Important Intangible Cultural Properties (Jūyō Mukei Bunkazai / Folk) | Agency for Cultural Affairs — mirrored via Wikidata | CC0 (Wikidata mirror) |
 | UNESCO ICH inscriptions for Japan | UNESCO — mirrored via Wikidata | CC0 (Wikidata mirror) |
 
 ## 17 supported languages
@@ -127,9 +127,10 @@ The chart shows the per-prefecture entity count — the long tail outside Kyoto
 ![Coverage by prefecture](coverage_chart.png)
 
 **13,394 attractions × 17 languages = 227,698 description cells.** Plus 690
-official-designation records (MAFF GI / METI crafts / Japan Heritage / 文化庁
-intangible / UNESCO ICH) translated to the same 17 languages = 11,730 more
-cells. Plus 13,961 canonical names × 17 languages = 237,337 more cells.
+official-designation records (MAFF GI, METI crafts, Japan Heritage,
+Bunka-cho intangible records, UNESCO ICH) translated to the same 17
+languages = 11,730 more cells. Plus 13,961 canonical names × 17 languages
+= 237,337 more cells.
 
 ## Refresh cadence
 

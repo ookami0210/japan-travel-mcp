@@ -8,10 +8,10 @@ the same pages any person can read in a browser.
 We collect:
 - Municipal tourism pages (official government websites)
 - Prefectural tourism office content
-- Prefectural ryokan business license registries (旅館業許可リスト)
+- Prefectural ryokan business-license registries
 - Hotel and ryokan official homepages
 - JNTO (Japan National Tourism Organization) published data
-- 観光庁 (Japan Tourism Agency) accommodation statistics
+- Japan Tourism Agency accommodation statistics
 - OpenStreetMap and Wikidata
 
 We do not collect:
