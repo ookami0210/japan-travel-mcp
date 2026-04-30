@@ -32,6 +32,7 @@
     "fetch:unesco_japan": "tsx scrapers/sources/fetch_unesco_japan.ts",
     "discover:tourism_orgs": "tsx scrapers/sources/discover_tourism_orgs.ts",
     "scrape:enriched": "tsx scrapers/run_enriched_scrape.ts",
+    "embed:build": "tsx scrapers/embed/build_embeddings.ts",
     "quality:report": "tsx scrapers/quality/quality_report.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:all": "tsc --project tsconfig.scrapers.json",
@@ -63,6 +64,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
+    "@huggingface/transformers": "^4.2.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "cheerio": "^1.0.0",
     "csv-parse": "^5.5.0",

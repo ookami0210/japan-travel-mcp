@@ -71,6 +71,9 @@ data/_state/dmo_seed_urls.json
 data/r3/*.json
 data/r3/translations/
 
+# Vector embeddings — large, regeneratable from data/ via `npm run embed:build`.
+data/embeddings/
+
 # Quality observability — per-spot scores are big (~10MB / 25k spots).
 # The summary md/json are kept (they're snapshot baselines worth diffing).
 data/_logs/quality_scores_*.jsonl

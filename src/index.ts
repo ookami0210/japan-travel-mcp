@@ -31,6 +31,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { resolveDataRoot } from "./lib/hf_data.js";
 import { matchesMunicipality, stripPrefSuffix } from "./lib/match.js";
+import { semanticSearch, tryLoadSemanticIndex } from "./lib/semantic.js";
 
 const DISCLAIMER =
   "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.";
@@ -1959,6 +1960,86 @@ async function getDmo(args: {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Tool: search_semantic
+//
+// Vector-similarity search over the prebuilt multilingual-e5 embedding
+// matrix (Phase 2, 2026-05-01). Returns the top-k entries most similar to
+// the query in any of e5's supported languages. Falls back gracefully when
+// the embedding binary hasn't been built yet (`available: false`).
+
+async function searchSemantic(args: {
+  q: string;
+  prefecture?: string;
+  kind?: string;
+  k?: number;
+}): Promise<unknown> {
+  if (!args.q?.trim()) {
+    return {
+      error: "q required",
+      hint: "Provide a natural-language query in any language. Example: q='京都の伝統工芸'",
+      disclaimer: DISCLAIMER,
+    };
+  }
+  let prefCode: string | null = null;
+  if (args.prefecture) {
+    prefCode = await resolvePrefectureCode(args.prefecture);
+    if (!prefCode) {
+      return {
+        error: `unknown_prefecture: ${args.prefecture}`,
+        disclaimer: DISCLAIMER,
+      };
+    }
+  }
+  const k = Math.max(1, Math.min(args.k ?? 10, 50));
+  // Try the resolved DATA_ROOT (HF cache when running as a user install) and
+  // the repo root as fallback — the embedding binary is sometimes only in the
+  // dev tree before the next HF dataset upload, same pattern as findR3Path.
+  const candidateRoots = [dataRoot()];
+  const repoRoot = resolve(findPackageRoot(), "data");
+  if (!candidateRoots.includes(repoRoot)) candidateRoots.push(repoRoot);
+  let out: Awaited<ReturnType<typeof semanticSearch>> | null = null;
+  for (const root of candidateRoots) {
+    out = await semanticSearch(root, args.q, k, {
+      prefecture_code: prefCode,
+      kind: args.kind ?? null,
+    });
+    if (out.available) break;
+  }
+  if (!out) out = { available: false, reason: "no_root_resolved" };
+  if (!out.available) {
+    return {
+      available: false,
+      reason: out.reason,
+      hint:
+        "Vector index not built yet. Run `npm run embed:build` to populate data/embeddings/.",
+      query: args.q,
+      disclaimer: DISCLAIMER,
+    };
+  }
+  return {
+    available: true,
+    query: args.q,
+    prefecture_code: prefCode,
+    kind: args.kind ?? null,
+    k,
+    built_at: out.built_at,
+    indexed_count: out.count,
+    results: (out.results ?? []).map((r) => ({
+      score: Number(r.score.toFixed(4)),
+      key: r.entry.key,
+      kind: r.entry.kind,
+      source: r.entry.source,
+      name: r.entry.name,
+      description: r.entry.description ?? null,
+      prefecture: r.entry.prefecture_name ?? null,
+      municipality: r.entry.municipality ?? null,
+      url: r.entry.url ?? null,
+    })),
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_local_food
 //
 // Like get_local_specialty (food + craft) but food-only AND wider — beyond
@@ -2737,6 +2818,36 @@ const TOOLS = [
     },
   },
   {
+    name: "search_semantic",
+    description:
+      "Vector-similarity search over the prebuilt multilingual-e5 embedding matrix (Phase 2, 2026-05-01). Returns the top-k entries most similar to the query across municipal-scrape spots, Wikidata attractions, and R-3 designation registries.\n\nWorks with natural-language queries in any of e5's supported languages — useful when keyword/substring search misses semantic paraphrases (e.g. user asks 'endangered tradition' and we want to surface 失われゆく職人技).\n\nOptional `prefecture` and `kind` filters narrow the candidate set before scoring. Returns `available: false` with a helpful `reason` when the embedding binary hasn't been built (run `npm run embed:build`).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        q: {
+          type: "string",
+          description: "Natural-language query in any language.",
+        },
+        prefecture: {
+          type: "string",
+          description:
+            "Restrict to entries tagged to this prefecture. Japanese name, English slug, or 2-digit JIS code.",
+        },
+        kind: {
+          type: "string",
+          enum: ["spot", "wikidata", "r3"],
+          description:
+            "Restrict to one entity kind. Omit for all three.",
+        },
+        k: {
+          type: "number",
+          description: "Number of results to return (1-50, default 10).",
+        },
+      },
+      required: ["q"],
+    },
+  },
+  {
     name: "get_dmo",
     description:
       "Returns 観光庁 (Japan Tourism Agency) registered + candidate DMO (Destination Management Organization) entities — the official tourism-coordination bodies for each region.\n\nEach DMO is the authoritative point of contact for stakeholder coordination, marketing, and visitor experience design in its target area. Each entry includes the registration class (広域連携 / 都道府県 / 地域 / 地域連携), the prefectures and municipalities the DMO covers, and a link to the official 形成確立計画 PDF (formation/establishment plan).\n\nUse this when the user asks about who is responsible for a region's tourism, or wants to learn the strategic framing of a destination as written by the body that coordinates it.",
@@ -2905,6 +3016,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           type: args.type as string | undefined,
           status: args.status as string | undefined,
           lang: args.lang as string | undefined,
+        });
+        break;
+      case "search_semantic":
+        result = await searchSemantic({
+          q: String(args.q ?? ""),
+          prefecture: args.prefecture as string | undefined,
+          kind: args.kind as string | undefined,
+          k: typeof args.k === "number" ? args.k : args.k ? Number(args.k) : undefined,
         });
         break;
       default:
