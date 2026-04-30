@@ -30,6 +30,7 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { resolveDataRoot } from "./lib/hf_data.js";
+import { matchesMunicipality, stripPrefSuffix } from "./lib/match.js";
 
 const DISCLAIMER =
   "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.";
@@ -469,31 +470,15 @@ async function getSpots(args: {
     );
   };
 
-  // Tolerant municipality matching:
-  //   - exact JA match wins
-  //   - bare-name (with 市/町/村/区 suffix stripped on either side)
-  //   - partial inclusion either way (so "南山城" matches "南山城村" and
-  //     vice-versa)
-  // We deliberately leave romaji-to-kanji unsupported here — that's what
-  // search_area is for, and a romaji query would resolve to a list of
-  // municipality codes the caller can pass through.
-  const cityRaw = args.city ?? args.municipality;
-  const cityKey = cityRaw?.trim().toLowerCase() ?? null;
-  const cityBare = cityKey?.replace(/[市町村区]$/u, "") ?? null;
-  const matchesCity = (muniName: string): boolean => {
-    if (!cityKey) return true;
-    const ja = muniName.toLowerCase();
-    const jaBare = ja.replace(/[市町村区]$/u, "");
-    if (ja === cityKey || jaBare === cityKey) return true;
-    if (cityBare && (jaBare === cityBare || ja.includes(cityBare))) return true;
-    if (jaBare.includes(cityKey)) return true;
-    return false;
-  };
+  // Tolerant municipality matching — see src/lib/match.ts. The dispatcher
+  // forwards both `city` and `municipality` so LLM clients calling either
+  // name reach the same logic.
+  const cityRaw = args.city ?? args.municipality ?? null;
 
   for (const p of prefs) {
     if (!matchesPrefecture(p)) continue;
     for (const m of p.municipalities) {
-      if (!matchesCity(m.municipality.name)) continue;
+      if (!matchesMunicipality(m.municipality.name, cityRaw)) continue;
       for (const s of m.spots) {
         spots.push({
           source: "municipal_scrape",
@@ -887,7 +872,7 @@ async function bareNameForPref(prefCode: string): Promise<string | null> {
   const prefs = await loadAllPrefectures();
   const p = prefs.find((x) => x.prefecture.code === prefCode);
   if (!p) return null;
-  return p.prefecture.name.replace(/[都道府県]$/u, "");
+  return stripPrefSuffix(p.prefecture.name);
 }
 
 async function textMentionsPrefecture(
