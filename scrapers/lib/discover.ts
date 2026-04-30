@@ -151,37 +151,114 @@ function shouldSkipUrl(url: string): boolean {
   return SKIP_PATTERNS.some((p) => p.test(url));
 }
 
+// Feature pages (curated articles, individual events / spots / specialties)
+// usually live below one of these path segments. When the BFS reaches one,
+// we let it explore one extra hop into the page's outbound links so it can
+// pick up linked sub-articles ("related events", "official site of this
+// festival", etc). Added 2026-04-30 (ADR 0001 / workstream B3).
+const FEATURE_URL_PATTERNS = [
+  /\/feature\//i,
+  /\/features\//i,
+  /\/special\//i,
+  /\/specials\//i,
+  /\/event\//i,
+  /\/events\//i,
+  /\/spot\//i,
+  /\/spots\//i,
+  /\/article\//i,
+  /\/articles\//i,
+  /\/post\//i,
+  /\/posts\//i,
+  /\/detail\//i,
+  /\/details\//i,
+  /\/matsuri\//i,
+  /\/festival\//i,
+  /\/festivals\//i,
+  /\/特集/u,
+  /\/イベント\//u,
+  /\/まつり/u,
+  /\/詳細/u,
+  /\/モデルコース/u,
+  /\/グルメ/u,
+  /\/特産/u,
+];
+
+function isFeaturePage(url: string): boolean {
+  return FEATURE_URL_PATTERNS.some((p) => p.test(url));
+}
+
 export interface DiscoveryResult {
   pages: { url: string; title: string }[];
   visited_count: number;
+  /** Number of distinct seed URLs we crawled from. Always >= 1. */
+  seed_count: number;
 }
 
+/**
+ * Discover tourism pages reachable from one or more seed URLs.
+ *
+ * In the multi-source design (ADR 0001) a single municipality can have
+ * several seed URLs — its city-hall site (*.lg.jp), its tourism-association
+ * site, sometimes a prefecture-level subdomain. We BFS from every seed
+ * into the same `visited` / `pages` accumulators, so duplicates collapse
+ * naturally and the per-municipality page budget covers all seeds together.
+ *
+ * For backwards compatibility a single-string `startUrls` argument is
+ * still accepted.
+ */
 export async function discoverTourismPages(
-  startUrl: string,
+  startUrls: string | string[],
   opts: ScrapeOptions,
   counter?: ErrorCounter,
 ): Promise<DiscoveryResult> {
+  const seeds = (Array.isArray(startUrls) ? startUrls : [startUrls]).filter(
+    (s) => typeof s === "string" && s.length > 0,
+  );
+  if (seeds.length === 0) {
+    return { pages: [], visited_count: 0, seed_count: 0 };
+  }
+
   // visited tracks canonical URLs so that /a/, /a, /a/index.html collapse.
   const visited = new Set<string>();
-  // Seed with the start URL plus multilingual landing path probes.
-  const queue: { url: string; depth: number }[] = [{ url: startUrl, depth: 0 }];
-  for (const seed of buildLanguageSeeds(startUrl)) {
+  // Seed queue with every seed URL + its multilingual landing path probes.
+  const queue: { url: string; depth: number }[] = [];
+  for (const seed of seeds) {
     queue.push({ url: seed, depth: 0 });
+    for (const langSeed of buildLanguageSeeds(seed)) {
+      queue.push({ url: langSeed, depth: 0 });
+    }
   }
   // pages keyed by canonical URL for cheap dedup.
   const pagesByCanonical = new Map<string, { url: string; title: string }>();
 
-  let startHost: string;
-  let startDomain: string;
-  try {
-    const u = new URL(startUrl);
-    startHost = u.hostname;
-    // Allow same-domain subdomains: e.g. www.town.x vs kankou.town.x
-    // Approximate "same domain" as "shares the last 2-3 labels of the host".
-    const labels = startHost.split(".");
-    startDomain = labels.slice(-3).join("."); // e.g. "town.chizu.tottori.jp" → "chizu.tottori.jp"
-  } catch {
-    return { pages: [], visited_count: 0 };
+  // Compute "same-domain" guards for each seed so links from one seed can
+  // freely walk that seed's site, but won't drift onto an unrelated host.
+  const domainsByHost: Array<{ host: string; domain: string }> = [];
+  for (const seed of seeds) {
+    try {
+      const u = new URL(seed);
+      const labels = u.hostname.split(".");
+      domainsByHost.push({
+        host: u.hostname,
+        domain: labels.slice(-3).join("."),
+      });
+    } catch {
+      // skip malformed seed
+    }
+  }
+  if (domainsByHost.length === 0) {
+    return { pages: [], visited_count: 0, seed_count: seeds.length };
+  }
+
+  function isOnSameSiteAsAnySeed(url: string): boolean {
+    try {
+      const u = new URL(url);
+      return domainsByHost.some(
+        (d) => u.hostname === d.host || u.hostname.endsWith(d.domain),
+      );
+    } catch {
+      return false;
+    }
   }
 
   const maxDepth = 2;
@@ -234,7 +311,13 @@ export async function discoverTourismPages(
       enqueue(alt.href, Math.min(depth + 1, maxDepth));
     }
 
-    if (depth >= maxDepth) continue;
+    // Feature pages (e.g. /feature/yoshidafirefes/) get one extra hop of
+    // depth budget so the BFS can follow links inside the article — to a
+    // sub-event page, the festival's own official site, the food page that
+    // belongs to the feature, etc. ADR 0001 / workstream B3.
+    const onFeaturePage = isFeaturePage(canonical);
+    const effectiveMaxDepth = onFeaturePage ? maxDepth + 1 : maxDepth;
+    if (depth >= effectiveMaxDepth) continue;
 
     for (const link of ext.links) {
       const linkCanonical = canonicalize(link.href);
@@ -246,12 +329,15 @@ export async function discoverTourismPages(
       } catch {
         continue;
       }
-      // Allow same registered domain (handles www → kankou subdomain hops)
-      if (!lu.hostname.endsWith(startDomain) && lu.hostname !== startHost) continue;
+      // Allow links that stay on any of the seed sites (handles
+      // city-hall ↔ tourism-association cross-links, www → kankou subdomain
+      // hops, etc.).
+      if (!isOnSameSiteAsAnySeed(link.href)) continue;
 
       const tourism = isTourismLike(link.href) || isTourismLike(link.text);
       const isLangLink = LANGUAGE_PATH_RE.test(link.href);
-      if (tourism || isLangLink) {
+      const isFeatureLink = isFeaturePage(link.href);
+      if (tourism || isLangLink || isFeatureLink) {
         enqueue(link.href, depth + 1);
       }
     }
@@ -260,5 +346,6 @@ export async function discoverTourismPages(
   return {
     pages: Array.from(pagesByCanonical.values()),
     visited_count: visited.size,
+    seed_count: seeds.length,
   };
 }
