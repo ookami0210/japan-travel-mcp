@@ -1,0 +1,342 @@
+{
+  "schema_version": 1,
+  "title": "Prefecture-level tourism association / official tourism portal URLs",
+  "purpose": "Per-prefecture canonical tourism portal, used as a second-source crawl seed alongside the per-municipality city-hall URL. Added in the multi-source sprint (ADR 0001).",
+  "source": {
+    "type": "manual_compilation",
+    "compiled_at": "2026-04-30",
+    "method": "We surveyed each prefecture's official tourism portal — usually run by the prefectural tourism federation (観光連盟 / 観光協会), occasionally by the prefectural government itself. We picked the URL that the prefecture itself promotes as its primary tourism site (the one that appears on top in '<prefecture> tourism' searches and that the prefectural government links to from its own pages)."
+  },
+  "license": "Public information; URLs themselves carry no copyright. The content reachable from these URLs carries the operator's own license; we follow per-page robots.txt and the project-wide DATA_POLICY.md.",
+  "prefectures": [
+    {
+      "code": "01",
+      "name_en": "Hokkaido",
+      "name_ja": "北海道",
+      "tourism_org_name": "北海道観光機構 (Hokkaido Tourism Organization)",
+      "url": "https://www.visit-hokkaido.jp/"
+    },
+    {
+      "code": "02",
+      "name_en": "Aomori",
+      "name_ja": "青森県",
+      "tourism_org_name": "公益社団法人青森県観光連盟",
+      "url": "https://www.aptinet.jp/"
+    },
+    {
+      "code": "03",
+      "name_en": "Iwate",
+      "name_ja": "岩手県",
+      "tourism_org_name": "公益財団法人岩手県観光協会",
+      "url": "https://iwatetabi.jp/"
+    },
+    {
+      "code": "04",
+      "name_en": "Miyagi",
+      "name_ja": "宮城県",
+      "tourism_org_name": "公益社団法人宮城県観光連盟",
+      "url": "https://www.miyagi-kankou.or.jp/"
+    },
+    {
+      "code": "05",
+      "name_en": "Akita",
+      "name_ja": "秋田県",
+      "tourism_org_name": "一般社団法人秋田県観光連盟",
+      "url": "https://www.akitafan.com/"
+    },
+    {
+      "code": "06",
+      "name_en": "Yamagata",
+      "name_ja": "山形県",
+      "tourism_org_name": "公益社団法人山形県観光物産協会",
+      "url": "https://yamagatakanko.com/"
+    },
+    {
+      "code": "07",
+      "name_en": "Fukushima",
+      "name_ja": "福島県",
+      "tourism_org_name": "公益財団法人福島県観光物産交流協会",
+      "url": "https://www.tif.ne.jp/"
+    },
+    {
+      "code": "08",
+      "name_en": "Ibaraki",
+      "name_ja": "茨城県",
+      "tourism_org_name": "一般社団法人茨城県観光物産協会",
+      "url": "https://www.ibarakiguide.jp/"
+    },
+    {
+      "code": "09",
+      "name_en": "Tochigi",
+      "name_ja": "栃木県",
+      "tourism_org_name": "公益社団法人栃木県観光物産協会",
+      "url": "https://www.tochigiji.or.jp/"
+    },
+    {
+      "code": "10",
+      "name_en": "Gunma",
+      "name_ja": "群馬県",
+      "tourism_org_name": "公益財団法人群馬県観光物産国際協会",
+      "url": "https://www.visitgunma.jp/"
+    },
+    {
+      "code": "11",
+      "name_en": "Saitama",
+      "name_ja": "埼玉県",
+      "tourism_org_name": "公益社団法人埼玉県物産観光協会",
+      "url": "https://chocotabi-saitama.jp/"
+    },
+    {
+      "code": "12",
+      "name_en": "Chiba",
+      "name_ja": "千葉県",
+      "tourism_org_name": "公益社団法人千葉県観光物産協会",
+      "url": "https://maruchiba.jp/"
+    },
+    {
+      "code": "13",
+      "name_en": "Tokyo",
+      "name_ja": "東京都",
+      "tourism_org_name": "公益財団法人東京観光財団",
+      "url": "https://www.gotokyo.org/"
+    },
+    {
+      "code": "14",
+      "name_en": "Kanagawa",
+      "name_ja": "神奈川県",
+      "tourism_org_name": "公益社団法人神奈川県観光協会",
+      "url": "https://www.kanagawa-kankou.or.jp/"
+    },
+    {
+      "code": "15",
+      "name_en": "Niigata",
+      "name_ja": "新潟県",
+      "tourism_org_name": "公益社団法人新潟県観光協会",
+      "url": "https://niigata-kankou.or.jp/"
+    },
+    {
+      "code": "16",
+      "name_en": "Toyama",
+      "name_ja": "富山県",
+      "tourism_org_name": "公益社団法人とやま観光推進機構",
+      "url": "https://www.info-toyama.com/"
+    },
+    {
+      "code": "17",
+      "name_en": "Ishikawa",
+      "name_ja": "石川県",
+      "tourism_org_name": "公益社団法人石川県観光連盟",
+      "url": "https://www.hot-ishikawa.jp/"
+    },
+    {
+      "code": "18",
+      "name_en": "Fukui",
+      "name_ja": "福井県",
+      "tourism_org_name": "公益社団法人福井県観光連盟",
+      "url": "https://www.fuku-e.com/"
+    },
+    {
+      "code": "19",
+      "name_en": "Yamanashi",
+      "name_ja": "山梨県",
+      "tourism_org_name": "公益社団法人やまなし観光推進機構",
+      "url": "https://www.yamanashi-kankou.jp/"
+    },
+    {
+      "code": "20",
+      "name_en": "Nagano",
+      "name_ja": "長野県",
+      "tourism_org_name": "一般社団法人長野県観光機構",
+      "url": "https://www.go-nagano.net/"
+    },
+    {
+      "code": "21",
+      "name_en": "Gifu",
+      "name_ja": "岐阜県",
+      "tourism_org_name": "公益社団法人岐阜県観光連盟",
+      "url": "https://www.kankou-gifu.jp/"
+    },
+    {
+      "code": "22",
+      "name_en": "Shizuoka",
+      "name_ja": "静岡県",
+      "tourism_org_name": "公益社団法人静岡県観光協会",
+      "url": "https://shizuoka-guide.com/"
+    },
+    {
+      "code": "23",
+      "name_en": "Aichi",
+      "name_ja": "愛知県",
+      "tourism_org_name": "一般社団法人愛知県観光協会",
+      "url": "https://www.aichi-now.jp/"
+    },
+    {
+      "code": "24",
+      "name_en": "Mie",
+      "name_ja": "三重県",
+      "tourism_org_name": "公益社団法人三重県観光連盟",
+      "url": "https://www.kankomie.or.jp/"
+    },
+    {
+      "code": "25",
+      "name_en": "Shiga",
+      "name_ja": "滋賀県",
+      "tourism_org_name": "公益社団法人びわこビジターズビューロー",
+      "url": "https://www.biwako-visitors.jp/"
+    },
+    {
+      "code": "26",
+      "name_en": "Kyoto",
+      "name_ja": "京都府",
+      "tourism_org_name": "公益社団法人京都府観光連盟 / 京都市観光協会",
+      "url": "https://www.kyoto-kankou.or.jp/"
+    },
+    {
+      "code": "27",
+      "name_en": "Osaka",
+      "name_ja": "大阪府",
+      "tourism_org_name": "公益財団法人大阪観光局",
+      "url": "https://osaka-info.jp/"
+    },
+    {
+      "code": "28",
+      "name_en": "Hyogo",
+      "name_ja": "兵庫県",
+      "tourism_org_name": "公益社団法人ひょうご観光本部",
+      "url": "https://www.hyogo-tourism.jp/"
+    },
+    {
+      "code": "29",
+      "name_en": "Nara",
+      "name_ja": "奈良県",
+      "tourism_org_name": "一般財団法人奈良県ビジターズビューロー",
+      "url": "https://yamatoji.nara-kankou.or.jp/"
+    },
+    {
+      "code": "30",
+      "name_en": "Wakayama",
+      "name_ja": "和歌山県",
+      "tourism_org_name": "公益社団法人和歌山県観光連盟",
+      "url": "https://www.wakayama-kanko.or.jp/"
+    },
+    {
+      "code": "31",
+      "name_en": "Tottori",
+      "name_ja": "鳥取県",
+      "tourism_org_name": "公益社団法人鳥取県観光連盟",
+      "url": "https://www.tottori-guide.jp/"
+    },
+    {
+      "code": "32",
+      "name_en": "Shimane",
+      "name_ja": "島根県",
+      "tourism_org_name": "公益社団法人島根県観光連盟",
+      "url": "https://www.kankou-shimane.com/"
+    },
+    {
+      "code": "33",
+      "name_en": "Okayama",
+      "name_ja": "岡山県",
+      "tourism_org_name": "公益社団法人岡山県観光連盟",
+      "url": "https://www.okayama-kanko.jp/"
+    },
+    {
+      "code": "34",
+      "name_en": "Hiroshima",
+      "name_ja": "広島県",
+      "tourism_org_name": "一般社団法人広島県観光連盟",
+      "url": "https://dive-hiroshima.com/"
+    },
+    {
+      "code": "35",
+      "name_en": "Yamaguchi",
+      "name_ja": "山口県",
+      "tourism_org_name": "一般社団法人山口県観光連盟",
+      "url": "https://yamaguchi-tourism.jp/"
+    },
+    {
+      "code": "36",
+      "name_en": "Tokushima",
+      "name_ja": "徳島県",
+      "tourism_org_name": "一般財団法人徳島県観光協会",
+      "url": "https://discovertokushima.net/"
+    },
+    {
+      "code": "37",
+      "name_en": "Kagawa",
+      "name_ja": "香川県",
+      "tourism_org_name": "一般社団法人香川県観光協会",
+      "url": "https://www.my-kagawa.jp/"
+    },
+    {
+      "code": "38",
+      "name_en": "Ehime",
+      "name_ja": "愛媛県",
+      "tourism_org_name": "一般社団法人愛媛県観光物産協会",
+      "url": "https://www.iyokannet.jp/"
+    },
+    {
+      "code": "39",
+      "name_en": "Kochi",
+      "name_ja": "高知県",
+      "tourism_org_name": "公益財団法人高知県観光コンベンション協会",
+      "url": "https://kochi-tabi.jp/"
+    },
+    {
+      "code": "40",
+      "name_en": "Fukuoka",
+      "name_ja": "福岡県",
+      "tourism_org_name": "公益社団法人福岡県観光連盟",
+      "url": "https://www.crossroadfukuoka.jp/"
+    },
+    {
+      "code": "41",
+      "name_en": "Saga",
+      "name_ja": "佐賀県",
+      "tourism_org_name": "一般社団法人佐賀県観光連盟",
+      "url": "https://www.asobo-saga.jp/"
+    },
+    {
+      "code": "42",
+      "name_en": "Nagasaki",
+      "name_ja": "長崎県",
+      "tourism_org_name": "一般社団法人長崎県観光連盟",
+      "url": "https://www.nagasaki-tabinet.com/"
+    },
+    {
+      "code": "43",
+      "name_en": "Kumamoto",
+      "name_ja": "熊本県",
+      "tourism_org_name": "公益社団法人熊本県観光連盟",
+      "url": "https://kumamoto.guide/"
+    },
+    {
+      "code": "44",
+      "name_en": "Oita",
+      "name_ja": "大分県",
+      "tourism_org_name": "公益社団法人ツーリズムおおいた",
+      "url": "https://www.visit-oita.jp/"
+    },
+    {
+      "code": "45",
+      "name_en": "Miyazaki",
+      "name_ja": "宮崎県",
+      "tourism_org_name": "公益財団法人宮崎県観光協会",
+      "url": "https://www.kanko-miyazaki.jp/"
+    },
+    {
+      "code": "46",
+      "name_en": "Kagoshima",
+      "name_ja": "鹿児島県",
+      "tourism_org_name": "公益社団法人鹿児島県観光連盟",
+      "url": "https://www.kagoshima-kankou.com/"
+    },
+    {
+      "code": "47",
+      "name_en": "Okinawa",
+      "name_ja": "沖縄県",
+      "tourism_org_name": "一般財団法人沖縄観光コンベンションビューロー",
+      "url": "https://www.okinawastory.jp/"
+    }
+  ]
+}
