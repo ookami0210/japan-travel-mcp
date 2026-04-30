@@ -25,10 +25,13 @@ export const DEFAULT_OPTIONS: ScrapeOptions = {
   rateLimitMs: 2000,
   globalConcurrency: 8,
   userAgent:
-    "JapanTravelMCP/0.0.1 (+https://github.com/ookami0210/japan-travel-mcp; OSS travel data for AI agents)",
+    "JapanTravelMCP/1.0 (+https://github.com/ookami0210/japan-travel-mcp; OSS travel data for AI agents)",
   timeoutMs: 30_000,
   retries: 2,
-  maxPagesPerMunicipality: 35,
+  // Raised from 35 to 100 in the multi-source sprint (ADR 0001). At 35 the
+  // BFS only reached the first index layer of a typical tourism site and
+  // never followed feature-page links into individual articles.
+  maxPagesPerMunicipality: 100,
   consecutive5xxAbort: 100,
   consecutive4xxAbort: 200,
 };
