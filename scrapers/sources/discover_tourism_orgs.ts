@@ -111,7 +111,9 @@ type CandidateSource =
   | "prefecture_portal"
   | "wikidata_p856"
   | "wikidata_p973"
-  | "dns_pattern";
+  | "dns_pattern"
+  | "city_hall_outbound" // city hall homepage links to an external tourism org
+  | "city_hall_kanko"; // city hall's own /kanko/ subpage (richer than the root)
 
 interface Candidate {
   url: string;
@@ -161,6 +163,23 @@ async function loadPortals(): Promise<PrefecturePortal[]> {
     prefectures: PrefecturePortal[];
   };
   return raw.prefectures;
+}
+
+async function loadOfficialUrls(): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const path = findStateFile("_state/official_urls.json");
+  if (!path) return out;
+  try {
+    const raw = JSON.parse(await readFile(fileURLToPath(path), "utf8")) as {
+      entries: { code: string; official_url: string | null }[];
+    };
+    for (const e of raw.entries) {
+      if (e.official_url) out.set(e.code, e.official_url);
+    }
+  } catch {
+    // missing → empty map
+  }
+  return out;
 }
 
 async function loadExisting(): Promise<Map<string, MunicipalityEntry>> {
@@ -451,13 +470,19 @@ function pickPrimary(entry: MunicipalityEntry): void {
     return;
   }
   // Confidence priority: high > medium > low.
-  // Source priority within same confidence: prefecture_portal (most curated)
-  // > wikidata_p856 > wikidata_p973 > dns_pattern.
+  // Source priority within same confidence:
+  //   prefecture_portal (most curated)
+  //   > city_hall_outbound (city hall actively links to it = strong signal)
+  //   > wikidata_p856 > wikidata_p973
+  //   > city_hall_kanko (internal subpage, fallback seed)
+  //   > dns_pattern (broadest, noisiest)
   const SOURCE_RANK: Record<CandidateSource, number> = {
     prefecture_portal: 0,
-    wikidata_p856: 1,
-    wikidata_p973: 2,
-    dns_pattern: 3,
+    city_hall_outbound: 1,
+    wikidata_p856: 2,
+    wikidata_p973: 3,
+    city_hall_kanko: 4,
+    dns_pattern: 5,
   };
   const CONF_RANK = { high: 0, medium: 1, low: 2 };
   const sorted = [...entry.candidates].sort((a, b) => {
@@ -491,6 +516,97 @@ async function save(entries: Map<string, MunicipalityEntry>): Promise<void> {
   process.stderr.write(
     `[discover] wrote ${all.length} entries (${haveCandidates} with candidates, ${havePrimary} with primary)\n`,
   );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Strategy 4: city-hall homepage harvest (+ two-hop /kanko/ fallback)
+
+interface CityHallHarvestResult {
+  external: { url: string; text: string }[]; // outbound to non-city-hall hosts
+  internal: { url: string; text: string }[]; // internal /kanko/ subpages
+}
+
+async function harvestCityHallSite(
+  cityHallUrl: string,
+): Promise<CityHallHarvestResult> {
+  const empty: CityHallHarvestResult = { external: [], internal: [] };
+  const r1 = await fetchHtml(cityHallUrl);
+  if (!r1) return empty;
+  const $1 = cheerio.load(r1);
+  const baseHost = (() => {
+    try { return new URL(cityHallUrl).hostname; } catch { return ""; }
+  })();
+  if (!baseHost) return empty;
+
+  const externalMap = new Map<string, { url: string; text: string }>();
+  const internalKanko: { url: string; text: string }[] = [];
+  $1("a[href]").each((_, el) => {
+    const href = $1(el).attr("href");
+    const text = $1(el).text().replace(/\s+/g, " ").trim();
+    if (!href) return;
+    let abs: string;
+    try { abs = new URL(href, cityHallUrl).href; } catch { return; }
+    if (!/^https?:/i.test(abs)) return;
+    let u: URL;
+    try { u = new URL(abs); } catch { return; }
+    if (SKIP_HOST_RE.test(u.hostname)) return;
+
+    const looksLikeTourism = TOURISM_HINT_RE.test(text) || TOURISM_HINT_RE.test(abs);
+    if (!looksLikeTourism) return;
+
+    if (u.hostname === baseHost) {
+      // Internal kanko page — keep one entry per path prefix
+      const key = u.pathname.split("/").slice(0, 3).join("/");
+      if (!internalKanko.some((x) => new URL(x.url).pathname.startsWith(key))) {
+        internalKanko.push({ url: abs, text });
+      }
+    } else if (!isCityHallHost(u.hostname)) {
+      if (!externalMap.has(u.hostname)) {
+        externalMap.set(u.hostname, { url: abs, text });
+      }
+    }
+  });
+
+  return {
+    external: [...externalMap.values()],
+    internal: internalKanko.slice(0, 3), // keep top 3 internal kanko paths
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Tiny p-limit (cheerio is already a dep; pulling in p-limit just for this
+// strategy is overkill, and we're already using fetch + setTimeout).
+
+function pLimitInline(concurrency: number) {
+  let active = 0;
+  const queue: Array<() => void> = [];
+  const next = () => {
+    if (active >= concurrency) return;
+    const fn = queue.shift();
+    if (fn) {
+      active += 1;
+      fn();
+    }
+  };
+  return <T>(work: () => Promise<T>): Promise<T> =>
+    new Promise<T>((resolve, reject) => {
+      const run = async () => {
+        try {
+          resolve(await work());
+        } catch (err) {
+          reject(err);
+        } finally {
+          active -= 1;
+          next();
+        }
+      };
+      queue.push(run);
+      next();
+    });
+}
+
+function opts_concurrency(): number {
+  return Math.max(1, parseInt(process.env.CITYHALL_CONCURRENCY ?? "8", 10));
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -653,6 +769,68 @@ async function main(): Promise<void> {
       }
     }
     await save(entries);
+  }
+
+  // ── Strategy 4: city-hall outbound + internal kanko subpage ───────
+  // Most municipalities don't have a separate tourism-org website — instead
+  // the city hall site has either:
+  //   (a) an outbound link to a tourism-org site (e.g. visithachinohe.com)
+  //   (b) an internal /kanko/ subpage that's the de-facto tourism page
+  // We harvest both. The internal kanko subpage is far better than the
+  // city-hall root as a multi-source-scrape seed because it skips the
+  // city-office news/jobs/permits content and lands directly on tourism.
+  if (!skip.has("cityhall")) {
+    process.stderr.write(`[discover/cityhall] starting...\n`);
+    const officialUrls = await loadOfficialUrls();
+    const limit = pLimitInline(opts_concurrency());
+    let probed = 0;
+    let foundExternal = 0;
+    let foundInternal = 0;
+    const tasks = targetMunis.map((m) =>
+      limit(async () => {
+        const cityHallUrl = officialUrls.get(m.code);
+        if (!cityHallUrl) return;
+        const result = await harvestCityHallSite(cityHallUrl);
+        const cands: Candidate[] = [];
+        for (const ext of result.external) {
+          cands.push({
+            url: ext.url,
+            source: "city_hall_outbound",
+            confidence: "high",
+            evidence: ext.text.slice(0, 80),
+          });
+        }
+        for (const internal of result.internal) {
+          cands.push({
+            url: internal.url,
+            source: "city_hall_kanko",
+            confidence: "medium", // internal page, useful as seed but not a separate org
+            evidence: internal.text.slice(0, 80),
+          });
+        }
+        if (cands.length > 0) {
+          mergeCandidates(entries, m.code, m.prefecture_code, m.name, cands);
+        }
+        if (result.external.length > 0) foundExternal += 1;
+        if (result.internal.length > 0) foundInternal += 1;
+        probed += 1;
+        if (probed % 50 === 0) {
+          process.stderr.write(
+            `[discover/cityhall] probed ${probed}/${targetMunis.length}, ` +
+              `external=${foundExternal}, internal_kanko=${foundInternal}\n`,
+          );
+          await save(entries);
+        }
+      }),
+    );
+    await Promise.all(tasks);
+    process.stderr.write(
+      `[discover/cityhall] done — ${probed}/${targetMunis.length} probed, ` +
+        `${foundExternal} with external link, ${foundInternal} with internal kanko\n`,
+    );
+    await save(entries);
+  } else {
+    process.stderr.write(`[discover/cityhall] skipped (SKIP=cityhall)\n`);
   }
 
   // ── Pick primary ──────────────────────────────────────────────────
