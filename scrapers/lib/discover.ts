@@ -183,7 +183,7 @@ const FEATURE_URL_PATTERNS = [
   /\/特産/u,
 ];
 
-function isFeaturePage(url: string): boolean {
+export function isFeaturePage(url: string): boolean {
   return FEATURE_URL_PATTERNS.some((p) => p.test(url));
 }
 
