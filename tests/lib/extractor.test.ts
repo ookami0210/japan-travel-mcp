@@ -227,7 +227,7 @@ describe("extract — image limits", () => {
 // was discarded.
 
 describe("extract — body paragraphs", () => {
-  it("collects substantive <p> nodes (>= 50 chars), drops shorts", () => {
+  it("collects substantive <p> nodes (>= MIN_PARAGRAPH_CHARS), drops shorts", () => {
     const long = "あ".repeat(60);
     const html = `<html><body>
       <p>short</p>
@@ -264,13 +264,13 @@ describe("extract — body paragraphs", () => {
     expect(got).toHaveLength(1);
   });
 
-  it("caps at 8 paragraphs even when more qualify", () => {
+  it("caps at MAX_BODY_PARAGRAPHS (30) even when more qualify", () => {
     const ps = Array.from(
-      { length: 20 },
+      { length: 50 },
       (_, i) => `<p>paragraph ${i} ${"x".repeat(80)}</p>`,
     ).join("");
     const html = `<html><body>${ps}</body></html>`;
-    expect(extract(html, BASE).body_paragraphs.length).toBeLessThanOrEqual(8);
+    expect(extract(html, BASE).body_paragraphs.length).toBeLessThanOrEqual(30);
   });
 
   it("skips giant blobs over 1200 chars (likely list dumps, not prose)", () => {
