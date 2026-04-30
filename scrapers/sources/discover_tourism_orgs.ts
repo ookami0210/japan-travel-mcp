@@ -45,16 +45,30 @@ import { fileURLToPath } from "node:url";
 import * as cheerio from "cheerio";
 
 const ROOT = new URL("../../", import.meta.url);
-const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
-const PREF_PORTALS_PATH = new URL(
-  "data/_state/prefecture_tourism_orgs.json",
-  ROOT,
-);
+// Output paths always go to the repo's data/ tree (committed back, then
+// uploaded to HF by the daily workflow).
 const OUT_PATH = new URL("data/_state/tourism_org_urls.json", ROOT);
 const STATE_PATH = new URL(
   "data/_state/tourism_org_discovery_state.json",
   ROOT,
 );
+
+// Read paths fall back to the HF cache so a fresh checkout works without
+// first re-running fetch:municipalities. Same chain as quality_report and
+// run_enriched_scrape.
+const STATE_DATA_ROOTS: URL[] = [
+  new URL("data/", ROOT),
+  new URL("file://" + (process.env.HOME ?? "") + "/.japan-travel-mcp/data/"),
+  new URL("file:///tmp/jtm-e2e-cache/"),
+];
+
+function findStateFile(relPath: string): URL | null {
+  for (const root of STATE_DATA_ROOTS) {
+    const candidate = new URL(relPath, root);
+    if (existsSync(fileURLToPath(candidate))) return candidate;
+  }
+  return null;
+}
 
 const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
 const USER_AGENT =
@@ -120,16 +134,32 @@ interface MunicipalityEntry {
 // Loading
 
 async function loadMunicipalities(): Promise<MunicipalityRow[]> {
-  const raw = JSON.parse(
-    await readFile(fileURLToPath(MUNI_PATH), "utf8"),
-  ) as { municipalities: MunicipalityRow[] };
+  const path = findStateFile("_state/municipalities.json");
+  if (!path) {
+    throw new Error(
+      "Could not find _state/municipalities.json in repo, ~/.japan-travel-mcp/data, " +
+        "or /tmp/jtm-e2e-cache. Run `npm run fetch:municipalities` first or " +
+        "ensure the HF cache is populated.",
+    );
+  }
+  const raw = JSON.parse(await readFile(fileURLToPath(path), "utf8")) as {
+    municipalities: MunicipalityRow[];
+  };
   return raw.municipalities;
 }
 
 async function loadPortals(): Promise<PrefecturePortal[]> {
-  const raw = JSON.parse(
-    await readFile(fileURLToPath(PREF_PORTALS_PATH), "utf8"),
-  ) as { prefectures: PrefecturePortal[] };
+  // Prefecture portals ARE checked into the repo, so try the repo path first
+  // and fall back through the chain only if a fresh-checkout edge case hits.
+  const path = findStateFile("_state/prefecture_tourism_orgs.json");
+  if (!path) {
+    throw new Error(
+      "Could not find _state/prefecture_tourism_orgs.json — it should be checked into the repo.",
+    );
+  }
+  const raw = JSON.parse(await readFile(fileURLToPath(path), "utf8")) as {
+    prefectures: PrefecturePortal[];
+  };
   return raw.prefectures;
 }
 
@@ -293,7 +323,42 @@ LIMIT 5000
   }
 }
 
-function isTourismUrl(url: string): boolean {
+// City-hall-style hosts already live in official_urls.json. We exclude them
+// from the discovery output so the tourism-org graph doesn't simply mirror
+// what we already have. We treat any host containing a `city|town|village|
+// vill|pref` segment OR ending in `.lg.jp` (the local-government TLD) as a
+// city hall. Examples that should match:
+//
+//   www.city.hakodate.hokkaido.jp   ← `city` segment
+//   www.town.kisosaki.lg.jp         ← `town` segment
+//   town.higashikawa.hokkaido.jp    ← leading `town` segment
+//   www.vill.shinshinotsu.hokkaido.jp ← `vill` segment (村)
+//   www.pref.tokyo.jp               ← `pref` segment
+//   www.foo.lg.jp                   ← `.lg.jp` TLD
+const CITY_HALL_SEGMENT = new Set(["city", "town", "village", "vill", "pref"]);
+function isCityHallHost(host: string): boolean {
+  if (/\.lg\.jp$/i.test(host)) return true;
+  for (const seg of host.toLowerCase().split(".")) {
+    if (CITY_HALL_SEGMENT.has(seg)) return true;
+  }
+  return false;
+}
+
+function isLikelyTourismUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    if (isCityHallHost(u.hostname)) return false;
+    if (SKIP_HOST_RE.test(u.hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Stricter check used for harvested links inside prefecture portals — the
+// keyword hint helps us pick out anchors that are visibly tourism-flavoured
+// from a long list of mixed links.
+function hasTourismHint(url: string): boolean {
   try {
     const u = new URL(url);
     return TOURISM_HINT_RE.test(u.hostname + u.pathname);
@@ -521,18 +586,24 @@ async function main(): Promise<void> {
         const m = targetMunis.find((x) => x.code === adminCode);
         if (!m) continue;
         const cands: Candidate[] = [];
-        if (b.officialSite?.value && isTourismUrl(b.officialSite.value)) {
+        // P856 (official website) is often the city hall; admit only if the
+        // host is clearly NOT a city-hall pattern (we already cover those
+        // via official_urls.json). High confidence when the URL also looks
+        // tourism-flavoured, otherwise medium.
+        if (b.officialSite?.value && isLikelyTourismUrl(b.officialSite.value)) {
           cands.push({
             url: b.officialSite.value,
             source: "wikidata_p856",
-            confidence: "medium",
+            confidence: hasTourismHint(b.officialSite.value) ? "high" : "medium",
           });
         }
-        if (b.describedAt?.value && isTourismUrl(b.describedAt.value)) {
+        // P973 (described at URL) is more often a tourism guide / external
+        // profile, so accept any non-city-hall URL as at least a candidate.
+        if (b.describedAt?.value && isLikelyTourismUrl(b.describedAt.value)) {
           cands.push({
             url: b.describedAt.value,
             source: "wikidata_p973",
-            confidence: "medium",
+            confidence: hasTourismHint(b.describedAt.value) ? "high" : "medium",
           });
         }
         if (cands.length > 0) {
