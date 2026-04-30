@@ -37,11 +37,12 @@ That information is largely invisible to AI agents and to non-Japanese
 travellers. The opportunity is to translate and distribute it openly,
 not to second-guess it.
 
-The risk in any "best of Japan" project is that the curator's perspective
-narrows the dataset. A curated list looks like the curator's preferences.
-A list of official designations looks like the country's own
-institutional view of what matters — that's the asset class no other
-open dataset offers.
+The risk in any "best of Japan" project is that the curator's taste
+shapes what is included and what is left out. If a person picks the
+entries, the result reflects that person's preferences and blind spots.
+If we picked the entries, it would reflect ours. A list of official
+designations reflects the country's own institutional view of what
+matters — that is the asset class no other open dataset offers.
 
 The project's value is in **the work that has been done**: translating
 690+ designation records into 17 languages, scraping 1,938 municipalities,
@@ -114,8 +115,8 @@ of public information, the same way we treat OpenStreetMap.
 
 - Personal blogs, food review sites (食べログ, トリップアドバイザー), SNS
   posts
-- AI-generated entity lists where the AI selects which entities to include
-- Lists curated from personal taste
+- Lists where we (or any process we run, including AI) selected the
+  entries based on taste rather than from an official source
 - Aggregated review rankings as primary content
 - **Media** — newspapers, magazines, TV programmes, regional editorial
   outlets. Excluded for two reasons: (1) editorial articles are
@@ -161,9 +162,9 @@ Choosing which 30 of 231 traditional crafts to feature on a "must-see
 crafts of Japan" page would be **curation**. The selection is the
 editorial act, regardless of how official the underlying records are.
 
-Adding a `lesser-known` tag based on an AI's judgment of relative fame
-would be **curation**. "Lesser-known" is a comparative judgment we are
-making; nothing in the official sources says it.
+Adding a `lesser-known` tag because we judged a record relatively
+unknown would be **curation**. "Lesser-known" is a comparative judgment
+we are making; nothing in the official sources says it.
 
 Producing a "best 50 Japanese gardens" list ranked by aesthetic quality
 would be **curation**. Even if every garden is from an official register,
