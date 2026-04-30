@@ -1397,6 +1397,135 @@ async function getJapanHeritage(args: {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Tool: get_local_food
+//
+// Like get_local_specialty (food + craft) but food-only AND wider — beyond
+// the MAFF GI registry it also surfaces local-food entries the municipal /
+// tourism-association scrape picked up (ご当地グルメ / 名物 / 郷土料理 /
+// 銘菓 / 地酒). Added 2026-04-30 (ADR 0001 / D2): MAFF GI alone misses the
+// regional dishes that don't have a formal designation but are nonetheless
+// what the prefecture's tourism portal foregrounds.
+
+const FOOD_KEYWORDS_JA = [
+  "グルメ", "ご当地グルメ", "ご当地", "名物", "名産",
+  "銘菓", "銘酒", "地酒", "和菓子", "郷土料理",
+  "ご当地スイーツ", "麺", "ラーメン", "うどん", "そば",
+  "丼", "弁当", "B級グルメ",
+];
+
+const FOOD_KEYWORDS_EN = [
+  "cuisine", "gourmet", "local food", "local-food", "specialty",
+  "dish", "noodle", "ramen", "udon", "soba", "sushi", "sake",
+];
+
+function isFoodText(text: string | null | undefined): boolean {
+  if (!text) return false;
+  for (const k of FOOD_KEYWORDS_JA) {
+    if (text.includes(k)) return true;
+  }
+  const low = text.toLowerCase();
+  for (const k of FOOD_KEYWORDS_EN) {
+    if (low.includes(k)) return true;
+  }
+  return false;
+}
+
+async function getLocalFood(args: {
+  prefecture?: string;
+  lang?: string;
+  include_overseas?: boolean;
+}): Promise<unknown> {
+  let prefCode: string | null = null;
+  if (args.prefecture) {
+    prefCode = await resolvePrefectureCode(args.prefecture);
+    if (!prefCode) {
+      return {
+        error: `unknown_prefecture: ${args.prefecture}`,
+        hint: "Use Japanese name (e.g. '京都府'), English slug, or 2-digit JIS code.",
+        disclaimer: DISCLAIMER,
+      };
+    }
+  }
+  const includeOverseas = args.include_overseas === true;
+  const lang = args.lang;
+  const translations = await loadR3Translations();
+  const items: unknown[] = [];
+
+  // ── source 1: MAFF GI (food only)
+  const maff = await loadMaffGi();
+  if (maff) {
+    for (const r of maff.records) {
+      if (prefCode && !r.prefecture_codes.includes(prefCode)) continue;
+      if (!includeOverseas && r.prefecture_codes.length === 0) continue;
+      const key = `maff_gi:${r.registration_number}`;
+      const t = translations.get(key);
+      const meta = r3Translation(t, lang);
+      items.push({
+        source: "maff_gi",
+        category: "designated_food",
+        key,
+        registration_number: r.registration_number,
+        name_ja: r.name_ja,
+        name: pickR3Name(r.name_ja, t, lang),
+        description_ja: r.characteristics_ja,
+        description: pickR3Description(r.characteristics_ja, t, lang),
+        registration_date: r.registration_date,
+        production_area_text: r.production_area_text,
+        prefecture_codes: r.prefecture_codes,
+        producer_group: r.producer_group,
+        source_url: r.detail_url,
+        translation_meta: meta,
+      });
+    }
+  }
+
+  // ── source 2: scraped municipal / tourism-association pages
+  const prefs = await loadAllPrefectures();
+  for (const p of prefs) {
+    if (prefCode && p.prefecture.code !== prefCode) continue;
+    for (const m of p.municipalities) {
+      for (const s of m.spots) {
+        const bodyJoin = ((s as { body_paragraphs?: string[] }).body_paragraphs ?? []).join(" ");
+        if (
+          !isFoodText(s.name) &&
+          !isFoodText(s.description) &&
+          !isFoodText(bodyJoin)
+        ) {
+          continue;
+        }
+        items.push({
+          source: "scraped_local_food",
+          category: "regional_dish",
+          name_ja: s.name,
+          name: s.name,
+          description_ja: s.description ?? null,
+          description: s.description ?? null,
+          body_paragraphs: (s as { body_paragraphs?: string[] }).body_paragraphs ?? [],
+          spot_url: s.url,
+          spot_id: s.id,
+          municipality: m.municipality.name,
+          prefecture: p.prefecture.name,
+          prefecture_code: p.prefecture.code,
+        });
+      }
+    }
+  }
+
+  return {
+    prefecture_code: prefCode,
+    lang: lang ?? null,
+    count: items.length,
+    items,
+    sources: [
+      { name: "農林水産省 (MAFF) Geographical Indication — designated foods only" },
+      { name: "Municipal & tourism-association websites — pages tagged with ご当地グルメ / 名物 / 郷土料理 / etc." },
+    ],
+    note: "Two-tier: officially-designated GIs first, then anything the municipal / tourism-association scrape surfaced as local-food content. The scraped tier is broader but each entry's authority is whichever site published it.",
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_festivals
 //
 // Festivals (祭り / matsuri / 神事 / 行事) aggregated from every source we
@@ -1907,6 +2036,35 @@ const TOOLS = [
     },
   },
   {
+    name: "get_local_food",
+    description:
+      "Returns Japan's regional foods (ご当地グルメ / 郷土料理 / 銘菓 / 地酒) aggregated from two sources: (1) MAFF Geographical Indications — officially-designated agricultural products with full provenance; (2) the municipal / tourism-association scrape, surfacing the everyday-famous dishes that aren't formally designated but are what the prefecture's tourism portals promote.\n\nUse this when the user asks 'what should I eat in <prefecture>' for an answer that mixes the formally-protected names with the popular local dishes. For crafts as well as food, use `get_local_specialty`.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        prefecture: {
+          type: "string",
+          description:
+            "Prefecture (Japanese name like '京都府', English slug 'kyoto', or 2-digit JIS code '26'). Omit to return all.",
+        },
+        include_overseas: {
+          type: "boolean",
+          description:
+            "If true, also return MAFF GI items registered for foreign countries (Italy / Vietnam / Thailand). Default false.",
+        },
+        lang: {
+          type: "string",
+          enum: [
+            "en", "ja", "zh", "ko", "fr", "es", "de", "it", "pt", "ru",
+            "th", "vi", "id", "ms", "ar", "hi", "tl",
+          ],
+          description:
+            "Language for the translated `name` and `description`. Defaults to original Japanese.",
+        },
+      },
+    },
+  },
+  {
     name: "get_festivals",
     description:
       "Returns Japanese festivals (祭り / matsuri) and traditional rituals aggregated from multiple official sources: 文化庁 Important Intangible Folk Cultural Properties, UNESCO Intangible Cultural Heritage inscriptions for Japan, and any Schema.org Event objects we found in the municipal scrape.\n\nUse this when the user asks about a festival in a specific prefecture — coverage is much wider than `get_events` (which only queries Wikidata live). 17-language translations are returned via `name` / `description` when available.\n\nFor real-time Wikidata SPARQL queries with month filtering, use `get_events` instead.",
@@ -2074,6 +2232,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = await getTraditionalArts({
           category: args.category as string | undefined,
           lang: args.lang as string | undefined,
+        });
+        break;
+      case "get_local_food":
+        result = await getLocalFood({
+          prefecture: args.prefecture as string | undefined,
+          lang: args.lang as string | undefined,
+          include_overseas: args.include_overseas === true,
         });
         break;
       case "get_festivals":
