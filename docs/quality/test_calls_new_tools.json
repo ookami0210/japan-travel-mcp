@@ -1,0 +1,79 @@
+[
+  {
+    "id": "S1",
+    "intent": "Semantic-only retrieval for an English paraphrase that has no Japanese keyword overlap.",
+    "tool": "search_hybrid",
+    "args": {"q": "endangered traditional craft", "k": 5},
+    "expected_signal": "should surface 失われゆく / 伝統工芸 / 後継者 entries"
+  },
+  {
+    "id": "S2",
+    "intent": "Cross-lingual query: Korean → Japanese content.",
+    "tool": "search_hybrid",
+    "args": {"q": "겨울 축제 홋카이도", "prefecture": "01", "k": 5},
+    "expected_signal": "Hokkaido winter festival hits"
+  },
+  {
+    "id": "S3",
+    "intent": "Mixed Japanese / loan-word query.",
+    "tool": "search_hybrid",
+    "args": {"q": "lantern festival temple", "k": 5},
+    "expected_signal": "灯籠 / 寺 entries"
+  },
+  {
+    "id": "S4",
+    "intent": "Semantic-only — paraphrase 'eat fermented food'.",
+    "tool": "search_semantic",
+    "args": {"q": "fermented Japanese food", "k": 5},
+    "expected_signal": "発酵 / 醤油 / 味噌 entries"
+  },
+  {
+    "id": "K1",
+    "intent": "keyword filter on get_festivals.",
+    "tool": "get_festivals",
+    "args": {"keyword": "花火"},
+    "expected_signal": "subset of festivals containing 花火"
+  },
+  {
+    "id": "K2",
+    "intent": "keyword filter on get_traditional_arts.",
+    "tool": "get_traditional_arts",
+    "args": {"keyword": "歌舞伎"},
+    "expected_signal": "non-empty kabuki-related arts"
+  },
+  {
+    "id": "K3",
+    "intent": "keyword filter on get_local_food.",
+    "tool": "get_local_food",
+    "args": {"keyword": "発酵"},
+    "expected_signal": "fermented foods only"
+  },
+  {
+    "id": "K4",
+    "intent": "keyword filter on get_local_food (English token).",
+    "tool": "get_local_food",
+    "args": {"prefecture": "kyoto", "keyword": "tofu"},
+    "expected_signal": "tofu-mention entries in Kyoto"
+  },
+  {
+    "id": "D1",
+    "intent": "DMO lookup for Yamagata.",
+    "tool": "get_dmo",
+    "args": {"prefecture": "yamagata"},
+    "expected_signal": "Yamagata-prefecture DMOs (broad + prefectural + regional)"
+  },
+  {
+    "id": "D2",
+    "intent": "DMO lookup, candidate status only.",
+    "tool": "get_dmo",
+    "args": {"status": "candidate"},
+    "expected_signal": "24 candidate DMOs"
+  },
+  {
+    "id": "D3",
+    "intent": "DMO lookup, broad-region tier.",
+    "tool": "get_dmo",
+    "args": {"type": "broad"},
+    "expected_signal": "10 broad-region DMOs (北海道観光機構 etc.)"
+  }
+]
