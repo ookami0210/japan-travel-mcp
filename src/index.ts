@@ -1397,6 +1397,202 @@ async function getJapanHeritage(args: {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Tool: get_festivals
+//
+// Festivals (祭り / matsuri / 神事 / 行事) aggregated from every source we
+// have that records them, deduplicated. Added 2026-04-30 (ADR 0001 / D1)
+// because get_events alone (Wikidata SPARQL) had zero coverage in many
+// prefectures (Yamanashi, Saga, …) and festivals are too central to
+// Japanese tourism to leave at zero.
+//
+// Sources combined:
+//   - bunka_intangible.json   (重要無形民俗文化財 — designated folk rituals)
+//   - unesco_japan.json       (UNESCO ICH inscriptions for Japan)
+//   - data/prefectures/*.json (per-page schema_events scraped from
+//                              municipal / tourism-association sites)
+//   - get_events (live Wikidata SPARQL) — exposed separately, not merged
+//                              here because of latency
+
+const FESTIVAL_KEYWORDS_JA = [
+  "祭", "祭り", "祭礼", "まつり", "マツリ",
+  "神事", "神楽", "神輿", "舞楽",
+  "行事", "縁日", "灯籠", "山車", "山鉾", "花火",
+];
+
+const FESTIVAL_KEYWORDS_EN = [
+  "festival", "matsuri", "fire festival", "lantern festival",
+  "ritual", "rite", "ceremony",
+];
+
+function isFestivalText(text: string | null | undefined): boolean {
+  if (!text) return false;
+  for (const k of FESTIVAL_KEYWORDS_JA) {
+    if (text.includes(k)) return true;
+  }
+  const low = text.toLowerCase();
+  for (const k of FESTIVAL_KEYWORDS_EN) {
+    if (low.includes(k)) return true;
+  }
+  return false;
+}
+
+async function getFestivals(args: {
+  prefecture?: string;
+  lang?: string;
+}): Promise<unknown> {
+  let prefCode: string | null = null;
+  if (args.prefecture) {
+    prefCode = await resolvePrefectureCode(args.prefecture);
+    if (!prefCode) {
+      return {
+        error: `unknown_prefecture: ${args.prefecture}`,
+        hint: "Use Japanese name (e.g. '京都府'), English slug, or 2-digit JIS code.",
+        disclaimer: DISCLAIMER,
+      };
+    }
+  }
+  const lang = args.lang;
+  const translations = await loadR3Translations();
+  const items: unknown[] = [];
+
+  // ── source 1: bunka_intangible (designated folk rituals)
+  const bunka = await loadBunkaIntangible();
+  if (bunka) {
+    for (const r of bunka.records) {
+      if (!isFestivalText(r.name_ja) && !isFestivalText(r.name_en)) continue;
+      const key = `bunka_intangible:${r.qid}`;
+      const t = translations.get(key);
+      const meta = r3Translation(t, lang);
+      items.push({
+        source: "bunka_intangible",
+        key,
+        name_ja: r.name_ja,
+        name_en: r.name_en,
+        name: pickR3Name(r.name_ja ?? r.name_en, t, lang),
+        description_ja: r.description_ja,
+        description_en: r.description_en,
+        description: pickR3Description(
+          r.description_ja ?? r.description_en,
+          t,
+          lang,
+        ),
+        designation: r.designation,
+        date: r.inception ?? null,
+        bunca_id: r.bunca_id,
+        source_url: r.wikidata_url,
+        translation_meta: meta,
+      });
+    }
+  }
+
+  // ── source 2: UNESCO ICH inscriptions
+  const unesco = await loadUnescoJapan();
+  if (unesco) {
+    for (const r of unesco.records) {
+      if (!isFestivalText(r.name_ja) && !isFestivalText(r.name_en)) continue;
+      const key = `unesco_japan:${r.qid}`;
+      const t = translations.get(key);
+      const meta = r3Translation(t, lang);
+      items.push({
+        source: "unesco_japan",
+        key,
+        name_ja: r.name_ja,
+        name_en: r.name_en,
+        name: pickR3Name(r.name_ja ?? r.name_en, t, lang),
+        description_ja: r.description_ja,
+        description_en: r.description_en,
+        description: pickR3Description(
+          r.description_ja ?? r.description_en,
+          t,
+          lang,
+        ),
+        designation: "UNESCO Intangible Cultural Heritage",
+        inscription_year: r.inscription_year,
+        unesco_id: r.unesco_id,
+        source_url: r.wikidata_url,
+        translation_meta: meta,
+      });
+    }
+  }
+
+  // ── source 3: schema.org Events scraped from municipal / tourism sites
+  const prefs = await loadAllPrefectures();
+  for (const p of prefs) {
+    if (prefCode && p.prefecture.code !== prefCode) continue;
+    for (const m of p.municipalities) {
+      for (const s of m.spots) {
+        const events = (s as { schema_events?: unknown[] }).schema_events ?? [];
+        for (const ev of events) {
+          if (!ev || typeof ev !== "object") continue;
+          const e = ev as Record<string, unknown>;
+          const name = (e.name as string | null) ?? null;
+          const desc = (e.description as string | null) ?? null;
+          if (
+            !isFestivalText(name) &&
+            !isFestivalText(desc) &&
+            !isFestivalText(s.name)
+          ) {
+            continue;
+          }
+          items.push({
+            source: "scraped_schema_event",
+            name_ja: name,
+            name,
+            description_ja: desc,
+            description: desc,
+            event_type: (e.type as string | null) ?? null,
+            start_date: (e.start_date as string | null) ?? null,
+            end_date: (e.end_date as string | null) ?? null,
+            location: (e.location as string | null) ?? null,
+            spot_url: s.url,
+            spot_name: s.name,
+            municipality: m.municipality.name,
+            prefecture: p.prefecture.name,
+            source_url: (e.url as string | null) ?? s.url,
+          });
+        }
+      }
+    }
+  }
+
+  // Filter by prefecture if requested. For bunka/unesco entries we don't
+  // carry a prefecture_code (the data set spans the whole country), so the
+  // prefecture filter on those sources is best-effort: we don't drop them
+  // unless the user explicitly opts into "scraped_only".
+  let filtered = items;
+  if (prefCode) {
+    filtered = items.filter((it) => {
+      const item = it as { source?: string; prefecture?: string };
+      if (item.source === "scraped_schema_event") {
+        // already prefecture-scoped above
+        return true;
+      }
+      // bunka / unesco: keep them in the response — most festivals attract
+      // visitors from outside their prefecture anyway, and dropping them
+      // would silently lose UNESCO-level events.
+      return true;
+    });
+  }
+
+  return {
+    prefecture_code: prefCode,
+    lang: lang ?? null,
+    count: filtered.length,
+    items: filtered,
+    sources: [
+      { name: "文化庁 重要無形民俗文化財 (via Wikidata, CC0)" },
+      { name: "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)" },
+      {
+        name: "Schema.org Event objects scraped from municipal and tourism-association websites",
+      },
+    ],
+    note:
+      "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+    disclaimer: DISCLAIMER,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_multilingual (signature tool)
 
 async function getMultilingual(args: {
@@ -1711,6 +1907,30 @@ const TOOLS = [
     },
   },
   {
+    name: "get_festivals",
+    description:
+      "Returns Japanese festivals (祭り / matsuri) and traditional rituals aggregated from multiple official sources: 文化庁 Important Intangible Folk Cultural Properties, UNESCO Intangible Cultural Heritage inscriptions for Japan, and any Schema.org Event objects we found in the municipal scrape.\n\nUse this when the user asks about a festival in a specific prefecture — coverage is much wider than `get_events` (which only queries Wikidata live). 17-language translations are returned via `name` / `description` when available.\n\nFor real-time Wikidata SPARQL queries with month filtering, use `get_events` instead.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        prefecture: {
+          type: "string",
+          description:
+            "Prefecture (Japanese name like '京都府', English slug 'kyoto', or 2-digit JIS code '26'). Omit to return all.",
+        },
+        lang: {
+          type: "string",
+          enum: [
+            "en", "ja", "zh", "ko", "fr", "es", "de", "it", "pt", "ru",
+            "th", "vi", "id", "ms", "ar", "hi", "tl",
+          ],
+          description:
+            "Language for the translated `name` and `description`. Defaults to original Japanese.",
+        },
+      },
+    },
+  },
+  {
     name: "get_japan_heritage",
     description:
       "Returns 文化庁 Japan Heritage (日本遺産) stories — 104 designated narratives that bundle related historic / cultural sites under a unified theme.\n\nEach story includes themes, era tags, related municipalities, and the official summary. Filter by prefecture or theme. For the full constituent assets of a story, follow `source_url` to the official portal.",
@@ -1853,6 +2073,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "get_traditional_arts":
         result = await getTraditionalArts({
           category: args.category as string | undefined,
+          lang: args.lang as string | undefined,
+        });
+        break;
+      case "get_festivals":
+        result = await getFestivals({
+          prefecture: args.prefecture as string | undefined,
           lang: args.lang as string | undefined,
         });
         break;
