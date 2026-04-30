@@ -1,4 +1,9 @@
-# Quality test scoring — new-tools (post-scrape)
+# Quality test scoring — new-tools (pre-scrape baseline)
+
+> Pre-scrape baseline of the 11-case new-tools harness — same harness as
+> the post-scrape rerun, but against the embedding index built on the
+> pre-scrape HF dataset snapshot. Pre-scrape totals are 12/22 (54.5%);
+> post-scrape will land in SCORING_REPORT_NEW_TOOLS.post_scrape.md.
 
 Generated: 2026-04-30 17:47:07 UTC
 Cases: 11
