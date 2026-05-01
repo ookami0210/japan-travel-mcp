@@ -94,8 +94,38 @@ async function listPrefectureFiles(): Promise<URL[]> {
   return [];
 }
 
+// Filter spots that are clearly nav-chrome / index pages / encoding garbage
+// rather than real assets. Prevents the embedding corpus from being polluted
+// with low-signal entries that drown real content out of top-N results.
+// Same logic as src/index.ts isNavChromeSpotName, kept duplicated to avoid
+// importing src/ into scrapers/.
+function isNavChromeSpotName(name: string | null | undefined): boolean {
+  if (!name) return true;
+  const trimmed = name.trim();
+  if (trimmed.length === 0) return true;
+  if (/[�]/.test(trimmed)) return true;
+  if (/^[�¿À-ÿ]+$/.test(trimmed)) return true;
+  const lower = trimmed.toLowerCase();
+  const navWords = new Set([
+    "main menu", "menu", "news", "videos", "video", "video library",
+    "home", "top", "sitemap", "site map", "site search", "search",
+    "login", "sign in", "sign up", "register", "press", "press room",
+    "rss", "rss feed", "subscribe", "twitter", "facebook", "youtube",
+    "instagram", "language", "english", "日本語",
+    "ご意見", "お問い合わせ", "プライバシーポリシー", "サイトマップ",
+    "サイト内検索", "関連リンク", "リンク集", "メインメニュー",
+    "観光パンフレット等のご案内", "観光客のおもてなし",
+    "おすすめ特集", "special feature",
+  ]);
+  if (navWords.has(lower)) return true;
+  if (navWords.has(trimmed)) return true;
+  if (/^[぀-ヿ]{1,3}$/.test(trimmed)) return true;
+  return false;
+}
+
 async function harvestSpots(limit: number | null): Promise<IndexEntry[]> {
   const out: IndexEntry[] = [];
+  let skippedNav = 0;
   const files = await listPrefectureFiles();
   for (const f of files) {
     if (limit !== null && out.length >= limit) break;
@@ -126,7 +156,16 @@ async function harvestSpots(limit: number | null): Promise<IndexEntry[]> {
     for (const m of data.municipalities ?? []) {
       for (const s of m.spots ?? []) {
         if (limit !== null && out.length >= limit) break;
+        if (isNavChromeSpotName(s.name)) {
+          skippedNav++;
+          continue;
+        }
         const body = (s.body_paragraphs ?? []).slice(0, 5).join(" ");
+        // Skip spots with no usable body text — pure index/listing entries.
+        if (!body && !s.description) {
+          skippedNav++;
+          continue;
+        }
         out.push({
           key: `spot:${s.id}`,
           kind: "spot",
@@ -156,6 +195,9 @@ async function harvestSpots(limit: number | null): Promise<IndexEntry[]> {
         url: a.wikidata_url,
       });
     }
+  }
+  if (skippedNav > 0) {
+    process.stderr.write(`[embed] skipped ${skippedNav} nav-chrome / empty-body spots\n`);
   }
   return out;
 }
