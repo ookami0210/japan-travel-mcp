@@ -95,8 +95,14 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           BATCH: ${{ matrix.batch }}
           PREFS: ${{ github.event.inputs.prefs }}
-          BURST_MODE: ${{ github.event.inputs.mode || 'shallow' }}
           RESUME: "1"
+          # Mode-driven knobs. shallow = fast 1st pass, full = deep refresh.
+          # KJ-approved 2026-05-01: rate 800ms (= 1.25 req/sec/domain) is
+          # well within Googlebot-class polite crawl norms for a one-off burst.
+          RATE_LIMIT_MS: ${{ github.event.inputs.mode == 'full' && '1200' || '800' }}
+          MAX_PAGES_PER_MUNICIPALITY: ${{ github.event.inputs.mode == 'full' && '150' || '100' }}
+          GLOBAL_CONCURRENCY: ${{ github.event.inputs.mode == 'full' && '8' || '12' }}
+          RETRIES: ${{ github.event.inputs.mode == 'full' && '2' || '1' }}
         run: npx tsx scrapers/run_enriched_scrape.ts
 
       - name: Sync to HF dataset (this batch's prefectures)
