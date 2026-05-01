@@ -51,7 +51,7 @@ let cachedIndex: SemanticIndex | null = null;
 let cachedRoot: string | null = null;
 let extractor: ((inputs: string[], opts: unknown) => Promise<{ data: Float32Array; dims: number[] }>) | null = null;
 
-function f16ToF32(h: number): number {
+export function f16ToF32(h: number): number {
   const sign = (h & 0x8000) << 16;
   const exp = (h & 0x7c00) >> 10;
   const mantissa = h & 0x03ff;
