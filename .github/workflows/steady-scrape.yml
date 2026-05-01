@@ -1,0 +1,93 @@
+# Steady scrape — daily refresh of municipalities under a 30-day SLA.
+#
+# Replaces the legacy scrape.yml hardcoded "70 munis/day" with a dynamic
+# picker that prioritises overdue (>=30 day) municipalities and smooths
+# daily load.
+#
+# Design: docs/automation/AUTOMATION_DESIGN.md
+# Concurrency: shares group `scrape` with burst-scrape.yml — they cannot
+# overlap, the steady cron will be skipped while a burst is running.
+#
+# Schedule disabled by default until KJ flips it on (after the launch-prep
+# burst completes and the new daily.ts picker lands).
+
+name: steady-scrape
+
+on:
+  # Schedule disabled until KJ flips this on. Uncomment to activate:
+  # schedule:
+  #   - cron: "0 18 * * *"   # 03:00 JST = 18:00 UTC (previous day)
+  workflow_dispatch:
+    inputs:
+      munis_per_day:
+        description: "Override daily muni count (empty = auto)"
+        required: false
+        default: ""
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  steady:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run steady scrape
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
+        run: npx tsx scrapers/daily.ts
+
+      - name: R-3 weekly rotation (errors don't block)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        continue-on-error: true
+        run: npx tsx scrapers/r3_refresh.ts
+
+      - name: Commit operational state
+        run: |
+          git config user.name "japan-travel-mcp-bot"
+          git config user.email "noreply@github.com"
+          git add data/_logs data/_state
+          if git diff --cached --quiet; then
+            echo "No state changes to commit"
+          else
+            git commit -m "data: steady scrape state $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Sync bulk data to Hugging Face dataset
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: kjsunada/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        continue-on-error: true
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Steady refresh $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — failure summary
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🚨 steady-scrape FAILED on ${GITHUB_REF##*/} ($(date -u +%Y-%m-%dT%H:%M:%SZ))\"}" \
+            "$SLACK_WEBHOOK_URL" || true

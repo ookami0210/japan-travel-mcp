@@ -201,10 +201,35 @@ async function main(): Promise<void> {
   // pair with per-prefecture flushing so each completed prefecture is
   // checkpointed and never re-fetched.
   const resume = process.env.RESUME === "1";
+
+  // Per-domain rate limit. Default 5s for the steady-state policy. The
+  // burst-scrape workflow overrides this to 800ms (KJ-approved 2026-05-01)
+  // because a one-off burst can be more aggressive than the daily cron
+  // without violating polite-scrape norms.
+  const rateLimitMs = parseInt(process.env.RATE_LIMIT_MS ?? "5000", 10);
+  const maxPages = parseInt(
+    process.env.MAX_PAGES_PER_MUNICIPALITY ??
+      String(DEFAULT_OPTIONS.maxPagesPerMunicipality),
+    10,
+  );
+  const concurrency = parseInt(
+    process.env.GLOBAL_CONCURRENCY ?? String(DEFAULT_OPTIONS.globalConcurrency),
+    10,
+  );
+  const retries = parseInt(
+    process.env.RETRIES ?? String(DEFAULT_OPTIONS.retries),
+    10,
+  );
   const opts: ScrapeOptions = {
     ...DEFAULT_OPTIONS,
-    rateLimitMs: 5000, // respect the steady-state per-domain policy
+    rateLimitMs,
+    maxPagesPerMunicipality: maxPages,
+    globalConcurrency: concurrency,
+    retries,
   };
+  process.stderr.write(
+    `[enriched] config: rateLimitMs=${rateLimitMs} maxPages=${maxPages} concurrency=${concurrency} retries=${retries}\n`,
+  );
 
   const requestedPrefs = selectTargetPrefectures();
   const targetPrefs = resume
