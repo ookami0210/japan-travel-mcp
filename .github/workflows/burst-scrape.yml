@@ -32,6 +32,11 @@ on:
         description: "Batches in parallel (1=serial=safest; 6=fastest, ~6h wall on free tier)"
         options: ["1", "2", "3", "6"]
         default: "1"
+      resume_from_hf:
+        type: choice
+        description: "Pull existing prefecture files from HF + skip them (use only for crash-recovery, NOT for fresh burst)"
+        options: ["false", "true"]
+        default: "false"
       prefs:
         description: "Override JIS codes (e.g. 01,02). Empty = all 6 batches."
         required: false
@@ -94,17 +99,18 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'kjsunada/japan-travel-mcp-data' }}
+          RESUME_FROM_HF: ${{ github.event.inputs.resume_from_hf || 'false' }}
         run: |
           python3 -m pip install --quiet huggingface_hub
           mkdir -p data/_state data/r3 data/prefectures
           python3 - <<'PY'
-          import os, sys
+          import os, sys, shutil
           from huggingface_hub import hf_hub_download
           repo = os.environ.get("HF_DATASET_REPO", "kjsunada/japan-travel-mcp-data")
           token = os.environ.get("HF_TOKEN") or None
-          # State + r3 files the scrape needs to read at startup. We don't
-          # need data/prefectures/*.json on the runner unless RESUME=1 wants
-          # to skip already-completed ones — pull those too so resume works.
+          resume_from_hf = os.environ.get("RESUME_FROM_HF", "false").lower() == "true"
+
+          # State + r3 files the scrape MUST have at startup
           essentials = [
               "_state/municipalities.json",
               "_state/official_urls.json",
@@ -118,29 +124,35 @@ jobs:
                   src = hf_hub_download(repo_id=repo, filename=path, repo_type="dataset", token=token)
                   dst = f"data/{path}"
                   os.makedirs(os.path.dirname(dst), exist_ok=True)
-                  import shutil; shutil.copyfile(src, dst)
+                  shutil.copyfile(src, dst)
                   print(f"[prefetch] OK  {path}")
               except Exception as e:
                   print(f"[prefetch] miss {path}: {e}", file=sys.stderr)
-          # Pull existing prefectures/*.json so RESUME=1 can skip what's done.
-          # We try every prefecture slug; missing = fine.
-          slugs = ["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima",
-                   "ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa",
-                   "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
-                   "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
-                   "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
-                   "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
-                   "kumamoto","oita","miyazaki","kagoshima","okinawa"]
-          got = 0
-          for slug in slugs:
-              try:
-                  src = hf_hub_download(repo_id=repo, filename=f"prefectures/{slug}.json",
-                                       repo_type="dataset", token=token)
-                  import shutil; shutil.copyfile(src, f"data/prefectures/{slug}.json")
-                  got += 1
-              except Exception:
-                  pass
-          print(f"[prefetch] pulled {got}/47 prefecture files (RESUME will skip these)")
+
+          # Prefecture files are pulled ONLY when resume_from_hf=true
+          # (mid-burst crash recovery scenario). Default false = fresh burst,
+          # RESUME=1 in scrape works only against this-run flushes, not HF
+          # baseline — otherwise a re-run silently skips everything.
+          if resume_from_hf:
+              slugs = ["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima",
+                       "ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa",
+                       "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
+                       "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
+                       "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
+                       "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
+                       "kumamoto","oita","miyazaki","kagoshima","okinawa"]
+              got = 0
+              for slug in slugs:
+                  try:
+                      src = hf_hub_download(repo_id=repo, filename=f"prefectures/{slug}.json",
+                                           repo_type="dataset", token=token)
+                      shutil.copyfile(src, f"data/prefectures/{slug}.json")
+                      got += 1
+                  except Exception:
+                      pass
+              print(f"[prefetch] resume_from_hf=true → pulled {got}/47 prefecture files (RESUME will skip these)")
+          else:
+              print(f"[prefetch] resume_from_hf=false → fresh burst, no prefecture prefetch")
           PY
 
       - name: Run burst batch ${{ matrix.batch }} (mode=${{ github.event.inputs.mode }})
