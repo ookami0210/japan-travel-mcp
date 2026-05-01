@@ -198,7 +198,7 @@ jobs:
     needs: burst
     if: needs.burst.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -206,6 +206,57 @@ jobs:
           node-version: "20"
           cache: "npm"
       - run: npm ci
+
+      - name: Prefetch state + all prefecture files from HF (full corpus)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'kjsunada/japan-travel-mcp-data' }}
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          mkdir -p data/_state data/r3 data/prefectures
+          python3 - <<'PY'
+          import os, sys, shutil
+          from huggingface_hub import hf_hub_download
+          repo = os.environ.get("HF_DATASET_REPO", "kjsunada/japan-travel-mcp-data")
+          token = os.environ.get("HF_TOKEN") or None
+          essentials = [
+              "_state/municipalities.json",
+              "_state/wikidata_attractions.json",
+              "_state/scrape_state.json",
+              "r3/maff_gi.json",
+              "r3/meti_densan.json",
+              "r3/japan_heritage.json",
+              "r3/bunka_intangible.json",
+              "r3/unesco_japan.json",
+          ]
+          for path in essentials:
+              try:
+                  src = hf_hub_download(repo_id=repo, filename=path, repo_type="dataset", token=token)
+                  dst = f"data/{path}"
+                  os.makedirs(os.path.dirname(dst), exist_ok=True)
+                  shutil.copyfile(src, dst)
+                  print(f"[prefetch] OK  {path}")
+              except Exception as e:
+                  print(f"[prefetch] miss {path}: {e}", file=sys.stderr)
+          slugs = ["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima",
+                   "ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa",
+                   "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
+                   "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
+                   "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
+                   "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
+                   "kumamoto","oita","miyazaki","kagoshima","okinawa"]
+          got = 0
+          for slug in slugs:
+              try:
+                  src = hf_hub_download(repo_id=repo, filename=f"prefectures/{slug}.json",
+                                       repo_type="dataset", token=token)
+                  shutil.copyfile(src, f"data/prefectures/{slug}.json")
+                  got += 1
+              except Exception:
+                  pass
+          print(f"[prefetch] pulled {got}/47 prefecture files for embedding")
+          PY
+
       - name: Rebuild embeddings (full corpus)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
