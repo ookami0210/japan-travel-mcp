@@ -245,7 +245,10 @@ async function harvestR3(limit: number | null): Promise<IndexEntry[]> {
       });
     }
   }
-  // DMO is a separate file shape
+  // DMO index entries — minimal "name + area" rows for DMO discoverability
+  // (the get_dmo tool surface). The richer regional positioning content
+  // lives in data/dmo/<id>/plan.json and is harvested by harvestDmoPlans()
+  // below so each plan chunk becomes its own embedded entity.
   const dmo = await loadJson<{ entries: { id: string; name: string; raw_area_text: string; plan_pdf_url: string | null; prefectures: string[] }[] }>("r3/dmo.json");
   if (dmo) {
     for (const e of dmo.entries ?? []) {
@@ -260,6 +263,92 @@ async function harvestR3(limit: number | null): Promise<IndexEntry[]> {
       });
     }
   }
+  return out;
+}
+
+/**
+ * Harvest DMO regional-positioning plan chunks.
+ *
+ * Each DMO's 形成確立計画 PDF (~5-15 pages) was fetched + chunked by
+ * fetch_dmo_plans.py into data/dmo/<id>/plan.json. Each chunk becomes one
+ * IndexEntry with kind="r3" and source="dmo_plan" so it flows through the
+ * existing hybrid retrieval path.
+ *
+ * KJ's framing (2026-05-02): "what makes each region special, in the
+ * region's own words" — we want a query like "endangered traditional
+ * crafts" to surface the DMO whose plan foregrounds endangered crafts as
+ * a positioning theme, then surface concrete spots / R-3 records from
+ * that region. Faithful rendering of self-curated regional voice, not
+ * editorial curation.
+ */
+async function harvestDmoPlans(limit: number | null): Promise<IndexEntry[]> {
+  const out: IndexEntry[] = [];
+  // dmo/ lives in data/, scan via the same fallback chain as listPrefectureFiles
+  const roots: URL[] = [
+    new URL("dmo/", REPO_DATA),
+    new URL("dmo/", HF_CACHE),
+    new URL("dmo/", TMP_CACHE),
+  ];
+  let dmoDir: URL | null = null;
+  for (const r of roots) {
+    if (existsSync(fileURLToPath(r))) {
+      dmoDir = r;
+      break;
+    }
+  }
+  if (!dmoDir) {
+    process.stderr.write(`[embed] no data/dmo/ — skipping DMO plan harvest\n`);
+    return out;
+  }
+  let dmoIds: string[] = [];
+  try {
+    dmoIds = (await readdir(fileURLToPath(dmoDir))).filter((f) => !f.startsWith("."));
+  } catch {
+    return out;
+  }
+  let plansSeen = 0;
+  let chunksAdded = 0;
+  for (const id of dmoIds) {
+    if (limit !== null && out.length >= limit) break;
+    const planPath = new URL(`${id}/plan.json`, dmoDir);
+    let plan: {
+      id: string;
+      name: string;
+      name_normalized?: string;
+      registration_class?: string;
+      status?: string;
+      prefectures?: string[];
+      municipalities?: string[];
+      plan_pdf_url?: string | null;
+      plan_chunks?: { idx: number; text: string }[];
+    } | null = null;
+    try {
+      plan = (await loadJsonAt(planPath)) as typeof plan;
+    } catch {
+      continue;
+    }
+    if (!plan || !Array.isArray(plan.plan_chunks) || plan.plan_chunks.length === 0) continue;
+    plansSeen++;
+    const prefList = (plan.prefectures ?? []).join(" / ") || null;
+    const muniList = (plan.municipalities ?? []).slice(0, 6).join(" / ") || null;
+    for (const c of plan.plan_chunks) {
+      if (limit !== null && out.length >= limit) break;
+      out.push({
+        key: `dmo_plan:${plan.id}:${c.idx}`,
+        kind: "r3",
+        source: "dmo_plan",
+        name: `${plan.name} — 形成確立計画 (chunk ${c.idx + 1})`,
+        description: c.text,
+        prefecture_name: prefList,
+        municipality: muniList,
+        url: plan.plan_pdf_url ?? null,
+      });
+      chunksAdded++;
+    }
+  }
+  process.stderr.write(
+    `[embed] DMO plans: ${plansSeen} plans → ${chunksAdded} chunks embedded\n`,
+  );
   return out;
 }
 
@@ -308,6 +397,10 @@ async function main(): Promise<void> {
   if (wantR3) {
     const remaining = limit !== null ? Math.max(0, limit - entries.length) : null;
     if (remaining === null || remaining > 0) entries.push(...(await harvestR3(remaining)));
+    // DMO regional positioning chunks share the R3 toggle (they're an
+    // official-source designation by 観光庁 — same authority tier).
+    const remaining2 = limit !== null ? Math.max(0, limit - entries.length) : null;
+    if (remaining2 === null || remaining2 > 0) entries.push(...(await harvestDmoPlans(remaining2)));
   }
   process.stderr.write(`[embed] ${entries.length} entries to embed\n`);
 
