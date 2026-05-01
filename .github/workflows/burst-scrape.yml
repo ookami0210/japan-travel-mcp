@@ -1,0 +1,152 @@
+# Burst scrape — re-scrape every municipality after a feature/scope change.
+#
+# Triggers:
+#   1. workflow_dispatch (manual button)
+#   2. PR labeled with `burst-required` (KJ adds the label after Archie
+#      recommends it; merge to main fires the burst)
+#
+# Mode:
+#   - shallow: maxPages=30, maxBody=10, concurrency=16, retries=1 → ~4-6h
+#   - full:    maxPages=150, maxBody=30, concurrency=8, retries=2 → ~12h
+#
+# Design: docs/automation/AUTOMATION_DESIGN.md
+# Concurrency: shares group `scrape` with steady-scrape.yml — they cannot
+# overlap. The steady cron will be skipped while a burst is running.
+#
+# Splits the run into 6 batches matching the documented playbook
+# (docs/batches/README.md). Each batch fits comfortably under the GitHub
+# Actions 6h job limit.
+
+name: burst-scrape
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        description: "Scrape depth"
+        options: [shallow, full]
+        default: shallow
+      prefs:
+        description: "Override JIS codes (e.g. 01,02). Empty = all 6 batches."
+        required: false
+        default: ""
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write   # for PR-comment progress updates
+
+jobs:
+  guard:
+    # Skip the entire workflow when the PR-label trigger fired but the
+    # label isn't `burst-required`. workflow_dispatch always proceeds.
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.gate.outputs.run }}
+    steps:
+      - id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.label.name }}" = "burst-required" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          else
+            echo "run=false" >> $GITHUB_OUTPUT
+          fi
+
+  burst:
+    needs: guard
+    if: needs.guard.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350    # ~5.8h, just under GH Actions 6h hard limit
+    strategy:
+      fail-fast: false
+      max-parallel: 1       # serial — concurrency group also enforces
+      matrix:
+        batch: ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run burst batch ${{ matrix.batch }} (mode=${{ github.event.inputs.mode }})
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          BATCH: ${{ matrix.batch }}
+          PREFS: ${{ github.event.inputs.prefs }}
+          BURST_MODE: ${{ github.event.inputs.mode || 'shallow' }}
+          RESUME: "1"
+        run: npx tsx scrapers/run_enriched_scrape.ts
+
+      - name: Sync to HF dataset (this batch's prefectures)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: kjsunada/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        continue-on-error: true
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Burst ${{ matrix.batch }} ($(date -u +%Y-%m-%d))" \
+            --no-card
+
+      - name: Slack — batch summary
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          STATUS="${{ job.status }}"
+          ICON="✅"
+          [ "$STATUS" != "success" ] && ICON="🚨"
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$ICON burst-scrape batch=${{ matrix.batch }} mode=${{ github.event.inputs.mode }} → $STATUS\"}" \
+            "$SLACK_WEBHOOK_URL" || true
+
+  rebuild-embeddings:
+    needs: burst
+    if: needs.burst.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Rebuild embeddings (full corpus)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: npx tsx scrapers/embed/build_embeddings.ts
+
+      - name: Sync embeddings to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: kjsunada/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Embeddings rebuild $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — final summary
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🎉 burst-scrape complete (mode=${{ github.event.inputs.mode }}) — embeddings rebuilt and pushed to HF\"}" \
+            "$SLACK_WEBHOOK_URL" || true
