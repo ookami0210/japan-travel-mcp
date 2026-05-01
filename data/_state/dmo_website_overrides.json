@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "_comment": "Manual mapping of DMO id -> official website URL. Filled in over time by KJ + volunteer engineers when plan-text auto-extract misses (currently 300 of 343 DMOs need override). To re-scrape after adding entries: rm data/dmo/<id>/pages.json && npm run scrape:dmo_websites",
+  "last_updated": "2026-05-02",
+  "overrides": {}
+}
