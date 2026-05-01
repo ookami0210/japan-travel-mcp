@@ -27,6 +27,11 @@ on:
         description: "Scrape depth"
         options: [shallow, full]
         default: shallow
+      parallelism:
+        type: choice
+        description: "Batches in parallel (1=serial=safest; 6=fastest, ~6h wall on free tier)"
+        options: ["1", "2", "3", "6"]
+        default: "1"
       prefs:
         description: "Override JIS codes (e.g. 01,02). Empty = all 6 batches."
         required: false
@@ -67,7 +72,11 @@ jobs:
     timeout-minutes: 350    # ~5.8h, just under GH Actions 6h hard limit
     strategy:
       fail-fast: false
-      max-parallel: 1       # serial — concurrency group also enforces
+      # parallelism is operator-controlled — different batches target
+      # different prefectures (different domains), so per-domain rate
+      # limits aren't shared across batches. Set parallelism=6 for the
+      # fastest finish (~6h wall) when KJ wants the burst to land same-day.
+      max-parallel: ${{ fromJson(github.event.inputs.parallelism || '1') }}
       matrix:
         batch: ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6"]
     steps:
