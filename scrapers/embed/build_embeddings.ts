@@ -345,9 +345,56 @@ async function harvestDmoPlans(limit: number | null): Promise<IndexEntry[]> {
       });
       chunksAdded++;
     }
+
+    // Also harvest the DMO's website pages (scraped by
+    // scripts/sources/scrape_dmo_websites.ts → data/dmo/<id>/pages.json).
+    // Each page is its own embedded entity so query "endangered crafts"
+    // can surface the DMO's actual blog post / featured-page on crafts.
+    const pagesPath = new URL(`${id}/pages.json`, dmoDir);
+    let pagesFile:
+      | {
+          id: string;
+          name: string;
+          prefectures?: string[];
+          municipalities?: string[];
+          homepage_url?: string;
+          pages?: {
+            url: string;
+            title: string;
+            description: string | null;
+            body_paragraphs: string[];
+            language: string;
+          }[];
+        }
+      | null = null;
+    try {
+      pagesFile = (await loadJsonAt(pagesPath)) as typeof pagesFile;
+    } catch {
+      pagesFile = null;
+    }
+    if (pagesFile && Array.isArray(pagesFile.pages)) {
+      for (const page of pagesFile.pages) {
+        if (limit !== null && out.length >= limit) break;
+        if (!page.title || page.title.length < 2) continue;
+        if (isNavChromeSpotName(page.title)) continue;
+        const body = (page.body_paragraphs ?? []).slice(0, 5).join(" ");
+        if (!body && !page.description) continue;
+        out.push({
+          key: `dmo_page:${plan.id}:${page.url}`,
+          kind: "r3",
+          source: "dmo_website",
+          name: `${page.title} (${plan.name})`,
+          description: body || page.description || null,
+          prefecture_name: prefList,
+          municipality: muniList,
+          url: page.url,
+        });
+        chunksAdded++;
+      }
+    }
   }
   process.stderr.write(
-    `[embed] DMO plans: ${plansSeen} plans → ${chunksAdded} chunks embedded\n`,
+    `[embed] DMO plans: ${plansSeen} plans → ${chunksAdded} chunks/pages embedded\n`,
   );
   return out;
 }
