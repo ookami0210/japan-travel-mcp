@@ -462,17 +462,13 @@ async function searchArea(args: {
   limit?: number;
 }): Promise<unknown> {
   const prefs = await loadAllPrefectures();
-  const q = args.q.trim().toLowerCase();
+  const q = args.q.trim();
+  const qLower = q.toLowerCase();
   if (q.length === 0) {
     return { error: "empty_query", disclaimer: DISCLAIMER };
   }
   const limit = Math.min(Math.max(args.limit ?? 50, 1), 200);
 
-  // Score model:
-  //   100  exact name match (any language)
-  //    50  name substring match (any language)
-  //    20  description / body substring match
-  //   + small notability boost (sitelink / officially-designated / multi-lang)
   type Match = {
     score: number;
     record: Record<string, unknown>;
@@ -480,19 +476,22 @@ async function searchArea(args: {
   const matches: Match[] = [];
 
   const exactMatch = (s: string | null | undefined): boolean =>
-    !!s && s.toLowerCase() === q;
+    !!s && s.toLowerCase() === qLower;
   const partialMatch = (s: string | null | undefined): boolean =>
-    !!s && s.toLowerCase().includes(q);
+    !!s && s.toLowerCase().includes(qLower);
 
   const addMatch = (score: number, record: Record<string, unknown>): void => {
     matches.push({ score, record });
   };
 
-  // ── prefectures (47)
+  // ── prefectures (47) — direct match against the prefecture index. These
+  //    aren't in the embedding corpus, so we keep the legacy lexical scoring.
+  //    Bumped above the hybrid 50-150 band so an exact prefecture/muni hit
+  //    can never be drowned by mid-quality hybrid noise.
   for (const p of prefs) {
     let s = 0;
-    if (exactMatch(p.prefecture.name) || exactMatch(p.prefecture.name_en)) s = 110;
-    else if (partialMatch(p.prefecture.name) || partialMatch(p.prefecture.name_en)) s = 60;
+    if (exactMatch(p.prefecture.name) || exactMatch(p.prefecture.name_en)) s = 220;
+    else if (partialMatch(p.prefecture.name) || partialMatch(p.prefecture.name_en)) s = 165;
     if (s > 0) {
       addMatch(s, {
         type: "prefecture",
@@ -503,12 +502,12 @@ async function searchArea(args: {
     }
   }
 
-  // ── municipalities + scraped spots
+  // ── municipalities — same reasoning. ~1,938 entries, exact-match cheap.
   for (const p of prefs) {
     for (const m of p.municipalities) {
       let muniScore = 0;
-      if (exactMatch(m.municipality.name)) muniScore = 105;
-      else if (partialMatch(m.municipality.name)) muniScore = 55;
+      if (exactMatch(m.municipality.name)) muniScore = 210;
+      else if (partialMatch(m.municipality.name)) muniScore = 160;
       if (muniScore > 0) {
         addMatch(muniScore, {
           type: "municipality",
@@ -517,7 +516,180 @@ async function searchArea(args: {
           prefecture: p.prefecture.name,
         });
       }
-      // Scraped spots: name first, then description/body fallback
+    }
+  }
+
+  // ── Spots / Wikidata / R-3 records — go through the hybrid retriever
+  //    (BM25 + multilingual-e5 fused with RRF). The embedding corpus already
+  //    contains every entity from the three legacy lookups, so we just map
+  //    its results back into the search_area schema and merge with the
+  //    prefecture/municipality matches above.
+  //
+  //    Falls back to the legacy lexical scan when embeddings aren't built.
+  const hybridUsed = await populateFromHybrid(args.q, limit, addMatch);
+  if (!hybridUsed) {
+    await populateLegacyLexical(prefs, exactMatch, partialMatch, addMatch);
+    const r3Hits = await searchR3Registries(args.q, qLower, exactMatch, partialMatch);
+    for (const m of r3Hits) matches.push(m);
+  }
+
+  matches.sort((a, b) => b.score - a.score);
+  // Dedupe: same record key (qid / spot id / story_id / etc.) only kept once,
+  // best-scored. Some entities can land via multiple paths (prefecture exact
+  // match + hybrid match for a spot named after the prefecture, etc.).
+  const seen = new Set<string>();
+  const deduped: Match[] = [];
+  for (const m of matches) {
+    const r = m.record;
+    const key =
+      String(r.type ?? "") +
+      ":" +
+      String(r.qid ?? r.id ?? r.code ?? r.story_id ?? r.key ?? r.name ?? "?");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(m);
+  }
+  const top = deduped.slice(0, limit);
+
+  return {
+    query: args.q,
+    match_count: deduped.length,
+    results: top.map((m) => m.record),
+    truncated: deduped.length > limit,
+    data_as_of: dataAsOf(prefs),
+    disclaimer: DISCLAIMER,
+    retrieval: hybridUsed ? "hybrid (BM25 + multilingual-e5 + RRF)" : "lexical",
+    note:
+      hybridUsed
+        ? "Spots / Wikidata / R-3 records ranked by RRF over BM25 + multilingual-e5; prefectures and municipalities ranked by exact / substring match."
+        : "Embedding index not built — falling back to lexical match. Run `npm run embed:build` to enable hybrid retrieval.",
+  };
+}
+
+/**
+ * Detect spot names that are clearly nav-chrome / index pages / encoding
+ * garbage rather than real assets. Used to filter the hybrid retriever's
+ * spot results before they reach the user. Patterns drawn from a quick
+ * audit of the post-burst embedding corpus (2026-05-01).
+ */
+function isNavChromeSpotName(name: string | null | undefined): boolean {
+  if (!name) return true;
+  const trimmed = name.trim();
+  if (trimmed.length === 0) return true;
+  // Encoding garbage — Mojibake characters or non-printable runs.
+  if (/[�]/.test(trimmed)) return true;
+  if (/^[�¿À-ÿ]+$/.test(trimmed)) return true;
+  const lower = trimmed.toLowerCase();
+  // Generic English nav labels.
+  const navWords = [
+    "main menu", "menu", "news", "videos", "video", "video library",
+    "home", "top", "sitemap", "site map", "site search", "search",
+    "login", "sign in", "sign up", "register", "press", "press room",
+    "rss", "rss feed", "subscribe", "twitter", "facebook", "youtube",
+    "instagram", "language", "english", "日本語",
+    "ご意見", "お問い合わせ", "プライバシーポリシー", "サイトマップ",
+    "サイト内検索", "関連リンク", "リンク集", "メインメニュー",
+    "観光パンフレット等のご案内", "観光客のおもてなし",
+  ];
+  if (navWords.includes(lower)) return true;
+  if (navWords.includes(trimmed)) return true;
+  // "おすすめ特集" / "Special Feature" style boilerplate that appears on every page.
+  if (/^(おすすめ特集|special feature)$/i.test(trimmed)) return true;
+  // 短い hiragana-only / katakana-only label (1-3 chars) はだいたい label
+  if (/^[぀-ヿ]{1,3}$/.test(trimmed)) return true;
+  return false;
+}
+
+/**
+ * Run the hybrid retriever and map each result into search_area's record
+ * shape. Returns true when the hybrid index was available, false when we
+ * should fall back to the legacy lexical scan.
+ *
+ * Score is normalised to roughly 0-150 so the merged sort with the legacy
+ * exact/substring band (50-110) keeps an exact prefecture / municipality
+ * match above a strong-but-not-exact hybrid hit.
+ */
+async function populateFromHybrid(
+  query: string,
+  limit: number,
+  addMatch: (score: number, record: Record<string, unknown>) => void,
+): Promise<boolean> {
+  const candidateRoots = [dataRoot()];
+  const repoLocal = resolve(findPackageRoot(), "data");
+  if (!candidateRoots.includes(repoLocal)) candidateRoots.push(repoLocal);
+  const beam = Math.max(limit * 2, 100);
+  for (const root of candidateRoots) {
+    const out = await hybridSearch(root, query, beam, {});
+    if (!out.available) continue;
+    for (const r of out.results ?? []) {
+      const e = r.entry;
+      // Skip obvious nav-chrome / encoding-garbled / generic-listing spots
+      // entirely — they carry zero information value and crowd good results
+      // out of the top-N. Far cheaper than rebuilding the embedding index
+      // with a quality filter (which we'll do post-deep-burst anyway).
+      if (e.kind === "spot" && isNavChromeSpotName(e.name)) continue;
+
+      // Normalise RRF scores (≈ 0.01-0.1) to the 50-150 band so they sort
+      // alongside exact-match prefecture (220) / municipality (210) hits.
+      // Strong hybrid match (rank 1 BM25 + rank 1 vec) ≈ 0.033 → ~85.
+      let normalisedScore = Math.min(150, 50 + r.score * 1500);
+      // Source-tier authority boost: official designations (R-3) outrank
+      // Wikidata, which outranks municipal-scraped spots. The municipal
+      // scrape unavoidably contains low-signal index/listing pages — even
+      // after the nav-chrome filter, generic spot names get less weight.
+      if (e.kind === "r3") normalisedScore += 30;
+      else if (e.kind === "wikidata") normalisedScore += 20;
+      if (e.kind === "spot") {
+        addMatch(normalisedScore, {
+          type: "spot",
+          source: e.source,
+          id: e.key.replace(/^spot:/, ""),
+          name: e.name,
+          description: e.description ?? null,
+          url: e.url ?? null,
+          municipality: e.municipality ?? null,
+          prefecture: e.prefecture_name ?? null,
+        });
+      } else if (e.kind === "wikidata") {
+        addMatch(normalisedScore, {
+          type: "attraction",
+          source: "wikidata",
+          qid: e.key.replace(/^wd:/, ""),
+          name_ja: e.name,
+          description_en: e.description ?? null,
+          prefecture_code: e.prefecture_code ?? null,
+          prefecture: e.prefecture_name ?? null,
+          municipality: e.municipality ?? null,
+        });
+      } else {
+        // R-3 registry record
+        addMatch(normalisedScore, {
+          type: "designation",
+          source: e.source,
+          key: e.key,
+          name: e.name,
+          description: e.description ?? null,
+          url: e.url ?? null,
+        });
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Legacy lexical scan (pre-Phase 3). Used only when the hybrid index isn't
+ * available. Same scoring model search_area always used.
+ */
+async function populateLegacyLexical(
+  prefs: PrefectureFile[],
+  exactMatch: (s: string | null | undefined) => boolean,
+  partialMatch: (s: string | null | undefined) => boolean,
+  addMatch: (score: number, record: Record<string, unknown>) => void,
+): Promise<void> {
+  for (const p of prefs) {
+    for (const m of p.municipalities) {
       for (const spot of m.spots ?? []) {
         let sScore = 0;
         if (exactMatch(spot.name)) sScore = 100;
@@ -543,11 +715,6 @@ async function searchArea(args: {
         }
       }
     }
-  }
-
-  // ── Wikidata attractions (41,000+; supplement loader fills missing
-  //    per-prefecture data from the master file)
-  for (const p of prefs) {
     for (const a of p.wikidata_attractions ?? []) {
       let s = 0;
       if (
@@ -568,9 +735,6 @@ async function searchArea(args: {
         s = 20;
       }
       if (s > 0) {
-        // Notability boost: shorter Q-id ≈ older / more notable in Wikidata.
-        // It's a proxy, not perfect, but it ranks Q170181 (Himeji Castle)
-        // above Q116606456 (Himeji City Archaeological Research Center).
         const qNum = parseInt((a.qid ?? "Q9999999999").replace(/^Q/, ""), 10);
         const notability = isFinite(qNum) ? Math.max(0, 10 - Math.log10(qNum)) : 0;
         addMatch(s + notability, {
@@ -586,26 +750,6 @@ async function searchArea(args: {
       }
     }
   }
-
-  // ── R-3 designation registries (MAFF GI / METI crafts / Japan Heritage /
-  //    bunka intangible / UNESCO ICH) — official records, ranked above
-  //    Wikidata when names match exactly because they're authoritative.
-  const r3Hits = await searchR3Registries(args.q, q, exactMatch, partialMatch);
-  for (const m of r3Hits) matches.push(m);
-
-  matches.sort((a, b) => b.score - a.score);
-  const top = matches.slice(0, limit);
-
-  return {
-    query: args.q,
-    match_count: matches.length,
-    results: top.map((m) => m.record),
-    truncated: matches.length > limit,
-    data_as_of: dataAsOf(prefs),
-    disclaimer: DISCLAIMER,
-    note:
-      "Results sorted by relevance: exact name match > name substring > description match. Wikidata notability is approximated by Q-id age (lower = older/more cited).",
-  };
 }
 
 async function searchR3Registries(
