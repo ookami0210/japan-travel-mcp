@@ -213,6 +213,88 @@ async function crawlDmoSite(
   return { pages, attempted, failed };
 }
 
+interface OverrideFile {
+  overrides?: Record<string, string>;
+}
+
+interface TourismOrgUrlsFile {
+  entries?: {
+    code: string;
+    primary?: string | null;
+    candidates?: { url: string; confidence: string }[];
+  }[];
+}
+
+let cachedOverrides: Record<string, string> | null = null;
+let cachedMunicipalityUrls: Map<string, string> | null = null;
+
+async function loadOverrides(): Promise<Record<string, string>> {
+  if (cachedOverrides) return cachedOverrides;
+  const url = new URL("data/_state/dmo_website_overrides.json", ROOT);
+  if (!existsSync(fileURLToPath(url))) {
+    cachedOverrides = {};
+    return cachedOverrides;
+  }
+  try {
+    const f = JSON.parse(await readFile(fileURLToPath(url), "utf8")) as OverrideFile;
+    cachedOverrides = f.overrides ?? {};
+  } catch {
+    cachedOverrides = {};
+  }
+  return cachedOverrides;
+}
+
+async function loadMunicipalityUrls(): Promise<Map<string, string>> {
+  if (cachedMunicipalityUrls) return cachedMunicipalityUrls;
+  const url = new URL("data/_state/tourism_org_urls.json", ROOT);
+  if (!existsSync(fileURLToPath(url))) {
+    cachedMunicipalityUrls = new Map();
+    return cachedMunicipalityUrls;
+  }
+  try {
+    const f = JSON.parse(await readFile(fileURLToPath(url), "utf8")) as TourismOrgUrlsFile;
+    const map = new Map<string, string>();
+    for (const e of f.entries ?? []) {
+      if (e.primary) map.set(e.code, e.primary);
+    }
+    cachedMunicipalityUrls = map;
+  } catch {
+    cachedMunicipalityUrls = new Map();
+  }
+  return cachedMunicipalityUrls;
+}
+
+/**
+ * Layered URL discovery (KJ-confirmed 2026-05-02):
+ *   1. data/_state/dmo_website_overrides.json — manual mapping (best)
+ *   2. plan PDF text regex — works when the plan mentions the URL
+ *   3. tourism_org_urls.json — pick the most-relevant municipality's
+ *      tourism portal as a proxy when the DMO covers a small region
+ *   4. give up — record note: "no_homepage_url_found"
+ */
+async function discoverHomepage(plan: PlanFile): Promise<{ url: string | null; via: string }> {
+  const overrides = await loadOverrides();
+  if (overrides[plan.id]) {
+    return { url: overrides[plan.id], via: "override" };
+  }
+  const allText = plan.plan_chunks.map((c) => c.text).join(" ");
+  const candidates = allText.match(URL_RE) ?? [];
+  const fromText = pickHomepage(candidates);
+  if (fromText) return { url: fromText, via: "plan_text" };
+
+  // Fallback to tourism_org_urls.json: if the DMO covers ≤3 municipalities,
+  // pick the first muni's tourism portal as a proxy. Wider-coverage DMOs
+  // (prefectural / inter-prefectural) need manual override — generic
+  // pref portal would be misleading.
+  if (plan.municipalities.length === 0 || plan.municipalities.length > 3) {
+    return { url: null, via: "no_url_found" };
+  }
+  const muniUrls = await loadMunicipalityUrls();
+  // We don't have JIS codes per DMO muni name, so this is best-effort —
+  // skip the fallback unless we extend dmo.json with codes later.
+  return { url: null, via: "no_url_found" };
+}
+
 async function processDmo(
   dmoId: string,
   opts: ScrapeOptions,
@@ -231,12 +313,10 @@ async function processDmo(
     process.stderr.write(`[dmo_web] ${dmoId} skip (no plan.json)\n`);
     return;
   }
-  const allText = plan.plan_chunks.map((c) => c.text).join(" ");
-  const candidates = allText.match(URL_RE) ?? [];
-  const homepage = pickHomepage(candidates);
+  const { url: homepage, via: discoveryVia } = await discoverHomepage(plan);
   if (!homepage) {
     process.stderr.write(
-      `[dmo_web] ${dmoId} (${plan.name}) no homepage URL found in plan\n`,
+      `[dmo_web] ${dmoId} (${plan.name}) no homepage URL [${discoveryVia}]\n`,
     );
     await writeFile(
       fileURLToPath(pagesPath),
@@ -251,6 +331,7 @@ async function processDmo(
           pages_attempted: 0,
           pages_failed: 0,
           fetched_at: new Date().toISOString(),
+          discovery_via: discoveryVia,
           note: "no_homepage_url_found",
         },
         null,
@@ -260,9 +341,9 @@ async function processDmo(
     );
     return;
   }
-  process.stderr.write(`[dmo_web] ${dmoId} (${plan.name}) → ${homepage}\n`);
+  process.stderr.write(`[dmo_web] ${dmoId} (${plan.name}) → ${homepage} [${discoveryVia}]\n`);
   const { pages, attempted, failed } = await crawlDmoSite(homepage, opts, counter);
-  const out: DmoPagesFile = {
+  const out: DmoPagesFile & { discovery_via: string } = {
     id: plan.id,
     name: plan.name,
     prefectures: plan.prefectures,
@@ -272,6 +353,7 @@ async function processDmo(
     pages_attempted: attempted,
     pages_failed: failed,
     fetched_at: new Date().toISOString(),
+    discovery_via: discoveryVia,
   };
   await mkdir(dirname(fileURLToPath(pagesPath)), { recursive: true });
   await writeFile(fileURLToPath(pagesPath), JSON.stringify(out, null, 2), "utf8");
