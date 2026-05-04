@@ -236,6 +236,14 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
     rationale_ja: "茶畑・茶産地。宇治・静岡・八女・嬉野等が代表。GI 登録のものも多い。",
   },
   {
+    id: "sake_brewery",
+    re: /(酒蔵|酒造|蔵元|日本酒|sake\s*(brewer|brand|kura|maker)|地酒)/iu,
+    target_kinds: ["sake_brewery", "sake_brand"],
+    semantic_tags: ["sake brewery", "kura", "japanese sake"],
+    rationale_en: "Sake brewery / brand — 41 entries via Wikipedia category 日本酒メーカー (6) + 日本酒の銘柄 (35). Famous regions: Niigata, Hyogo (Nada), Akita, Hiroshima (Saijo).",
+    rationale_ja: "日本酒の蔵元・銘柄。新潟・兵庫(灘)・秋田・広島(西条)等が代表。Wikipedia 日本酒メーカー/銘柄 category 経由で 41 entries。",
+  },
+  {
     id: "yuzu_citrus",
     re: /(ゆず|柚子|yuzu|sudachi|すだち|kabosu|かぼす|柑橘|citrus|local\s*citrus)/iu,
     routing_tool: "get_local_specialty",
