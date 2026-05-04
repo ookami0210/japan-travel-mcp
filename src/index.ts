@@ -1433,6 +1433,23 @@ const PREF_WIDE_PORTAL_DOMAINS: string[] = [
   "vekanko.jp",
   "tic-toyama.jp",
   "kanko.kyoto-fukuchiyama",
+  // Iter67: expanded list flagged by iter65 judges
+  "iwatetabi.jp",  // Iwate prefecture-wide
+  "fuku-e.com",  // Fukui DISCOVER FUKUI
+  "fukuoka-kanko.com",
+  "tabi-aichi.jp",
+  "honokuni.or.jp",  // 山陰観光
+  "yamagatakanko.com",
+  "tochigiji.or.jp",
+  "kanko-shimane.com",
+  "tottori-tour.jp",
+  "discover-niigata.com",
+  "saitama-kanko.com",
+  "gunma-trip.jp",
+  "kankou-shiga.jp",
+  "miyazaki-kankou.jp",
+  "kankou-japan.go.jp",
+  "japan.travel",
 ];
 
 function isPrefWidePortalUrl(url: string | null | undefined): boolean {
@@ -3634,8 +3651,25 @@ async function getLocalSpecialty(args: {
   lang?: string;
   include_overseas?: boolean;
 }): Promise<unknown> {
-  const wantFood = !args.category || args.category === "food";
-  const wantCraft = !args.category || args.category === "craft";
+  // Iter67: when category is unset but q strongly
+  // suggests a craft (絣/織/染/塗/焼/陶磁/漆/和紙/染色/刺繍/etc.) or food
+  // (鮮魚/牛/豚/鶏/酒/ご飯/etc.), narrow to that category to avoid the
+  // food-only or craft-only return seen in iter62-65 judges (L1-12 弓浜絣
+  // returned only food, missing the textile entirely).
+  let wantFood = !args.category || args.category === "food";
+  let wantCraft = !args.category || args.category === "craft";
+  const qStr = args.q?.trim() ?? "";
+  const CRAFT_HINT_RE = /(絣|織|染|塗|焼|陶磁器|陶器|漆|和紙|刺繍|刀|筆|墨|硯|提灯|団扇|簾|箒|箪笥|たんす|彫刻|木工|竹工|金工|染色|kasuri|ori|nuri|yaki|urushi|washi|paper|textile|porcelain|ceramic|lacquer|forge|katana|sword|incense)/iu;
+  const FOOD_HINT_RE = /(料理|食|肉|魚|果実|野菜|米|餅|麺|麦|果物|たまご|wagyu|beef|pork|fish|crab|tuna|蕎麦|うどん|ラーメン|寿司|刺身|味噌|醤油|酒|wine|sake|tea|tea\s*cer)/iu;
+  if (!args.category && qStr) {
+    if (CRAFT_HINT_RE.test(qStr) && !FOOD_HINT_RE.test(qStr)) {
+      wantFood = false;
+      wantCraft = true;
+    } else if (FOOD_HINT_RE.test(qStr) && !CRAFT_HINT_RE.test(qStr)) {
+      wantFood = true;
+      wantCraft = false;
+    }
+  }
   const includeOverseas = args.include_overseas === true;
 
   let prefCode: string | null = null;
