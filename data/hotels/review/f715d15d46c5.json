@@ -1,0 +1,100 @@
+{
+  "id": "f715d15d46c5",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 42m",
+    "name similarity 0.71 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111406760",
+      "source_url": "https://www.wikidata.org/wiki/Q111406760",
+      "name": "京都ブライトンホテル",
+      "name_en": "Kyoto Brighton Hotel",
+      "name_zh": "京都布賴頓酒店",
+      "name_ko": "교토 브라이튼 호텔",
+      "coordinates": {
+        "lat": 35.02442,
+        "lng": 135.75616
+      },
+      "phone": null,
+      "street": "602-8071 京都府京都市上京区新町通中立売下ル仕丁町330",
+      "postal_code": null,
+      "website": "https://kyoto.brightonhotels.co.jp/",
+      "type": null,
+      "prefecture_code": "26",
+      "raw": {
+        "qid": "Q111406760",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111406760",
+        "name_ja": "京都ブライトンホテル",
+        "name_en": "Kyoto Brighton Hotel",
+        "name_zh": "京都布賴頓酒店",
+        "name_ko": "교토 브라이튼 호텔",
+        "description_en": "hotel in Kyoto, Japan",
+        "coordinates": {
+          "lat": 35.02442,
+          "lng": 135.75616
+        },
+        "prefecture_code": "26",
+        "admin_code": "260002",
+        "admin_name": "京都府",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://kyoto.brightonhotels.co.jp/",
+        "phone": null,
+        "street_address": "602-8071 京都府京都市上京区新町通中立売下ル仕丁町330",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/2691296677",
+      "source_url": "https://www.openstreetmap.org/node/2691296677",
+      "name": "ブライトンホテル",
+      "name_en": "Brighton Hotel Kyoto",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.024587,
+        "lng": 135.755745
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.brightonhotels.co.jp/kyoto/",
+      "type": "hotel",
+      "prefecture_code": "26",
+      "raw": {
+        "osm_id": "node/2691296677",
+        "osm_url": "https://www.openstreetmap.org/node/2691296677",
+        "type": "hotel",
+        "name": "ブライトンホテル",
+        "name_en": "Brighton Hotel Kyoto",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.024587,
+          "lng": 135.755745
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": "京都市",
+        "street": null,
+        "phone": null,
+        "website": "https://www.brightonhotels.co.jp/kyoto/",
+        "stars": null,
+        "raw_tags": {
+          "addr:city": "京都市",
+          "name": "ブライトンホテル",
+          "name:en": "Brighton Hotel Kyoto",
+          "operator": "Brighton Hotels",
+          "tourism": "hotel",
+          "website": "https://www.brightonhotels.co.jp/kyoto/",
+          "wikidata": "Q111406760"
+        }
+      }
+    }
+  ]
+}

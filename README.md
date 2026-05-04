@@ -1,0 +1,438 @@
+# Japan Travel MCP
+
+> **Open Japanese tourism dataset + Model Context Protocol (MCP) server** —
+> 13,394 tourist spots × 17 languages, 40,128 accommodations, 690
+> officially-designated cultural records (MAFF GI, METI traditional crafts,
+> Japan Heritage, UNESCO ICH). **Free, no API key, no account.** All data is
+> downloadable as JSON/JSONL from [Hugging Face](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data).
+
+[![npm version](https://img.shields.io/npm/v/japan-travel-mcp.svg)](https://www.npmjs.com/package/japan-travel-mcp)
+[![🤗 Dataset](https://img.shields.io/badge/🤗-Dataset-yellow)](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data)
+[![Code: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE)
+[![Data: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
+## What you can do in 60 seconds
+
+**1. Use it from any MCP client (Claude Desktop, Cursor, Windsurf):**
+
+```json
+{ "mcpServers": { "japan-travel": { "command": "npx", "args": ["-y", "japan-travel-mcp"] } } }
+```
+
+Then ask the model anything like "What's special about Tottori, in Russian?" — it gets a 17-language tourism description from official Japanese sources.
+
+**2. Or grab the raw dataset for your own pipeline:**
+
+```python
+from huggingface_hub import snapshot_download
+snapshot_download(repo_id="open-travel/japan-travel-mcp-data", repo_type="dataset")
+```
+
+**See also:** [🤗 Dataset card](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data) · [Live demo (coming soon)](#) · [arXiv preprint (coming soon)](#)
+
+---
+
+## Quick start (Claude Desktop)
+
+```json
+{
+  "mcpServers": {
+    "japan-travel": {
+      "command": "npx",
+      "args": ["-y", "japan-travel-mcp"]
+    }
+  }
+}
+```
+
+On first run, the server downloads ~270 MB of travel data from
+[huggingface.co/datasets/open-travel/japan-travel-mcp-data](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data)
+to `~/.japan-travel-mcp/data/` (override the cache location with the
+`JAPAN_TRAVEL_MCP_CACHE` env var). Subsequent runs use the local cache.
+
+> ⚠️ **During the pre-launch review period the HF dataset is private**, so
+> the first-run download requires an `HF_TOKEN` env var. Get a read-scope
+> token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+> after a maintainer has added you as a collaborator. Once the dataset is made public
+> (Phase D, alongside `npm publish`), the token is no longer needed.
+
+```jsonc
+// claude_desktop_config.json (during private-review period)
+{
+  "mcpServers": {
+    "japan-travel": {
+      "command": "npx",
+      "args": ["-y", "japan-travel-mcp"],
+      "env": { "HF_TOKEN": "hf_..." }
+    }
+  }
+}
+```
+
+---
+
+## Get the raw data directly
+
+If you'd rather work with the JSON / JSONL files yourself (e.g. fine-tune a
+model, embed everything into a vector store, run analytics), download from
+the dataset repo:
+
+```python
+from huggingface_hub import snapshot_download
+local_dir = snapshot_download(
+    repo_id="open-travel/japan-travel-mcp-data",
+    repo_type="dataset",
+)
+```
+
+```bash
+# or via plain git
+git clone https://huggingface.co/datasets/open-travel/japan-travel-mcp-data
+```
+
+> All 47 prefectures and all 1,938 entities (1,741 municipalities + 197 designated-city wards) are covered in parallel — no prioritization by population, fame, or tourism volume.
+> Tokyo and Kyoto are here too — but the point of this dataset is everywhere else.
+
+---
+
+## Why this exists
+
+Japan has incredible destinations, rich local culture, and tourism information
+published across thousands of municipal websites — almost none of it accessible
+to AI agents.
+
+I've spent years in Japan's travel industry. I know how much the world is
+missing. This project exists because I believe Japan deserves to be better
+represented in the AI era.
+
+Not a business. A contribution.
+
+— **KJ Sunada**, founder of [KabuK Style](https://kabuk.co.jp/), building products for Japan's travel industry since 2019.
+
+### Why not just use Wikipedia / Google Places / JNTO?
+
+|                                                  | **japan-travel-mcp** | Wikipedia        | Google Places  | JNTO open data |
+|:-------------------------------------------------|:--------------------:|:----------------:|:--------------:|:--------------:|
+| Coverage of all 47 prefectures × 1,938 entities  |          ✅          |     partial      |      ✅        |    partial     |
+| 17-language tourism descriptions (200-300 chars) |     ✅ 13K spots     |      sparse      |  name only     |  EN + a few    |
+| Official designation registries (MAFF GI etc.)   |   ✅ 690 records     |     partial      |      ❌        |    partial     |
+| MCP server out of the box                        |          ✅          |       ❌         |      ❌        |       ❌       |
+| Open dataset (CC BY 4.0)                         |          ✅          | ✅ (CC BY-SA)    |      ❌        |    varies      |
+| Free / no API key / no quota                     |          ✅          |        ✅        |  ❌ (paid)     | ❌ (key)       |
+| Refreshed daily on a 30-day rolling cycle        |          ✅          |   community      | ✅ (proprietary)|     varies     |
+
+The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo and Kyoto fine. The point is that *AI agents* need a single, structured, multilingual, license-clear source for **everywhere else in Japan**, and that didn't exist until now.
+
+---
+
+## What's inside
+
+### Tools (MCP)
+
+| Tool | Description |
+|------|-------------|
+| `search_area` | Search across prefectures, municipalities, and 41,000+ Wikidata attractions by name or keyword |
+| `get_spots` | Tourist spots by prefecture or municipality (combines municipal scrape + Wikidata) |
+| `get_hotels` | 40,000+ accommodations (Wikidata + OpenStreetMap merged) — filter by area or lat/lng/radius |
+| `get_transport` | Spot coordinates, prefecture, municipality, and the official URL where access is documented |
+| `get_events` | Festivals registered in Wikidata for a given prefecture, with optional month filter (live SPARQL, in-memory cache) |
+| `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |
+| **`get_description`** | **SIGNATURE TOOL.** 200-300 character tourism descriptions in **17 languages** for 13,000+ spots, generated for global tourist consumption |
+| `get_local_specialty` | Regional specialties (food + crafts) by prefecture, drawn from official designation systems: MAFF Geographical Indications (172 items) + METI-designated Traditional Crafts / Dentō Kōgeihin (231 items) |
+| `get_local_food` | Regional cuisine — MAFF GI food rows plus tourism-association pages tagged as local-cuisine / specialty-dish / regional-food, deduplicated and prefecture-scoped |
+| `get_festivals` | Festivals (matsuri, Shinto rites, annual rituals) — UNESCO ICH + Important Intangible Cultural Properties + scraped municipal and tourism-association festival pages, with Schema.org Event metadata where present |
+| `get_traditional_arts` | Intangible cultural assets from the Agency for Cultural Affairs — Important Intangible Cultural Properties + Folk (125 items) + UNESCO ICH inscriptions for Japan (58 items) |
+| `get_japan_heritage` | All 104 Japan Heritage (Nihon Isan) stories from the Agency for Cultural Affairs, with theme / era / prefecture filters |
+
+**Signature tool: `get_description`**
+This MCP exposes 17-language tourism descriptions — English, Japanese, Chinese, Korean,
+French, Spanish, German, Italian, Portuguese, Russian, Thai, Vietnamese, Indonesian,
+Malay, Arabic, Hindi, Tagalog — for over 13,000 Japanese tourist spots. Each
+description is 150-350 characters in the target language, generated by Claude
+Sonnet 4.6 grounded in Wikidata metadata, and applies a project-wide canonical
+glossary (e.g. 神社 → Shrine, 寺 → Temple, modified Hepburn romanisation
+for place-names) for consistency across the 17 languages.
+
+This dataset does not exist anywhere else. Pre-built, queryable in one call,
+no API key required.
+
+### Data layers
+
+```
+Layer 1: Municipal tourism pages           — all 1,938 entities (incl. designated-city wards)
+Layer 2: Tourism-association portals       — all 47 prefectures + municipal/regional bodies
+                                             (city-hall + tourism-org URLs scraped in parallel,
+                                             see docs/decisions/0001)
+Layer 3: Hotel & ryokan master list        — built from Wikidata + OSM (see below)
+Layer 4: Wikidata attractions              — 41,404 ja-anchored entities
+Layer 5: 17-language translation layer     — Wikipedia sitelinks + Sonnet 4.6 batch
+Layer 6: Official designation systems      — MAFF Geographical Indications,
+         METI Traditional Crafts (Dentō Kōgeihin), Japan Heritage (Nihon Isan),
+         Important Intangible Cultural Properties, UNESCO ICH (Japan)
+```
+
+The municipal-page layer extracts plain prose paragraphs and any
+embedded `Schema.org` `Event` / `Place` JSON-LD blocks, so festival
+dates, venues, and place metadata feed `get_festivals` / `get_spots`
+without depending on freeform descriptions alone. See
+[docs/decisions/0001-multi-source-tourism-data.md](./docs/decisions/0001-multi-source-tourism-data.md)
+for the rationale.
+
+### Official designation sources (`data/r3/`)
+
+This MCP only surfaces what authorities have officially designated — no editorial
+or AI-curated picks. Each record carries the source URL and authority so
+provenance is verifiable.
+
+| Source | Records | Authority | Refresh |
+|:---|---:|:---|:---|
+| Geographical Indications (GI) | 172 | Ministry of Agriculture, Forestry and Fisheries (MAFF) | Mon (weekly) |
+| Traditional Crafts (Dentō Kōgeihin) | 231 | Ministry of Economy, Trade and Industry (METI) | Tue (weekly) |
+| Japan Heritage (Nihon Isan) | 104 | Agency for Cultural Affairs | Wed (weekly) |
+| Important Intangible Cultural Properties + Folk | 125 | Agency for Cultural Affairs — mirrored via Wikidata | Thu (weekly) |
+| UNESCO Intangible Cultural Heritage — Japan inscriptions | 58 | UNESCO — mirrored via Wikidata | Thu (weekly) |
+
+All 690 designation records are translated to the same 17 languages by an
+incremental Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
+
+---
+
+## How the hotel master list is built
+
+No single source covers all of Japan's accommodations. We merge two public
+open-data sources and resolve duplicates by location and name.
+
+```
+Wikidata + OpenStreetMap → entity matching → master.json
+```
+
+**Sources used:**
+- **Wikidata** — accommodation entities tagged in Japan (CC0). Multilingual labels.
+- **OpenStreetMap** — `tourism=hotel|hostel|guest_house|motel` and `tourism=apartment` nodes/ways inside Japan (ODbL).
+
+**Matching logic:**
+Two records are considered the same property if they fall within 100 meters of each other
+AND share a sufficiently similar name (accounting for kanji / kana / romaji variations).
+Singleton records (only one source) are kept with `confidence: "singleton"`; merged
+clusters get `confidence: "confirmed"`.
+
+Uncertain matches (similar names, slightly different positions, or one-sided
+metadata) are written to `data/hotels/review/` — open for community resolution.
+
+**This pipeline is fully open source.** The matching engine is in
+`scrapers/matcher/`. Imperfect matches are PRs waiting to happen — drop a
+`{ "id": "...", "decision": "merge" | "split", "rationale": "..." }` next to
+the file you've reviewed.
+
+> **Roadmap.** Adding the prefectural ryokan business-license registries
+> is on the wishlist — those are the authoritative national registry —
+> but each prefecture publishes its list in a different format and we
+> haven't unified the parsing yet. PRs welcome.
+
+---
+
+## A note on data collection
+
+I built this because Japan's tourism information —  
+created to reach the world — is nearly invisible to AI agents.  
+That gap seemed worth fixing.
+
+Here's how I think about robots.txt:  
+I read it on every domain I crawl. I respect clear intent —  
+private paths, member areas, anything not meant to be public.  
+But when a municipality publishes tourism content  
+to attract visitors from around the world,  
+I don't think blocking AI agents serves that intent.  
+I think it contradicts it.
+
+You may disagree. That's a fair conversation to have.
+
+**What I commit to:**  
+- Each domain refreshed at most once every ~30 days (rolling cycle)  
+- Steady-state: 5-second minimum interval between requests to the same domain — slower than Googlebot, by design  
+- Initial bootstrap may run faster (down to 2 seconds per domain) to complete the first build in hours, never less than that  
+- Static caching only — source sites are never hit at query time  
+- 48-hour response to any removal request (open an issue)
+
+— KJ Sunada
+
+---
+
+## Data freshness
+
+We aim to keep every record fresh within 30 days.  
+That's the freshness target — not a server-load mitigation.  
+We are not a continuous crawler. Tourism information changes slowly; 30 days is enough.
+
+**Two refresh tracks (both run by the same daily GitHub Actions cron at 03:00 JST):**
+
+| Track | Items | Cycle | Per-day work |
+|:---|:---|:---|:---|
+| Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
+| Official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
+
+Each domain is hit at most once per cycle. The designation sources update
+infrequently (annual / quarterly), so the 7-day rotation keeps every record
+fresh well within their real upstream cadence.
+
+Initial dataset: bootstrapped in a single run (a few hours, 2-second per-domain interval).  
+Steady-state schedule: daily cron, 5-second per-domain interval.  
+Last updated: see `data/metadata.json`
+
+---
+
+## Repository structure
+
+```
+japan-travel-mcp/                          # this repo — code + lightweight metadata only
+├── README.md
+├── CONTRIBUTING.md
+├── DATA_POLICY.md
+├── src/
+│   ├── index.ts                           # MCP server (12 tools)
+│   └── lib/hf_data.ts                     # HF dataset bootstrap (first-run download)
+├── data/                                  # only what readers / contributors need to see
+│   ├── _logs/                             # daily scrape run summaries (transparency)
+│   ├── _state/
+│   │   ├── scrape_state.json              # live operational state (Actions updates)
+│   │   ├── translation_batch.json         # historical Anthropic batch IDs
+│   │   └── r3_translation_batch.json
+│   ├── hotels/review/                     # unresolved matches — PRs welcome
+│   ├── knowledge/taxonomies/              # regions + eras (lightweight reference)
+│   └── metadata.json                      # source list
+├── scrapers/                              # producers of the dataset
+│   ├── daily.ts                           # municipal-page rolling refresh
+│   ├── r3_refresh.ts                      # official-designation 7-day rotation
+│   ├── municipal/, hotel/, sources/, matcher/
+│   ├── translate/                         # Sonnet 4.6 batch translators
+│   └── hf/                                # uploads data to the HF dataset
+└── .github/workflows/
+    └── scrape.yml                         # daily 03:00 JST cron
+```
+
+**Bulk runtime data lives separately on Hugging Face:**
+[huggingface.co/datasets/open-travel/japan-travel-mcp-data](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data)
+
+```
+data/translations/    # 17-language names + 200-300 char descriptions
+data/prefectures/     # 47 prefectures of municipal-scrape + Wikidata spots
+data/hotels/master    # 40,128 unified hotels & ryokan
+data/hotels/raw/      # OSM + Wikidata pre-merge sources
+data/glossary/        # canonical terms used at translation time
+data/_state/wikidata_attractions.json + 3 muni files
+data/r3/              # MAFF GI, METI crafts, Japan Heritage, Bunka-cho intangible records, UNESCO ICH
+```
+
+The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data/`).
+
+---
+
+## Multilingual data and translation pipeline
+
+The project ships **17 languages** as a first-class feature, not an afterthought.
+
+**Coverage matrix (2026-04-27):**
+
+| Layer | What | Coverage | Source |
+|:---|:---|:---|:---|
+| Attraction names | Canonical entity name in 17 languages | 13,961 entities × 17 langs (237,337 pairs) | Wikipedia sitelinks + Sonnet 4.6 batch |
+| Attraction descriptions | 200-300 char tourism description in 17 languages | 13,394 entities × 17 langs (227,698 descriptions) | Sonnet 4.6 batch, glossary-grounded |
+| Wikipedia-anchored names (raw) | Sitelinks-only subset | 41,404 entities, sparse cross-language | Wikidata SPARQL sitelinks |
+| Designation-source translations | Names + descriptions for every officially-designated record | **690 records × 17 langs (100% coverage)** | Sonnet 4.6 batch from official Japanese text |
+
+**17 supported languages:** English (en), Japanese (ja), Chinese (zh), Korean (ko),
+French (fr), Spanish (es), German (de), Italian (it), Portuguese (pt), Russian (ru),
+Thai (th), Vietnamese (vi), Indonesian (id), Malay (ms), Arabic (ar), Hindi (hi),
+Tagalog (tl).
+
+**Translation source hierarchy** (highest authority first):
+
+1. **Wikipedia article titles** (via Wikidata sitelinks) — human-curated, peer-reviewed,
+   used directly when available.
+2. **Project canonical glossary** (`data/glossary/seed_canonical.json` + `mlit_canonical.json`) —
+   house style for suffix mappings (e.g. 神社 → Shrine, 寺 → Temple, 城 → Castle),
+   modified Hepburn romanisation, proper-noun handling. Loaded as a cached
+   system prompt for AI consistency.
+3. **Claude Sonnet 4.6 batch translation** — fills gaps that Wikipedia doesn't cover,
+   constrained by the canonical glossary above. 50% batch-API discount; all 13,961
+   names + 13,394 descriptions + 690 designation records generated for ~$111 total.
+
+**Output:** published as `translations/multilingual_complete.jsonl` (names),
+`translations/descriptions_complete.jsonl` (attraction descriptions), and
+`r3/translations/r3_translations.jsonl` (designation-source records) on the
+[HF dataset](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data),
+all in JSONL.
+
+**English-first principle:** While the source data is Japanese, this dataset is
+designed for global consumption. Field ordering, default tool responses, and
+documentation prioritize English. Other languages are first-class but always
+listed after English.
+
+### Contributing translations
+
+We welcome PRs improving:
+- Translation quality (especially for low-confidence entries — see `confidence` field)
+- The canonical glossary (`seed_canonical.json`)
+- Coverage for entities currently lacking a Japanese Wikipedia anchor
+- Alternative translation pipelines (DeepL, Gemini, etc.) — document the source
+  so consumers can choose by provenance.
+
+---
+
+## Tests
+
+The project ships a [Vitest](https://vitest.dev) suite covering the pure
+helpers and the Hugging Face bootstrap. Tests run **fully offline** — the
+HF download path is exercised against a stubbed `fetch`, so no network
+access (and no `HF_TOKEN`) is required.
+
+```bash
+npm test              # run once
+npm run test:watch    # watch mode
+npm run test:coverage # v8 coverage report (text + html)
+```
+
+What's covered today:
+
+- `src/lib/hf_data.ts` — HF bootstrap (cold cache, idempotency, missing-only refetch, auth header, 401/404/500 paths, local checkout fallback)
+- `scrapers/lib/canonical.ts` — URL canonicalisation
+- `scrapers/lib/spot_filter.ts` — spot quality filter
+- `scrapers/lib/extractor.ts` — HTML → structured page data
+- `scrapers/lib/prefecture_match.ts` — prefecture / municipality name matching (sync paths)
+- `scrapers/lib/discover.ts` — `isTourismLike` keyword detection
+- `scrapers/lib/state.ts` — `pickStaleMunicipalities` rotation logic
+
+Test files live under `tests/`, fixtures under `tests/fixtures/`. Tests are
+type-checked alongside the rest of the project — `npm run typecheck:all`
+covers `src/`, `scrapers/`, and `tests/`.
+
+### Quality report
+
+Beyond unit tests, `npm run quality:report` audits the *contents* of the
+dataset: a per-prefecture coverage matrix (spots / hotels / festivals /
+local food / heritage) plus a per-spot quality score (description, body
+paragraphs, address, coordinates, Schema.org metadata, image) banded
+low / medium / high. Outputs land in `data/_logs/quality_report_*.md`
+and are the baseline we measure the multi-source sprint against.
+
+---
+
+## Contributing
+
+PRs are not just welcome — they're the whole point.  
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+If your PR touches a data fetcher (anything under `scrapers/` or
+`DATA_SOURCES.md`), one rule applies: **the PR must update
+[DATA_SOURCES.md](./DATA_SOURCES.md) and `npm run validate:data-sources`
+must pass (CI green) before merge.** That's the single rule, enforced
+by CI. No exceptions.
+
+---
+
+## License
+
+Data: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)  
+Code: [MIT](./LICENSE)
+
+Attribution: **Japan Travel MCP** by KJ Sunada

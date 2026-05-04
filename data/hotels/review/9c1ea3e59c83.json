@@ -1,0 +1,100 @@
+{
+  "id": "9c1ea3e59c83",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 25m",
+    "name similarity 0.80 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111406552",
+      "source_url": "https://www.wikidata.org/wiki/Q111406552",
+      "name": "星野リゾート リゾナーレトマム",
+      "name_en": "Hoshino Resorts Risonare Tomamu",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.066648,
+        "lng": 142.634264
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": null,
+      "prefecture_code": "01",
+      "raw": {
+        "qid": "Q111406552",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111406552",
+        "name_ja": "星野リゾート リゾナーレトマム",
+        "name_en": "Hoshino Resorts Risonare Tomamu",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Shimukappu, Japan",
+        "coordinates": {
+          "lat": 43.066648,
+          "lng": 142.634264
+        },
+        "prefecture_code": "01",
+        "admin_code": "010006",
+        "admin_name": "北海道",
+        "types": [
+          "Q27686"
+        ],
+        "website": null,
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/3080111634",
+      "source_url": "https://www.openstreetmap.org/node/3080111634",
+      "name": "リゾナーレトマム",
+      "name_en": "Risonare Tomamu",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.0668716,
+        "lng": 142.6342482
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "01",
+      "raw": {
+        "osm_id": "node/3080111634",
+        "osm_url": "https://www.openstreetmap.org/node/3080111634",
+        "type": "hotel",
+        "name": "リゾナーレトマム",
+        "name_en": "Risonare Tomamu",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 43.0668716,
+          "lng": 142.6342482
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "リゾナーレトマム",
+          "name:en": "Risonare Tomamu",
+          "name:ja": "リゾナーレトマム",
+          "name:ja-Hira": "りぞなーれとまむ",
+          "name:ja_rm": "rizonāretomamu",
+          "rooms": "200",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

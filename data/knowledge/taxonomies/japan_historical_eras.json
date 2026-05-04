@@ -1,0 +1,284 @@
+{
+  "schema_version": 1,
+  "title": "Japanese Historical Eras with Year Ranges",
+  "purpose": "Standard taxonomic reference for Japanese history. Used for (1) entity meta-tag validation (e.g. era=heian), (2) discovery views (list entities by era), and (3) cross-cultural temporal synchronization (year ranges in CE/BCE allow alignment with concurrent world history — e.g. mapping Heian Period (794-1185) onto European Early-to-High Medieval Period).",
+  "year_system": {
+    "convention": "Gregorian-equivalent CE/BCE (negative integers represent BCE)",
+    "precision_note": "Era boundaries before 538 CE (introduction of Buddhism) are archaeological estimates and vary by scholar. Modern era boundaries (Meiji onward) are precise to the day in the original Japanese imperial system (元号), but here we use whole-year approximations."
+  },
+  "license": "CC BY 4.0 (this compilation); underlying periodization is standard scholarly convention",
+  "high_level_periods": [
+    {
+      "id": "prehistoric",
+      "name_en": "Prehistoric",
+      "name_ja": "原始",
+      "year_start": -38000,
+      "year_end": 538,
+      "child_era_ids": [
+        "paleolithic",
+        "jomon",
+        "yayoi",
+        "kofun"
+      ]
+    },
+    {
+      "id": "ancient",
+      "name_en": "Ancient",
+      "name_ja": "古代",
+      "year_start": 538,
+      "year_end": 1185,
+      "child_era_ids": [
+        "asuka",
+        "nara",
+        "heian"
+      ]
+    },
+    {
+      "id": "medieval",
+      "name_en": "Medieval",
+      "name_ja": "中世",
+      "year_start": 1185,
+      "year_end": 1573,
+      "child_era_ids": [
+        "kamakura",
+        "kenmu_restoration",
+        "nanbokucho",
+        "muromachi",
+        "sengoku"
+      ]
+    },
+    {
+      "id": "early_modern",
+      "name_en": "Early Modern",
+      "name_ja": "近世",
+      "year_start": 1573,
+      "year_end": 1868,
+      "child_era_ids": [
+        "azuchi_momoyama",
+        "edo"
+      ]
+    },
+    {
+      "id": "modern",
+      "name_en": "Modern",
+      "name_ja": "近代",
+      "year_start": 1868,
+      "year_end": 1945,
+      "child_era_ids": [
+        "meiji",
+        "taisho",
+        "showa_prewar"
+      ]
+    },
+    {
+      "id": "contemporary",
+      "name_en": "Contemporary",
+      "name_ja": "現代",
+      "year_start": 1945,
+      "year_end": null,
+      "year_end_note": "ongoing",
+      "child_era_ids": [
+        "showa_postwar",
+        "heisei",
+        "reiwa"
+      ]
+    }
+  ],
+  "eras": [
+    {
+      "id": "paleolithic",
+      "name_en": "Japanese Paleolithic Period",
+      "name_ja": "旧石器時代",
+      "year_start": -38000,
+      "year_end": -14000,
+      "year_precision": "approximate",
+      "parent_period_id": "prehistoric"
+    },
+    {
+      "id": "jomon",
+      "name_en": "Jomon Period",
+      "name_ja": "縄文時代",
+      "year_start": -14000,
+      "year_end": -300,
+      "year_precision": "approximate",
+      "parent_period_id": "prehistoric"
+    },
+    {
+      "id": "yayoi",
+      "name_en": "Yayoi Period",
+      "name_ja": "弥生時代",
+      "year_start": -300,
+      "year_end": 250,
+      "year_precision": "approximate",
+      "parent_period_id": "prehistoric"
+    },
+    {
+      "id": "kofun",
+      "name_en": "Kofun Period",
+      "name_ja": "古墳時代",
+      "year_start": 250,
+      "year_end": 538,
+      "year_precision": "approximate",
+      "parent_period_id": "prehistoric"
+    },
+    {
+      "id": "asuka",
+      "name_en": "Asuka Period",
+      "name_ja": "飛鳥時代",
+      "year_start": 538,
+      "year_end": 710,
+      "year_precision": "approximate",
+      "parent_period_id": "ancient"
+    },
+    {
+      "id": "nara",
+      "name_en": "Nara Period",
+      "name_ja": "奈良時代",
+      "year_start": 710,
+      "year_end": 794,
+      "year_precision": "exact",
+      "parent_period_id": "ancient"
+    },
+    {
+      "id": "heian",
+      "name_en": "Heian Period",
+      "name_ja": "平安時代",
+      "year_start": 794,
+      "year_end": 1185,
+      "year_precision": "exact",
+      "parent_period_id": "ancient"
+    },
+    {
+      "id": "kamakura",
+      "name_en": "Kamakura Period",
+      "name_ja": "鎌倉時代",
+      "year_start": 1185,
+      "year_end": 1333,
+      "year_precision": "exact",
+      "parent_period_id": "medieval"
+    },
+    {
+      "id": "kenmu_restoration",
+      "name_en": "Kenmu Restoration",
+      "name_ja": "建武の新政",
+      "year_start": 1333,
+      "year_end": 1336,
+      "year_precision": "exact",
+      "parent_period_id": "medieval"
+    },
+    {
+      "id": "nanbokucho",
+      "name_en": "Nanboku-cho (Northern and Southern Courts) Period",
+      "name_ja": "南北朝時代",
+      "year_start": 1336,
+      "year_end": 1392,
+      "year_precision": "exact",
+      "parent_period_id": "medieval",
+      "overlaps_with": [
+        "muromachi"
+      ]
+    },
+    {
+      "id": "muromachi",
+      "name_en": "Muromachi Period",
+      "name_ja": "室町時代",
+      "year_start": 1336,
+      "year_end": 1573,
+      "year_precision": "exact",
+      "parent_period_id": "medieval"
+    },
+    {
+      "id": "sengoku",
+      "name_en": "Sengoku (Warring States) Period",
+      "name_ja": "戦国時代",
+      "year_start": 1467,
+      "year_end": 1603,
+      "year_precision": "approximate",
+      "parent_period_id": "medieval",
+      "overlaps_with": [
+        "muromachi",
+        "azuchi_momoyama"
+      ]
+    },
+    {
+      "id": "azuchi_momoyama",
+      "name_en": "Azuchi-Momoyama Period",
+      "name_ja": "安土桃山時代",
+      "year_start": 1573,
+      "year_end": 1603,
+      "year_precision": "exact",
+      "parent_period_id": "early_modern"
+    },
+    {
+      "id": "edo",
+      "name_en": "Edo Period",
+      "name_ja": "江戸時代",
+      "year_start": 1603,
+      "year_end": 1868,
+      "year_precision": "exact",
+      "parent_period_id": "early_modern"
+    },
+    {
+      "id": "meiji",
+      "name_en": "Meiji Era",
+      "name_ja": "明治時代",
+      "year_start": 1868,
+      "year_end": 1912,
+      "year_precision": "exact",
+      "parent_period_id": "modern"
+    },
+    {
+      "id": "taisho",
+      "name_en": "Taisho Era",
+      "name_ja": "大正時代",
+      "year_start": 1912,
+      "year_end": 1926,
+      "year_precision": "exact",
+      "parent_period_id": "modern"
+    },
+    {
+      "id": "showa_prewar",
+      "name_en": "Showa Era (Pre-war)",
+      "name_ja": "昭和時代（戦前）",
+      "year_start": 1926,
+      "year_end": 1945,
+      "year_precision": "exact",
+      "parent_period_id": "modern",
+      "overlaps_with": [
+        "showa_postwar"
+      ],
+      "overlap_note": "The Showa Era technically spans 1926-1989; here it is split at 1945 for periodization purposes."
+    },
+    {
+      "id": "showa_postwar",
+      "name_en": "Showa Era (Post-war)",
+      "name_ja": "昭和時代（戦後）",
+      "year_start": 1945,
+      "year_end": 1989,
+      "year_precision": "exact",
+      "parent_period_id": "contemporary",
+      "overlaps_with": [
+        "showa_prewar"
+      ]
+    },
+    {
+      "id": "heisei",
+      "name_en": "Heisei Era",
+      "name_ja": "平成時代",
+      "year_start": 1989,
+      "year_end": 2019,
+      "year_precision": "exact",
+      "parent_period_id": "contemporary"
+    },
+    {
+      "id": "reiwa",
+      "name_en": "Reiwa Era",
+      "name_ja": "令和時代",
+      "year_start": 2019,
+      "year_end": null,
+      "year_end_note": "ongoing",
+      "year_precision": "exact",
+      "parent_period_id": "contemporary"
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "id": "05c8e1aed802",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 34m",
+    "name similarity 0.68 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/7653531950",
+      "source_url": "https://www.openstreetmap.org/node/7653531950",
+      "name": "Richmond Hotel Premier Asakusa",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.7141094,
+        "lng": 139.7939917
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "111-0032",
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/7653531950",
+        "osm_url": "https://www.openstreetmap.org/node/7653531950",
+        "type": "hotel",
+        "name": "Richmond Hotel Premier Asakusa",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.7141094,
+          "lng": 139.7939917
+        },
+        "postal_code": "111-0032",
+        "full_address": null,
+        "city": "台東区",
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "6",
+          "addr:city": "台東区",
+          "addr:housenumber": "7",
+          "addr:neighbourhood": "2丁目",
+          "addr:postcode": "111-0032",
+          "addr:province": "東京都",
+          "addr:quarter": "浅草",
+          "brand": "リッチモンドホテル",
+          "internet_access": "wlan",
+          "internet_access:fee": "no",
+          "name": "Richmond Hotel Premier Asakusa",
+          "name:ja": "リッチモンドホテルプレミア浅草",
+          "rooms": "270",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/11888240315",
+      "source_url": "https://www.openstreetmap.org/node/11888240315",
+      "name": "Richmond Hotel Asakusa",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.714287,
+        "lng": 139.7942957
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://richmondhotel.jp/asakusa/",
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/11888240315",
+        "osm_url": "https://www.openstreetmap.org/node/11888240315",
+        "type": "hotel",
+        "name": "Richmond Hotel Asakusa",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.714287,
+          "lng": 139.7942957
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": "https://richmondhotel.jp/asakusa/",
+        "stars": null,
+        "raw_tags": {
+          "name": "Richmond Hotel Asakusa",
+          "name:ja": "リッチモンドホテル浅草",
+          "source": "survey",
+          "tourism": "hotel",
+          "website": "https://richmondhotel.jp/asakusa/",
+          "wikidata": "Q111406694"
+        }
+      }
+    }
+  ]
+}

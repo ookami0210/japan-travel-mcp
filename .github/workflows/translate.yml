@@ -1,0 +1,111 @@
+name: Translate (Sonnet 4.6 Batch)
+
+# Manually triggered: Actions tab → "Translate (Sonnet 4.6 Batch)" → Run workflow
+# This translates attraction names that are missing English translations
+# using the Anthropic Batch API for 50% cost savings.
+on:
+  workflow_dispatch:
+    inputs:
+      target_language:
+        description: "Target language code (en for now; zh-CN/ko/fr/etc when 17-lang fetcher ships)"
+        required: false
+        default: "en"
+        type: choice
+        options:
+          - en
+      ai_limit:
+        description: "Cap number of AI translations (0 = no cap, all 7,997 missing). Use 100 for a test run first."
+        required: false
+        default: "100"
+
+concurrency:
+  group: translate
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    # Batch API can take up to 24 hours but typically completes in 1-4h
+    timeout-minutes: 1440 # 24 hours
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need full history so we can push back
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify ANTHROPIC_API_KEY is set
+        run: |
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "::error::ANTHROPIC_API_KEY secret is not set. Run: gh secret set ANTHROPIC_API_KEY --repo ookami0210/japan-travel-mcp"
+            exit 1
+          fi
+          echo "ANTHROPIC_API_KEY secret is configured."
+
+      - name: Notify Slack — start
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          LANG_CODE: ${{ github.event.inputs.target_language }}
+          LIMIT: ${{ github.event.inputs.ai_limit }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set, skipping start notification"
+            exit 0
+          fi
+          curl -s -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\"🌐 Translation batch started (lang=${LANG_CODE}, limit=${LIMIT}). Sonnet 4.6 Batch API; ETA 1-4 hours.\"}" \
+            "$SLACK_WEBHOOK_URL"
+
+      - name: Run translation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AI_LIMIT: ${{ github.event.inputs.ai_limit }}
+        run: npx tsx scrapers/translate/translate_attraction_names.ts
+
+      - name: Commit results
+        run: |
+          git config user.name "japan-travel-mcp-bot"
+          git config user.email "noreply@github.com"
+          git add data/_state/wikidata_attractions.json data/translations/ data/_state/translation_batch.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No translation diffs to commit."
+          else
+            git commit -m "data: translation batch (${{ github.event.inputs.target_language }}) $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Notify Slack — success
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set, skipping notification"
+            exit 0
+          fi
+          curl -s -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\"✅ Translation batch complete. See data/translations/jp_en.jsonl for the dataset.\"}" \
+            "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Slack — failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not set, skipping notification"
+            exit 0
+          fi
+          curl -s -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\"🚨 Translation batch FAILED. Check the GitHub Actions log.\"}" \
+            "$SLACK_WEBHOOK_URL"

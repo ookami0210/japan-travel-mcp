@@ -1,0 +1,108 @@
+{
+  "id": "22ba8bcb97f7",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 19m",
+    "name similarity 0.85 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q6747859",
+      "source_url": "https://www.wikidata.org/wiki/Q6747859",
+      "name": "マンダリン・オリエンタル東京",
+      "name_en": "Mandarin Oriental, Tokyo",
+      "name_zh": "東京文華東方酒店",
+      "name_ko": "만다린 오리엔탈 도쿄",
+      "coordinates": {
+        "lat": 35.6870475,
+        "lng": 139.7730634
+      },
+      "phone": "+81 0 3 3270 8800",
+      "street": null,
+      "postal_code": "103-8328",
+      "website": "https://www.mandarinoriental.com/en/tokyo/nihonbashi",
+      "type": null,
+      "prefecture_code": "12",
+      "raw": {
+        "qid": "Q6747859",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q6747859",
+        "name_ja": "マンダリン・オリエンタル東京",
+        "name_en": "Mandarin Oriental, Tokyo",
+        "name_zh": "東京文華東方酒店",
+        "name_ko": "만다린 오리엔탈 도쿄",
+        "description_en": "hotel in Nihonbashi, Chuo, Tokyo.",
+        "coordinates": {
+          "lat": 35.6870475,
+          "lng": 139.7730634
+        },
+        "prefecture_code": "12",
+        "admin_code": "121011",
+        "admin_name": "中央区",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.mandarinoriental.com/en/tokyo/nihonbashi",
+        "phone": "+81 0 3 3270 8800",
+        "street_address": null,
+        "postal_code": "103-8328"
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/573261208",
+      "source_url": "https://www.openstreetmap.org/node/573261208",
+      "name": "マンダリンオリエンタル",
+      "name_en": "Mandarin Oriental, Tokyo",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.687145,
+        "lng": 139.772888
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/573261208",
+        "osm_url": "https://www.openstreetmap.org/node/573261208",
+        "type": "hotel",
+        "name": "マンダリンオリエンタル",
+        "name_en": "Mandarin Oriental, Tokyo",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.687145,
+          "lng": 139.772888
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": "5",
+        "raw_tags": {
+          "name": "マンダリンオリエンタル",
+          "name:en": "Mandarin Oriental, Tokyo",
+          "name:es": "Mandarin Oriental, Tokyo",
+          "operator": "Mandarin Oriental Hotel Group",
+          "payment:coins": "yes",
+          "payment:jcb": "yes",
+          "payment:mastercard": "yes",
+          "payment:notes": "yes",
+          "payment:visa": "yes",
+          "payment:visa_debit": "yes",
+          "stars": "5",
+          "tourism": "hotel",
+          "wikidata": "Q6747859",
+          "wikimedia_commons": "Category:Mandarin Oriental, Tokyo",
+          "wikipedia": "en:Mandarin Oriental, Tokyo"
+        }
+      }
+    }
+  ]
+}

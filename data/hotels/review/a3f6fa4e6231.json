@@ -1,0 +1,99 @@
+{
+  "id": "a3f6fa4e6231",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 18m",
+    "name similarity 0.80 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q17219278",
+      "source_url": "https://www.wikidata.org/wiki/Q17219278",
+      "name": "JRホテルクレメント宇和島",
+      "name_en": "JR Hotel Clement Uwajima",
+      "name_zh": "JR宇和島克雷緬特飯店",
+      "name_ko": "JR 호텔 클레멘트 우와지마",
+      "coordinates": {
+        "lat": 33.225897,
+        "lng": 132.567639
+      },
+      "phone": null,
+      "street": "愛媛県宇和島市錦町10-1",
+      "postal_code": null,
+      "website": "https://www.jrclement.co.jp/uwajima/",
+      "type": null,
+      "prefecture_code": "38",
+      "raw": {
+        "qid": "Q17219278",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q17219278",
+        "name_ja": "JRホテルクレメント宇和島",
+        "name_en": "JR Hotel Clement Uwajima",
+        "name_zh": "JR宇和島克雷緬特飯店",
+        "name_ko": "JR 호텔 클레멘트 우와지마",
+        "description_en": null,
+        "coordinates": {
+          "lat": 33.225897,
+          "lng": 132.567639
+        },
+        "prefecture_code": "38",
+        "admin_code": "382035",
+        "admin_name": "宇和島市",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.jrclement.co.jp/uwajima/",
+        "phone": null,
+        "street_address": "愛媛県宇和島市錦町10-1",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/415318017",
+      "source_url": "https://www.openstreetmap.org/way/415318017",
+      "name": "ホテル クレメント 宇和島",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 33.2257951,
+        "lng": 132.5674915
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "38",
+      "raw": {
+        "osm_id": "way/415318017",
+        "osm_url": "https://www.openstreetmap.org/way/415318017",
+        "type": "hotel",
+        "name": "ホテル クレメント 宇和島",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 33.2257951,
+          "lng": 132.5674915
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "building": "hotel",
+          "building:levels": "7",
+          "name": "ホテル クレメント 宇和島",
+          "tourism": "hotel",
+          "wikidata": "Q17219278",
+          "wikipedia": "ja:JRホテルクレメント宇和島"
+        }
+      }
+    }
+  ]
+}

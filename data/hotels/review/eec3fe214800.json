@@ -1,0 +1,104 @@
+{
+  "id": "eec3fe214800",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 18m",
+    "name similarity 0.73 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111865997",
+      "source_url": "https://www.wikidata.org/wiki/Q111865997",
+      "name": "ダイワロイネットホテルつくば",
+      "name_en": "Daiwa Roynet Hotel Tsukuba",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.081974,
+        "lng": 140.11047
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": null,
+      "prefecture_code": "08",
+      "raw": {
+        "qid": "Q111865997",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111865997",
+        "name_ja": "ダイワロイネットホテルつくば",
+        "name_en": "Daiwa Roynet Hotel Tsukuba",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Tsukuba, Japan",
+        "coordinates": {
+          "lat": 36.081974,
+          "lng": 140.11047
+        },
+        "prefecture_code": "08",
+        "admin_code": "080004",
+        "admin_name": "茨城県",
+        "types": [
+          "Q27686"
+        ],
+        "website": null,
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/1956948812",
+      "source_url": "https://www.openstreetmap.org/node/1956948812",
+      "name": "ダイワロイネットホテル",
+      "name_en": "Daiwa Roynet Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.0818591,
+        "lng": 140.1106087
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "305-0031",
+      "website": "https://www.daiwaroynet.jp/",
+      "type": "hotel",
+      "prefecture_code": "08",
+      "raw": {
+        "osm_id": "node/1956948812",
+        "osm_url": "https://www.openstreetmap.org/node/1956948812",
+        "type": "hotel",
+        "name": "ダイワロイネットホテル",
+        "name_en": "Daiwa Roynet Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 36.0818591,
+          "lng": 140.1106087
+        },
+        "postal_code": "305-0031",
+        "full_address": null,
+        "city": "つくば市",
+        "street": null,
+        "phone": null,
+        "website": "https://www.daiwaroynet.jp/",
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "5",
+          "addr:city": "つくば市",
+          "addr:housenumber": "7",
+          "addr:neighbourhood": "吾妻一丁目",
+          "addr:postcode": "305-0031",
+          "addr:province": "茨城県",
+          "name": "ダイワロイネットホテル",
+          "name:en": "Daiwa Roynet Hotel",
+          "source": "Bing 2010",
+          "tourism": "hotel",
+          "website": "https://www.daiwaroynet.jp/"
+        }
+      }
+    }
+  ]
+}

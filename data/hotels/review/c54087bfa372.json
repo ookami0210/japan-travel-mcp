@@ -1,0 +1,101 @@
+{
+  "id": "c54087bfa372",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 30m",
+    "name similarity 0.78 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q55528639",
+      "source_url": "https://www.wikidata.org/wiki/Q55528639",
+      "name": "リーガロイヤルホテル東京",
+      "name_en": "Rihga Royal Hotel Tokyo",
+      "name_zh": "東京麗嘉皇家酒店",
+      "name_ko": "리가로얄호텔 도쿄",
+      "coordinates": {
+        "lat": 35.710594,
+        "lng": 139.72253
+      },
+      "phone": null,
+      "street": "169-8613 東京都新宿区戸塚町1丁目104-19",
+      "postal_code": null,
+      "website": "https://www.rihga.co.jp/tokyo",
+      "type": null,
+      "prefecture_code": "13",
+      "raw": {
+        "qid": "Q55528639",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q55528639",
+        "name_ja": "リーガロイヤルホテル東京",
+        "name_en": "Rihga Royal Hotel Tokyo",
+        "name_zh": "東京麗嘉皇家酒店",
+        "name_ko": "리가로얄호텔 도쿄",
+        "description_en": "hotel in Tokyo, Japan",
+        "coordinates": {
+          "lat": 35.710594,
+          "lng": 139.72253
+        },
+        "prefecture_code": "13",
+        "admin_code": "131041",
+        "admin_name": "新宿区",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.rihga.co.jp/tokyo",
+        "phone": null,
+        "street_address": "169-8613 東京都新宿区戸塚町1丁目104-19",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/9141188929",
+      "source_url": "https://www.openstreetmap.org/node/9141188929",
+      "name": "リーガロイヤルホテル",
+      "name_en": "Rihga Royal Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.7103369,
+        "lng": 139.7224125
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.rihga.co.jp/",
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/9141188929",
+        "osm_url": "https://www.openstreetmap.org/node/9141188929",
+        "type": "hotel",
+        "name": "リーガロイヤルホテル",
+        "name_en": "Rihga Royal Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.7103369,
+          "lng": 139.7224125
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": "https://www.rihga.co.jp/",
+        "stars": null,
+        "raw_tags": {
+          "name": "リーガロイヤルホテル",
+          "name:en": "Rihga Royal Hotel",
+          "name:es": "Rihga Royal Hotel",
+          "source": "survey;Bing, 2007-04",
+          "tourism": "hotel",
+          "website": "https://www.rihga.co.jp/",
+          "wikidata": "Q11348723",
+          "wikipedia": "ja:リーガロイヤルホテル"
+        }
+      }
+    }
+  ]
+}

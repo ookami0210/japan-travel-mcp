@@ -1,0 +1,111 @@
+{
+  "id": "17750b82dcd9",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 5m",
+    "name similarity 0.67 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q11226160",
+      "source_url": "https://www.wikidata.org/wiki/Q11226160",
+      "name": "JRイン札幌",
+      "name_en": "JR INN Sapporo",
+      "name_zh": "札幌JR飯店",
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.064244,
+        "lng": 141.354127
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "http://www.jr-inn.jp",
+      "type": null,
+      "prefecture_code": "01",
+      "raw": {
+        "qid": "Q11226160",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q11226160",
+        "name_ja": "JRイン札幌",
+        "name_en": "JR INN Sapporo",
+        "name_zh": "札幌JR飯店",
+        "name_ko": null,
+        "description_en": "building in Chuo-ku, Hokkaido Prefecture, Japan",
+        "coordinates": {
+          "lat": 43.064244,
+          "lng": 141.354127
+        },
+        "prefecture_code": "01",
+        "admin_code": "010006",
+        "admin_name": "北海道",
+        "types": [
+          "Q27686"
+        ],
+        "website": "http://www.jr-inn.jp",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/7972730016",
+      "source_url": "https://www.openstreetmap.org/node/7972730016",
+      "name": "JRイン札幌北2条",
+      "name_en": "JR INN Sapporo N2",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.064204,
+        "lng": 141.3541422
+      },
+      "phone": "+81-11-212-1256",
+      "street": null,
+      "postal_code": "060-0002",
+      "website": "https://www.jr-inn.jp/north2/",
+      "type": "hotel",
+      "prefecture_code": "01",
+      "raw": {
+        "osm_id": "node/7972730016",
+        "osm_url": "https://www.openstreetmap.org/node/7972730016",
+        "type": "hotel",
+        "name": "JRイン札幌北2条",
+        "name_en": "JR INN Sapporo N2",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 43.064204,
+          "lng": 141.3541422
+        },
+        "postal_code": "060-0002",
+        "full_address": null,
+        "city": "札幌市",
+        "street": null,
+        "phone": "+81-11-212-1256",
+        "website": "https://www.jr-inn.jp/north2/",
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "8",
+          "addr:city": "札幌市",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "北2条西2丁目",
+          "addr:postcode": "060-0002",
+          "addr:province": "北海道",
+          "addr:suburb": "中央区",
+          "air_conditioning": "yes",
+          "brand": "JR INN",
+          "internet_access": "yes",
+          "name": "JRイン札幌北2条",
+          "name:en": "JR INN Sapporo N2",
+          "name:ja": "JRイン札幌北2条",
+          "operator": "JR北海道ホテルズ",
+          "phone": "+81-11-212-1256",
+          "start_date": "2020-10-02",
+          "tourism": "hotel",
+          "website": "https://www.jr-inn.jp/north2/"
+        }
+      }
+    }
+  ]
+}

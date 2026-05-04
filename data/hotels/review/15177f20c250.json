@@ -1,0 +1,114 @@
+{
+  "id": "15177f20c250",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 34m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/368601232",
+      "source_url": "https://www.openstreetmap.org/node/368601232",
+      "name": "비원게스트하우스",
+      "name_en": "Beewon Guest House",
+      "name_zh": null,
+      "name_ko": "비원게스트하우스",
+      "coordinates": {
+        "lat": 37.576081,
+        "lng": 126.989858
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "guest_house",
+      "prefecture_code": null,
+      "raw": {
+        "osm_id": "node/368601232",
+        "osm_url": "https://www.openstreetmap.org/node/368601232",
+        "type": "guest_house",
+        "name": "비원게스트하우스",
+        "name_en": "Beewon Guest House",
+        "name_zh": null,
+        "name_ko": "비원게스트하우스",
+        "coordinates": {
+          "lat": 37.576081,
+          "lng": 126.989858
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "비원게스트하우스",
+          "name:en": "Beewon Guest House",
+          "name:ko": "비원게스트하우스",
+          "name:ko-Latn": "Biwongeseuteuhauseu",
+          "tourism": "guest_house"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/560023034",
+      "source_url": "https://www.openstreetmap.org/way/560023034",
+      "name": "문게스트하우스",
+      "name_en": "Moon Guesthouse",
+      "name_zh": null,
+      "name_ko": "문게스트하우스",
+      "coordinates": {
+        "lat": 37.5762308,
+        "lng": 126.9895214
+      },
+      "phone": null,
+      "street": "삼일대로32길",
+      "postal_code": "03131",
+      "website": null,
+      "type": "guest_house",
+      "prefecture_code": null,
+      "raw": {
+        "osm_id": "way/560023034",
+        "osm_url": "https://www.openstreetmap.org/way/560023034",
+        "type": "guest_house",
+        "name": "문게스트하우스",
+        "name_en": "Moon Guesthouse",
+        "name_zh": null,
+        "name_ko": "문게스트하우스",
+        "coordinates": {
+          "lat": 37.5762308,
+          "lng": 126.9895214
+        },
+        "postal_code": "03131",
+        "full_address": null,
+        "city": "서울특별시",
+        "street": "삼일대로32길",
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:city": "서울특별시",
+          "addr:district": "종로구",
+          "addr:housenumber": "31-16",
+          "addr:postcode": "03131",
+          "addr:street": "삼일대로32길",
+          "addr:subdistrict": "운니동",
+          "building": "yes",
+          "internet_access": "wlan",
+          "internet_access:fee": "no",
+          "name": "문게스트하우스",
+          "name:en": "Moon Guesthouse",
+          "name:ja": "ムンゲストハウス",
+          "name:ko": "문게스트하우스",
+          "operator": "박문순",
+          "rooms": "6",
+          "smoking": "outside",
+          "tourism": "guest_house"
+        }
+      }
+    }
+  ]
+}

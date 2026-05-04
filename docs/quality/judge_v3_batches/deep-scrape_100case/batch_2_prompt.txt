@@ -1,0 +1,2647 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case L2-06 ===
+Topic / intent: 東北 桜
+Query: Lugares para ver cerezos en flor en Tohoku, no en Tokio.
+Tool: get_spots({"prefecture": "Akita", "limit": 30})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "f13697725f03d380",
+      "name": "くらし",
+      "description": "ようこそ、木のぬくもり漂う能代へ 能代市は秋田県北西部に位置し、雄大な日本海、世界自然遺産「白神山地」、出羽丘陵の緑豊な森林地帯に囲まれています。 先人の知恵と努力を継承しながら木材関連産業や特産品をはぐくみ、輝きを増し続けています。 美しく雄大な自然と...",
+      "coordinates": {
+        "lat": 40.212273,
+        "lng": 140.026657
+      },
+      "address": "〒016-8501 秋田県能代市上町1番3号",
+      "url": "https://www.city.noshiro.lg.jp/res/kanko",
+      "municipality": "能代市",
+      "municipality_code": "052027",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "8d4d1b3b838554c6",
+      "name": "くらし",
+      "description": "能代市で堪能できる、体験型観光メニューをご紹介します。 慌ただしい日常を離れて、緑豊かな大自然の中で、ゆったりとしたスローで贅沢な時間を過ごしてみませんか。 懐かしさあふれる農山村での農作業体験や、木都能代での木工体験、ガイドと一緒の里山散策など、自然...",
+      "coordinates": {
+        "lat": 40.212273,
+        "lng": 140.026657
+      },
+      "address": "〒016-8501 秋田県能代市上町1番3号",
+      "url": "https://www.city.noshiro.lg.jp/res/kanko/experience",
+      "municipality": "能代市",
+      "municipality_code": "052027",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "aa31f3b1dcf9995e",
+      "name": "くらし",
+      "description": "昔ながらの「ふるさと料理」（郷土料理）や地元の食材を活用した創作（アイディア）料理をご紹介していただける方を、私たちは「食彩人」と呼んでいます。 地元の料理を、より多くの方々にＰＲしていくことにより、伝統の味を後生に残し、かつ、「食」による活性化を図っ...",
+      "coordinates": {
+        "lat": 40.212273,
+        "lng": 140.026657
+      },
+      "address": "〒016-8501 秋田県能代市上町1番3号",
+      "url": "https://www.city.noshiro.lg.jp/res/kanko/shokusai-bito",
+      "municipality": "能代市",
+      "municipality_code": "052027",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "2e4597b6c1016528",
+      "name": "くらし・手続き",
+      "description": "令和7年度海水浴場開設のお知らせ次のとおり海水浴場が開設されます。営業期間    令和7年7月9日（水曜日）～8月31日（日曜日）駐車場    700台  （駐車料金：無料）【交通】鉄道     JR男鹿線「出戸浜」駅より徒歩10分自動車    秋田市内より20分/秋田自動車道「昭和男鹿半島IC」より10分※当日の遊泳の可否については、海の家へお問い合わせいただくか、出戸浜海水浴場公式SNSをご確認ください。海の家 ひまわり 電話：018-878-5594出戸浜海水浴場公式SNSFacebookインスタグラム @detohamabeachX(旧Twitter) @detohamabeach",
+      "coordinates": {
+        "lat": 39.862446,
+        "lng": 140.007538
+      },
+      "address": "〒010-0201 秋田県潟上市天王字棒沼台226番地1",
+      "url": "https://www.city.katagami.lg.jp/soshiki/sangyoushinkoubu/shoukoukankoushinkouka/kankoukouryu/kankochi/3274.html",
+      "municipality": "潟上市",
+      "municipality_code": "052116",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "1d140e8afe3f4f16",
+      "name": "Music Festival in DAISEN 大音郷",
+      "description": "MusicFestivalinDAISENは、大仙市に縁のある歌手や若手アーティストの皆さんが出演し、音楽文化発信型イベントとして開催するもので、令和7年度で7回目を迎えます。MusicFestivalinDAISEN　大音郷2025...",
+      "coordinates": {
+        "lat": 39.452633,
+        "lng": 140.476227
+      },
+      "address": "〒014-8601 秋田県大仙市大曲花園町1-1",
+      "url": "https://www.city.daisen.lg.jp/archive/p20240927161232",
+      "municipality": "大仙市",
+      "municipality_code": "052124",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9a83b34dfe7b01e8",
+      "name": "【研究レポートVol.03】にかほ市×秋田公立美術大学協働プロジェクト『ジオカルチャー研究プロジェクト』",
+      "description": "にかほ市×秋田公立美術大学協働プロジェクト「ジオカルチャー研究プロジェクト」は、人間と自然を繋ぐ統一的な生命環境としてのジオス（地球）と、これまで培われてきたカルチャー（文化）を結ぶプロジェクトです。研究の過程をまとめた研究レポート《手長足長》Vol.03を発行しました。にかほ市や秋田市内の公共施設などで配架しておりますので、ぜひご覧ください。",
+      "coordinates": {
+        "lat": 39.202885,
+        "lng": 139.907471
+      },
+      "address": "〒018-0192秋田県にかほ市象潟町字浜ノ田1番地電話番号：0184-43-7510お問い合わせはこちら",
+      "url": "https://www.city.nikaho.akita.jp/soshikikarasagasu/renkei/gyomuannai/7/2/5352.html",
+      "municipality": "にかほ市",
+      "municipality_code": "052141",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+ 
+```
+
+
+=== Case L2-07 ===
+Topic / intent: 新潟 酒蔵
+Query: List the major sake breweries in Niigata prefecture.
+Tool: get_local_specialty({"prefecture": "Niigata", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "15",
+  "category_filter": null,
+  "lang": "en",
+  "count": 20,
+  "items": [
+    {
+      "key": "maff_gi:29",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 29,
+      "name_ja": "くろさき茶豆",
+      "name": "Kurosaki Chamame",
+      "description_ja": "明治末期に導入した茶豆から選抜された小平方茶豆に由来する独特の「色」、「香り」と味わい。一般の枝豆に比べ、莢の付きが多く、莢はやや大きく平べったい。",
+      "description": "A distinctive color, aroma, and flavor derived from the Kodaira-kata chamame variety, which was selected from cha-type edamame introduced in the late Meiji era. Compared to ordinary edamame, the pods are more numerous, and each pod is somewhat larger and flatter.",
+      "registration_date": "平成29年4月21日",
+      "production_area_text": "新潟県新潟市西区黒埼地区、新潟市西区小新的場地区、新潟市西区亀貝寅明地区",
+      "prefecture_codes": [
+        "15"
+      ],
+      "producer_group": "新潟県新潟市西区木場53新潟市黒埼地区茶豆組合協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0029/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.482Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:81",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 81,
+      "name_ja": "津南の雪下にんじん",
+      "name": "Tsunan Snow-Buried Carrots",
+      "description_ja": "日本有数の豪雪地帯である津南町において、初冬から春にかけて3ヶ月間以上深い積雪下で栽培される。甘みや旨みの成分であるアスパラギンなどのアミノ酸や香り成分であるカリオフィレンを豊富に含んでおり、マイルドな甘さと旨みを有し香りも良い。独特の甘みや旨みといった特性が評価され、出荷先の市場や量販店において、高価格で取引されている。",
+      "description": "Cultivated in Tsunan Town, one of Japan's leading heavy-snowfall areas, these carrots are grown under deep snow for more than three months from early winter through spring. They are rich in amino acids such as asparagine, which contribute to sweetness and umami, and in caryophyllene, an aromatic compound. They possess a mild sweetness, umami, and a pleasant aroma. Their distinctive sweetness and umami characteristics are highly regarded, and they are traded at premium prices in the markets and retail stores to which they are shipped.",
+      "registration_date": "令和元年6月14日",
+      "production_area_text": "新潟県中魚沼郡津南町",
+      "prefecture_codes": [
+        "15"
+      ],
+      "producer_group": "新潟県中魚沼郡津南町大字下船渡戊585番地 津南町役場農林振興課津南雪下にんじん協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0081/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:57:16.511Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:109",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 109,
+      "name_ja": "大口れんこん",
+      "name": "Oguchi Renkon",
+      "description_ja": "厳しい出荷基準により、傷みがなく、穴に一切泥が入っていないれんこんを出荷しており、調理しても白い果肉の黒紫色化が起こりにくい。果肉の白さや、食感がシャキシャキとして歯ごたえがあり、甘み・旨味・風味を感じられる点が評価され、産地指定での注文が増加している。",
+      "description": "Strict shipping standards ensure that only lotus roots free of damage and with no mud whatsoever inside the holes are shipped. Even after cooking, the white flesh is unlikely to turn dark purple. The lotus roots are valued for the whiteness of their flesh, their crisp and firm texture, and their discernible sweetness, umami, and aroma, and orders specifying this production area are increasing.",
+      "registration_date": "令和3年5月31日",
+      "production_area_text": "明治22年3月31日における行政区画名としての新潟県南蒲原郡大口村、池之島村、押切新田、思川新田、大曲戸村、大曲戸新田、 灰島新田、中興野、坪根村（現長岡市中之島上通地区）",
+      "prefecture_codes": [
+        "15"
+      ],
+      "producer_group": "新潟県長岡市中之島773番地 えちご中越農業協同組合なんかん南営農センター内大口れんこん生産組合",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0109/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence":
+```
+
+
+=== Case L2-08 ===
+Topic / intent: 白馬 スキー場+温泉
+Query: Stations de ski avec sources thermales dans la région d'Hakuba.
+Tool: get_spots({"prefecture": "Nagano", "municipality": "白馬"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "8313db554c4113ee",
+      "name": "白馬村がUN Tourismベスト・ツーリズム・ビレッジに選出されました",
+      "description": "<ベスト・ツーリズム・ビレッジ申請の際に使用した白馬村紹介動画>https://youtu.be/z1LqBJpKCN8",
+      "coordinates": {
+        "lat": 36.6978,
+        "lng": 137.863052
+      },
+      "address": "〒399-9393長野県北安曇郡白馬村大字北城7025電話番号：0261-85-0722",
+      "url": "https://www.vill.hakuba.lg.jp/gyosei/soshikikarasagasu/kankoka/kankoshokokakari/1/10162.html",
+      "municipality": "白馬村",
+      "municipality_code": "204854",
+      "prefecture": "長野県",
+      "language": "ja",
+      "quality_score": 0.55
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "07943f5efb628479",
+      "name": "景観・環境・観光",
+      "description": "観光行政に関する内容はこちらをご覧ください。",
+      "coordinates": {
+        "lat": 36.6978,
+        "lng": 137.863052
+      },
+      "address": "〒399-9393長野県北安曇郡白馬村大字北城7025",
+      "url": "https://www.vill.hakuba.lg.jp/gyosei/keikan_kankyo_kanko",
+      "municipality": "白馬村",
+      "municipality_code": "204854",
+      "prefecture": "長野県",
+      "language": "ja",
+      "quality_score": 0.5
+    }
+  ],
+  "count": 2,
+  "total_before_limit": 2,
+  "truncated": false,
+  "min_quality_applied": 0.3,
+  "data_as_of": "2026-04-26T19:35:53.998Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness (description, body paragraphs, coordinates, Schema.org metadata). Increase `min_quality` to tighten further or set to 0 to see admin-page-style entries."
+}
+```
+
+
+=== Case L2-09 ===
+Topic / intent: 関西 紅葉
+Query: What are the best autumn foliage spots in the Kansai region?
+Tool: get_spots({"prefecture": "Kyoto", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "9f42a4885ce6a24f",
+      "name": "京丹後アートフェスティバル",
+      "description": "京丹後アートフェスティバル2025を開催します！京丹後アートフェスティバルは、令和4年度に策定された京丹後市文化芸術振興計画のもと、誰もが文化芸術に触れ、楽しみ、学ぶ機会を創出する取組として、一定期間をフェスティバルとし、市内各所で文化芸術に関する多彩なプログラムを展開します。期　間　令和7年9月6日（土曜日）～12月21日（日曜日） 京丹後市内各所※日程、会場はイベントにより異なります。プログラム(1) みるプログラム（鑑賞）絵画や写真、書、工芸の展覧会や、ダンスや吹奏楽、合唱の舞台発表など、市内で鑑賞できる芸術作品を楽しむプログラムです。市民団体によるサークル活動から、丹後を拠点に国内外で活躍するアーティスト、クリエイターによるプロジェクト、民間の美術館や行政による文化芸術事業、またそれら文化芸術活動の素地となる丹後の貴重な歴史、文化財などを含め、その主体やジャンルの多様性を一体的に集約したプログラムです。ARTMAPはこちらから(PDFファイル:8.6MB)■イベントカレンダー　▶9月　▶10月　▶11月　▶12月 (2) 知るプログラム（体験）アーティストは作品制作をするとき、どのような視点で目のまえのもとを対峙し、またどのようなプロセスを経て新しい表現を生み出しているのでしょう？「知るプログラム」では、普段の生活や学校の授業では出会わない表現を体験しながら、このまちの文化的資源や、私たちが生きる社会、地域、環境についてみつめなおす、参加型の体験プログラムです。 ■10/18（土曜日）アートマルシェ at 大宮ふれあい工房　終了しましたアートな体験を集めたマルシェが、今年は大宮ふれあい工房で開催！作品を鑑賞したり、ワークショップに参加したり、気軽に秋の芸術体験を楽しみませんか？ ■アーティストによる連続ワークショップ1年目の「多様な表現を知る」、2年目の「丹後を素材につくる」をテーマに行ってきた連続ワークショップの3年目は「丹後を舞台にみせる（発表）」です。丹後を拠点に活躍中のアーティストを講師に迎え、丹後の地域資源をさまざまな切り口でワークショップに取り組んでいます。▶▶WS「みなみなさないをする」の成果展示が、現在開催中です。令和7年度三坂神社墳墓群発掘未調査報告展会期｜10月18日（土曜日）～12月21日（日曜日）9:00～17:00会場｜大宮ふれあい工房（京丹後市大宮町三坂105-3）休館日｜火曜日～木曜日",
+      "coordinates": {
+        "lat": 35.583649,
+        "lng": 135.095795
+      },
+      "address": "〒629-2501京丹後市大宮町口大野226番地（大宮庁舎）電話番号：0772-69-0630",
+      "url": "https://www.city.kyotango.lg.jp/top/soshiki/kyoikuiinkai/syogaigakusyu/7/kyotangoartfes",
+      "municipality": "京丹後市",
+      "municipality_code": "262129",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "04aefca844f4e589",
+      "name": "みるプログラム（鑑賞）",
+      "description": "絵画や写真、書、工芸の展覧会や、ダンスや吹奏楽、合唱の舞台発表など、市内で鑑賞できる芸術作品を楽しむプログラムです。市民団体によるサークル活動から、丹後を拠点に国内外で活躍するアーティストやクリエイターによるプロジェクト、民間の美術館や行政による文化芸術事業、またそれら文化芸術活動の素地となる丹後の貴重な歴史や文化財などを含め、その主体やジャンルの多様性を一体的に集約した、鑑賞プログラムです。The Art Appreciation Program provides visitors with opportunities to view and enjoy artworks in the city, including exhibitions of painting, photography, calligraphy, and crafts, along with dance, brass music, and choral performances. It integrates a wide range of cultural activities organized by various groups: residents’ clubs, Tango-based artists and designers who are active around the country and abroad, and private museums and the local government. This program also includes opportunities to view Tango’s valuable historical and cultural assets, the heritage that underlies the present-day cultural and artistic activities.",
+      "coordinates": {
+        "lat": 35.583649,
+        "lng": 135.095795
+      },
+      "address": "〒629-2501京丹後市大宮町口大野226番地（大宮庁舎）電話番号：0772-69-0630",
+      "url": "https://www.city.kyotango.lg.jp/top/soshiki/kyoikuiinkai/syogaigakusyu/7/kyotangoartfes/program01",
+      "municipality": "京丹後市",
+      "municipality_code": "262129",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "bef901054e19d516",
+      "name": "新着情報",
+      "description": "現在、市の広報誌では、創業から300年を迎えた「丹後ちりめん」にちなんだ新コーナー「絹を織りなす人びと」を連載しています。技術の伝承や技術の研さんはもとより、新商品の開発や新たな販路の開拓、新分野への進出等に取り組む市内の織物事業者（人）にスポットを当て、その取り組みや未来への思いを紹介しています。バックナンバーをこちらのページに随時掲載していきますので、是非ご覧ください！",
+      "coordinates": {
+        "lat": 35.681969,
+        "lng": 135.025803
+      },
+      "address": "〒629-3101京都府京丹後市網野町網野385番地の1（ら・ぽーと）電話番号：0772-69-0440",
+      "url": "https://www.city.kyotango.lg.jp/top/kanko_bunka_sports/geijyutsu_bunka/kinuoribito",
+      "municipality": "京丹後市",
+      "municipality_code": "262129",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f7889cc916a39245",
+      "name": "日本遺産～300年を紡ぐ絹が織り成す丹後ちりめん回廊～",
+      "description": "平成29年4月に認定された日本遺産（Japan Heritage）『300年を紡ぐ絹が織り成す丹後ちりめん回廊』の構成文化財として、「吉村家住宅、吉村家別荘[桜山荘（おうざんそう）]」「網野神社・蠶織神社（こおりじんじゃ）」「丹後ばらずし」他1件が構成文化財として追加認定されました。",
+      "coordinates": {
+        "lat
+```
+
+
+=== Case L2-10 ===
+Topic / intent: 関西 桜
+Query: ما هي الأماكن المشهورة بأزهار الكرز في كانساي؟
+Tool: get_spots({"prefecture": "Nara", "limit": 30})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "fc8f7b01c397d14c",
+      "name": "春のストリートピアノフェスティバル2026 開催",
+      "description": "【春のストリートピアノフェスティバル2026】青空の中、芝生の上でピアノの演奏を聴きませんか？普段はコミュニティ広場に設置されているストリートピアノを芝生広場に引っ張り出して開催！地域の方の協力で完成した日本に1つしかない虹色のピアノを使ったコンサートです。(観覧無料・入退場自由)イベントの司会進行は、高田商業高校まち部。です。みんなで演奏を盛り上げよう！",
+      "coordinates": {
+        "lat": 34.50901,
+        "lng": 135.743576
+      },
+      "address": "〒635-0085 奈良県大和高田市片塩町12番5号",
+      "url": "https://www.city.yamatotakada.nara.jp/cosmosplaza/oshirase/news/10030.html",
+      "municipality": "大和高田市",
+      "municipality_code": "292028",
+      "prefecture": "奈良県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "97cb67140c29cfe0",
+      "name": "くらし・手続き",
+      "description": "市内のこども食堂やフードバンク大和高田などによる、多彩な企画が盛りだくさんです！親子で楽しめるイベントもあるので、みんなで遊びに来てね！日時令和8年5月6日（水曜日）10時00分～14時00分 場所関西工務店 駐車場（大和高田市材木町1-3） タイムスケジュール10時15分 青空ペインティング（参加費100円 汚れてもいい服で来てね！）【ステージコーナー】11時15分 マジックリン北村 11時45分 きりしま12時45分 よさこい みつば家13時30分 おひさまコンサート ※内容は変更する可能性があります。※雨天決行、荒天中止の予定です。",
+      "coordinates": {
+        "lat": 34.51506,
+        "lng": 135.737167
+      },
+      "address": "〒635-8511 奈良県大和高田市大字大中98番地4",
+      "url": "https://www.city.yamatotakada.nara.jp/soshikikarasagasu/kodomosesaku/8933.html",
+      "municipality": "大和高田市",
+      "municipality_code": "292028",
+      "prefecture": "奈良県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7c706a294df2204c",
+      "name": "くらし・手続き",
+      "description": "「人と関わるのが苦手」「家族以外の誰かとつながりたい」「自宅以外の居場所がほしい」など、日々の暮らしの中で生きづらさや孤独を感じ、ひきこもり状態にある人、その家族や支援者などが参加できる居場所です。4月は「eスポーツを楽しもう！」を開催します。eスポーツは、テレビゲームなどを使って対戦する競技で、年齢や経験に関係なく、どなたでも参加できます。ゲームを楽しみながら、参加者同士でコミュニケーションを図ることができます。",
+      "coordinates": {
+        "lat": 34.51506,
+        "lng": 135.737167
+      },
+      "address": "〒635-8511 奈良県大和高田市大字大中98番地4",
+      "url": "https://www.city.yamatotakada.nara.jp/soshikikarasagasu/hukushisesaku/9084.html",
+      "municipality": "大和高田市",
+      "municipality_code": "292028",
+      "prefecture": "奈良県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "5cc862ff505667a5",
+      "name": "春のストリートピアノフェスティバル2026 出演者募集",
+      "description": "青空の中、芝生の上でピアノを弾いてみませんか？普段はコミュニティ広場に設置されているストリートピアノを芝生広場に引っ張り出して開催！【春のストリートピアノフェスティバル2026】の出演者を大募集しています。 老若男女を問わずどなたでもご参加いただけます。毎年個性豊な出演者が勢ぞろい。最近ピアノを弾き始めた人からピアノ歴が長い人、ソロ、連弾、他の楽器とのアンサンブル等の演奏形態も様々。音楽を楽しみたい人におすすめのイベントです。「高田商業高校まち部。」がイベントの司会進行をしてくれます！いつもとは、ひと味違うイベントになりそうでワクワクしますね＾＾下記詳細をご覧いただき、ぜひご応募お待ちしています！",
+      "coordinates": {
+        "lat": 34.50901,
+        "lng": 135.743576
+      },
+      "address": "〒635-0085 奈良県大和高田市片塩町12番5号",
+      "url": "https://www.city.yamatotakada.nara.jp/cosmosplaza/oshirase/news/9939.html",
+      "municipality": "大和高田市",
+      "municipality_code": "292028",
+      "prefecture": "奈良県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "05407c4414629fc6",
+      "name": "くらし・手続き",
+      "description": "高田川畔の千本桜は、市制施行の1948年（昭和23年）に植樹されたものです。樹齢70年を超え、年輪を重ねた見事な桜並木を見ることができます。3月下旬から4月上旬にかけては、大中公園を中心に川の両岸南北2.5キロメートルにわたり、見事な花が続きます。夕闇とともに、ぼんぼりがともり、ライトアップされた夜桜を見物する人の波は絶えることがなく、桜の下で、楽しく、にぎやかに、宴が開かれます。近年、高田川畔の 千本桜は、近鉄沿線の桜の名所としても知られるようになりました。また、高田川畔は、「高田川水辺プラザ整備計画」の完成により、護岸工事とともに飛び石、スロープ、遊歩道が設置され、市民の皆さんが、水辺と親しむ憩いの空間となっています。街中に2.5キロメートルもの桜並木が続く場所は少なく、街中にあることで、場所によって見れる景色は様々です。駅からも遠くない立地なので市外からも気軽に訪れることができます。",
+      "coordinates": {
+        "lat": 34.51506,
+        "lng": 135.737167
+      },
+      "address": "〒635-8511 奈良県大和高田市大字大中98番地4",
+      "url": "https://www.city.yamatotakada.nara.jp/soshikikarasagasu/sangyoshinko/kanko/kanko_tokusan/1540.html",
+      "municipality": "大和高田市",
+      "municipality_code": "292028",
+      "prefecture": "奈良県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "0
+```
+
+
+=== Case L2-11 ===
+Topic / intent: 沖縄 星空
+Query: 沖縄の離島で星空が綺麗な場所はどこ？
+Tool: get_spots({"prefecture": "Okinawa", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "666e80c55e6584d9",
+      "name": "くらし・手続き",
+      "description": "令和8年度第1回ふくふく講座のご案内です！\n\nご家庭でからだとこころの成長ついてお子さんとお話できていますか？ 今回は男女のからだの違いを学びながら「男の子のからだとこころ」に注目し、子どもたちが自分のからだに関心を持ち大切に思えるよう、そして保護者としてどうサポートすれば良いか等、親子で一緒に学びます。",
+      "coordinates": {
+        "lat": 26.257994,
+        "lng": 127.763351
+      },
+      "address": "〒901-2213沖縄県宜野湾市志真志1-15-22電話番号：098-896-1616",
+      "url": "https://www.city.ginowan.lg.jp/soshiki/keizai/shiminkyodo/fukufuku/1/20094.html",
+      "municipality": "宜野湾市",
+      "municipality_code": "472051",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f37e00eaeecd32ce",
+      "name": "くらし・手続き",
+      "description": "令和8年1月11日（日曜日）宜野湾市民会館において、今年度二十歳を迎える皆さんの節目を祝う式典「令和8年宜野湾市二十歳のつどい」が開催されました。会場には、華やかなスーツや彩り豊な着物に身を包んだ参加者で大いに賑わいをみせ、久々の再会を喜びあいました。式典は、佐喜眞市長の式辞で幕を開け、今年度二十歳を迎える1,038人を代表して、川満玲寧さん、泉川寛愛さん、齋藤博斗さん、金城咲南さんがあいさつを行いました。齋藤さんは「二十歳を迎えることは何かを達成したことではなく、自分自身の未熟さと向き合い、これからどのようにに生きていくのかを問われる出発点だと思います。自分の頭で考え、自分の言葉で語り、自分の選択に責任を持つ大人でありたいと思います。」とあいさつしました。また、司会の宮城稚嘉さんと當間美穂さんにより式典の進行をして頂きました。式典の開幕では、宜野湾市真志喜中学校軽音学部による演奏が披露され、二十歳を迎える先輩たちへ熱いエールが送られました。",
+      "coordinates": {
+        "lat": 26.280542,
+        "lng": 127.778175
+      },
+      "address": "〒901-2203沖縄県宜野湾市野嵩1-1-2電話番号：098-893-4431",
+      "url": "https://www.city.ginowan.lg.jp/soshiki/kyoiku/1/3/1_1/hatatinotudoi",
+      "municipality": "宜野湾市",
+      "municipality_code": "472051",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "45a48ff5f1eab1f7",
+      "name": "くらし・手続き",
+      "description": "野球をしたことがない、見たことがない未就学児や小学生を対象に、野球に触れあい「投げる・捕る・打つ・走る」を楽しく学びながら記録にチャレンジしてもらう、参加型イベントです！！見たことあるけどやったことない！お兄ちゃんがやっている野球ってどんなもの？もっとボールを遠くに投げれるようになりたい！！ 野球に興味を持ち始めた子も、野球を知らない子も、ベイスターズキャンプに遊びに来た皆さんも、どなたでも参加OK!！この機会に、ぜひ野球に触れて楽しんでください！",
+      "coordinates": {
+        "lat": 26.281231,
+        "lng": 127.77784
+      },
+      "address": "〒901-2710沖縄県宜野湾市野嵩1-1-1電話番号：098-893-4432",
+      "url": "https://www.city.ginowan.lg.jp/event/19604.html",
+      "municipality": "宜野湾市",
+      "municipality_code": "472051",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "d416582acbaef33c",
+      "name": "アクセス",
+      "description": "宜野湾市は沖縄本島中部の東シナ海に面し、北には北谷町、東には中城村、北東には北中城村、東南には西原町、南に浦添市と隣接しています。　那覇空港から車で約30分、国道58号、国道330号、県道34号、県道宜野湾北中城線、さらに沖縄自動車道の北中城インターチェンジ、西原インターチェンジへもつなぎが容易な沖縄本島の中部及び北部を結ぶ交通上の重要な地点に位置しています。",
+      "coordinates": {
+        "lat": 26.281231,
+        "lng": 127.77784
+      },
+      "address": "〒901-2710 沖縄県宜野湾市野嵩1-1-1",
+      "url": "https://www.city.ginowan.lg.jp/sightseeing/access",
+      "municipality": "宜野湾市",
+      "municipality_code": "472051",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "8057576bbf7ececd",
+      "name": "普天満宮　普天満宮洞穴（市指定名勝）",
+      "description": "沖縄本島中部最大の神社で、琉球八社の1つである由緒正しい「普天満宮」。健康祈願や交通祈願をはじめ、合格祈願・安産祈願まで幅広いご利益をうけることができます。航海安全や豊漁、五穀豊穣の神様としても古くから信仰されています。 本殿の隣にある「普天満宮洞穴」は、全長約280メートルの鍾乳洞で、現在はその一部、およそ50メートルが公開されています。1991年8月1日に「宜野湾市指定文化財（名勝）」に指定されたこの洞穴は、普天満宮発祥の場所ともいわれています。",
+      "coordinates": {
+        "lat": 26.281231,
+        "lng": 127.77784
+      },
+      "address": "〒901-2710 沖縄県宜野湾市野嵩1-1-1",
+      "url": "https://www.city.ginowan.lg.jp/sightseeing/tourist_attractions/7034.html",
+      "municipality": "宜野湾市",
+      "municipality_code": "472051",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "e205b29687f8c407",
+      "name": "嘉数高台公園",
+      "description": "本市の西の小高い自然林を利用して造成された公園です。沖縄戦では激戦地となり、多くの犠牲者を出したといわれ、その慰霊を慰めるため慰霊の塔が建てられました。 公園内には地球儀をイメージした展望台があり、北は残波岬、西は慶良間諸島などが見えます。 公園内には、各種遊具やベンチが豊富に設置され、ゲートボールやグランドゴルフなどのスポー
+```
+
+
+=== Case L2-12 ===
+Topic / intent: 北海道 田舎 温泉
+Query: ที่พักออนเซ็นในชนบทของฮอกไกโด
+Tool: get_hotels({"prefecture": "Hokkaido"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "0af2b605a9e3",
+      "confidence": "confirmed",
+      "name": "ANA ホリデイ・イン 札幌すすきの",
+      "name_en": "ANA Holiday Inn Sapporo Susukino",
+      "name_zh": "全日空假日酒店札幌薄野",
+      "name_ko": "ANA 홀리데이 인 삿포로 스스키노",
+      "type": "hotel",
+      "coordinates": {
+        "lat": 43.054722222,
+        "lng": 141.354722222
+      },
+      "phone": "+81-11-512-5533",
+      "website": "http://www.anahisapporosusukino.com",
+      "postal_code": "064-0805",
+      "street": "064-0805 北海道札幌市中央区南5条西3丁目7",
+      "prefecture_code": "01",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q41723120",
+          "url": "https://www.wikidata.org/wiki/Q41723120"
+        },
+        {
+          "source": "osm",
+          "id": "node/3822095835",
+          "url": "https://www.openstreetmap.org/node/3822095835"
+        }
+      ]
+    },
+    {
+      "id": "14d44b4408af",
+      "confidence": "confirmed",
+      "name": "ANAクラウンプラザホテル札幌",
+      "name_en": "ANA Crowne Plaza Sapporo",
+      "name_zh": "ANA 皇冠假日酒店 札幌",
+      "name_ko": "ANA 크라운 플라자 호텔 삿포로",
+      "type": "hotel",
+      "coordinates": {
+        "lat": 43.065666,
+        "lng": 141.35562
+      },
+      "phone": null,
+      "website": "https://www.anacpsapporo.com/",
+      "postal_code": "060-0003",
+      "street": null,
+      "prefecture_code": "01",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q28137494",
+          "url": "https://www.wikidata.org/wiki/Q28137494"
+        },
+        {
+          "source": "osm",
+          "id": "node/2003852915",
+          "url": "https://www.openstreetmap.org/node/2003852915"
+        }
+      ]
+    },
+    {
+      "id": "7bd0272a6b9f",
+      "confidence": "confirmed",
+      "name": "ANAクラウンプラザホテル釧路",
+      "name_en": "ANA Crowne Plaza Kushiro",
+      "name_zh": "釧路ANA皇冠假日酒店",
+      "name_ko": "ANA 크라운 플라자 호텔 구시로",
+      "type": "hotel",
+      "coordinates": {
+        "lat": 42.98249,
+        "lng": 144.38192
+      },
+      "phone": "+81 154 31 4111",
+      "website": "https://www.anacpkushiro.com/",
+      "postal_code": "085-0016",
+      "street": "085-0016 北海道釧路市錦町3丁目7",
+      "prefecture_code": "01",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q56636278",
+          "url": "https://www.wikidata.org/wiki/Q56636278"
+        },
+        {
+          "source": "osm",
+          "id": "way/531720978",
+          "url": "https://www.openstreetmap.org/way/531720978"
+        }
+      ]
+    },
+    {
+      "id": "de848557d169",
+      "confidence": "confirmed",
+      "name": "Full Circle",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "apartment",
+      "coordinates": {
+        "lat": 42.8576008,
+        "lng": 140.7072998
+      },
+      "phone": "+81-136-22-4611",
+      "website": "https://www.skijapan.com/",
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "01",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/193446355",
+          "url": "https://www.openstreetmap.org/way/193446355"
+        },
+        {
+          "source": "osm",
+          "id": "way/193446421",
+          "url": "https://www.openstreetmap.org/way/193446421"
+        },
+        {
+          "source": "osm",
+          "id": "way/193446429",
+          "url": "https://www.openstreetmap.org/way/193446429"
+        },
+        {
+          "source": "osm",
+          "id": "way/193446476",
+          "url": "https://www.openstreetmap.org/way/193446476"
+        }
+      ]
+    },
+    {
+      "id": "6b67f43c43a6",
+      "confidence": "confirmed",
+      "name": "Gondola Chalet",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "apartment",
+      "coordinates": {
+        "lat": 42.8629353,
+        "lng": 140.7027322
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "01",
+      "sources": [
+        {
+         
+```
+
+
+=== Case L2-13 ===
+Topic / intent: 瀬戸内 島々
+Query: Các đảo ở Biển nội địa Seto đáng ghé thăm.
+Tool: get_spots({"prefecture": "Kagawa", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "eacddafd1aa04500",
+      "name": "情報を検索する",
+      "description": "三豊の魅力をより多くの人に届けるためには、三豊のことを好きな人を増やすのが1番！ということで、このページでは、三豊をもっと好きになる情報をたっぷりお届けします。今後、以下のようなコンテンツを順次公開予定ですので、ぜひお楽しみに！・地元の魅力を再発見できる特集記事・三豊のイベントやおすすめスポット情報・地域の人々と出会えるインタビュー記事三豊市の新たな一面を知ることで、三豊をもっと好きになるきっかけがきっと見つかるはずです！随時、情報を更新しますので、定期的にチェックしてくださいね。みなさまのご意見やアイデアも大歓迎です。三豊を一緒に盛り上げていきましょう！",
+      "coordinates": {
+        "lat": 34.182659,
+        "lng": 133.715332
+      },
+      "address": "〒767-8585香川県三豊市高瀬町下勝間2373番地1電話番号：0875-73-3012ファックス：0875-73-3022お問い合わせはこちらから",
+      "url": "https://www.city.mitoyo.lg.jp/kakuka/seisaku/sangyo/1/13704.html",
+      "municipality": "三豊市",
+      "municipality_code": "372081",
+      "prefecture": "香川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "3c7e6345f0f61a04",
+      "name": "石の物語",
+      "description": "いつも穏やかな表情で人に恵みと癒しを与え続ける瀬戸内海の海。そこには石と島が織りなす歴史浪漫が息づいています。岡山県笠岡市、丸亀市、土庄町、小豆島町の2市2町で令和元年に日本遺産に認定された「知ってる!?悠久の時が流れる石の島～海を越え、日本の礎を築いたせとうち備讃諸島～」。400年前の時をこえて今も残る“石の島”の歴史、文化、産業に触れてみませんか。 （ストーリー）瀬戸内備讃諸島の花崗岩と石切り技術は長きにわたり日本の建築文化を支えてきた。日本の近代化を象徴する日本銀行本店本館などの西洋建築、また古くは近世城郭の代表である大坂城の石垣など、日本のランドマークとなる建造物が、ここから切り出された石で築かれている。備讃諸島には巨石を切り、運び、石と共に生きてきた人たちの希有な文化が息づいている。 「せとうち石の島」ホームページ",
+      "coordinates": {
+        "lat": 34.486176,
+        "lng": 134.188675
+      },
+      "address": "〒761-4192香川県小豆郡土庄町淵崎甲1400番地2",
+      "url": "https://www.town.tonosho.kagawa.jp/kanko/stonestory",
+      "municipality": "土庄町",
+      "municipality_code": "373222",
+      "prefecture": "香川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "872557a02e16adb6",
+      "name": "7年連続！土庄町が2026年版「訪れてみたい日本のアニメ聖地88」に選ばれました！",
+      "description": "7年連続！土庄町が2026年版「訪れてみたい日本のアニメ聖地88」に選ばれました！土庄町の皆様、そして国内外のファンの皆様へ、嬉しいお知らせです。一般社団法人 アニメツーリズム協会 が発表した2026年版「訪れてみたい日本のアニメ聖地88」において、土庄町が『からかい上手の高木さん』の舞台として認定されました。今回で7年連続の選定となります。________________________________________■ 「日常」が愛されるまちとして『からかい上手の高木さん』は、穏やかな島の風景と中学生の何気ない日常を描いた作品です。その舞台モデルの一つとされる土庄町には、作品の空気感を感じられる場所が今も息づいています。この7年連続の選定は、作品と地域がともに歩んできた積み重ねの証であり、ファンの皆様の継続的な応援の賜物です。________________________________________■ 世界へ広がるアニメの力本年の投票は、約110の国・地域から寄せられ、海外からの投票は全体の約3割を占めました。日本のアニメ文化が国境を越えて愛されていること、そして土庄町という小さな島のまちにも世界中から関心が寄せられていることを、大変心強く感じています。________________________________________■ 感謝とこれから7年という年月にわたり選んでいただけたのは、・作品を大切に想い続けてくださるファンの皆様・訪れる皆様を温かく迎える地域の皆様・作品づくりに携わる関係者の皆様そのすべての力が重なった結果です。心より感謝申し上げます。土庄町はこれからも、作品の世界観を尊重しながら、地域の暮らしや文化と調和した「持続可能な聖地づくり」を進めてまいります。何度訪れても、あの物語の空気を感じられる場所へ。これからも土庄町、そして『からかい上手の高木さん』への応援をどうぞよろしくお願いいたします。",
+      "coordinates": {
+        "lat": 34.486176,
+        "lng": 134.188675
+      },
+      "address": "〒761-4192香川県小豆郡土庄町淵崎甲1400番地2電話番号：0879-62-7004",
+      "url": "https://www.town.tonosho.kagawa.jp/kanko/event/3956.html",
+      "municipality": "土庄町",
+      "municipality_code": "373222",
+      "prefecture": "香川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "28236b8fa7b122fa",
+      "name": "総合トップ",
+      "description": "皇踏山は標高わずか394メートルの低山ですが、瀬戸内海や近隣の島々なども見え、島ならではの眺望をお楽しみいただけます。さらにハイキングコース内に寺院や山岳霊場などもあることから、お遍路気分を感じながら歩くこともできます。初めて山道を歩く方にもオススメです。ぜひ島内外から皇踏山の魅力を味わいにいらしてください。",
+      "coordinates": {
+        "lat": 34.486176,
+        "lng": 134.188675
+      },
+      "address": "〒761-4192香川県小豆郡土庄町淵崎甲1400番地2電話番号：0879-62-7004",
+      "url": "https://www.town.tonosho.kagawa.jp/gyosei/soshiki/shoko/4/5/1917.html",
+      "municipality": "土庄町",
+      "municipality_code": "373222",
+      "prefecture": "香川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fdc765765741191d",
+      "name": "総合トップ",
+      "description": "国指定特別天然記念物（昭和30年8月認定）で日本最大の真柏は、小豆島八十八ヶ所霊場のひとつ、第五十四番札所宝生院の境内にあります。根元の周囲は16.9メートル、樹高約20.9メートル。地上1メートルほどのところで三方に分かれて支幹を出し、樹勢も旺盛です。応神天皇のお手植えによるものと伝えられ、樹齢は1,500年以上と推定されます。真柏のそばに行くと、風と戯れ、光と
+```
+
+
+=== Case L2-14 ===
+Topic / intent: 徳島 藍染
+Query: Indigo dyeing workshops in Tokushima prefecture.
+Tool: get_local_specialty({"prefecture": "Tokushima", "category": "craft", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "36",
+  "category_filter": "craft",
+  "lang": "en",
+  "count": 3,
+  "items": [
+    {
+      "key": "meti_densan:0122",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0122",
+      "name_ja": "阿波正藍しじら織",
+      "name": "Awa Hon-ai Shijira Weave",
+      "description_ja": null,
+      "description": null,
+      "designation_date": "昭和53年7月22日",
+      "production_area_text": "徳島市",
+      "prefecture_codes": [
+        "36"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0122/",
+      "translation_meta": {
+        "source": "official_only",
+        "generated_at": null,
+        "confidence": null
+      }
+    },
+    {
+      "key": "meti_densan:0420",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "陶磁器",
+      "craft_id": "0420",
+      "name_ja": "大谷焼",
+      "name": "Otani Ware",
+      "description_ja": "大谷焼は、徳島県鳴門市大麻町において、約200年前から焼き続けられている四国を代表する陶器の一つです。 身の丈ほどもある甕や睡蓮鉢の大物陶器の製作には、「寝ろくろ」（二人一組となり一人が成形を担当し、一人が寝ころび足で蹴ってろくろを回す）を使用して成形するのが特に有名で、それを焼く登り窯の大きさは日本一とも評されています。 また、酒器は精巧なろくろ技術により、非常に薄手でありながら丈夫であることが特色です。",
+      "description": "Otani Ware is one of the representative ceramics of Shikoku, fired continuously for approximately 200 years in Oma-cho, Naruto City, Tokushima Prefecture. The production of large pieces such as crocks and water-lily basins nearly as tall as a person is especially well known for the use of the 'ne-rokuro' (a technique in which two people work as a pair — one handles the shaping while the other lies down and kicks the wheel with their feet). The climbing kiln used to fire these pieces is said to be the largest in Japan. In addition, sake vessels are characterized by being extremely thin yet sturdy, achieved through refined wheel-throwing technique.",
+      "designation_date": "平成15年9月10日",
+      "production_area_text": "鳴門市",
+      "prefecture_codes": [
+        "36"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0420/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:46.045Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0907",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "和紙",
+      "craft_id": "0907",
+      "name_ja": "阿波和紙",
+      "name": "Awa Washi",
+      "description_ja": "手漉（す）きならではの生成（きなり）の色合い、優しい肌触り、しなやかな柔らかさと、驚くほどの強さがある草木染製品が阿波藍染和紙です",
+      "description": "Awa Indigo-dyed washi is a plant-dyed paper product that possesses the natural off-white coloring, gentle texture, and supple softness unique to hand-papermaking, along with remarkable strength.",
+      "designation_date": "昭和51年12月15日",
+      "production_area_text": "吉野川市、那賀郡那賀町、三好市",
+      "prefecture_codes": [
+        "36"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0907/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "農林水産省 (MAFF) Geographical Indication",
+      "category": "food"
+    },
+    {
+      "name": "経済産業省 (METI) Traditional Crafts (伝統的工芸品)",
+      "category": "craft"
+    }
+  ],
+  "note": "Only items officially designated by MAFF or METI appear. Non-designated regional foods/crafts are intentionally excluded.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case L2-15 ===
+Topic / intent: 高野山 宿坊
+Query: Buddhistische Tempel mit Übernachtungsmöglichkeit (Shukubo) auf dem Berg Koya.
+Tool: get_hotels({"prefecture": "Wakayama"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "64a715c1fa59",
+      "confidence": "confirmed",
+      "name": "HOTEL KII TANABE",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "coordinates": {
+        "lat": 33.7356091,
+        "lng": 135.3817217
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/12538987281",
+          "url": "https://www.openstreetmap.org/node/12538987281"
+        },
+        {
+          "source": "osm",
+          "id": "way/1354912514",
+          "url": "https://www.openstreetmap.org/way/1354912514"
+        }
+      ]
+    },
+    {
+      "id": "7902ab066d00",
+      "confidence": "confirmed",
+      "name": "HOTEL KII TANABE HANARE",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "coordinates": {
+        "lat": 33.7355584,
+        "lng": 135.3822632
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/12785159605",
+          "url": "https://www.openstreetmap.org/node/12785159605"
+        },
+        {
+          "source": "osm",
+          "id": "way/1381036782",
+          "url": "https://www.openstreetmap.org/way/1381036782"
+        }
+      ]
+    },
+    {
+      "id": "c70b9175194c",
+      "confidence": "confirmed",
+      "name": "Myoji House",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "coordinates": {
+        "lat": 34.2961227,
+        "lng": 135.5219731
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/13391447982",
+          "url": "https://www.openstreetmap.org/node/13391447982"
+        },
+        {
+          "source": "osm",
+          "id": "node/13391714601",
+          "url": "https://www.openstreetmap.org/node/13391714601"
+        }
+      ]
+    },
+    {
+      "id": "06ad9162c42f",
+      "confidence": "confirmed",
+      "name": "WAKAYAMA House (hotel)",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "coordinates": {
+        "lat": 34.2384352,
+        "lng": 135.1667012
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": "640-8201",
+      "street": null,
+      "prefecture_code": "30",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5306319927",
+          "url": "https://www.openstreetmap.org/node/5306319927"
+        },
+        {
+          "source": "osm",
+          "id": "way/554754466",
+          "url": "https://www.openstreetmap.org/way/554754466"
+        }
+      ]
+    },
+    {
+      "id": "05529c13f766",
+      "confidence": "confirmed",
+      "name": "ビジネスホテル 串本温泉",
+      "name_en": "Business Hotel Kushimoto",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "coordinates": {
+        "lat": 33.4722156,
+        "lng": 135.781854
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/6842760408",
+          "url": "https://www.openstreetmap.org/node/6842760408"
+        },
+        {
+          "source": "osm",
+          "id": "way/483665109",
+          "url": "https://www.openstreetmap.org/way/483665109"
+        }
+      ]
+    },
+    {
+      "id": "7c1c53eb1aed",
+      "confidence": "confirmed",
+      "name": "南紀白浜マリオットホテル",
+      "name_en": "Nanki-Shirahama Marriott Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "coordinates": {
+        "lat": 33.678936,
+        "lng": 135.34515
+
+```
+
+
+=== Case L2-16 ===
+Topic / intent: 武家屋敷 地方
+Query: Off-the-beaten-path samurai districts outside of Kyoto.
+Tool: search_area({"q": "武家屋敷", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "武家屋敷",
+  "match_count": 89,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "1ad47045b888f173",
+      "name": "关于佐贺",
+      "description": "佐贺县位于日本的南部，可以从主要城市乘坐飞机或新干线轻松前往。县内有许多可以享受历史和文化、自然的观光景点，无论谁都可以尽情享受。这里有丰富的自然环境，包括加入拉姆塞尔公约的湿地（东与贺海滩・肥前鹿岛海滩）和玄海国定公园（虹之松原等）等。秋季登录到联合国教科文组织非物质文化遗产的唐津宫日节和亚洲规模最大的热气球大会都会吸引来许多的游客来访。这里作为伊万里烧和有田烧等陶瓷器的产地，也是从很早的时候就十分出名。这里还有日本三大美肌温泉之一的嬉野温泉和武雄温泉，古汤温泉等温泉可以治愈旅途的疲惫。 从武雄神社的本殿沿着被竹林包围的小道进入内部后，可以见到树龄约3000年的大楠树。 其扎根于地面的姿态极具存在感，会给予观赏之人以力量。 深受领主喜爱的陶瓷之乡。拥有山水画般的风景和卓越的陶瓷器文化的秘窑之里。1660年左右（江户时代）作为佐贺藩锅岛家的御用窑，主要制作技术不外传、不考虑成本的最高品质的「锅岛」瓷器。如今还有30个烧制瓷器的窑坚守着，并向下一代传承着传统的制法工艺。 绵延至唐津湾海滨的虹之松原是国家的特别名胜，也是日本三大松原之一的知名景观。 长约4.5km，宽约0.5km，生长着约100万棵黑松。 伊吕波岛是位于伊万里湾中，大小共48个岛屿的总称。据称是空海（弘法大师）以伊吕波48文字为这些岛屿命名的，在蔚蓝的海洋中漂浮着的绿色岛屿的美丽姿态，据说令弘法大师也感叹无法画出其美丽。",
+      "url": "https://www.asobo-saga.jp/cn",
+      "municipality": "白石町",
+      "prefecture": "佐賀県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "a7ab8b62729dc7ba",
+      "name": "石川県観光公式サイト",
+      "description": "香林坊から歩いてすぐ、繁華街の近くとは思えないほど静かな長町界隈。加賀藩士・中級武士たちの屋敷跡が残り、黄土色の土塀、石畳の小路などが当時の面影をしのばせます。今も市民生活が営まれ、周辺には九谷焼のお店や飲食店も並びます。長町武家屋敷跡は、昔ながらの街並みの中に現代の生活が自然に溶け込み、独特の風情が漂う魅力的なエリアです。雪から土塀を守る「こも掛け」は雪吊りとともに金沢の冬の風物詩となっています。長町を流れる大野庄用水は、古くから人々の生活を支え、今も町に趣を添えています。屋敷を公開している「武家屋敷跡野村家」では豪華な建物と美しい庭園を楽しむことができます。「旧加賀藩士高田家跡」では修復された藩政時代の長屋門を一般公開しており、敷地内には見事な池泉回遊式庭園もあります。足軽屋敷を移築再現した「金沢市足軽資料館」では、足軽の職務や日常生活を知ることができます。「長町友禅館」では本加賀友禅の工芸品と着物が多数展示されています。歴史や見どころをおさえつつ、効率よく巡るなら「長町武家屋敷休憩館」に常駐の無料の観光ボランティアガイド「まいどさん」がおすすめ。ガイドは団体様や特別な要望時には事前の予約が必要です。>>【関連記事】長町武家屋敷をオトナ散歩してきた！ 香林坊から歩いてすぐ、繁華街の近くとは思えないほど静かな長町界隈。加賀藩士・中級武士たちの屋敷跡が残り、黄土色の土塀、石畳の小路などが当時の面影をしのばせます。今も市民生活が営まれ、周辺には九谷焼のお店や飲食店も並びます。長町武家屋敷跡は、昔ながらの街並みの中に現代の生活が自然に溶け込み、独特の風情が漂う魅力的なエリアです。 雪から土塀を守る「こも掛け」は雪吊りとともに金沢の冬の風物詩となっています。長町を流れる大野庄用水は、古くから人々の生活を支え、今も町に趣を添えています。 屋敷を公開している「武家屋敷跡野村家」では豪華な建物と美しい庭園を楽しむことができます。「旧加賀藩士高田家跡」では修復された藩政時代の長屋門を一般公開しており、敷地内には見事な池泉回遊式庭園もあります。足軽屋敷を移築再現した「金沢市足軽資料館」では、足軽の職務や日常生活を知ることができます。「長町友禅館」では本加賀友禅の工芸品と着物が多数展示されています。 歴史や見どころをおさえつつ、効率よく巡るなら「長町武家屋敷休憩館」に常駐の無料の観光ボランティアガイド「まいどさん」がおすすめ。ガイドは団体様や特別な要望時には事前の予約が必要です。",
+      "url": "https://www.hot-ishikawa.jp/spot/detail_5962.html",
+      "municipality": "能登町",
+      "prefecture": "石川県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "691e3d4ef9b4501b",
+      "name": "京都戦乱のきずな―四人の絆を巡る―",
+      "description": "戦国一の知将であり、領民に慕われた名君『明智光秀』 類いまれなる美貌と知性と信念の女性『細川ガラシャ』 当代一流の文化人として名高い、古今伝授の相伝者『細川幽斎』 ガラシャの夫であり、深い夫婦の絆を示した『細川忠興』 これら四人は、激動の人生を生きた父と娘、父と息子、そして夫婦であり、 その後の日本の歴史に大きな影響を与えました。 ゆかりの地である京都府内9市町と隣接する兵庫県2市では、行政と民間団体が協働で、光秀・ガラシャ・幽斎・忠興の大河ドラマ誘致に取り組んでいます。 〒602-8570 京都市上京区下立売通新町西入薮ノ内町 府庁2号館3階 TEL：075-411-9990 FAX：075-411-9993",
+      "url": "https://www.kyoto-kankou.or.jp/kizuna",
+      "municipality": "与謝野町",
+      "prefecture": "京都府"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "ce69ded4014fcdd0",
+      "name": "萬翠荘（ばんすいそう）",
+      "description": "・格調高いネオルネッサンス様式の西洋建築で愛媛県で最も古い鉄筋コンクリート造りの建物 ・市街中心部に位置するも、喧騒から隔絶される特別な場所にあり大正ロマン溢れる空間 ・左右非対称の外観や踊り場壁面の美しく壮大なステンドグラスなど建物全体が美術品 ・神秘的な雰囲気に一体が包まれているかのような神聖な空間 ・本殿正面には、樹齢2600年あまりの立派な御神木がそびえる ・美しい力強さを感じる国指定重要文化財の本殿と拝殿 ・江戸時代の吉田町へタイムスリップするかのような空間 ・1859年（安政6年）建築の商家を移築復元した豪壮な造りの商家「法花津屋」 ・農家の生活用具や農具に触れて、当時の暮らしをリアルに体感 ・建築家・浦辺鎮太郎が手掛けたモダニズム建築 ・美しい“普段の生活”につながるヒントが散りばめられた空間 ・展示スペースの壁と吹き抜けを有効活用できる空間 ・城主気分を味わい、歴史の場面に入り込める空間 ・高欄櫓の後方には肱川と大洲の町並みを望む景色が広がる ・樹齢300年以上の木材を使った力強い柱棟や複雑な骨組みが美しい天守",
+      "url": "https://www.iyokannet.jp/feature/%E6%84%9B%E5%AA%9B%E3%81%A7%E7%89%B9%E5%88%A5%E3%81%AA%E4%BD%93%E9%A8%93%E3%82%92%EF%BD%9EUnique%20Venues%20in%20Ehime%EF%BD%9E/%E6%84%9B%E5%AA%9B%E3%81%A7%E7%89%B9%E5%88%A5%E3%81%AA%E4%BD%93%E9%A8%93%E3%82%92%EF%BD%9EUnique%20Venues%20in%20Ehime%EF%BD%9E",
+      "municipality": "愛南町",
+      "prefecture": "愛媛県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "835f37077b920fba",
+      "name": "介紹佐賀",
+      "description": "佐賀縣位於日本南方九州地區，可以從主要都市搭乘飛機或新幹線等輕鬆前往。有很多歷史、文化、自然等任何人都能享受的旅遊
+```
+
+
+=== Case L2-17 ===
+Topic / intent: 秋田 夏祭り
+Query: Festival musim panas di prefektur Akita.
+Tool: get_festivals({"prefecture": "Akita", "lang": "id"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "05",
+  "lang": "id",
+  "count": 39,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "Dainichido Bugaku",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "Seni pertunjukan rakyat yang diwariskan di Kuil Dainichireki di Kota Kazuno, Prefektur Akita.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q6349714",
+      "name_ja": "角館のお祭り",
+      "name_en": "Kakunodate Festival",
+      "name": "Festival Kakunodate",
+      "description_ja": "秋田県仙北市の神明社と成就院薬師堂の祭",
+      "description_en": "Japanese festival",
+      "description": "Festival kuil Shinmeisha dan aula Jojuin Yakushido di Kota Semboku, Prefektur Akita.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q6349714",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q7849923",
+      "name_ja": "土崎神明社祭の曳山行事",
+      "name_en": "Tsuchizaki Shinmei Shrine Festival",
+      "name": "Prosesi Kereta Hias Festival Kuil Tsuchizaki Shinmeisha",
+      "description_ja": "秋田県秋田市にある土崎神明社の例祭",
+      "description_en": null,
+      "description": "Festival tahunan Kuil Tsuchizaki Shinmeisha yang terletak di Kota Akita, Prefektur Akita.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": "1705-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q7849923",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "Dainichido Bugaku",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "Seni pertunjukan rakyat yang diwariskan di Kuil Dainichireiki di Kota Kazuno, Prefektur Akita.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00275",
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11511418",
+      "name_ja": "早池峰神楽",
+      "name_en": "Hayachine Kagura",
+      "name": "Hayachine Kagura",
+      "description_ja": null,
+      "description_en": "type of dance",
+      "description": "Sejenis tarian.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00272",
+      "source_url": "https://www.wikidata.org/wiki/Q11511418",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "low"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Festival Hikawa Kawagoe",
+      "des
+```
+
+
+=== Case L2-18 ===
+Topic / intent: 山陰 漁港 町
+Query: 산인 지방의 작은 항구 마을.
+Tool: get_spots({"prefecture": "Shimane", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "ffc3d9c69d205d9a",
+      "name": "松江市役所新庁舎オープニングイベントを開催します",
+      "description": "松江市役所新庁舎は令和8年5月16日にグランドオープンを迎えます。グランドオープンを記念し、新庁舎を使用してイベントを開催します。当日は、こども向けイベント、マルシェ、茶の湯体験、どう行列など沢山のイベントを準備しています。みなさまのご来場をお待ちしております。イベントの詳細については、下記のチラシをご覧ください。",
+      "coordinates": {
+        "lat": 35.467972,
+        "lng": 133.048508
+      },
+      "address": "〒690-8540 島根県松江市末次町86番地",
+      "url": "https://www.city.matsue.lg.jp/soshikikarasagasu/zaiseibu_shinchoshaseibika/shinchoshaseibigaiyou/25260.html",
+      "municipality": "松江市",
+      "municipality_code": "322016",
+      "prefecture": "島根県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f3137f4e68523484",
+      "name": "天文教室",
+      "description": "4月22日に予定していた4月の天文教室（以下に掲載）は、雲が多く星が見えないため、開催を中止します。楽しみにされていた方におかれましては大変申し訳ございませんが、ご了承のほどよろしくお願い申し上げます。 次回の天文教室は5月20日(水曜日)に実施します。詳細は来月掲載いたしますので、ご確認ください。たくさんのご参加をお待ちしております。",
+      "coordinates": {
+        "lat": 35.467972,
+        "lng": 133.048508
+      },
+      "address": "〒690-8540 島根県松江市末次町86番地",
+      "url": "https://www.city.matsue.lg.jp/soshikikarasagasu/kyoikuiinkai_shogaigakushuka/shogaigakushu_kominkan/1563.html",
+      "municipality": "松江市",
+      "municipality_code": "322016",
+      "prefecture": "島根県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "3f004c2d6fdeee24",
+      "name": "重要文化財木幡家住宅保存修理現場見学会の開催",
+      "description": "木幡家住宅は、松江市宍道町に位置する重要文化財の建物で、藩主が訪れたことから「八雲本陣」の名称で親しまれています。  この木幡家住宅を後世に引き継ぐために、令和元年度から12年間の計画で大規模な改修工事を行っています。  この度、多くの方に文化財の重要性や保存修理の必要性を伝え、地域の歴史文化を継承するために、普段は見ることができない保存修理現場の内部を見学できる機会を設けるものです。",
+      "coordinates": {
+        "lat": 35.467972,
+        "lng": 133.048508
+      },
+      "address": "〒690-8540 島根県松江市末次町86番地",
+      "url": "https://www.city.matsue.lg.jp/soshikikarasagasu/bunkasportsbu_bunkazaika/rekishi_bunkazai/3/4/18708.html",
+      "municipality": "松江市",
+      "municipality_code": "322016",
+      "prefecture": "島根県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "65dcbf68ed32b591",
+      "name": "第53回松江市民美術展 優秀作品展",
+      "description": "第53回松江市民美術展は、令和7年9月5日（金曜）から9月8日（月曜）に島根県立美術館で開催を予定しておりましたが、島根県立美術館の空調設備の故障により、中止としました。この度、第53回松江市民美術展の受賞作品を集めた第53回松江民美術展優秀作品展を以下のとおり開催いたしますので、ぜひご来場ください。",
+      "coordinates": {
+        "lat": 35.467972,
+        "lng": 133.048508
+      },
+      "address": "〒690-8540 島根県松江市末次町86番地",
+      "url": "https://www.city.matsue.lg.jp/soshikikarasagasu/bunkasportsbu_bunkashinkoka/bunkaryoku/6/19791.html",
+      "municipality": "松江市",
+      "municipality_code": "322016",
+      "prefecture": "島根県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "668eab1310b5463b",
+      "name": "【締め切りました】令和7年度 松江CityHack!! vol.8 参加者募集",
+      "description": "ITを使用し日常生活や学校生活がより楽しく＆便利になるようなアイデアを出し合い、チーム作業でWebアプリケーションづくりにチャレンジしていただきます。ワークショップには島根県内のIT企業で活躍するエンジニアの方々にご参加いただき、学生の皆さんのチーム作業をサポートしていただきます。IT企業への就職を検討している方にとっては、IT業界で働くイメージが膨らみ、同時に、地域のIT企業と出会えるとても良い機会になることでしょう！開催前にはIT企業のエンジニアの方々とのオンライン事前説明会を開催！どんなイベントだろう？どんな企業、エンジニアの方々がいるんだろう？と気になる方は、ぜひオンライン事前説明会にご参加ください！（最下に申込みフォーム有）",
+      "coordinates": {
+        "lat": 35.467972,
+        "lng": 133.048508
+      },
+      "address": "〒690-8540 島根県松江市末次町86番地",
+      "url": "https://www.city.matsue.lg.jp/soshikikarasagasu/sangyokeizaibu_teijuukigyoritchisuishinka/iju_teiju/event_info/24017.html",
+      "municipality": "松江市",
+      "municipality_code": "322016",
+      "prefecture": "島根県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "83b3bfa5d7c3c95d",
+      "name": "歴史的建造物一斉公開",
+      "description": "1．日時：令和5年6月10日（土曜日）16時から21時、      令和5年6月11日（日曜日）10時から16時2．場所：美保関町美保関（青石畳通り周辺、美保関灯台）3．公開する建造物\t三代家住宅主屋（美保関町美保関581番地外）(PDFファイル:489.3KB)\t定秀家住宅（美保関町美保関466番
+```
+
+
+=== Case L2-19 ===
+Topic / intent: 岐阜 和紙
+Query: Where can I experience washi paper making in Gifu?
+Tool: get_local_specialty({"prefecture": "Gifu", "category": "craft", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "21",
+  "category_filter": "craft",
+  "lang": "en",
+  "count": 9,
+  "items": [
+    {
+      "key": "meti_densan:0406",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "陶磁器",
+      "craft_id": "0406",
+      "name_ja": "美濃焼",
+      "name": "Mino Ware",
+      "description_ja": "伝統的工芸品として指定されている美濃焼は15種類あります。中でも志野、黄瀬戸（きぜと）、織部、瀬戸黒（せとぐろ）等は色合いを大切にしたもので、淡い色彩のソフトな素地と釉薬の仕上がり、バランスのとれたデザインを最大の見どころとしています。",
+      "description": "There are 15 types of Mino Ware designated as traditional crafts. Among them, Shino, Ki-Seto (yellow Seto), Oribe, and Seto-Guro (black Seto) are styles that place great importance on color, with their key features being a soft body in subdued tones, a refined glaze finish, and well-balanced design.",
+      "designation_date": "昭和53年7月22日",
+      "production_area_text": "多治見市、土岐市、瑞浪市、可児市、恵那市、可児郡御嵩町",
+      "prefecture_codes": [
+        "21"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0406/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0502",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "漆器",
+      "craft_id": "0502",
+      "name_ja": "秀衡塗",
+      "name": "Hidehira-nuri",
+      "description_ja": "下地は、最も丈夫と言われる本堅地（ほんかたじ）を使っています。加飾は当地で昔から伝えられてきた漆器の「秀衡椀」を手本にしたもので、「源氏雲」という雲の形と、いくつかの菱形の組み合わせで作られる「有職菱文様（ゆうそくひしもんよう）」が描かれます。ちょっと見ると金箔を使ったとても華やかなデザインに見えますが、実際手にとってみると、一番上に塗られた上塗りの黒や朱色の漆や加飾は、光沢をおさえた仕上げをしているので、漆本来の美しい艶を味わうことができます。",
+      "description": "The base coat uses honkataji, considered the most durable foundation. The decoration is modeled on the Hidehira bowl, a lacquerware form long handed down in this region, and features a cloud motif called Genji-gumo together with a pattern of diamond shapes known as yusoku hishi mon'yo. At first glance the design appears very ornate, as if gold leaf were used, but when actually held in the hand, the black or vermilion lacquer of the topcoat and the decorative elements are finished with a subdued luster, allowing one to appreciate the inherent, beautiful sheen of lacquer.",
+      "designation_date": "昭和60年5月22日",
+      "production_area_text": "盛岡市、花巻市、一関市、奥州市、平泉町、滝沢市",
+      "prefecture_codes": [
+        "03",
+        "21"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0502/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:46.048Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0516",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "漆器",
+      "craft_id": "0516",
+      "name_ja": "飛騨春慶",
+      "name": "Hida Shunkei",
+      "description_ja": "板を立体的に仕上げる曲げの技法は特に優れており、色々な製品に活かされています。飛騨春慶は、透明で木肌の持つ美しさをそのまま活かすところに特徴があります。",
+      "description": "The bending technique used to shape boards into three-dimensional forms is particularly accomplished and is employed in a wide variety of products. Hida Shunkei lacquerware is characterized by its transparent finish, which allows the natural beauty of the wood grain to come through as it is.",
+      "designation_date": "昭和50年2月17日",
+      "production_area_text": "高山市、飛騨市",
+      "prefecture_codes": [
+        "21"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0516/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0613",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "木工品・竹工品",
+      "cr
+```
+
+
+=== Case L2-20 ===
+Topic / intent: 能登 漁村
+Query: Pueblos de pescadores en la península de Noto.
+Tool: get_spots({"prefecture": "Ishikawa", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "93bb4c667f6cdffc",
+      "name": "情報を探す",
+      "description": "小松空港（飛行機で）\t\t\t\t\t\t札幌（新千歳）\t\t\t約1時間30分\t\t\t\t\t\t\t仙台（注意）運休中\t\t\t約1時間\t\t\t\t\t\t\t成田（注意）運休中\t\t\t約1時間15分\t\t\t\t\t\t\t東京羽田\t\t\t約1時間\t\t\t\t\t\t\t福岡\t\t\t約1時間40分\t\t\t\t\t\t\t那覇\t\t\t約2時間35分\t\t\t\t\t\t\tソウル（仁川）\t\t\t約2時間\t\t\t\t\t\t\t上海（浦東）\t\t\t約3時間10分\t\t\t\t\t\t\t台北\t\t\t約3時間35分\t\t\t\t\t\t\t香港\t\t\t約4時間15分\t\t\t\t小松駅\t\t\t\t\t\t東京\t\t\t新幹線で最短2時間40分\t\t\t\t\t\t\t大阪\t\t\t最短2時間14分\t\t\t\t\t\t\t名古屋\t\t\t最短1時間57分\t\t\t※敦賀駅で「つるぎ」と特急「サンダーバード」「しらさぎ」が接続します。乗り換え標準時分は8分です。",
+      "coordinates": {
+        "lat": 36.408424,
+        "lng": 136.444901
+      },
+      "address": "〒923-8650 石川県小松市小馬出町91番地",
+      "url": "https://www.city.komatsu.lg.jp/soshiki/1006/koho/shinogaiyou/2319.html",
+      "municipality": "小松市",
+      "municipality_code": "172031",
+      "prefecture": "石川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "626ff0ff5e5d86f9",
+      "name": "情報を探す",
+      "description": "まつり一覧\t\t\t\t\t\t時期\t\t\t名称・内容\t\t\t場所\t\t\t\t\t\t\t\t\t4月初旬\t\t\t芦城公園桜の見ごろ\t\t\t芦城公園\t\t\t\t\t\t\t5月初旬\t\t\t日本子供歌舞伎まつりin小松\t\t\t石川県小松市團十郎芸術劇場うらら\t\t\t\t\t\t\t5月中旬\t\t\tお旅まつり\t\t\t莵橋神社・本折日吉神社\t\t\t\t\t\t\t6月5日\t\t\t利常公宮渡祭り\t\t\t小松天満宮\t\t\t\t\t\t\t6月中旬\t\t\t木場潟公園花菖蒲の見ごろ\t\t\t木場潟公園\t\t\t\t\t\t\t7月下旬\t\t\tかぶとまつり\t\t\t多太神社\t\t\t\t\t\t\t8月下旬\t\t\tおっしょべ祭り\t\t\t粟津温泉\t\t\t\t\t\t\t8月下旬\t\t\t西瓜まつり\t\t\t莵橋神社\t\t\t\t\t\t\t9月上旬\t\t\t安宅まつり\t\t\t安宅住吉神社\t\t\t\t\t\t\t9月中旬\t\t\t悪魔祓い\t\t\t向本折白山神社\t\t\t\t\t\t\t9月下旬\t\t\tKOMATSU全日本鉄人レース\t\t\tこまつドーム\t\t\t\t\t\t\t9月下旬~10月上旬\t\t\t大倉岳高原まつり\t\t\t大倉岳高原スキー場\t\t\t\t\t\t\t9月下旬~10月上旬\t\t\t小松基地航空祭\t\t\t航空自衛隊小松基地\t\t\t\t\t\t\t10月中旬\t\t\t小松市どんどんまつり\t\t\tJR小松駅前\t\t\t\t\t\t\t10月中旬\t\t\tこまつ勧進帳マラソン\t\t\t末広陸上競技場他\t\t\t\t\t\t\t11月上旬～下旬\t\t\t那谷寺紅葉の見ごろ\t\t\t那谷寺境内",
+      "coordinates": {
+        "lat": 36.408424,
+        "lng": 136.444901
+      },
+      "address": "〒923-8650石川県小松市小馬出町91番地電話番号:",
+      "url": "https://www.city.komatsu.lg.jp/soshiki/1015/event/2/2467.html",
+      "municipality": "小松市",
+      "municipality_code": "172031",
+      "prefecture": "石川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "cd95b9a90c3d6c8f",
+      "name": "情報を探す",
+      "description": "平成11年より開催されている「全国子供歌舞伎フェスティバル in 小松」にて、第1回より、小松ゆかりの歌舞伎「勧進帳」を上演しています。 毎回出演者を募り、オーディションで選ばれた小・中学生が役者や口上を務めます。 12月末より上演成功へ向けた約 4ヶ月間の稽古を重ね、晴れの舞台に挑みます。長唄と囃子方は、応募のあった市内小学生をはじめ、こまつ歌舞伎未来塾「こまつ邦楽舞踊教室」のメンバーや小松市立高等学校邦楽部の方たちで編成。出演者を盛り立てる後見やツケ打ち、メイクや着付けなどの裏方にも市民ボランティアが加わり、「歌舞伎のまち」の市民による「勧進帳」を上演します。",
+      "coordinates": {
+        "lat": 36.408424,
+        "lng": 136.444901
+      },
+      "address": "〒923-8650石川県小松市小馬出町91番地電話番号:",
+      "url": "https://www.city.komatsu.lg.jp/soshiki/1016/ibento_omatsuri/3/662.html",
+      "municipality": "小松市",
+      "municipality_code": "172031",
+      "prefecture": "石川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "1cf17c273e47fbed",
+      "name": "情報を探す",
+      "description": "令和8年度（予定） \t令和8年4月26日（日曜日） 午前10時～午後3時 担当：裏千家\t令和8年5月24日（日曜日） 午前10時～午後3時 担当：裏千家\t令和8年6月14日（日曜日） 午前10時～午後3時 担当：煎茶松月流\t令和8年9月27日（日曜日） 午前10時～午後3時 担当：表千家\t\t\t（注意） お点前はありません。普段着でお気軽にお越しください。\t\t\t呈茶料:700円（和菓子付）\t\t申込み:不要です。\t\t駐車場:小松市役所駐車場",
+      "coordinates": {
+        "lat": 36.408424,
+        "lng": 136.444901
+      },
+      "address": "〒923-8650石川県小松市小馬出町91番地電話番号:",
+      "url": "https://www.city.komatsu.lg.jp/soshiki/1016/ibento_omatsuri/4/952.html",
+      "municipality": "小松市",
+      "municipality_code": "172031",
+      "prefecture": "石川県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "6ae8168c537c067d",
+      "name": "情報を探す",
+      "description": "チケット料金一覧\t\t\t\t\t\t席種\t\t\t前売・当日\t\t\t\t\t\t\t\t\t\t\t\t一般（自由席）\t\t\t\t\t\t1,000 円\t\t\t\t\t\t\t高校生以下（自由席）\t\t\t500 円\t\t\t
+```
+
+
+=== Case L2-21 ===
+Topic / intent: 砂丘 全国
+Query: Lesser-known sand dunes in Japan, not just Tottori.
+Tool: search_area({"q": "砂丘", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "砂丘",
+  "match_count": 84,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "746b76963e262506",
+      "name": "画になる舞台、鳥取。",
+      "description": "日本海に面して広がる鳥取砂丘、文豪・島崎藤村も絶賛した浦富海岸をはじめとする雄大な自然がつくる造形美。 さらに、日本の原風景を思わせる景観、歴史情緒漂うまちなみや建築・遺跡群など、さまざまな時代の趣を現代に残す鳥取県。 多彩なシチュエーションを兼ね備えた鳥取県での作品制作を支援します。",
+      "url": "https://www.tottori-guide.jp/fc",
+      "municipality": "江府町",
+      "prefecture": "鳥取県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "9908b398aa5fc670",
+      "name": "鳥取砂丘 | とっとり旅 【公式】鳥取県観光旅行情報サイト",
+      "description": "鳥取砂丘のウェブサイト。風と砂が織りなす、海と陸の出会うところ、鳥取砂丘の魅力を紹介します。",
+      "url": "https://www.tottori-guide.jp/sakyu",
+      "municipality": "伯耆町",
+      "prefecture": "鳥取県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "9d62ccab1ac2926c",
+      "name": "栗林公園",
+      "description": "特別名勝 栗林公園 MORE 介紹 栗林公園的變遷 占地面積 世界公認的三星級名勝 日本第一的松樹 景點 MORE 日式遊船〜達官貴人式的遊船消遣 乘船費 飛來峰 掬月亭 根上五葉松 舊日暮亭 工商獎勵館 贊岐民藝館 We use cookies on this site to enhance your user experience. If you continue to browse, you accept the use of cookies on our site. See our cookies policy for more information.",
+      "url": "http://www.my-kagawa.jp/static/zh-TW/ritsurin",
+      "municipality": "琴平町",
+      "prefecture": "香川県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "835f37077b920fba",
+      "name": "介紹佐賀",
+      "description": "佐賀縣位於日本南方九州地區，可以從主要都市搭乘飛機或新幹線等輕鬆前往。有很多歷史、文化、自然等任何人都能享受的旅遊景點。 有拉姆薩公約溼地(東與賀干潟、肥前鹿島干潟)和玄海國定公園(虹之松原等)等豐富的自然環境。 秋天還有很多遊客會來參加聯合國教科文組織無形文化遺產-唐津宮日祭和亞洲最大的熱氣球大賽。 伊萬里燒和有田燒等自古聞名的陶瓷產地。 也可以在日本三大美肌溫泉之一的嬉野溫泉和武雄溫泉、古湯溫泉中緩解旅行的疲勞。 從武雄神社本殿沿著被竹林包圍的小路繼續前行，就會看到一棵樹齡3000年的大楠木。紮根於地面充滿生命力的樣子，帶給觀賞的人滿滿的力量。 深受領主喜愛的器皿之鄉，風景宛如山水畫般、有著卓越陶瓷文化的秘窯之里。1660年左右(江戶時代)作為佐賀藩鍋島家的御用官窯，以技術不外洩、不考慮利潤，生產最高品質的瓷器「鍋島」。 現在仍有30個窯場保留著傳統的燒製方法，並傳承給下一代。 唐津灣海濱綿延不斷的虹之松原為國家特別名勝，是日本三大松原之一的風景勝地。 在長約4.5km，寬約0.5km的平原，種植了約100萬棵黑松。 伊呂波島是漂浮在伊萬里灣的48個大小島嶼的總稱。 據說是空海(弘法大師)以伊呂波48文字來命名的，連弘法大師都對蔚藍大海和漂浮在其中的綠色島嶼所形成的美麗景色驚艷不已。",
+      "url": "https://www.asobo-saga.jp/tw",
+      "municipality": "白石町",
+      "prefecture": "佐賀県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "da70f6e732640248",
+      "name": "STAY YAMAGATA",
+      "description": "四季精彩景點 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 從旅遊主題搜尋 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 點閱率排行榜 山寺（寶珠山立石寺） more 山形城遺址、霞城公園 more 藏王樹冰 ／ Juhyo ／ Snow Monster （Zao’s Juhyo ／ Zao’s Rime ／ Frost Covered Trees of Zao） more 置賜公園香草園（置賜公園香草園展） more 天童温泉♨（Tendo Onsen） more 最上川堤防千本櫻 more Nakano Kanko Kajuen more Benihana Musuem more Michi-no-Eki Sagae Cherry Land more 月山 more Zao Bodaira Highlands more 更多景點 更多活動",
+      "url": "https://yamagatakanko.com/zh_TW",
+      "municipality": "白鷹町",
+      "prefecture": "山形県"
+    },
+    {
+      "type": "designation",
+      "source": "maff_gi",
+      "key": "maff_gi:11",
+      "name": "鳥取砂丘らっきょう",
+      "description": "身が締まっているうえ、各鱗片の厚みもほぼ同一で、食感の「シャキシャキ感」が良く、らっきょうの外観が白い。",
+      "url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0011/index.html"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "d8e136dda228c618",
+      "name": "雄偉自然的饋贈：溫泉與美食",
+      "description": "位於日本西南部九州中央的熊本，擁有足以向世界自豪的豐富自然。何不漫步在日本傳統文化依然生機盎然的土地上？ 在熊本，有擁有世界最大級火山口（破火山口）的名山「阿蘇」，也有被美麗海洋環抱、約120座島嶼漂浮其上的「天草」。 阿蘇的群山與天草的海域都被日本政府指定為國立公園。 熊本同時擁有「山」與「海」兩處國立公園，是日本非常罕見的地區。 阿蘇擁有享譽世界的活火山。 得益於這份火山能量，熊本遍布風情十足的溫泉鄉。 熊本也是日本人氣很高的溫泉勝地。 在豐饒自然中泡溫泉，不僅能舒緩身體，也能療癒心靈。 阿蘇火山的恩惠並不止於溫泉。 噴發形成的地層過濾出的清澈泉水在縣內各處湧出，這裡也以「水之美」聞名。 （事實上，熊本縣人口最多的熊本市，自來水全部由天然地下水供給。） 在礦物質豐富的清澈好水與豐饒自然的滋養下，熊本盛產凸顯食材本味的美味食材： 如大米、柑橘、赤牛等「山
+```
+
+
+=== Case L2-22 ===
+Topic / intent: 山陰 工芸
+Query: 山阴地区的传统工艺品。
+Tool: get_local_specialty({"prefecture": "Shimane", "category": "craft", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "32",
+  "category_filter": "craft",
+  "lang": "zh",
+  "count": 4,
+  "items": [
+    {
+      "key": "meti_densan:0417",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "陶磁器",
+      "craft_id": "0417",
+      "name_ja": "石見焼",
+      "name": "石见烧",
+      "description_ja": "磁器に近い粘土を使い、鉄を含む地元の石を使った茶褐色の釉薬（ゆうやく）や、アルカリを含む石を使った透明な釉薬を用いた製品が主力です。この透明釉は、完全燃焼した炎で焼くと黄土色を、不完全燃焼した炎で焼くと青色になります。",
+      "description": "主要产品使用接近瓷器的黏土，施以由含铁当地石料制成的茶褐色釉药，或由含碱性石料制成的透明釉药。透明釉在完全燃烧的火焰中烧制呈黄土色，在不完全燃烧的火焰中烧制则呈蓝色。",
+      "designation_date": "平成6年4月4日",
+      "production_area_text": "江津市、浜田市、益田市、大田市、鹿足郡津和野町",
+      "prefecture_codes": [
+        "32",
+        "24"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0417/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0906",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "和紙",
+      "craft_id": "0906",
+      "name_ja": "石州和紙",
+      "name": "石州和纸",
+      "description_ja": "コウゾ紙は繊維が長く最も強靱です。ミツマタ紙は繊細で弾力があり、柔らかな艶があります。ガンピ紙は最も繊細で光沢があり虫の害に強い紙です。生産の多いコウゾ紙はかつて商人が帳簿に用い、火災のとき井戸に投げ込んで保存を図ることができたほどしっかりしています。",
+      "description": "楮纸纤维长，是最为强韧的纸。三桠纸细腻、有弹性，带有柔和的光泽。雁皮纸最为精细，有光泽，且耐虫害。产量最多的楮纸曾被商人用于记账，其坚韧程度甚至在火灾时投入井中也能保存下来。",
+      "designation_date": "平成1年4月11日",
+      "production_area_text": "江津市、浜田市",
+      "prefecture_codes": [
+        "32",
+        "24"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0906/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:1006",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "文具",
+      "craft_id": "1006",
+      "name_ja": "雲州そろばん",
+      "name": "云州算盘",
+      "description_ja": "そろばんで最も重要なものは珠です。珠の動きが良く、冴（さ）えた高い音のするものが良いものと言えます。特に珠の穴の仕上げや芯竹の仕上げは、入念に仕上げられているので、長く使用するほど使いよくなります。",
+      "description": "算盘最重要的部件是算珠。算珠移动顺畅、发出清脆响亮声音的算盘可以称为优质算盘。尤其是算珠孔的打磨和芯杆的精加工均经过精心处理，因此使用越久越顺手。",
+      "designation_date": "昭和60年5月22日",
+      "production_area_text": "仁多郡奥出雲町",
+      "prefecture_codes": [
+        "32"
+      ],
+      "source_url": "https://kougeihin.jp/craft/1006/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:1104",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "石工品",
+      "craft_id": "1104",
+      "name_ja": "出雲石燈ろう",
+      "name": "出云石灯笼",
+      "description_ja": "細かい粒子がしっかり詰まっている石質の原石のため、気品高く柔らかで優美な作品が出来ます。色合いが良い上に、早く苔が付いて古色を帯び、自然と良く調和します。さらに寒さや、熱さに強く、徳川時代初期の作品が現代まで残っているように、長年の風化に良く耐えます。",
+      "description": "由于原石石质细密、颗粒紧实，成品作品高雅柔和、造型优美。色调优良，且苔藓易于附着，很快便呈现出古朴色泽，与自然环境相得益彰。此外，其耐寒耐热性强，历经多年风化而不损，正如江户时代初期的作品保存至今所证明的那样。",
+      "designation_date": "昭和51年6月2日",
+      "production_area_text": "境港市 島根県／松江市、出雲市",
+      "prefecture_codes": [
+        "32"
+      ],
+      "source_url": "https://kougeihin.jp/craft/1104/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "農林水産省 (MAFF) Geographical Indication",
+      "category": "food"
+    },
+    {
+      "name": "経済産業省 (METI) Traditional Crafts (伝統的工芸品)",
+      "category": "craft"
+    }
+  ],
+  "note": "Only items officially designated by MAFF or METI appear. Non-designated regional foods/crafts are intentionall
+```
+
+
+=== Case L2-23 ===
+Topic / intent: 北海道 ラベンダー
+Query: What lavender fields exist in Hokkaido beyond Furano?
+Tool: get_spots({"prefecture": "Hokkaido", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "9745048b19ed2f5b",
+      "name": "企画展示「知ってほしい、こんな旭川」（中央図書館）",
+      "description": "旭川叢書第37巻『知ってほしい、こんな旭川』を始めとするこれまで刊行された旭川叢書、及びこれに関連する書籍、写真、地図等郷土資料と叢書の経緯について解説パネル及び関連新聞記事パネル等を展示。併せて中央図書館が所蔵している往時の市内映画館の広告（複製）パネル、旭川市史等の郷土史関連書籍等を展示する。",
+      "coordinates": {
+        "lat": 43.776031,
+        "lng": 142.358032
+      },
+      "address": "〒070-0044 旭川市常磐公園",
+      "url": "https://www.city.asahikawa.hokkaido.jp/event/category-06/d081696.html",
+      "municipality": "旭川市",
+      "municipality_code": "012041",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "e65211da48b25900",
+      "name": "インバウンド対応",
+      "description": "近年、外国人が日本を訪れるインバウンドが増加しており、令和7年1月には市内にも多くの外国人旅行者が訪れ、雪景色や雪遊びを楽しむ姿が多く見られました。一方で、私有地への無断立ち入りなどのマナー違反や車道・軒下での写真撮影といった危険行為も一部発生しました。こうした行動の多くは悪意によるものではなく、マナーや文化、生活習慣の違いから起きてしまうものです。岩見沢を訪れる方々に楽しく安全に過ごしてもらうため、そして市民の皆さんが気持ちよくお迎えできるようにするためにも、互いの文化や習慣を理解し合うことが大切です。市は、外国人旅行者へのマナー啓発や危険行為への注意喚起を進めていますので、ご理解とご協力をお願いします。",
+      "coordinates": {
+        "lat": 43.196449,
+        "lng": 141.775482
+      },
+      "address": "〒068-8686 北海道岩見沢市鳩が丘1丁目1番1号",
+      "url": "https://www.city.iwamizawa.hokkaido.jp/soshiki/kankobussanshinkoka/16356.html",
+      "municipality": "岩見沢市",
+      "municipality_code": "012106",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c24bac6cf631da82",
+      "name": "想いがめぐるVol.3 上杉克也・高橋ヒサ子・竹澤誠",
+      "description": "3回目となる「想いがめぐる」展。この世に数多くの作品を遺し、天国へと旅立った3 人の作家たち。その手から生まれたのは、個性的で、力強く、そしてどこか可愛らしい作品の数々です。 墨絵、色鉛筆、版画と三者三様の表現が織りなす、魅力あふれる世界をお楽しみ下さい。",
+      "coordinates": {
+        "lat": 43.196449,
+        "lng": 141.775482
+      },
+      "address": "〒068-8686 北海道岩見沢市鳩が丘1丁目1番1号",
+      "url": "https://www.city.iwamizawa.hokkaido.jp/soshiki/fukushika/event/16781.html",
+      "municipality": "岩見沢市",
+      "municipality_code": "012106",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "254388cf545b5a22",
+      "name": "巡回パネル展「新しい市指定文化財 辻村家ガラス乾板写真及び関連資料」",
+      "description": "北村環境改善センター（北村赤川595）期間4月20日（月曜日）を除く4月16日（木曜日）から4月30日（木曜日）時間午前9時から午後9時岩見沢市立図書館（春日町2）期間5月18日（月曜日）を除く5月12日（火曜日）から5月24日（日曜日）時間午前10時から午後7時土曜日、日曜日は午前10時から午後5時30分来夢21図書館（栗沢町南本町41）期間毎週月曜日を除く6月2日（火曜日）から6月23日（火曜日）時間午前10時から午後6時土曜日、日曜日は午前10時から午後5時30分生涯学習センターいわなび（4西1）期間7月3日（金曜日）から7月17日（金曜日）時間午前9時から午後9時30分",
+      "coordinates": {
+        "lat": 43.202549,
+        "lng": 141.764221
+      },
+      "address": "〒068-0024 北海道岩見沢市4条西3丁目1番地",
+      "url": "https://www.city.iwamizawa.hokkaido.jp/soshiki/shogaigakushu_bunka_sportshinkoka/event/14307.html",
+      "municipality": "岩見沢市",
+      "municipality_code": "012106",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "a1015ffdfef3b282",
+      "name": "センター開放",
+      "description": "センター開放予定一覧表\t\t\t\t\t\t予定日\t\t\t内容\t\t\t\t\t\t\t4月16日\t\t\t絵本・紙芝居\t\t\t\t\t\t\t5月21日\t\t\t折り紙\t\t\t\t\t\t\t6月4日\t\t\tお絵描き\t\t\t\t\t\t\t7月1日\t\t\tはじき絵\t\t\t\t\t\t\t7月16日\t\t\t水遊び\t\t\t\t\t\t\t7月30日\t\t\t水遊び\t\t\t\t\t\t\t8月20日\t\t\tスタンプ遊び\t\t\t\t\t\t\t9月3日\t\t\tちぎって紙遊び\t\t\t\t\t\t\t9月17日\t\t\tゲーム\t\t\t\t\t\t\t10月1日\t\t\t絵本・紙芝居\t\t\t\t\t\t\t10月15日\t\t\t折り紙\t\t\t\t\t\t\t11月19日\t\t\tお絵描き\t\t\t\t\t\t\t12月3日\t\t\tクリスマス制作 \t\t\t\t\t\t\t1月21日\t\t\t雪中大会\t\t\t\t\t\t\t2月4日\t\t\tそり遊び\t\t\t\t\t\t\t2月18日\t\t\tゲーム\t\t\t\t\t\t\t3月4日\t\t\tスポーツ大会",
+      "coordinates": {
+        "lat": 43.193317,
+        "lng": 141.782043
+      },
+      "address": "〒068-0820 北海道岩見沢市東山2丁目1番2号電話：0126-22-2094ファックス：0126-24-1042このページに対するお問い合わせ",
+      "url": "https://www.city.iwamizawa.hokkaido.jp/soshiki/kodomoka/event/17027.html",
+      "municipality": "岩見沢市",
+      "municipality_code": "012106",
+      "prefecture": "北海道",
+      "language": 
+```
+
+
+=== Case L2-24 ===
+Topic / intent: 九州 古い町並み
+Query: Mga tradisyonal na bayan ng kape sa Kyushu.
+Tool: get_spots({"prefecture": "Oita", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "ab92407cd32753d4",
+      "name": "別府市無料公衆無線LAN（Wi-Fi）Beppu City Free Public Wireless LAN (Wi-Fi)",
+      "description": "別府市では以下のエリアで公衆無線LAN（Wi-Fi）が無料で利用できます。In Beppu City, public wireless LAN (Wi-Fi) is provided free of charge at the following areas.",
+      "coordinates": {
+        "lat": 33.284492,
+        "lng": 131.490921
+      },
+      "address": "〒874-8511 別府市上野口町1番15号",
+      "url": "https://www.city.beppu.oita.jp/sangyou/kankou/wifi.html",
+      "municipality": "別府市",
+      "municipality_code": "442020",
+      "prefecture": "大分県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f06415980418af2e",
+      "name": "RECAMP(リキャンプ)　別府志高湖(べっぷしだかこ)",
+      "description": "所在地：〒874-0805　別府市大字別府字志高4380番地（キャンプ場は4380-1）　電話：0977-25-3601（志高湖管理事務所）　FAX：0977-25-3602　施設概要：レストハウス、バーベキューコーナー、キャンプ場、ボート",
+      "coordinates": {
+        "lat": 33.285442,
+        "lng": 131.485748
+      },
+      "address": "〒874-0805 別府市大字別府字志高4380番地（キャンプ場は4380-1）",
+      "url": "https://www.city.beppu.oita.jp/sisetu/sangyou_kankou/11kankou_11-01sidakako.html",
+      "municipality": "別府市",
+      "municipality_code": "442020",
+      "prefecture": "大分県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ece9652ccfb5f755",
+      "name": "湯けむり展望台",
+      "description": "所在地：〒874-0042　別府市鉄輪東8組（ロイヤルタウン大観山）　電話：0977-21-1128（別府市観光課）、営業時間：4月～10月　8：00～22：00、11月～3月　8：00～21：00、湯けむりライトアップ：土・日・祝日（19時～21時）",
+      "coordinates": {
+        "lat": 33.284492,
+        "lng": 131.490921
+      },
+      "address": "〒874-8511 別府市上野口町1番15号",
+      "url": "https://www.city.beppu.oita.jp/sisetu/sangyou_kankou/yukemuri.html",
+      "municipality": "別府市",
+      "municipality_code": "442020",
+      "prefecture": "大分県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "a50f3f9f8ad6f145",
+      "name": "別府市公設地方卸売市場",
+      "description": "所在地：〒874-0013　別府市古市町881番地81　電話：0977-66-0034　FAX：0977-66-0087　施設概要：卸売場、買荷保管積込所、業者事務所、買受人組合事務所、倉庫、冷蔵庫、保冷庫、管理事務所、関連商品売場、守衛所、駐車場",
+      "coordinates": {
+        "lat": 33.338314,
+        "lng": 131.494293
+      },
+      "address": "〒874-0013 別府市古市町881番地81",
+      "url": "https://www.city.beppu.oita.jp/sisetu/sangyou_kankou/06syoukou_06-01itiba.html",
+      "municipality": "別府市",
+      "municipality_code": "442020",
+      "prefecture": "大分県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "b22f8018e9d35683",
+      "name": "目的別で探す",
+      "description": "開催詳細カラーポリ袋で着れるこいのぼりを作りましょう！ 日時2025年4月29日（水曜日・祝）                 13:00～14:30参加費：無料対象ハサミを使用できる子先着20名準備物・ハサミ・クレヨンやマジック・飾りに使用したいもの※マジックやクレヨンはこちらでもご準備していますが数に限りがござますので、御協力いただきながらの作業となります。ご了承ください。●汚れてもよい服装でお願いします。天気が良ければ屋外での作業となります。熱中症対策もお願いします。帽子・タオル・水分補給等の準備もお願いします。申込竹田市歴史文化館（0974-63-2200）",
+      "coordinates": {
+        "lat": 32.965721,
+        "lng": 131.393631
+      },
+      "address": "〒878-0013大分県竹田市竹田2083電話：0974-63-2200お問い合わせはこちら",
+      "url": "https://www.city.taketa.oita.jp/bunka_rekishi_kanko/yugakukan/waku/11474.html",
+      "municipality": "竹田市",
+      "municipality_code": "442089",
+      "prefecture": "大分県",
+      "language": "ja",
+      "quality_score": 0.62
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "eaa78890aae9eba2",
+      "name": "目的別で探す",
+      "description": "ルカスによる豊後でいち早く教会が建設された「朽網（くたみ）」、ドン・パウロ志賀親次（親善）の領地である「竹田・志賀」を中心に、竹田市にも多くのキリシタン・南蛮文化遺産が残り、それらにキリシタン信仰の証をみることができます。ここでは竹田市のキリシタン・南蛮文化遺産を紹介するとともに、県内6市で取り組んでいる「キリシタン・南蛮文化交流協定協議会」の活動についても紹介します。",
+      "coordinates": {
+        "lat": 32.975739,
+        "lng": 131.396973
+      },
+      "address": "〒878-8555 大分県竹田市大字会々1650番地",
+      "url": "https://www.city.taketa.oita.jp/bunka_rekishi_kanko/bunkazai/kirishitan_nanbanbunka",
+      "municipality": "竹田市",
+      "municipality_code": "442089",
+      "prefectu
+```
+
+
+=== Case L2-25 ===
+Topic / intent: 北陸 古民家
+Query: 北陸地方で泊まれる古民家を教えて
+Tool: get_hotels({"prefecture": "Ishikawa"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "3e5a7c89538c",
+      "confidence": "confirmed",
+      "name": null,
+      "name_en": "Student housing 1",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hostel",
+      "coordinates": {
+        "lat": 36.4429442,
+        "lng": 136.5934471
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5439110525",
+          "url": "https://www.openstreetmap.org/node/5439110525"
+        },
+        {
+          "source": "osm",
+          "id": "node/5439115621",
+          "url": "https://www.openstreetmap.org/node/5439115621"
+        },
+        {
+          "source": "osm",
+          "id": "node/5439115622",
+          "url": "https://www.openstreetmap.org/node/5439115622"
+        },
+        {
+          "source": "osm",
+          "id": "node/5439115721",
+          "url": "https://www.openstreetmap.org/node/5439115721"
+        },
+        {
+          "source": "osm",
+          "id": "node/5439115722",
+          "url": "https://www.openstreetmap.org/node/5439115722"
+        },
+        {
+          "source": "osm",
+          "id": "node/5439115723",
+          "url": "https://www.openstreetmap.org/node/5439115723"
+        },
+        {
+          "source": "osm",
+          "id": "node/5439115821",
+          "url": "https://www.openstreetmap.org/node/5439115821"
+        },
+        {
+          "source": "osm",
+          "id": "node/5439115822",
+          "url": "https://www.openstreetmap.org/node/5439115822"
+        }
+      ]
+    },
+    {
+      "id": "4c33c6a9df25",
+      "confidence": "confirmed",
+      "name": "AB HOTEL",
+      "name_en": "AB Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "coordinates": {
+        "lat": 36.5780571,
+        "lng": 136.6464396
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4251484889",
+          "url": "https://www.openstreetmap.org/node/4251484889"
+        },
+        {
+          "source": "osm",
+          "id": "node/12547475282",
+          "url": "https://www.openstreetmap.org/node/12547475282"
+        }
+      ]
+    },
+    {
+      "id": "36cebca42a9c",
+      "confidence": "confirmed",
+      "name": "ANAクラウンプラザホテル金沢",
+      "name_en": "ANA Crowne Plaza Kanazawa",
+      "name_zh": "ANA 皇冠假日酒店 金澤",
+      "name_ko": "ANA 크라운 플라자 호텔 가나자와",
+      "type": "hotel",
+      "coordinates": {
+        "lat": 36.576447,
+        "lng": 136.64838
+      },
+      "phone": null,
+      "website": "https://www.anacrowneplaza-kanazawa.jp/",
+      "postal_code": null,
+      "street": "920-8518 石川県金沢市昭和町16-3",
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q56348569",
+          "url": "https://www.wikidata.org/wiki/Q56348569"
+        },
+        {
+          "source": "osm",
+          "id": "way/104629021",
+          "url": "https://www.openstreetmap.org/way/104629021"
+        }
+      ]
+    },
+    {
+      "id": "b6d97e0c3583",
+      "confidence": "confirmed",
+      "name": "かなや",
+      "name_en": "Kanaya",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "coordinates": {
+        "lat": 36.4869039,
+        "lng": 136.7568331
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/280954719",
+          "url": "https://www.openstreetmap.org/way/280954719"
+        },
+        {
+          "source": "osm",
+          "id": "way/280954730",
+          "url": "https://www.openstreetmap.org/way/280954730"
+        },
+        {
+          "source": "osm",
+          "id": "way/280954745",
+          "url": "https://ww
+```
+
+
+=== Case L2-26 ===
+Topic / intent: 紀伊半島 山岳信仰
+Query: Mountain shrines in the Kii Peninsula.
+Tool: get_japan_heritage({"prefecture": "Wakayama", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "30",
+  "theme_filter": null,
+  "lang": "en",
+  "count": 7,
+  "items": [
+    {
+      "key": "japan_heritage:032",
+      "story_id": "032",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "鯨とともに生きる",
+      "subtitle_ja": null,
+      "title": "Living with Whales",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの鯨とともに生きるについて。鯨は、古来より、日本人にとって富をもたらす神&ldquo;えび",
+      "summary": "About 'Living with Whales' on the Japan Heritage portal site. Since ancient times, whales have been regarded by the Japanese as a god ('Ebisu') that brings wealth...",
+      "body_ja": "鯨は、日本人にとって信仰の対象となる特別な存在であった。人々は、大海原を悠然と泳ぐ巨体を畏れたものの、時折浜辺に打ち上げられた鯨を食料や道具の素材などに利用していたが、やがて生活を安定させるため、捕鯨に乗り出した。熊野灘沿岸地域では、江戸時代に入り、熊野水軍の流れを汲む人々が捕鯨の技術や流通方法を確立し、これ以降、この地域は鯨に感謝しつつ捕鯨とともに生きてきた。当時の捕鯨の面影を残す旧跡が町中や周辺に点在し、鯨にまつわる祭りや伝統芸能、食文化が今も受け継がれている。\n\n鯨は、古来より、日本人にとって富をもたらす神“えびす”であった。浜辺に打ち寄せられた鯨の肉を食し、皮や骨、ひげで生活用品を作るなど、全てを余すことなく利用してきた人々は、この“海からの贈り物”に感謝し崇めながらも、やがて自ら捕獲する道を歩み始める。熊野灘沿岸地域では、江戸時代初期に組織的な古式捕鯨（網で鯨の動きを止め、銛を打つ漁法）が始まり、地域を支える一大産業に発展した。現在も捕鯨は続けられ、食・祭り・伝統芸能などが伝承され「鯨とともに生きる」捕鯨文化が息づいている。\n\n熊野灘沿岸は、背後に急峻な熊野の山々を擁し、橋杭岩（はしくいいわ）などの岩礁が目立つリアス式海岸が続いている。その海岸近くを、黒潮が最大4ノットの速さで南方から北へ向けて流れ、多くの海の幸をもたらしている。この地域は、鯨が陸の近くを頻繁に回遊すること、またその鯨をいち早く発見することのできる高台、捕った鯨を引き揚げることのできる浜という、古式捕鯨にとって最も重要な地理的要件を備えていた。そして、人々は古くより生きる糧を海に求めたため、造船や操船に秀で、泳ぎに長けており、海に関する知識が豊富であった。これは、この地域の人々が、古くに熊野水軍として名を馳せ、源平の戦いでは海上戦の勝敗を左右する活躍をしたことなどからもわかる。江戸時代、この能力を活かし、新たな産業として着手したのが捕鯨である。最大の生物である鯨を捕獲するには、船団を組み、深さ約45ｍから60ｍにも及ぶ網で鯨を取り囲み、銛で仕留めるという、他に類を見ない大がかりな漁法が必要であった。命の危険を伴うこの漁は、勇敢さと統一ある行動が求められた。この意味で捕鯨は、水軍で培われた知識と技術が、そのまま有効に活用できる漁であり、その壮大さは「紀州熊野浦捕鯨図屏風」などに生き生きと描かれている。漁においては、500名を超える人々が役割を分担し、地域を挙げて捕鯨に従事していた。その役割は、鯨を見張り到来を知らせるほか不足資材や漁の状況等の情報の伝達をする者（山見（やまみ））、鯨に網を掛ける者（網舟（あみぶね））、銛を打つ者（羽差（はざし））、仕留めた鯨を運搬する者（持双舟（もっそうぶね））、操業中各舟で不足した資材・食料を運搬する者（納屋舟（なやぶね））、また資材の管理や修繕を行う者（大納屋（おおなや））など多岐に渡っていた。解体・加工は、「鯨始末（しまつ）係」が担った。鯨始末係は、鯨を引き揚げるために轆轤を回す“頭仲間（かばちなかま）”、解体をする“魚切（うおきり）”、骨や皮などを釜煎りし鯨油を採取する“採油係”などに細分化され、総勢80余名で構成された。彼らは、肉の大半を塩漬けにして樽詰で出荷し、ヒゲや筋は道具の素材とし、採油後の骨や血液の粉、胃の中の食物等は肥料とするなど、持てる知識と技術を発揮し、巨体の全てを活用した。鯨は、“一頭で七郷が潤う”と言われ、当時セミクジラ1頭で約120両にもなり、年間95頭捕れた天和元年（1681年）には、6,000両を超す莫大な利益をもたらした。このことは、遠く離れた大阪にも伝わり、井原西鶴の著書「日本永代蔵」には、鯨を取って得られる金銀が、使っても減らないほど蓄えられ、檜造りの長屋に200人を超す漁師が住み、船が80隻もあり、鯨の骨で造られた三丈ほどの「鯨鳥居」があるなど、この地域の繁栄ぶりが記述されている。捕鯨が発展を遂げた背景には、捕鯨という一次産業にとどまらず、解体や加工、鯨舟を造る船大工、銛や剣を作る鍛冶屋、浮き樽を作る桶屋、販売・経営を司る支配所など、二次・三次にも及ぶ広い業種が関わり、地域全体が利益を享受できるシステムを構築していたことが挙げられる。\n\nこの地域には、多くの鯨にまつわる祭りや伝統芸能が今も受け継がれている。飛鳥神社の「お弓祭り」や塩竈（しおがま）神社の「せみ祭り」では、的に取り付けられた「せみ」（セミクジラを模した木や藁で作られたもの）という縁起物を用い、豊漁や航海の安全を祈願している。「河内祭（こうちまつり）」のハイライトは、豪華に飾り立てた鯨舟の渡御であり、かつて捕鯨がこの地域の生活を担う誇るべき産業であったことを物語っている。また、鯨踊は、かつて大漁を祝う鯨唄の調べとともに、勢子舟（せこぶね）に渡した板の上に座したまま、あるいは浜で舞っていたものだが、この踊りにおける一糸乱れぬ動きは、鯨との死闘を見るようである。新宮市や太地町では、多くの小学生が、学習の一環としてこの踊りを習い、次の担い手となって継承しており、今では神事の際や祭りで披露し、郷土芸能として浸透している。平素の生活においても、今も続く捕鯨により得られた肉は、郷土の味として定着している。熊野灘沿岸の各地には、古式捕鯨時代の山見台跡や狼煙（のろし）跡、総指揮を行う支度部屋（したくべや）跡などが残り、当時の勇壮な漁の様子を想像できる。また、太地漁港周辺に残る集落全体を取り囲む石垣の一部や、集落の入り口にあたる場所にあった“和田の岩門（せきもん）”などは、かつて地域が一つの共同体として捕鯨に取り組んでいた面影を今に残しており、江戸時代以降、この地域の産業と文化の根幹であった古式捕鯨の名残を今も伝えている。",
+      "themes": [
+        "海・水辺",
+        "祭礼",
+        "食文化・酒"
+      ],
+      "periods": [
+        "室町",
+        "江戸"
+      ],
+      "related_areas_text": "和歌山県（新宮市，那智勝浦町，太地町，串本町）",
+      "prefecture_codes": [
+        "30"
+      ],
+      "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story032/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:26:55.437Z",
+        "confidence": "low"
+      }
+    },
+    {
+      "key": "japan_heritage:046",
+      "story_id": "046",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "絶景の宝庫 和歌の浦",
+      "subtitle_ja": null,
+      "title": "A Treasury of Scenic Beauty: Wakanoura",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの絶景の宝庫 和歌の浦について。和歌の浦は、和歌川の河口に広がる干潟を中心に、南は熊野古道の",
+      "summary": "About Wakanoura on the Japan Heritage portal site. Wakanoura is centered on the tidal flats spreading at the mouth of the Waka River, and extends sou
+```
+
+
+=== Case L2-27 ===
+Topic / intent: 日本海 花火
+Query: Summer fireworks festivals along the Sea of Japan coast.
+Tool: get_festivals({"prefecture": "Niigata", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "15",
+  "lang": "en",
+  "count": 36,
+  "items": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "Dainichido Bugaku",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "A folk performing art passed down at Dainichireiki Shrine in Kazuno City, Akita Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00275",
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11511418",
+      "name_ja": "早池峰神楽",
+      "name_en": "Hayachine Kagura",
+      "name": "Hayachine Kagura",
+      "description_ja": null,
+      "description_en": "type of dance",
+      "description": "A type of dance.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00272",
+      "source_url": "https://www.wikidata.org/wiki/Q11511418",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "low"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Kawagoe Hikawa Festival",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "Festival of Kawagoe Hikawa Shrine in Kawagoe City, Saitama Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11271139",
+      "name_ja": "たてもん祭り",
+      "name_en": "Uozu Tatemon Festival",
+      "name": "Tatemon Festival",
+      "description_ja": "富山県魚津市の諏訪神社の夏季祭礼",
+      "description_en": null,
+      "description": "A summer festival held at Suwa Shrine in Uozu City, Toyama Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11271139",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11360316",
+      "name_ja": "上野天神祭",
+      "name_en": "Ueno Tenjin Festival",
+      "name": "Ueno Tenjin Festival",
+      "description_ja": "三重県伊賀市の菅原神社で行なわれる秋祭り",
+      "description_en": null,
+      "description": "An autumn festival held at Sugawara Shrine in Iga City, Mie Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11360316",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11370941",
+      "name_ja": "亀崎潮干祭",
+      "name_en": "Kamezaki Shiohi Festival",
+      "name": "Kamezaki Shiohi Festival",
+      "description_ja": "愛知県半田市にある神前神社の祭礼",
+      "description_en": null,
+      "description": "A festival of Kamezaki Shrine located in Handa City, Aichi Prefecture.",
+      "designation": "UN
+```
+
+
+=== Case L2-28 ===
+Topic / intent: 大分 竹工芸
+Query: Traditional bamboo crafts in Oita prefecture.
+Tool: get_local_specialty({"prefecture": "Oita", "category": "craft", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "44",
+  "category_filter": "craft",
+  "lang": "en",
+  "count": 2,
+  "items": [
+    {
+      "key": "meti_densan:0123",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0123",
+      "name_ja": "博多織",
+      "name": "Hakata Ori (Hakata Weave)",
+      "description_ja": "「献上博多」に代表される平織（ひらおり）は優美華麗なあでやかさを、紋織（もんおり）は繊細緻密な織柄と見事な色合いを見せています。博多帯は締めやすく、締める時の「キュッキュッ」という絹鳴りは博多織ならではのものです。",
+      "description": "The plain weave (hiraori) typified by \"Kenjo Hakata\" displays elegant and brilliant beauty, while the figured weave (mon'ori) exhibits finely detailed woven patterns and splendid coloring. Hakata obi sashes are easy to tie, and the distinctive silken rustling sound—a crisp \"squeak\"—made when tying them is unique to Hakata Ori.",
+      "designation_date": "昭和51年6月14日",
+      "production_area_text": "福岡市、筑紫野市、大野城市他、佐賀県／唐津市他、大分県",
+      "prefecture_codes": [
+        "40",
+        "41",
+        "44"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0123/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.798Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0630",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "木工品・竹工品",
+      "craft_id": "0630",
+      "name_ja": "別府竹細工",
+      "name": "Beppu Bamboo Crafts",
+      "description_ja": "別府竹細工に使用される竹は編み組みに適した大分県産のマダケという竹が主な材料となっています。その他用途に応じてハチク、クロチク、ゴマダケ、メダケ等の竹が用いられ、8種類の基礎技法を基本にして、竹本来の美しさを生かした製品を作っています。",
+      "description": "The primary material used in Beppu Bamboo Crafts is Madake bamboo grown in Oita Prefecture, which is well suited for weaving and plaiting. Other types of bamboo, such as Hachiku, Kurochiku, Gomadake, and Medake, are also used depending on the intended application. Products are made using eight basic weaving techniques and showcase the natural beauty of bamboo.",
+      "designation_date": "昭和54年8月3日",
+      "production_area_text": "大分市、別府市、日田市、杵築市、由布市、速見郡日出町",
+      "prefecture_codes": [
+        "44"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0630/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "農林水産省 (MAFF) Geographical Indication",
+      "category": "food"
+    },
+    {
+      "name": "経済産業省 (METI) Traditional Crafts (伝統的工芸品)",
+      "category": "craft"
+    }
+  ],
+  "note": "Only items officially designated by MAFF or METI appear. Non-designated regional foods/crafts are intentionally excluded.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case L2-29 ===
+Topic / intent: 四国 サイクリング
+Query: Cycling routes through rural Shikoku.
+Tool: get_spots({"prefecture": "Ehime", "limit": 50})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q104150547",
+      "name": "朝日山古墳",
+      "name_en": "Asahiyama Kofun",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 33.978027777,
+        "lng": 133.586888888
+      },
+      "url": "https://www.wikidata.org/wiki/Q104150547",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q104660439",
+      "name": "東宮山古墳",
+      "name_en": "Togusan Kofun",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 33.981138888,
+        "lng": 133.578166666
+      },
+      "url": "https://www.wikidata.org/wiki/Q104660439",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q104766231",
+      "name": "久米官衙遺跡群",
+      "name_en": "Kume Kanga Sites",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "archaeological site in Japan",
+      "coordinates": {
+        "lat": 33.810277777,
+        "lng": 132.801388888
+      },
+      "url": "https://www.wikidata.org/wiki/Q104766231",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q104783925",
+      "name": "西条市立東予郷土館",
+      "name_en": "Toyo Local Museum",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "museum in Saijō, Ehime, Japan",
+      "coordinates": {
+        "lat": 33.927851,
+        "lng": 133.081406
+      },
+      "url": "https://www.wikidata.org/wiki/Q104783925",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q104783927",
+      "name": "湯築城資料館",
+      "name_en": "Yuzuki Castle Museum",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "museum in Matsuyama, Ehime, Japan",
+      "coordinates": {
+        "lat": 33.848117,
+        "lng": 132.785612
+      },
+      "url": "https://www.wikidata.org/wiki/Q104783927",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q104783929",
+      "name": "大洲市河辺歴史民俗資料館",
+      "name_en": "Ozushi Kawabe Museum of Folklore",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "museum in Ōzu, Ehime, Japan",
+      "coordinates": {
+        "lat": 33.510992,
+        "lng": 132.795262
+      },
+      "url": "https://www.wikidata.org/wiki/Q104783929",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q107020656",
+      "name": "石手寺二王門",
+      "name_en": "Niō Gate, Ishite-ji",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 33.84749,
+        "lng": 132.7965
+      },
+      "url": "https://www.wikidata.org/wiki/Q107020656",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q107046985",
+      "name": "禽獣葡萄鏡",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q107046985",
+      "municipality": "愛媛県",
+      "municipality_code": "380008",
+      "prefecture": "愛媛県",
+      "quality_score": 0.6
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1071856",
+      "name": "今治城",
+      "name_en": "Imabari Castle",
+      "name_zh": "今治城",
+      "name_ko": "이마바리성",
+      "description_en
+```
+
+
+=== Case L2-30 ===
+Topic / intent: 地方 歌舞伎
+Query: Where to see traditional kabuki outside of Tokyo and Kyoto.
+Tool: get_traditional_arts({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "category_filter": null,
+  "lang": "en",
+  "count": 183,
+  "items": [
+    {
+      "key": "bunka_intangible:Q1037119",
+      "category": "important",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形文化財 (Important Intangible Cultural Property)",
+      "qid": "Q1037119",
+      "name_ja": "能楽",
+      "name_en": "nōgaku",
+      "name": "Nogaku",
+      "description_ja": "日本の伝統芸能。 能や狂言などの総称",
+      "description_en": "classical Japanese musical drama. \"Nohgaku\" conclude Noh, Kyōgen and etc.",
+      "description": "A traditional performing art of Japan. A collective term for Noh, Kyogen, and related forms.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q1037119",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q105338690",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q105338690",
+      "name_ja": "貴船まつり",
+      "name_en": "Kibune Matsuri",
+      "name": "Kifune Festival",
+      "description_ja": "神奈川県真鶴町の貴船神社の例大祭",
+      "description_en": null,
+      "description": "The annual grand festival of Kifune Shrine in Manazuru Town, Kanagawa Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q105338690",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q109598617",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q109598617",
+      "name_ja": "お熊甲祭",
+      "name_en": "Okuma Kabuto Festival",
+      "name": "Okumakabuto Festival",
+      "description_ja": "石川県七尾市にある久麻加夫都阿良加志比古神社の例祭",
+      "description_en": null,
+      "description": "The annual festival of Kumakabuto Aragakashihiko Shrine, located in Nanao City, Ishikawa Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q109598617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q109598841",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q109598841",
+      "name_ja": "呼子大綱引き",
+      "name_en": null,
+      "name": "Yobuko Otsunahiki",
+      "description_ja": "佐賀県唐津市呼子町に伝わる伝統行事",
+      "description_en": null,
+      "description": "A traditional event passed down in Yobuko-machi, Karatsu City, Saga Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q109598841",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q11019445",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Kawagoe Hikawa Festival",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "The festival of Kawagoe Hikawa Shrine in Kawagoe City, Saitama Prefecture.",
+      "inception": "1648-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+      
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.

@@ -1,0 +1,109 @@
+{
+  "id": "94970723d67f",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 2m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q130212741",
+      "source_url": "https://www.wikidata.org/wiki/Q130212741",
+      "name": "ホテル オリエンタル エクスプレス 東京蒲田",
+      "name_en": "Hotel Oriental Express Tokyo Kamata",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.559707,
+        "lng": 139.724776
+      },
+      "phone": null,
+      "street": "東京都大田区南蒲田1-3-15",
+      "postal_code": "144-0035",
+      "website": "https://tokyokamata.hotelorientalexpress.com/",
+      "type": null,
+      "prefecture_code": "13",
+      "raw": {
+        "qid": "Q130212741",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q130212741",
+        "name_ja": "ホテル オリエンタル エクスプレス 東京蒲田",
+        "name_en": "Hotel Oriental Express Tokyo Kamata",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in MInami-Kamata, Ota-ku",
+        "coordinates": {
+          "lat": 35.559707,
+          "lng": 139.724776
+        },
+        "prefecture_code": "13",
+        "admin_code": "131113",
+        "admin_name": "大田区",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://tokyokamata.hotelorientalexpress.com/",
+        "phone": null,
+        "street_address": "東京都大田区南蒲田1-3-15",
+        "postal_code": "144-0035"
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/10963162435",
+      "source_url": "https://www.openstreetmap.org/node/10963162435",
+      "name": "オリエンタル エクスプレス",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.559691,
+        "lng": 139.7247723
+      },
+      "phone": "0570-051-153",
+      "street": null,
+      "postal_code": "144-0035",
+      "website": "https://tokyokamata.hotelorientalexpress.com/",
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/10963162435",
+        "osm_url": "https://www.openstreetmap.org/node/10963162435",
+        "type": "hotel",
+        "name": "オリエンタル エクスプレス",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.559691,
+          "lng": 139.7247723
+        },
+        "postal_code": "144-0035",
+        "full_address": null,
+        "city": "大田区",
+        "street": null,
+        "phone": "0570-051-153",
+        "website": "https://tokyokamata.hotelorientalexpress.com/",
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "3",
+          "addr:city": "大田区",
+          "addr:housenumber": "15",
+          "addr:neighbourhood": "1",
+          "addr:postcode": "144-0035",
+          "addr:province": "東京都",
+          "addr:quarter": "南蒲田",
+          "air_conditioning": "yes",
+          "branch": "東京蒲田",
+          "internet_access": "wlan",
+          "mapillary": "261503699866555",
+          "name": "オリエンタル エクスプレス",
+          "phone": "0570-051-153",
+          "tourism": "hotel",
+          "website": "https://tokyokamata.hotelorientalexpress.com/",
+          "wikidata": "Q130212741"
+        }
+      }
+    }
+  ]
+}

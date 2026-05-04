@@ -1,0 +1,100 @@
+{
+  "id": "a9a80d3b9975",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 1m",
+    "name similarity 0.67 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q130287669",
+      "source_url": "https://www.wikidata.org/wiki/Q130287669",
+      "name": "RAKUSAホテル 屋久島",
+      "name_en": "Rakusa Hotel Yakushima",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 30.381921,
+        "lng": 130.659679
+      },
+      "phone": null,
+      "street": "鹿児島県熊毛郡屋久島町小瀬田324-25",
+      "postal_code": "891-4207",
+      "website": "https://www.rakusa-hoteland.com/",
+      "type": null,
+      "prefecture_code": "46",
+      "raw": {
+        "qid": "Q130287669",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q130287669",
+        "name_ja": "RAKUSAホテル 屋久島",
+        "name_en": "Rakusa Hotel Yakushima",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Yakushima",
+        "coordinates": {
+          "lat": 30.381921,
+          "lng": 130.659679
+        },
+        "prefecture_code": "46",
+        "admin_code": "460001",
+        "admin_name": "鹿児島県",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.rakusa-hoteland.com/",
+        "phone": null,
+        "street_address": "鹿児島県熊毛郡屋久島町小瀬田324-25",
+        "postal_code": "891-4207"
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/432816977",
+      "source_url": "https://www.openstreetmap.org/way/432816977",
+      "name": "RAKUSA ホテル",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 30.3819159,
+        "lng": 130.6596832
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.rakusa-hoteland.com/",
+      "type": "hotel",
+      "prefecture_code": "46",
+      "raw": {
+        "osm_id": "way/432816977",
+        "osm_url": "https://www.openstreetmap.org/way/432816977",
+        "type": "hotel",
+        "name": "RAKUSA ホテル",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 30.3819159,
+          "lng": 130.6596832
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": "鹿児島県熊毛郡屋久島町小瀬田",
+        "street": null,
+        "phone": null,
+        "website": "https://www.rakusa-hoteland.com/",
+        "stars": null,
+        "raw_tags": {
+          "addr:city": "鹿児島県熊毛郡屋久島町小瀬田",
+          "addr:housenumber": "324-25",
+          "building": "yes",
+          "name": "RAKUSA ホテル",
+          "tourism": "hotel",
+          "website": "https://www.rakusa-hoteland.com/",
+          "wikidata": "Q130287669"
+        }
+      }
+    }
+  ]
+}

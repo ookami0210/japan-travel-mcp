@@ -1,0 +1,103 @@
+{
+  "id": "f943a5888230",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 52m",
+    "name similarity 0.78 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q11337885",
+      "source_url": "https://www.wikidata.org/wiki/Q11337885",
+      "name": "ホテルニューオータニ大阪",
+      "name_en": "Hotel New Otani Osaka",
+      "name_zh": "大阪新大谷飯店",
+      "name_ko": "호텔 뉴오타니 오사카",
+      "coordinates": {
+        "lat": 34.69043,
+        "lng": 135.533
+      },
+      "phone": null,
+      "street": "540-8578 大阪府大阪市中央区城見1丁目4-1",
+      "postal_code": null,
+      "website": "https://www.newotani.co.jp/osaka/",
+      "type": null,
+      "prefecture_code": "27",
+      "raw": {
+        "qid": "Q11337885",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q11337885",
+        "name_ja": "ホテルニューオータニ大阪",
+        "name_en": "Hotel New Otani Osaka",
+        "name_zh": "大阪新大谷飯店",
+        "name_ko": "호텔 뉴오타니 오사카",
+        "description_en": "building in Chuo-ku, Osaka Prefecture, Japan",
+        "coordinates": {
+          "lat": 34.69043,
+          "lng": 135.533
+        },
+        "prefecture_code": "27",
+        "admin_code": "270008",
+        "admin_name": "大阪府",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.newotani.co.jp/osaka/",
+        "phone": null,
+        "street_address": "540-8578 大阪府大阪市中央区城見1丁目4-1",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/176306968",
+      "source_url": "https://www.openstreetmap.org/way/176306968",
+      "name": "ホテルニューオータニ",
+      "name_en": "Hotel New Otani Osaka",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.6908821,
+        "lng": 135.5328699
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "27",
+      "raw": {
+        "osm_id": "way/176306968",
+        "osm_url": "https://www.openstreetmap.org/way/176306968",
+        "type": "hotel",
+        "name": "ホテルニューオータニ",
+        "name_en": "Hotel New Otani Osaka",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.6908821,
+          "lng": 135.5328699
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "branch": "大阪",
+          "brand": "ホテルニューオータニ",
+          "building": "yes",
+          "name": "ホテルニューオータニ",
+          "name:en": "Hotel New Otani Osaka",
+          "source": "http://www.hotelnewotaniosaka.jp/osaka-hotel-directions.php",
+          "tourism": "hotel",
+          "wikidata": "Q11337885",
+          "wikimedia_commons": "Category:Hotel New Otani Osaka",
+          "wikipedia": "ja:ホテルニューオータニ大阪"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+# Burst scrape — re-scrape every municipality after a feature/scope change.
+#
+# Triggers:
+#   1. workflow_dispatch (manual button)
+#   2. PR labeled with `burst-required` (a maintainer adds the label after
+#      review; merge to main fires the burst)
+#
+# Mode:
+#   - shallow: maxPages=30, maxBody=10, concurrency=16, retries=1 → ~4-6h
+#   - full:    maxPages=150, maxBody=30, concurrency=8, retries=2 → ~12h
+#
+# Design: docs/automation/AUTOMATION_DESIGN.md
+# Concurrency: shares group `scrape` with steady-scrape.yml — they cannot
+# overlap. The steady cron will be skipped while a burst is running.
+#
+# Splits the run into 6 batches matching the documented playbook
+# (docs/batches/README.md). Each batch fits comfortably under the GitHub
+# Actions 6h job limit.
+
+name: burst-scrape
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        description: "Scrape depth"
+        options: [shallow, full]
+        default: shallow
+      parallelism:
+        type: choice
+        description: "Batches in parallel (1=serial=safest; 6=fastest, ~6h wall on free tier)"
+        options: ["1", "2", "3", "6"]
+        default: "1"
+      resume_from_hf:
+        type: choice
+        description: "Pull existing prefecture files from HF + skip them (use only for crash-recovery, NOT for fresh burst)"
+        options: ["false", "true"]
+        default: "false"
+      prefs:
+        description: "Override JIS codes (e.g. 01,02). Empty = all 6 batches."
+        required: false
+        default: ""
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write   # for PR-comment progress updates
+
+jobs:
+  guard:
+    # Skip the entire workflow when the PR-label trigger fired but the
+    # label isn't `burst-required`. workflow_dispatch always proceeds.
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.gate.outputs.run }}
+    steps:
+      - id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.label.name }}" = "burst-required" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          else
+            echo "run=false" >> $GITHUB_OUTPUT
+          fi
+
+  burst:
+    needs: guard
+    if: needs.guard.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350    # ~5.8h, just under GH Actions 6h hard limit
+    strategy:
+      fail-fast: false
+      # parallelism is operator-controlled — different batches target
+      # different prefectures (different domains), so per-domain rate
+      # limits aren't shared across batches. Set parallelism=6 for the
+      # fastest finish (~6h wall) when the burst needs to land same-day.
+      max-parallel: ${{ fromJson(github.event.inputs.parallelism || '1') }}
+      matrix:
+        batch: ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prefetch state files from HF dataset
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+          RESUME_FROM_HF: ${{ github.event.inputs.resume_from_hf || 'false' }}
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          mkdir -p data/_state data/r3 data/prefectures
+          python3 - <<'PY'
+          import os, sys, shutil
+          from huggingface_hub import hf_hub_download
+          repo = os.environ.get("HF_DATASET_REPO", "open-travel/japan-travel-mcp-data")
+          token = os.environ.get("HF_TOKEN") or None
+          resume_from_hf = os.environ.get("RESUME_FROM_HF", "false").lower() == "true"
+
+          # State + r3 files the scrape MUST have at startup
+          essentials = [
+              "_state/municipalities.json",
+              "_state/official_urls.json",
+              "_state/municipality_centroids.json",
+              "_state/tourism_org_urls.json",
+              "_state/wikidata_attractions.json",
+              "_state/scrape_state.json",
+          ]
+          for path in essentials:
+              try:
+                  src = hf_hub_download(repo_id=repo, filename=path, repo_type="dataset", token=token)
+                  dst = f"data/{path}"
+                  os.makedirs(os.path.dirname(dst), exist_ok=True)
+                  shutil.copyfile(src, dst)
+                  print(f"[prefetch] OK  {path}")
+              except Exception as e:
+                  print(f"[prefetch] miss {path}: {e}", file=sys.stderr)
+
+          # Prefecture files are pulled ONLY when resume_from_hf=true
+          # (mid-burst crash recovery scenario). Default false = fresh burst,
+          # RESUME=1 in scrape works only against this-run flushes, not HF
+          # baseline — otherwise a re-run silently skips everything.
+          if resume_from_hf:
+              slugs = ["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima",
+                       "ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa",
+                       "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
+                       "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
+                       "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
+                       "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
+                       "kumamoto","oita","miyazaki","kagoshima","okinawa"]
+              got = 0
+              for slug in slugs:
+                  try:
+                      src = hf_hub_download(repo_id=repo, filename=f"prefectures/{slug}.json",
+                                           repo_type="dataset", token=token)
+                      shutil.copyfile(src, f"data/prefectures/{slug}.json")
+                      got += 1
+                  except Exception:
+                      pass
+              print(f"[prefetch] resume_from_hf=true → pulled {got}/47 prefecture files (RESUME will skip these)")
+          else:
+              print(f"[prefetch] resume_from_hf=false → fresh burst, no prefecture prefetch")
+          PY
+
+      - name: Run burst batch ${{ matrix.batch }} (mode=${{ github.event.inputs.mode }})
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          BATCH: ${{ matrix.batch }}
+          PREFS: ${{ github.event.inputs.prefs }}
+          RESUME: "1"
+          # Mode-driven knobs. shallow = fast 1st pass, full = deep refresh.
+          # approved 2026-05-01: rate 800ms (= 1.25 req/sec/domain) is
+          # well within Googlebot-class polite crawl norms for a one-off burst.
+          RATE_LIMIT_MS: ${{ github.event.inputs.mode == 'full' && '1200' || '800' }}
+          MAX_PAGES_PER_MUNICIPALITY: ${{ github.event.inputs.mode == 'full' && '150' || '100' }}
+          GLOBAL_CONCURRENCY: ${{ github.event.inputs.mode == 'full' && '8' || '12' }}
+          RETRIES: ${{ github.event.inputs.mode == 'full' && '2' || '1' }}
+        run: npx tsx scrapers/run_enriched_scrape.ts
+
+      - name: Sync to HF dataset (this batch's prefectures)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: open-travel/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        continue-on-error: true
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Burst ${{ matrix.batch }} ($(date -u +%Y-%m-%d))" \
+            --no-card
+
+      - name: Slack — batch summary
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          STATUS="${{ job.status }}"
+          ICON="✅"
+          [ "$STATUS" != "success" ] && ICON="🚨"
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$ICON burst-scrape batch=${{ matrix.batch }} mode=${{ github.event.inputs.mode }} → $STATUS\"}" \
+            "$SLACK_WEBHOOK_URL" || true
+
+  rebuild-embeddings:
+    needs: burst
+    if: needs.burst.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+
+      - name: Prefetch state + all prefecture files from HF (full corpus)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          mkdir -p data/_state data/r3 data/prefectures
+          python3 - <<'PY'
+          import os, sys, shutil
+          from huggingface_hub import hf_hub_download
+          repo = os.environ.get("HF_DATASET_REPO", "open-travel/japan-travel-mcp-data")
+          token = os.environ.get("HF_TOKEN") or None
+          essentials = [
+              "_state/municipalities.json",
+              "_state/wikidata_attractions.json",
+              "_state/scrape_state.json",
+              "r3/maff_gi.json",
+              "r3/meti_densan.json",
+              "r3/japan_heritage.json",
+              "r3/bunka_intangible.json",
+              "r3/unesco_japan.json",
+          ]
+          for path in essentials:
+              try:
+                  src = hf_hub_download(repo_id=repo, filename=path, repo_type="dataset", token=token)
+                  dst = f"data/{path}"
+                  os.makedirs(os.path.dirname(dst), exist_ok=True)
+                  shutil.copyfile(src, dst)
+                  print(f"[prefetch] OK  {path}")
+              except Exception as e:
+                  print(f"[prefetch] miss {path}: {e}", file=sys.stderr)
+          slugs = ["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima",
+                   "ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa",
+                   "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
+                   "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
+                   "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
+                   "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
+                   "kumamoto","oita","miyazaki","kagoshima","okinawa"]
+          got = 0
+          for slug in slugs:
+              try:
+                  src = hf_hub_download(repo_id=repo, filename=f"prefectures/{slug}.json",
+                                       repo_type="dataset", token=token)
+                  shutil.copyfile(src, f"data/prefectures/{slug}.json")
+                  got += 1
+              except Exception:
+                  pass
+          print(f"[prefetch] pulled {got}/47 prefecture files for embedding")
+          PY
+
+      - name: Rebuild embeddings (full corpus)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: npx tsx scrapers/embed/build_embeddings.ts
+
+      - name: Sync embeddings to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: open-travel/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Embeddings rebuild $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — final summary
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🎉 burst-scrape complete (mode=${{ github.event.inputs.mode }}) — embeddings rebuilt and pushed to HF\"}" \
+            "$SLACK_WEBHOOK_URL" || true

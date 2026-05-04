@@ -1,0 +1,97 @@
+{
+  "id": "72f2cb2b2407",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 18m",
+    "name similarity 0.82 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q11432607",
+      "source_url": "https://www.wikidata.org/wiki/Q11432607",
+      "name": "ホテル日航大分 オアシスタワー",
+      "name_en": "Hotel Nikko Oita Oasis Tower",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 33.23843,
+        "lng": 131.60246
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.nikko-oita.oasistower.co.jp/",
+      "type": null,
+      "prefecture_code": "44",
+      "raw": {
+        "qid": "Q11432607",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q11432607",
+        "name_ja": "ホテル日航大分 オアシスタワー",
+        "name_en": "Hotel Nikko Oita Oasis Tower",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "building in Oita Prefecture, Japan",
+        "coordinates": {
+          "lat": 33.23843,
+          "lng": 131.60246
+        },
+        "prefecture_code": "44",
+        "admin_code": "442011",
+        "admin_name": "大分市",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.nikko-oita.oasistower.co.jp/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/618524230",
+      "source_url": "https://www.openstreetmap.org/node/618524230",
+      "name": "大分オアシスタワーホテル",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 33.238401,
+        "lng": 131.602266
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "44",
+      "raw": {
+        "osm_id": "node/618524230",
+        "osm_url": "https://www.openstreetmap.org/node/618524230",
+        "type": "hotel",
+        "name": "大分オアシスタワーホテル",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 33.238401,
+          "lng": 131.602266
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "大分オアシスタワーホテル",
+          "tourism": "hotel",
+          "wheelchair": "yes",
+          "wheelchair:description": "周辺歩道は傾斜がきついところがあるので通行注意。"
+        }
+      }
+    }
+  ]
+}

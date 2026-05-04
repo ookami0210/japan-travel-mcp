@@ -1,0 +1,3229 @@
+You are scoring tool responses from japan-travel-mcp's **Product 1 — the MCP data server**. The direct consumer is an AI agent (Claude / GPT / Gemini), NOT a human end-user. The server's job is to return faithful, complete, well-structured travel data; composing user-friendly prose is the agent's responsibility (or a separate Product 2 composition layer).
+
+Score the response on the **Data Layer Scorecard (v4-data, 7 dimensions)**.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent has everything needed and more
+  4 = good — minor gap that doesn't block the agent
+  3 = acceptable — works but missing a relevant subset
+  2 = problematic — major asset(s) missing or wrong
+  1 = bad — wrong domain / wrong jurisdiction / fabricated
+  0 = empty or hostile (errors, unrelated payload)
+
+DIMENSIONS:
+
+1. **data_completeness (0-5)** — Does the response include the primary entities the query implies? Use the `expected_entities` list (when given) as ground truth, but reward over-coverage of clearly-related entities too.
+
+2. **data_accuracy (0-5)** — Are facts correct (names, prefectures, types, coordinates near-correct, source URLs)? An entity in the wrong prefecture is -2; a wrong romanisation is -1; a fabricated entity is 0 and forces hallucination_pass=false.
+
+3. **schema_conformance (0-5)** — Are records well-structured? Look for: stable IDs (qid / spot_id), `source` and `source_url`/`url` for traceability, `prefecture`, `coordinates` where applicable, `kinds`/`types`, multilingual labels when available. Penalise broken nesting, dangling cross-refs, mixed language fields, missing source attribution.
+
+4. **recall_of_known (0-5)** — When the query mentions a famous landmark (e.g. 富士山, 姫路城, 出雲大社, 厳島神社, 那智の滝, 鎌倉大仏, 京都御所, 屋久島), does that entity appear AT ALL in the response (not necessarily ranked first)? 5 = present and findable. 3 = a closely-related entity present but not the canonical one. 0 = entirely missing.
+
+5. **prominence_ranking (0-5)** — Is the most-famous matching entity ranked near the top? A 4-language Wikipedia entity with heritage_designations should outrank a single-language local kofun in a same-name match.
+
+6. **traceability (0-5)** — Can a downstream agent trust and cite the data? Look for: source_anchor/types, qid, source URL, dataset attribution. Heritage designations (UNESCO WHS, 国宝, 重要文化財, etc.) when relevant should be in the response.
+
+7. **structured_metadata (0-5)** — Does the response carry agent-useful metadata fields beyond names? E.g. heritage_designations, kinds (waterfall/temple/castle), prominence_score, safety_keywords_detected when query implies risk, truncation_note when results capped. Reward when present and informative.
+
+PASS/FAIL CHECKS:
+
+- **safety_pass (true|false)** — TRUE iff the response avoids fabricating dangerous, infeasible, or impossible facts. Note: the server does NOT need to compose a safety warning to pass — emitting `safety_keywords_detected` metadata is enough. Composition is the agent's job.
+
+- **hallucination_pass (true|false)** — TRUE iff every named entity in the response actually exists in real Japan. Made-up shrines, fictional ryokan, made-up festival dates → false.
+
+KPI CALCULATION (used downstream):
+  satisfaction_data = weighted average ≥ 4.0 across the 7 dimensions, with
+    weights {data_completeness:0.25, data_accuracy:0.25, recall_of_known:0.20,
+             prominence_ranking:0.10, schema_conformance:0.10, traceability:0.05,
+             structured_metadata:0.05}
+  minimum_data = safety_pass AND hallucination_pass AND avg(7 dims) ≥ 3.0
+  catastrophic = NOT(safety_pass) OR NOT(hallucination_pass)
+
+FREE-FORM FIELDS (≤80 words each):
+- **reasoning** — short justification of scoring
+- **missing_entities** — comma list of clearly-expected entities not present (or '')
+- **wrong_facts** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step for the server (e.g. "fetch P31=Q92026 castles", "add heritage_designations to get_local_food", "expose source_anchor on get_dmo")
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line. Each object MUST contain: id, data_completeness, data_accuracy, schema_conformance, recall_of_known, prominence_ranking, traceability, structured_metadata, safety_pass, hallucination_pass, reasoning, missing_entities, wrong_facts, improvement_hint.
+
+
+=== Case L1-01 ===
+Topic / intent: 但馬牛
+Query: Tell me about Tajima beef from Hyogo, the origin of Kobe beef.
+Tool: get_local_food({"prefecture": "Hyogo", "lang": "en"})
+Expected entities (ground truth, may be empty): 但馬牛, Tajima beef, Tajima-gyu, 但馬ビーフ
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "28",
+  "lang": "en",
+  "count": 196,
+  "total_matching": 196,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:2",
+      "registration_number": 2,
+      "name_ja": "但馬牛",
+      "name": "Tajima Beef",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B2等級以上に格付けされた枝肉であり、肉そのものが柔らかい。",
+      "description": "Carcass meat graded A or B, grade 2 or higher, produced by fattening Tajima cattle—a breed refined over many years in the mountain valleys of the Tajima region in northern Hyogo Prefecture—as feeder cattle. The meat itself is tender.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0002/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:3",
+      "registration_number": 3,
+      "name_ja": "神戸ビーフ",
+      "name": "Kobe Beef",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B4等級以上でBMSNo6以上に格付けされた枝肉であり、最高級の霜ふり肉。",
+      "description": "Carcass meat graded A or B grade 4 or higher and BMS No. 6 or higher, produced by fattening Tajima cattle—a breed refined over many years in the mountain villages of the Tajima region in northern Hyogo Prefecture—as the base stock; it is the highest-grade marbled beef.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0003/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:78",
+      "registration_number": 78,
+      "name_ja": "佐用もち大豆",
+      "name": "Sayo Mochi Daizu",
+      "description_ja": "グリシニン（タンパク質）含有量が多く、加熱するともちもちした食感を有する在来種の大豆。一般的な品種と比較すると大粒で約3割重く、ショ糖をはじめとした糖質含量が高く甘味が強い。大豆を専門に取り扱う流通業者からこれらの品質が高く評価されている。",
+      "description": "A traditional variety of soybean with high glycinin (protein) content that develops a sticky, mochi-like texture when heated. Compared to common varieties, the beans are large-grained and approximately 30% heavier, with a high sugar content including sucrose, giving them a strong sweetness. These qualities are highly valued by distributors specializing in soybeans.",
+      "registration_date": "令和元年5月8日",
+      "production_area_text": "兵庫県佐用郡佐用町",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県佐用郡佐用町佐用2611番地1佐用もち大豆振興部会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0078/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:144",
+      "registration_number": 144,
+      "name_ja": "淡路島3年とらふぐ",
+      "name": "Awajishima 3-nen Torafugu",
+      "description_ja": "一般的な養殖とらふぐの1.5～2倍と大きく、引き締まった身質と歯ごたえ、濃厚な味などが需要者から評価され高値で取引。「とらふぐ」目当ての観光客が増えるなど、冬の淡路島を代表するブランドとして定着",
+      "description": "This tiger puffer fish (torafugu) is 1.5 to 2 times larger than typical farmed torafugu. Its firm texture, firm bite, and rich flavor are highly regarded by buyers, commanding a high market price. It has become established as a representative brand of Awajishima in winter, with an increasing number of tourists vi
+```
+
+=== Case L1-02 ===
+Topic / intent: 但馬牛
+Query: أخبرني عن لحم تاجيما في محافظة هيوغو، أصل لحم كوبي.
+Tool: get_local_food({"prefecture": "Hyogo", "lang": "ar"})
+Expected entities (ground truth, may be empty): 但馬牛, Tajima beef, Tajima-gyu, 但馬ビーフ
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "28",
+  "lang": "ar",
+  "count": 196,
+  "total_matching": 196,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:2",
+      "registration_number": 2,
+      "name_ja": "但馬牛",
+      "name": "لحم بقر تاجيما",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B2等級以上に格付けされた枝肉であり、肉そのものが柔らかい。",
+      "description": "لحم ذبيحة مصنَّف ضمن الفئة A أو B بدرجة 2 أو أعلى، يُنتج عن طريق تسمين أبقار تاجيما — سلالة جرى تحسينها على مدى سنوات طويلة في وديان منطقة تاجيما الجبلية شمال محافظة هيوغو — كأبقار تربية. واللحم نفسه طري القوام.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0002/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:3",
+      "registration_number": 3,
+      "name_ja": "神戸ビーフ",
+      "name": "لحم بقر كوبي",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B4等級以上でBMSNo6以上に格付けされた枝肉であり、最高級の霜ふり肉。",
+      "description": "لحم الذبيحة المصنّف ضمن الدرجة A أو B 4 أو أعلى ومؤشر BMS رقم 6 أو أعلى، ويُنتج عن طريق تسمين أبقار تاجيما — وهي سلالة طُوِّرت على مدى سنوات طويلة في قرى الجبال بمنطقة تاجيما شمال محافظة هيوغو — بوصفها الماشية الأصلية؛ وهو لحم البقر الرخامي من أعلى الدرجات.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0003/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:78",
+      "registration_number": 78,
+      "name_ja": "佐用もち大豆",
+      "name": "ساو موتشي دايزو",
+      "description_ja": "グリシニン（タンパク質）含有量が多く、加熱するともちもちした食感を有する在来種の大豆。一般的な品種と比較すると大粒で約3割重く、ショ糖をはじめとした糖質含量が高く甘味が強い。大豆を専門に取り扱う流通業者からこれらの品質が高く評価されている。",
+      "description": "صنف تقليدي من فول الصويا يتميز بمحتوى عالٍ من الغليسينين (البروتين)، وعند تسخينه يكتسب قواماً لزجاً ومطاطاً يشبه الموتشي. مقارنةً بالأصناف الشائعة، تكون الحبوب أكبر حجماً وأثقل بنحو 30%، كما تتميز بمحتوى سكري مرتفع يشمل السكروز، مما يمنحها حلاوة قوية. وتحظى هذه الجودة بتقدير عالٍ من الموزعين المتخصصين في فول الصويا.",
+      "registration_date": "令和元年5月8日",
+      "production_area_text": "兵庫県佐用郡佐用町",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県佐用郡佐用町佐用2611番地1佐用もち大豆振興部会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0078/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:144",
+      "registration_number": 144,
+      "name_ja": "淡路島3年とらふぐ",
+      "name": "أواجيشيما 3-نين توراফوغو",
+      "description_ja": "一般的な養殖とらふぐの1.5～2倍と大きく、引き締まった身質と歯ごたえ、濃厚な味などが需要者から評価され高値で取引。「とらふぐ」目当ての観光客が増えるなど、冬の淡路島を代表するブランドとして定着",
+      "description": "يُعدّ هذا السمكة من نوع توراफوغو (سمكة النفخ النمرية) أكبر بمقدار 1.5 إلى 2 ضعف من سمكة التورافوغو المستزرعة العادية. يحظى بتقدير عالٍ من المشترين بسبب قوام لحمه المتماسك وملمسه المقرمش وطعمه الغني، مما يجعله يُتداول بأسعار مرتفعة. وقد رسّخ نفسه علامةً تجارية بارزة تمثّل جزيرة أواجيشيما في الشتاء، إذ يتزايد عدد السياح القادمين خصيصاً لتناول التورافوغو.",
+      "registration_date": "令和6年1月29日
+```
+
+=== Case L1-03 ===
+Topic / intent: 南山城村 茶畑
+Query: Describe the tea fields of Minami-Yamashiro village in Kyoto. Just the village, not Uji.
+Tool: get_japan_heritage({"prefecture": "Kyoto", "lang": "en"})
+Expected entities (ground truth, may be empty): 南山城村, 南山城茶, Minami-Yamashiro, 宇治茶 南山城
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "26",
+  "region": null,
+  "region_prefecture_codes": null,
+  "theme_filter": null,
+  "q": null,
+  "lang": "en",
+  "count": 6,
+  "items": [
+    {
+      "key": "japan_heritage:095",
+      "story_id": "095",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "京都と大津を繋ぐ希望の水路　琵琶湖疏水",
+      "subtitle_ja": "～舟に乗り、歩いて触れる明治のひととき～",
+      "title": "The Canal of Hope Connecting Kyoto and Otsu: The Lake Biwa Canal — A Moment of the Meiji Era Experienced by Boat and on Foot",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの京都と大津を繋ぐ希望の水路 琵琶湖疏水について。 千年以上にわたって日本の首都であった京都は，明治維新の東京",
+      "summary": "Information on the Lake Biwa Canal, the canal of hope connecting Kyoto and Otsu, from the Japan Heritage portal site. Kyoto, which had been Japan's capital for more than a thousand years, faced the relocation of the capital to Tokyo following the Meiji Restoration.",
+      "body_ja": "平安京の誕生以来，約千年間にわたり日本の都として栄えた京都は，明治2年の事実上の東京遷都により，人口が減少し，産業も衰退していった。この危機に対して復興策として計画されたのが，琵琶湖疏水である。琵琶湖から京都に水を引くという一大プロジェクトは，日本最初の事業用水力発電や路面電車の開業のほか，舟運，防火，庭園への活用など，経済や産業，文化を大きく発展させることとなった。また，外国人技師に設計監督を委ねていた時代，すべてを日本人の手で行った我が国最初の大土木工事でもあった。そして，時が過ぎた平成30年，一度は途絶えた舟運が，観光船「びわ湖疏水船」として，67年ぶりに復活し，現在，多くの方の好評を得ている。京都に「命の水」を運び続ける琵琶湖疏水。明治期の壮大な志は，時を超え，今に脈々と息づいている。\n\n千年以上にわたって日本の首都であった京都は，明治維新の東京奠都によって，人口が約3分の1も減少し，「いずれ狐や狸の棲家になる」といわれました。しかし，人々はただ嘆いたのではなく，京都と大津を結ぶ「希望の水路」琵琶湖疏水の建設に，まちの再生の望みを託したのです。\n\n第3代京都府知事の北垣国道の下，当時の京都府の予算の2年分もの莫大な工事費を要する前代未聞の大事業が始められました。 工事は，工部大学校（現在の東京大学工学部）を卒業して間もない田邉朔郎（当時21歳）を工事の主任技師に，欧米の先進の測量術で実績を積んでいた島田道生（当時36歳）を測量主任とする青年コンビによる布陣で，明治18（1885）年に着工しました。\n\n当時の土木技術は現在と比べると未発達であり，機械や材料も貧弱でした。大半の資材を自給自足で賄い，夜には技術者を養成し，昼にはそれを実践するという，現在ではおよそ想像もつかない努力の積み重ねとなりました。また，トンネルを掘り進む中で湧き出る大量の地下水にも悩まされました。 延べ400万人の作業員を動員し，約5年に及ぶ難工事の末，明治23（1890）年に，第1疏水が完成しました。日本で初めて，日本人のみの手によって成し遂げた大土木事業でした。 第1疏水によって，京都のまちは，復興の道を力強く歩み始めました。今でも，疏水沿いを歩くと，各所のトンネルに，当時の有力政治家たちの揮ごうによる扁額を目にします。扁額の石に彫り込まれた文字は，琵琶湖疏水が日本における一大プロジェクトであったことを私たちに語りかけています。\n\n第1疏水から送られる水は，水車動力や舟運，かんがい，防火，庭園用水など，多くの目的に利用されましたが，最も人々のくらしを変えたのは，当時の最先端技術であった水力発電でした。 当初，琵琶湖疏水は水車の動力に用いる計画でしたが，工事の途中，田邉朔郎は，実業家の高木文平とともにアメリカへ水力利用の視察に赴きました。二人は，コロラド州アスペンの水力発電を視察する中で，大きなひらめきを得ました。帰国後，田邉朔郎は北垣知事を懸命に説得し，工事の途中で，水力発電の実用化に踏み切ったのです。明治24（1891）年に蹴上で日本最初の一般供給用水力発電所が稼働すると，まちに電気が送られ，電灯を灯し，機械を動かす動力に利用されました。 水力を利用した低廉豊富な電力によって，京都の中小工場の機械化が大いに進んだほか，日本初となる電気鉄道の営業がスタートしました。\n\n電力の需要は増大の一途をたどり，京都の経済や産業を発展させ，産業の振興は，その後の工学，科学発展の礎となりました。また，医療や娯楽にも電気が活用され，人々の生活文化の向上に大きく貢献しました。 電力出力の増強のために建設された第2期蹴上発電所は，現在も蹴上に残っており，京都のくらしとまちを大きく発展させた多大な功績を今に伝えています。",
+      "themes": [
+        "海・水辺"
+      ],
+      "periods": [
+        "平安",
+        "明治"
+      ],
+      "related_areas_text": "京都府（京都市）・滋賀県（大津市）",
+      "prefecture_codes": [
+        "26",
+        "25"
+      ],
+      "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story095/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:26:55.437Z",
+        "confidence": "medium"
+      },
+      "relevance_score": null
+    },
+    {
+      "key": "japan_heritage:043",
+      "story_id": "043",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "300年を紡ぐ絹が織り成す丹後ちりめん回廊",
+      "subtitle_ja": null,
+      "title": "Tango Chirimen Corridor: 300 Years of Woven Silk",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの300年を紡ぐ絹が織り成す丹後ちりめん回廊について。丹後の内陸部では、農業と織物が人々の生活を支えたが、江戸時代",
+      "summary": "This entry on the Japan Heritage portal concerns the Tango Chirimen Corridor: 300 Years of Woven Silk. In the inland areas of Tango, agriculture and weaving sustained people's livelihoods; during the Edo period...",
+      "body_ja": "京都府北部の丹後を訪れると、どこからか聞こえてくるガチャガチャという機織りの音。丹後は古くから織物の里であり、江戸時代に発祥した絹織物「丹後ちりめん」は、しなやかで染色性に優れ、友禅染などの着物の代表的な生地として、我が国の和装文化を支えてきた。この地は今も着物の生地の約６割を生産する国内最大の絹織物産地であり、織物の営みが育んだ、住居と機場が一体となった機屋や商家、三角屋根の織物工場の町並みと、民謡宮津節で歌い継がれた天橋立などの象徴的な風景を巡れば、約300年に渡る織物の歴史と文化を体感できる。\n\n京都府北部の丹後の地を訪れると、どこからともなくガチャガチャという機織りの音が聞こえてくる。丹後は、特に秋から冬は「弁当忘れても傘忘れるな」と言われるほど、雨や雪の日が多い湿潤な気候で、糸が切れるため乾燥を嫌う絹織物の生産に適していた。そのため、奈良時代には聖武天皇に
+```
+
+=== Case L1-04 ===
+Topic / intent: 吉田の火祭り
+Query: Háblame del Yoshida no Hi-Matsuri al pie del Monte Fuji.
+Tool: get_festivals({"prefecture": "Yamanashi", "lang": "es"})
+Expected entities (ground truth, may be empty): 吉田の火祭り, 吉田火祭り, Yoshida Fire Festival, Yoshida no Hi-Matsuri, 北口本宮冨士浅間神社
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "19",
+  "lang": "es",
+  "count": 1,
+  "total_matching": 1,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q11413521",
+      "name_ja": "吉田の火祭",
+      "name_en": "Yoshida Fire Festival",
+      "name": "Festival del fuego de Yoshida",
+      "description_ja": "山梨県富士吉田市で行われる祭り",
+      "description_en": null,
+      "description": "Festival celebrado en la ciudad de Fujiyoshida, prefectura de Yamanashi.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11413521",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "national_heritage": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "Dainichido Bugaku",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "Arte escénico folclórico transmitido en el santuario Dainichireiki de la ciudad de Kazuno, prefectura de Akita.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00275",
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11511418",
+      "name_ja": "早池峰神楽",
+      "name_en": "Hayachine Kagura",
+      "name": "Hayachine Kagura",
+      "description_ja": null,
+      "description_en": "type of dance",
+      "description": "Un tipo de danza.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00272",
+      "source_url": "https://www.wikidata.org/wiki/Q11511418",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "low"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Festival Hikawa de Kawagoe",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "Festival del santuario Hikawa de Kawagoe, en la ciudad de Kawagoe, prefectura de Saitama.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11271139",
+      "name_ja": "たてもん祭り",
+      "name_en": "Uozu Tatemon Festival",
+      "name": "Festival Tatemon",
+      "description_ja": "富山県魚津市の諏訪神社の夏季祭礼",
+      "description_en": null,
+      "description": "Festival de verano celebrado en el santuario Suwa en la ciudad de Uozu, prefectura de Toyama.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11271139",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q1136
+```
+
+=== Case L1-05 ===
+Topic / intent: 中芸ゆず
+Query: 中芸地域の柚子について教えて
+Tool: get_local_food({"prefecture": "Kochi", "lang": "ja"})
+Expected entities (ground truth, may be empty): 中芸ゆず, 馬路村ゆず, 中芸地区, 中芸 柚子, Nakagei yuzu
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "39",
+  "lang": "ja",
+  "count": 500,
+  "total_matching": 688,
+  "truncated": true,
+  "truncation_note": "Response capped at 500 of 688 matches. Pass a prefecture or keyword to narrow.",
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:96",
+      "registration_number": 96,
+      "name_ja": "物部ゆず",
+      "name": "物部ゆず",
+      "description_ja": "キズが少なく外観が美しい、棚持ちの良い青果用に特化したゆず。青果用ゆずは栽培管理に手間がかかるため、全国平均の青果率は18%であるが、「物部ゆず」は69%（平成29年）と青果率の高さが際立っている。取引市場から、長期間安定供給、選果選別の徹底、棚持の良さなどが高く評価され、「物部ゆず」指定での注文も多い。",
+      "description": "キズが少なく外観が美しい、棚持ちの良い青果用に特化したゆず。青果用ゆずは栽培管理に手間がかかるため、全国平均の青果率は18%であるが、「物部ゆず」は69%（平成29年）と青果率の高さが際立っている。取引市場から、長期間安定供給、選果選別の徹底、棚持の良さなどが高く評価され、「物部ゆず」指定での注文も多い。",
+      "registration_date": "令和2年6月29日",
+      "production_area_text": "高知県香美市（注）香美市は、平成18年3月1日に物部村、香北町及び土佐山田町が合併してできた行政区画である。",
+      "prefecture_codes": [
+        "39"
+      ],
+      "producer_group": "高知県高知市五台山5015番地1高知県農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0096/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:45.824Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "観光スポット検索",
+      "name": "観光スポット検索",
+      "description_ja": null,
+      "description": null,
+      "body_paragraphs": [
+        "雄大な太平洋を望む桂浜、城下町の風情が残る高知城、四万十川の清流",
+        "──高知には、心を動かす風景があります。感性に響く観光地を厳選して紹介。あなただけの旅の舞台が、ここから始まります。",
+        "高知市中心部に位置する「ひろめ市場」は、約60店舗が軒を連ねる屋台村スタイルの観光名所。カツオのたたきをはじめとする高知グルメを、地元の人々と肩を並べて楽しめる独特の空間です。観光客も地元客も分け隔て ...",
+        "須崎市浦ノ内湾の美しい海を背にそびえる「鳴無（おとなし）神社」は、鎌倉時代の創建と伝わる歴史を秘めた縁結びの名所。 赤い鳥居が青い海と空を鮮やかに彩り、かつては船でしか参拝できなかった“土佐の宮島” ...",
+        "高知市にある太平洋に面した美しい海岸で、古くから「月の名所」として知られる高知県を代表する景勝地です。弓状に広がる砂浜、青い海、背後の松林が織りなす風景は日本の渚百選にも選ばれています。幕末の英雄・...",
+        "印象派の巨匠クロード・モネが自ら絵を描くために作り上げ、こよなく愛したフランスのジヴェルニーの庭を高知の自然の中に再現。 睡蓮の咲く池と緑の太鼓橋が印象的な「水の庭」など、約３万平方メートルの敷地に ...",
+        "高知県大月町の先端に浮かぶ柏島は、エメラルドグリーンの海と驚異の透明度で「船が宙に浮かんで見える島」として話題の絶景スポットです。黒潮と豊後水道が交わる特別な海域に位置し、日本国内の魚種の3分の1が生 ...",
+        "愛媛・高知県境にまたがる「四国カルスト」は、東西約25kmにわたる標高1,000〜1,500mの高原地帯。このエリアは、白い石灰岩が点在する草原風景と放牧された牛たちが織りなす、牧歌的で雄大な絶景が魅力です。 特に「 ...",
+        "高知での旅をサポートしてくれる高知観光情報発信館「とさてらす」、人気のフォトスポット「三志士像」など、高知に着いたらまず立ち寄りたい旅の拠点です。",
+        "高知県出身の植物学者・牧野富太郎博士の業績を顕彰するため、1958年に高知市五台山に開園しました。約8haの園内では、西南日本の植物や博士ゆかりの植物など、四季折々3000種類以上が楽しめます。珍しい熱帯植物があ ...",
+        "江戸時代から300年続く、毎週日曜日に開かれる街路市。 高知城へと続く追手筋で、約１kmにわたり300ものお店が並びます。 地元の新鮮な野菜・果物や、手作りの田舎寿司に芋天など、高知の特産品が盛りだくさん。 高知 ...",
+        "マグロ・カツオをはじめとする鮮魚部、干物・ちりめんじゃこなどの塩干魚部、野菜・果物を扱う青果部があり、地元でとれた四季折々の選りすぐりの新鮮な食材を買い求めることができます。 また、場内で市場業者向 ...",
+        "高知城は、天守、本丸御殿（「懐徳館」）、追手門といった15棟の建造物が国の重要文化財に指定されています。 天守は、高さ18.5mの３層６階、屋根入母屋造り本瓦葺きの望楼型です。 現存12天守の１つであり、その中 ...",
+        "海洋深層水100パーセントの温かいプールで、室戸の美しい海を眺めながら様々なアクアエクササイズが楽しめるタラソテラピー施設です。他に露天風呂、フィンランドサウナ、外気浴ホットタブ、足湯など本格的な施設を...",
+        "四国山地の雄大な峰々をつなぐ約27kmの山岳ドライブコースは、もともと「雄峰ライン」と呼ばれていました。 登山者がこの道で撮影した写真にUFOが映り込み、地元新聞で大きく報じられたことで話題に。以来、「UFOラ ...",
+        "高知県円行寺の山あいで、ディアランドファーム・岡﨑牧場が山地酪農にこだわり、雨と高温で育つ野芝を食む元気な乳牛を放牧しています。運動量豊富でストレスフリーな牛たちの新鮮なミルクを、朝イチにしぼって使...",
+        "ものづくりの人材育成や観光を目的に2021年にオープンした施設。 １階の工場では、ここでしか見られない海洋堂のソフビフィギュアが生まれる瞬間が見学できます。 生命をテーマにした4mを超える大きなモニュメント ...",
+        "「仁淀ブルー」という言葉を全国に広めた、仁淀川支流にある神秘的な青い滝壺です。太陽の光や季節により刻々と変化する幻想的なブルーが、訪れる人々を魅了し続けています。水神の化身とされる大蛇伝説が残る地元...",
+        "佐田沈下橋は、四万十川に架かる数ある沈下橋の中でも最下流・最長を誇る橋で、雄大な自然と川の流れに溶け込む風景が魅力です。 増水時に橋が沈むことで流失を防ぐ構造のため、欄干がなく、水面との一体感が独 ...",
+        "津野町不入山に端を発し、中土佐町、四万十町、四万十市を流れる四国最長の大河（全長196km）。 『最後の清流』として知られ、火振り漁や柴づけ漁など現在でも伝統的な漁が行われています。 上流から下流に数多く残...",
+        "世界でも珍しい、水の重みで動くケーブルカー。 昔はこれで木材を運びました。 かなりの急傾斜をゆっくり登り降りします。 登っている途中や、登った先では、馬路村ののどかな風景を楽しめます。",
+        "100年以上の歴史を持つ、漁師町の市場。 起源は明治の中頃。大正時代の大火で焼失後、大正天皇から復興費が届けられたのを機に、通りを大正町と改名、以来大正町市場と呼ばれています。 地元でとれた新鮮な魚をは...",
+        "大きな石なのに押せば簡単にゴトゴトと揺れる。けれどどんなに押しても決して落ちない不思議な石です。いつの頃からか「落ちない祈願」をするために、願掛けに受験生などが訪れるようになりました。近くには山姥の...",
+    
+```
+
+=== Case L1-06 ===
+Topic / intent: 弘前公園桜
+Query: 介绍一下青森县的弘前公园樱花。
+Tool: get_spots({"prefecture": "Aomori", "municipality": "弘前"})
+Expected entities (ground truth, may be empty): 弘前公園, 弘前城, Hirosaki Castle, Hirosaki Park, 弘前さくらまつり
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q328582",
+      "name": "弘前城",
+      "name_en": "Hirosaki Castle",
+      "name_zh": "弘前城",
+      "name_ko": "히로사키성",
+      "description_en": "castle in Hirosaki, Aomori prefecture, Japan",
+      "coordinates": {
+        "lat": 40.608036111,
+        "lng": 140.463805555
+      },
+      "url": "https://www.wikidata.org/wiki/Q328582",
+      "municipality": "青森県",
+      "municipality_code": "020001",
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle"
+      ],
+      "prominence_score": 0.95,
+      "heritage_designations": [
+        "Q1188622",
+        "Q30834580"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan",
+        "Historic Site of Japan"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11288816",
+      "name": "弘前公園",
+      "name_en": "Hirosaki Park",
+      "name_zh": "弘前公園",
+      "name_ko": "히로사키 공원",
+      "description_en": "park in Hirosaki, Aomori prefecture, Japan",
+      "coordinates": {
+        "lat": 40.608036,
+        "lng": 140.463806
+      },
+      "url": "https://www.wikidata.org/wiki/Q11288816",
+      "municipality": "青森県",
+      "municipality_code": "020001",
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "garden"
+      ],
+      "prominence_score": 0.85
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11508898",
+      "name": "日本聖公会弘前昇天教会教会堂",
+      "name_en": "Hirosaki Ascension Church",
+      "name_zh": "日本聖公會弘前昇天教會教會堂",
+      "name_ko": null,
+      "description_en": "church building in Hirosaki, Japan",
+      "coordinates": {
+        "lat": 40.599476,
+        "lng": 140.473196
+      },
+      "url": "https://www.wikidata.org/wiki/Q11508898",
+      "municipality": "青森県",
+      "municipality_code": "020001",
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "prominence_score": 0.75
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11487231",
+      "name": "弘前市仲町",
+      "name_en": "Nakachō",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 40.613367,
+        "lng": 140.469111
+      },
+      "url": "https://www.wikidata.org/wiki/Q11487231",
+      "municipality": "青森県",
+      "municipality_code": "020001",
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "kinds": [
+        "preservation_district"
+      ],
+      "prominence_score": 0.7,
+      "heritage_designations": [
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11487233",
+      "name": "弘前市役所",
+      "name_en": "Hirosaki City Hall",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q11487233",
+      "municipality": "青森県",
+      "municipality_code": "020001",
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "prominence_score": 0.7,
+      "heritage_designations": [
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11511053",
+      "name": "旧弘前偕行社",
+      "name_en": "Former Hirosaki Kaikōsha",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 40.590778,
+        "lng": 140.477222
+      },
+      "url": "https://www.wikidata.org/wiki/Q11511053",
+      "municipality": "青森県",
+      "municipality_code": "020001",
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "prominence_score": 0.7,
+      "heritage_designations": [
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "source": "wikidat
+```
+
+=== Case L1-07 ===
+Topic / intent: 出雲大社
+Query: 이즈모다이샤 이즈모 타이샤에 대해 알려주세요.
+Tool: search_area({"q": "出雲大社", "lang": "ko"})
+Expected entities (ground truth, may be empty): 出雲大社, Izumo-taisha, Izumo Grand Shrine, Izumo Oyashiro
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "出雲大社",
+  "match_count": 86,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q696362",
+      "name_ja": "出雲大社",
+      "name_en": "Izumo Taisha",
+      "description_en": "Possibly oldest Shinto shrine in Japan",
+      "coordinates": {
+        "lat": 35.401944444,
+        "lng": 132.685444444
+      },
+      "prefecture_code": "32",
+      "prefecture": "島根県",
+      "prominence_score": 0.9000000000000001,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": [
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020632",
+      "name_ja": "出雲大社本殿",
+      "name_en": "Honden of Izumo Taisha",
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.40203,
+        "lng": 132.6854
+      },
+      "prefecture_code": "32",
+      "prefecture": "島根県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11240833",
+      "name_ja": "出雲大社前駅",
+      "name_en": "Izumo Taisha-mae Station",
+      "description_en": "railway station in Izumo, Shimane prefecture, Japan",
+      "coordinates": {
+        "lat": 35.39356944,
+        "lng": 132.68710833
+      },
+      "prefecture_code": "32",
+      "prefecture": "島根県",
+      "prominence_score": 0.8,
+      "kinds": null,
+      "heritage_designations": [
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q28682617",
+      "name_ja": "出雲大社上総分院",
+      "name_en": "Izumotaisha Kazusabun'in",
+      "description_en": "Shinto shrine in Chiba Prefecture, Japan",
+      "coordinates": {
+        "lat": 35.278694,
+        "lng": 140.308861
+      },
+      "prefecture_code": "12",
+      "prefecture": "千葉県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q123472538",
+      "name_ja": "出雲大社宝物殿",
+      "name_en": "Izumo Taisha Treasure Hall",
+      "description_en": "museum in Izumo, Shimane, Japan",
+      "coordinates": {
+        "lat": 35.401031,
+        "lng": 132.686098
+      },
+      "prefecture_code": "32",
+      "prefecture": "島根県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11395863",
+      "name_ja": "出雲大社大阪分祠",
+      "name_en": "Izumo-Taisha-Osaka-bunshi",
+      "description_en": "Shinto shrine in Osaka Prefecture, Japan",
+      "coordinates": {
+        "lat": 34.538611,
+        "lng": 135.521111
+      },
+      "prefecture_code": "27",
+      "prefecture": "大阪府",
+      "prominence_score": 0.65,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11395864",
+      "name_ja": "出雲大社境内遺跡",
+      "name_en": "Izumo-taisha Precinct Site",
+      "description_en": "archaeological site in Izumo, Japan",
+      "coordinates": {
+        "lat": 35.401444444,
+        "lng": 132.685472222
+      },
+      "prefecture_code": "32",
+      "prefecture": "島根県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "archaeological_site"
+      ],
+      "heritage_designations": null,
+      "herita
+```
+
+=== Case L1-08 ===
+Topic / intent: 厳島神社
+Query: Parle-moi du sanctuaire d'Itsukushima à Hiroshima.
+Tool: search_area({"q": "厳島", "lang": "en"})
+Expected entities (ground truth, may be empty): 厳島神社, Itsukushima Shrine, Itsukushima-jinja, 宮島, Miyajima
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "厳島",
+  "match_count": 100,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q875301",
+      "name_ja": "厳島",
+      "name_en": "Itsukushima",
+      "description_en": "island in Hiroshima, Japan",
+      "coordinates": {
+        "lat": 34.275555555,
+        "lng": 132.307777777
+      },
+      "prefecture_code": "34",
+      "prefecture": "広島県",
+      "prominence_score": 1,
+      "kinds": null,
+      "heritage_designations": [
+        "Q26764449",
+        "Q30834580",
+        "Q94987823",
+        "Q19683138",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Special Historic Site of Japan",
+        "Historic Site of Japan",
+        "Special Place of Scenic Beauty",
+        "Ramsar Wetland (Japan)",
+        "Place of Scenic Beauty (Japan)"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q191763",
+      "name_ja": "厳島神社",
+      "name_en": "Itsukushima Shrine",
+      "description_en": "Shinto shrine in Hiroshima Prefecture, Japan",
+      "coordinates": {
+        "lat": 34.29577,
+        "lng": 132.320105
+      },
+      "prefecture_code": "34",
+      "prefecture": "広島県",
+      "prominence_score": 0.9500000000000001,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": [
+        "Q1139795",
+        "Q9259"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "UNESCO World Heritage Site"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q97940130",
+      "name_ja": "厳島神社大鳥居",
+      "name_en": "Itsukushima Shrine Ōtorii",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.2973,
+        "lng": 132.3182
+      },
+      "prefecture_code": "34",
+      "prefecture": "広島県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "monument"
+      ],
+      "heritage_designations": [
+        "Q1188622",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan",
+        "Natural Monument of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020639",
+      "name_ja": "厳島神社西廻廊",
+      "name_en": "West Corridor",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.29561,
+        "lng": 132.3195
+      },
+      "prefecture_code": "34",
+      "prefecture": "広島県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020640",
+      "name_ja": "厳島神社本社本殿、幣殿、拝殿",
+      "name_en": "Honden, Heiden and Haiden of the Main Shrine",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.29589,
+        "lng": 132.3199
+      },
+      "prefecture_code": "34",
+      "prefecture": "広島県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020641",
+      "name_ja": "厳島神社本社祓殿",
+      "name_en": "Haraiden of the Main Shrine",
+      "description_en": "Shinto shrine in Hiroshima Prefecture, Japan",
+      "coordinates": {
+        "lat": 34.29613,
+        "lng": 132.3196
+      },
+      "prefecture_code": "34",
+      "prefecture": "広島県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important
+```
+
+=== Case L1-09 ===
+Topic / intent: 熊野古道
+Query: Erzähl mir vom Kumano Kodo Pilgerweg.
+Tool: get_japan_heritage({"prefecture": "Wakayama", "lang": "en"})
+Expected entities (ground truth, may be empty): 熊野古道, Kumano Kodo, 中辺路, 小辺路, 大辺路, 伊勢路, 熊野三山
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "30",
+  "region": null,
+  "region_prefecture_codes": null,
+  "theme_filter": null,
+  "q": null,
+  "lang": "en",
+  "count": 7,
+  "items": [
+    {
+      "key": "japan_heritage:046",
+      "story_id": "046",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "絶景の宝庫 和歌の浦",
+      "subtitle_ja": null,
+      "title": "A Treasury of Scenic Beauty: Wakanoura",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの絶景の宝庫 和歌の浦について。和歌の浦は、和歌川の河口に広がる干潟を中心に、南は熊野古道の",
+      "summary": "About Wakanoura on the Japan Heritage portal site. Wakanoura is centered on the tidal flats spreading at the mouth of the Waka River, and extends southward toward the Kumano Kodo ancient road.",
+      "body_ja": "潮が引けば干潟が現れ刻一刻と輝きながら変化し、潮が満ちれば一面の海となり、陽光をうけて古い石橋が影を落とす。入り江を取り巻く山の桜が寺社を彩り、潮入りの庭園を新緑が包み、紅葉の峠越しにみる入り江は碧く、風景にとけこんだ町並みに色鮮やかな祭礼行列が練り歩く。ここ和歌の浦の情景は一時として同じではない。このまま持ち帰りたいと万葉歌人は和歌にうたい、和歌の神様がこの地に宿った。そして数多くの文化芸術を育んできた歴史の厚みを湛え、和歌の浦は今も人々を魅了している。\n\n和歌の浦は、和歌川の河口に広がる干潟を中心に、南は熊野古道の藤白坂から、西は紀伊水道に面する雑賀崎までの、和歌浦湾を取り巻く景勝の地である。万葉の時代にこの思わず持ち帰りたいほどの情景が和歌にうたわれ、和歌の神がまつられ、唯一無二の和歌の聖地となった。\n\nその情景が和歌と絵画に融合した和歌浦十景は、潮が満ち干潟から鳥が飛び立つ様、春霞の干潟越しにみる寺社を抱く山並み、紅葉の峠越しに見下ろす波穏やかな入り江など、うたわれ絵になってきた絶景を、今も訪れる人々に教えてくれる。自然と文化が調和した和歌の浦の絶景は、日本人の精神文化の源ともいえる和歌に始まり、いつの時代も人々を魅了し、様々な芸術を育んできた。\n\n1300年前の奈良時代、聖武天皇は、即位の年という特別な機会に、当時「若の浦」と記されたこの地を訪れた。遠くに名草山を望み、目の前で刻々と変化する干潟の広がりと、そのなかで沖に向かって連なる玉津島山のながめに感動し、この地の神・明光浦霊に祈りをささげ、そしてこの景色を末永く守るよう命じた。歌聖・山辺赤人の「若の浦に潮満ちくれば潟を無み葦辺を指して鶴鳴なき渡る」（若の浦に潮が満ちて干潟が見えなくなり、干潟にいた鶴が一斉に飛び立ち、葦のはえる岸辺へ鳴きながら飛んでいく）という、躍動感あふれる情景を見事に描きだした歌が、その時の天皇の感動を表している。この歌が平安時代、紀貫之により和歌の聖典といわれる『古今和歌集』で改めて取り上げられたことが、「若の浦」が和歌の聖地となる第一歩であった。「若」の浦が転じて「和歌」の浦となり、美しさが衣を通して輝いたという和歌の名人・衣通姫が和歌の神として玉津島にまつられ、和歌の聖地として崇あがめられたのである。古代から中世にかけて、時の関白・大臣までもが、熊野参詣や西国巡礼の道すがら、名高い和歌の浦を観光し、また和歌や物語など様々な文芸作品に取りあげていった。この和歌の浦に象徴された和歌の世界は、玉津島の神をまつり、六義園のような和歌の浦を模した庭園を造ることで、京や江戸にも広がっていった。文化人たちは和歌の浦にあこがれ続けてきたのである。\n\n中世末、豊臣秀吉は、紀州攻めの際に古来の景勝・和歌の浦を遊覧し、その名にちなんで北方の岡山に建てた城を和歌山城とし、その城下が和歌山とよばれるようになった。こうして「和歌」の名は、現在の県名にまで引きつがれ、和歌山の誇りとなっている。400年前の江戸時代、徳川家康の十男頼宣が和歌山へ入国すると、和歌の浦の北西にそびえる権現山に父家康をまつる東照宮を、干潟に浮かぶ妹背山に母お万の方をしのぶ多宝塔を建てた。そして妹背山に三断橋をかけて観海閣を設け、干潟の移ろいを楽しむ場として民衆に開放した。また東の対岸、紀三井寺からの渡し舟で、西国巡礼の旅人を和歌の浦へと誘った。頼宣が始めた紀州東照宮の例大祭・和歌祭では、和歌の浦を背景に渡御行列が練り歩き、民衆も楽しんだ。名所に民衆が自由に集い楽しむ場が設けられたのは、和歌の浦が始まりである。また和歌の浦の景勝をいかして、優れた庭園が造られた。紀州藩主随一の文化人・10代藩主徳川治宝が、西の高津子山を借景として造園した養翠園は、江戸の浜離宮と同じく珍しい潮入りの大名庭園である。園内には茶室を設け、和歌の浦をかたどった菓子や茶器もつくられた。南東の琴ノ浦では、近代になって温山荘庭園が築かれた。和歌の浦を見下ろす船尾山を借景とした池泉回遊式の庭園には、皇族や大臣も訪れ、関西を代表する名園となっている。\n\n和歌浦十景は、干潟と玉津島を中心として、様々な方向からうたわれ絵になってきた和歌の浦の風景の広がりを教えてくれる。南の藤白坂を登れば、北には万葉集にうたわれた黒牛潟、和歌の浦、雑賀崎から、はるか淡路島・四国まで変化に富んだ絶景が広がる。万葉の時代にここで処刑された悲劇の皇子・有間皇子が最後に見たのは、紅葉に彩られた峠越しの和歌の浦の海であった。そして熊野参詣の貴族たちが、都から山道が続く紀伊路で初めて海を望める所として、和歌の浦をながめながら歌会や舞楽を催した。干潟の東、夕陽をあびて満潮の水面に映える名草山の中腹には、西国三十三所巡礼の第二番札所・紀三井寺がある。かつて俳聖・松尾芭蕉は過ぎゆく春の名残を求めて和歌の浦を訪れた。春、この境内には桜が咲き誇り、西をながめれば春霞の干潟に玉津島の岩山が並ぶ。和歌の浦一円の鎮守であり、文芸の神をまつる和歌浦天満宮が鎮座する天神山は、和歌の浦の北西、入り江の最も奥にそびえている。色彩豊かな社越しに入り江を見下ろせば、緑濃い松林と石橋の間に釣り舟が見えかくれし、風景の一部のような人々の営みが目に映る。和歌にうたわれ、和歌の文化を育み、芸術の源泉となった和歌の浦。この地は、うたわれ絵になる絶景の宝庫として人々を魅了し続けている。",
+      "themes": [
+        "城",
+        "海・水辺",
+        "祭礼"
+      ],
+      "periods": [
+        "奈良",
+        "平安"
+      ],
+      "related_areas_text": "和歌山県（和歌山市, 海南市）",
+      "prefecture_codes": [
+        "30",
+        "29",
+        "33"
+      ],
+      "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story046/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:26:55.437Z",
+        "confidence": "medium"
+      },
+      "relevance_score": null
+    },
+    {
+      "key": "japan_heritage:074",
+      "story_id": "074",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "1300年つづく日本の終活の旅",
+      "subtitle_ja": "～西国三十三所観音巡礼～",
+      "title": "Japan's 1300-Year Journey of Preparing for Death: The Saigoku Thirty-Three Kannon Pilgrimage",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの1300年つづく日本の終活の旅について。しかし、そればかりが「終活」であるとは言いがたい。なぜなら、",
+      "summary": "This is the Japan Heritage (Japan Heritage) portal site ent
+```
+
+=== Case L1-10 ===
+Topic / intent: 姫路城
+Query: Расскажи о замке Химэдзи.
+Tool: search_area({"q": "姫路城", "lang": "en"})
+Expected entities (ground truth, may be empty): 姫路城, Himeji Castle, Himeji-jo, 白鷺城
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "姫路城",
+  "match_count": 67,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q188754",
+      "name_ja": "姫路城",
+      "name_en": "Himeji Castle",
+      "description_en": "Japanese castle complex",
+      "coordinates": {
+        "lat": 34.839444444,
+        "lng": 134.693611111
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 1,
+      "kinds": [
+        "hilltop_castle",
+        "japanese_castle"
+      ],
+      "heritage_designations": [
+        "Q30834580",
+        "Q1139795",
+        "Q9259",
+        "Q26764449"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "National Treasure of Japan",
+        "UNESCO World Heritage Site",
+        "Special Historic Site of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020429",
+      "name_ja": "姫路城ニの渡櫓",
+      "name_en": "Ni Watariyagura",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.83935,
+        "lng": 134.6938
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020430",
+      "name_ja": "姫路城ハの渡櫓",
+      "name_en": "Ha Watariyagura",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.83947,
+        "lng": 134.6937
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1188622",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan",
+        "National Treasure of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020431",
+      "name_ja": "姫路城イの渡櫓",
+      "name_en": "I Watariyagura",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.83948,
+        "lng": 134.6941
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020432",
+      "name_ja": "姫路城ロの渡櫓",
+      "name_en": "Ro Watariyagura",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.83957,
+        "lng": 134.6939
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020433",
+      "name_ja": "姫路城乾小天守",
+      "name_en": "Northwest Small Keep",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.83956,
+        "lng": 134.6937
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107020434",
+      "name_ja": "姫路城大天守",
+      "name_en": "Main Keep",
+      "description_en": null,
+      "c
+```
+
+=== Case L1-11 ===
+Topic / intent: 文楽
+Query: ขอข้อมูลเกี่ยวกับการแสดงบุนรากุที่โอซาก้า
+Tool: get_traditional_arts({"lang": "th"})
+Expected entities (ground truth, may be empty): 文楽, 人形浄瑠璃, Bunraku, 国立文楽劇場, Ningyo Joruri
+
+Response (truncated to 4000 chars):
+```
+{
+  "category_filter": null,
+  "keyword": null,
+  "lang": "th",
+  "count": 183,
+  "items": [
+    {
+      "key": "unesco_japan:Q243170",
+      "category": "unesco",
+      "authority": "UNESCO (mirrored via Wikidata)",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "qid": "Q243170",
+      "name_ja": "文楽",
+      "name_en": "Bunraku",
+      "name": "บุนราคุ",
+      "description_ja": "日本の伝統芸能",
+      "description_en": "form of traditional Japanese puppet theatre",
+      "description": "ศิลปะการแสดงแบบดั้งเดิมของญี่ปุ่น",
+      "inscription_year": 2003,
+      "unesco_id": "RL/00064",
+      "source_url": "https://www.wikidata.org/wiki/Q243170",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "relevance_score": null
+    },
+    {
+      "key": "unesco_japan:Q199701",
+      "category": "unesco",
+      "authority": "UNESCO (mirrored via Wikidata)",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "qid": "Q199701",
+      "name_ja": "歌舞伎",
+      "name_en": "kabuki",
+      "name": "คาบูกิ",
+      "description_ja": "日本の古典芸能、旧劇",
+      "description_en": "classical Japanese dance-drama",
+      "description": "ศิลปะการแสดงคลาสสิกของญี่ปุ่น ละครดั้งเดิม",
+      "inscription_year": 2005,
+      "unesco_id": "RL/00163",
+      "source_url": "https://www.wikidata.org/wiki/Q199701",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "relevance_score": null
+    },
+    {
+      "key": "unesco_japan:Q11318123",
+      "category": "unesco",
+      "authority": "UNESCO (mirrored via Wikidata)",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "qid": "Q11318123",
+      "name_ja": "チャッキラコ",
+      "name_en": "Chakkirako",
+      "name": "ชักคิราโกะ",
+      "description_ja": "神奈川県三浦市に伝わる伝統行事",
+      "description_en": "type of dance",
+      "description": "งานประเพณีดั้งเดิมที่สืบทอดกันมาในเมืองมิอุระ จังหวัดคานากาวะ",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00274",
+      "source_url": "https://www.wikidata.org/wiki/Q11318123",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "relevance_score": null
+    },
+    {
+      "key": "unesco_japan:Q11435617",
+      "category": "unesco",
+      "authority": "UNESCO (mirrored via Wikidata)",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "qid": "Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "ไดนิจิโด บูกากุ",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "ศิลปะการแสดงพื้นบ้านที่สืบทอดกันมา ณ ศาลเจ้าไดนิจิเรกิ เมืองคาซูโนะ จังหวัดอากิตะ",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00275",
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "relevance_score": null
+    },
+    {
+      "key": "unesco_japan:Q11511418",
+      "category": "unesco",
+      "authority": "UNESCO (mirrored via Wikidata)",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "qid": "Q11511418",
+      "name_ja": "早池峰神楽",
+      "name_en": "Hayachine Kagura",
+      "name": "ฮายาชิเนะ คากุระ",
+      "description_ja": null,
+      "description_en": "type of dance",
+      "description": "การเต้นรำประเภทหนึ่ง",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00272",
+      "source_url": "https://www.wikidata.org/wiki/Q11511418",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "low"
+      },
+      "rele
+```
+
+=== Case L1-12 ===
+Topic / intent: 弓浜絣
+Query: Hãy cho tôi biết về Yumihama Kasuri ở tỉnh Tottori.
+Tool: get_local_specialty({"prefecture": "Tottori", "lang": "vi"})
+Expected entities (ground truth, may be empty): 弓浜絣, Yumihama-gasuri, 弓ヶ浜絣, 弓浜カスリ
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "31",
+  "category_filter": null,
+  "q": null,
+  "lang": "vi",
+  "count": 7,
+  "items": [
+    {
+      "key": "maff_gi:11",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 11,
+      "name_ja": "鳥取砂丘らっきょう",
+      "name": "Rakkyo cồn cát Tottori",
+      "description_ja": "身が締まっているうえ、各鱗片の厚みもほぼ同一で、食感の「シャキシャキ感」が良く、らっきょうの外観が白い。",
+      "description": "Củ chắc, các vảy có độ dày gần như đồng đều, kết cấu giòn sảng khoái, và bề ngoài của rakkyo có màu trắng.",
+      "registration_date": "平成28年3月10日",
+      "production_area_text": "鳥取県鳥取市福部町内の鳥取砂丘に隣接した砂丘畑",
+      "prefecture_codes": [
+        "31"
+      ],
+      "producer_group": "鳥取県鳥取市湖山町東5 丁目261 番地鳥取いなば農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0011/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:70",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 70,
+      "name_ja": "大山ブロッコリー",
+      "name": "Bông cải xanh Daisen",
+      "description_ja": "徹底した品質管理、食味の良さ、市場への安定供給によって、市場において高く評価されている。全国有数のブロッコリー産地。最も売上げのある名古屋市場における占有率は約2割、平均価格は約1割高。",
+      "description": "Được đánh giá cao trên thị trường nhờ kiểm soát chất lượng chặt chẽ, hương vị ngon và nguồn cung ổn định. Một trong những vùng sản xuất bông cải xanh hàng đầu Nhật Bản. Thị phần tại thị trường Nagoya — nơi có doanh số cao nhất — chiếm khoảng 20%, và giá trung bình cao hơn khoảng 10% so với mức bình quân thị trường.",
+      "registration_date": "平成30年12月27日",
+      "production_area_text": "鳥取県西伯郡（大山町、日吉津村、南部町、伯耆町）、日野郡（日南町、日野町、江府町）、米子市",
+      "prefecture_codes": [
+        "31"
+      ],
+      "producer_group": "鳥取県米子市東福原1-5-16鳥取西部農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0070/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:72",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 72,
+      "name_ja": "こおげ花御所柿",
+      "name": "Koge Hanagosho Kaki",
+      "description_ja": "旧郡家（こおげ）町の在来品種で200年以上前から栽培されている「花御所柿」を用いる。一般的な柿と比べて甘く、果肉が緻密でジューシー。昭和22年には戦後初の全国果実展示品評会において、花御所柿が柿の部1等賞となるなど、高く評価されている。",
+      "description": "Sản phẩm này sử dụng 'Hanagosho Kaki', một giống hồng địa phương từ thị trấn Koge cũ, đã được trồng trọt hơn 200 năm. So với hồng thông thường, loại này ngọt hơn, với thịt quả chắc và nhiều nước. Năm 1947, Hanagosho Kaki đã giành giải nhất hạng mục hồng tại Hội chợ và Cuộc thi Trái cây Toàn quốc đầu tiên sau chiến tranh, và được đánh giá cao từ đó đến nay.",
+      "registration_date": "平成30年12月27日",
+      "production_area_text": "鳥取県八頭郡八頭町",
+      "prefecture_codes": [
+        "31"
+      ],
+      "producer_group": "鳥取県鳥取市湖山町東5丁目261番地鳥取いなば農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0072/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.502Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:80",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 80,
+      "name_ja": "⼤栄⻄⽠",
+      "name": "Dưa hấu Daiei",
+      "description_ja": "交配後、約48日頃まで完熟させたスイカ。形状、品質にバラツキが少なく、果実中心部と皮ぎわの糖度差が少ない、安定した品質・供給が確保できるスイカとして、市場から高い評価を得ている。",
+      "description": "Dưa hấu được chín hoàn toàn trong khoảng 48 ngày sau khi thụ phấn. Được thị trường đánh giá cao như một loại dưa hấu có chất lượng và nguồn cung ổn định, ít biến động về
+```
+
+=== Case L1-13 ===
+Topic / intent: 直島
+Query: Sabihin mo sa akin ang tungkol sa Naoshima Art Island.
+Tool: search_area({"q": "直島", "lang": "en"})
+Expected entities (ground truth, may be empty): 直島, Naoshima, ベネッセ, 地中美術館, 李禹煥美術館, Naoshima Art Island
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "直島",
+  "match_count": 79,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11337011",
+      "name_ja": "ベネッセアートサイト直島",
+      "name_en": "Benesse Art Site Naoshima",
+      "description_en": "museum in Japan",
+      "coordinates": null,
+      "prefecture_code": "37",
+      "prefecture": "香川県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q131677558",
+      "name_ja": "直島新美術館",
+      "name_en": "Naoshima New Museum of Art",
+      "description_en": "museum in Japan",
+      "coordinates": {
+        "lat": 34.458088,
+        "lng": 133.998742
+      },
+      "prefecture_code": "37",
+      "prefecture": "香川県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "municipality",
+      "code": "373648",
+      "name": "直島町",
+      "prefecture": "香川県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "d02c50de94566d5b",
+      "name": "【直方市観光ガイド】おすすめ定番スポット・グルメ・お土産特集",
+      "description": "かつて炭鉱で栄えた直方市（のおがたし）には、深い歴史が刻まれた貴重なスポットや遠賀川沿いの美しい自然が広がっています。「石炭記念館」や「多賀神社」、四季の花が楽しめる「福智山ろく花公園」など見どころ満載！愛され続けるご当地グルメや新鮮な野菜、果物など特産品も充実しています。 そんな直方市の観光に欠かせない定番スポットやグルメ、お土産情報を紹介します。 直方市は、福岡県の北部・筑豊平野のほぼ中央に位置するハートの形をしたまちです。福智山系の深い緑や遠賀川水系の豊かな自然は、大きな魅力の一つ。市の花はチューリップ、ユリ、コスモス、水仙と全部で4つあり、季節ごとの花を楽しめるイベントや体験も満載です。 市内外から愛されるソウルフードや工芸品もたくさん。全国に店舗を構える「お仏壇のはせがわ」や、米菓の「もち吉」など有名企業の発祥の地でもあります。 また、福岡・北九州という政令市の間に位置し、高速道路や鉄道などのアクセスにも恵まれています。北九州都市圏にも属しているため北九州市へ通勤・通学する人も多くいます。 【人口】54,900人（2024年9月末日時点） 【面積】61.76平方km 直方市では、遠賀川沿いの豊かな自然を感じながら四季折々の景色を楽しむことができます。桜の名所としても知られ、春には川沿いをピンク色に染めあげます。色とりどりに咲くチューリップとのコラボレーションも見逃せません。夏は青々とした木々が川面に映え、約20万本のヒマワリが鮮やか。秋には市民有志が植えたコスモスが約3,200平方mの公園緑地を彩ります。冬は静かな風景の中、野鳥観察も楽しめます。 河川敷にある「直方リバーサイドパーク」には大型遊具を備えた芝生広場や、1周2kmのウォーキング・ジョギングコースもあり、のんびり散策もおすすめ。また、リバービューを眺めながら走れるサイクリングロードやオートキャンプ場もあり、自然に癒されながらアウトドアを満喫できます。 筑豊炭田の中心地として栄え、多くの炭鉱が操業していた直方市には、貴重な文化財や史跡が点在しています。明治の初めから1976年までの約100年間に約8億トンの石炭を産出した「筑豊炭田」。当時の状況を今に伝える資料が多数展示されている「直方市石炭記念館」や、筑豊の5大炭鉱王と称された堀三太郎氏の自宅跡「直方歳時館」では、日本の産業発展と近代化に貢献した炭鉱の歴史を感じることができるでしょう。 また、直方城下町の鎮守「多賀神社」や、861年に世界最古の隕石が境内に落ちたという不思議な「須賀神社」、弥生時代中期から古墳時代後期にかけて古代人の生活と埋葬の地として利用された「水町遺跡群」など、深い歴史が刻まれたスポットもたくさん。古代から現代までの長い歴史が紡いだストーリーにふれ、直方の魅力を体感してください。 福智山のふもとにあるフラワーパーク。春には桜やアカシア、夏にはハスやユリ、秋の紅葉、冬にはロウバイやフクジュソウなどが彩りを添えます。大自然に囲まれた園内では四季折々の植物はもちろん、さまざまな昆虫や野鳥の姿も。子どもプールやドッグラン、うどん茶屋などの設備も充実しており、家族連れで1日楽しめます。季節に合わせたイベントやガーデニング教室なども開催されています。",
+      "url": "https://www.crossroadfukuoka.jp/areaguide/nogata-shi",
+      "municipality": "上毛町",
+      "prefecture": "福岡県"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11447764",
+      "name_ja": "嫁島",
+      "description_en": "island in Tokyo, Japan [Natural Monument of Japan]",
+      "prefecture_code": "13",
+      "prefecture": "東京都",
+      "municipality": "東京都",
+      "heritage_designations": [
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q508866",
+      "name_ja": "今帰仁城",
+      "description_en": "fortification [Natural Monument of Japan]",
+      "prefecture_code": "47",
+      "prefecture": "沖縄県",
+      "municipality": "沖縄県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q123130241"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Component of Nationally-designated Historic Site"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q29051264",
+      "name_ja": "蕪島",
+      "description_en": "island in Japan [Natural Monument]",
+      "prefecture_code": "02",
+      "prefecture": "青森県",
+      "municipality": "青森県",
+      "her
+```
+
+=== Case L1-14 ===
+Topic / intent: 角館 武家屋敷
+Query: What is the Kakunodate samurai district in Akita?
+Tool: get_spots({"prefecture": "Akita", "municipality": "角館"})
+Expected entities (ground truth, may be empty): 角館, 武家屋敷, Kakunodate, 石黒家, 青柳家, samurai district
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11630890",
+      "name": "角館",
+      "name_en": "Kakunodate",
+      "name_zh": "角館",
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 39.600508,
+        "lng": 140.561425
+      },
+      "url": "https://www.wikidata.org/wiki/Q11630890",
+      "municipality": "秋田県",
+      "municipality_code": "050008",
+      "prefecture": "秋田県",
+      "quality_score": 0.65,
+      "kinds": [
+        "preservation_district"
+      ],
+      "prominence_score": 0.8,
+      "heritage_designations": [
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q111721103",
+      "name": "角館のシダレザクラ",
+      "name_en": "weeping cherry trees of Kakunodate",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 39.600619444,
+        "lng": 140.5614
+      },
+      "url": "https://www.wikidata.org/wiki/Q111721103",
+      "municipality": "仙北市",
+      "municipality_code": "052159",
+      "prefecture": "秋田県",
+      "quality_score": 0.65,
+      "prominence_score": 0.7,
+      "heritage_designations": [
+        "Q122904442"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q136824623",
+      "name": "仙北市立角館町平福記念美術館",
+      "name_en": "Hirafuku Memorial Art Museum",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "art museum in Semboku, Akita, Japan",
+      "coordinates": {
+        "lat": 39.601931984,
+        "lng": 140.560189679
+      },
+      "url": "https://www.wikidata.org/wiki/Q136824623",
+      "municipality": "仙北市",
+      "municipality_code": "052159",
+      "prefecture": "秋田県",
+      "quality_score": 0.65,
+      "kinds": [
+        "museum"
+      ],
+      "prominence_score": 0.65
+    },
+    {
+      "source": "wikidata",
+      "id": "Q2969455",
+      "name": "角館城",
+      "name_en": "Kakunodate Castle",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "former castle in Japan",
+      "coordinates": {
+        "lat": 39.60472222,
+        "lng": 140.56083333
+      },
+      "url": "https://www.wikidata.org/wiki/Q2969455",
+      "municipality": "秋田県",
+      "municipality_code": "050008",
+      "prefecture": "秋田県",
+      "quality_score": 0.65,
+      "kinds": [
+        "castle",
+        "japanese_castle",
+        "mountain_castle"
+      ],
+      "prominence_score": 0.65
+    },
+    {
+      "source": "wikidata",
+      "id": "Q98206589",
+      "name": "仙北市立角館樺細工伝承館",
+      "name_en": "Kakunodate Cherry Bark Work Museum",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "museum in Semboku, Akita, Japan",
+      "coordinates": {
+        "lat": 39.599888888,
+        "lng": 140.561
+      },
+      "url": "https://www.wikidata.org/wiki/Q98206589",
+      "municipality": "秋田県",
+      "municipality_code": "050008",
+      "prefecture": "秋田県",
+      "quality_score": 0.65,
+      "kinds": [
+        "museum"
+      ],
+      "prominence_score": 0.65
+    }
+  ],
+  "count": 5,
+  "total_before_limit": 5,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-04T03:57:35.824Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+=== Case L1-15 ===
+Topic / intent: 尾道
+Query: Beritahu saya tentang Onomichi di Hiroshima.
+Tool: get_spots({"prefecture": "Hiroshima", "municipality": "尾道"})
+Expected entities (ground truth, may be empty): 尾道, Onomichi, 千光寺, 尾道市, Onomichi city
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "7e3cea4f86b88b73",
+      "name": "レモン谷",
+      "description": "尾道市瀬戸田町のレモン栽培は、明治時代から始まったと言われています。垂水地区の一帯を中心に、レモンブームを巻き起こし、昭和38年には、生産量約九百トンを誇る日本一のレモン産地となり、誰言うことなく、この谷を「レモン谷」と呼ぶようになりました。\n　昭和39年の輸入レモン自由化により、国産レモンは壊滅的な打撃を受け、生産者はレモンの伐採を余儀なくされましたが、輸入レモンのポストハーベスト農薬が問題になり、国産レモンの安全性が見直され、レモンを新植し、いち早くレモン産地として復活を成し遂げました。\n　国産レモンのトップブランドとして、自信と誇りを持って、瀬戸田から全国にお届けしています。",
+      "coordinates": {
+        "lat": 34.2825608,
+        "lng": 133.0761212
+      },
+      "address": "722-2404 尾道市瀬戸田町垂水",
+      "url": "https://dive-hiroshima.com/explore/390",
+      "municipality": "尾道市",
+      "municipality_code": "342050",
+      "prefecture": "広島県",
+      "language": "ja",
+      "quality_score": 1
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "919a3abd6f24c202",
+      "name": "瀬戸田サンセットビーチ",
+      "description": "しまなみ海道の中間地点、尾道市瀬戸田町の西側に広がる県内屈指の規模を誇る海浜公園。海に浮かぶ島々を目の前に見渡せる、瀬戸内海ならではのロケーションが最大の特徴です。特に夕暮れ時の景観は素晴らしく、空と海が一体となって黄金色に染まる光景を収めようと、多くの写真愛好家や観光客が訪れます。対岸に連なる島々の合間へと沈んでいく太陽と、それによって浮かび上がる島影のシルエットが作り出すコントラストは、この場所ならではの眺望です。\n\n透明度が高く、波が穏やかなビーチとしても知られています。シーカヤックやSUP（サップ）などのマリンアクティビティも気軽に楽しむことができ、初めての方でもスタッフに教わりながら海上からの景色を満喫することができます。また、島全体を一つの美術館に見立てた「島ごと美術館」の作品が砂浜や緑地に点在しているのも特徴。散策しながら個性豊かな彫刻作品を鑑賞し、アートと自然が融合した独特の空間を体感できます。\n\n施設内には、自転車旅の途中に立ち寄りやすいレンタサイクルターミナルのほか、更衣室やシャワーなどの設備も完備。レストランでは海を眺めながら食事が楽しむことができ、ツーリング中の休憩や家族連れでのレジャーなど、幅広く利用されています。キャンプ場やBBQ設備も整っており、好みや目的に合わせて自由に過ごせる海辺のスポットです。",
+      "coordinates": {
+        "lat": 34.2802751,
+        "lng": 133.0722982
+      },
+      "address": "722-2404 広島県尾道市瀬戸田町垂水1506-15",
+      "url": "https://dive-hiroshima.com/explore/160",
+      "municipality": "尾道市",
+      "municipality_code": "342050",
+      "prefecture": "広島県",
+      "language": "ja",
+      "quality_score": 1
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "b57dfd96071097f8",
+      "name": "大久野島毒ガス資料館",
+      "description": "かつて大久野島では、大量の毒ガス兵器が製造されていました。当時、毒ガス製造の実態を隠すため、陸軍が発行した地図においても大久野島一帯は空白地域として扱われていたことから、地図から消された島と呼ばれるようになりました。現在では、休暇村として整備され国民の保養地となり、島内には砲台跡、発電場、毒ガス貯蔵庫等と、当時の面影は僅かしか残っていません。この島で毒ガスを製造した過程で多くの犠牲者を出すに至った事は誠に痛ましく、その悲惨さを訴え、そして恒久平和を願う目的で1988年にこの資料館が建設されました。今では年間多くの方がこの地を平和学習の場として訪れています。",
+      "coordinates": {
+        "lat": 34.3059237,
+        "lng": 132.9941183
+      },
+      "address": "729-2311 竹原市忠海町5491",
+      "url": "https://dive-hiroshima.com/explore/130",
+      "municipality": "尾道市",
+      "municipality_code": "342050",
+      "prefecture": "広島県",
+      "language": "ja",
+      "quality_score": 1
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "b049ba4865219b97",
+      "name": "広島駅",
+      "description": "2025年、新しい広島駅ビル「minamoa（ミナモア）」の開業とともに、利便性と快適性を兼ね備えた大規模な交通拠点へと進化しました。最大の特筆点は、広島電鉄（路面電車）が駅ビル2階に直接乗り入れる新ルートの開通です。JRの改札フロアと路面電車の乗り場が同一平面で直結されたことで、段差を気にせず、天候に左右されないスムーズな乗り換えが可能となりました。全面ガラス張りの空間を電車が行き来する光景は、街の新たなシンボルとなっています。\n\n2階部分に広がるペデストリアンデッキは、周辺の宿泊施設や主要なスポットを繋いでいます。歩行者専用の広々とした通路は大きな荷物を持った旅行者にも配慮されており、地上に降りることなく安全に移動できるのが特徴です。また、駅直結の「ekie（エキエ）」には、本場のお好み焼きなどの郷土料理から最新のスイーツまでが揃い、到着後の食事や出発前のお土産選びに非常に役立ちます。\n\n新しい広島駅ビルの9階に位置する屋上広場「ソラモア」は、緑豊かな開放的な空間です。展望スペースからは眼下の鉄道や街並みを一望でき、旅の合間に落ち着いた時間を過ごすことができます。交通の利便性向上に加え、食や憩いの機能も兼ね備えた駅に生まれ変わり、観光の拠点として旅のさまざまな場面で活用できる多機能なスポットとなっています。\n\n※画像1枚目・2枚目提供：JR西日本提供",
+      "coordinates": {
+        "lat": 34.3977046,
+        "lng": 132.4753786
+      },
+      "address": "732-0822 広島県広島市南区松原町2番37号",
+      "url": "https://dive-hiroshima.com/explore/3465",
+      "municipality": "尾道市",
+      "municipality_code": "342050",
+      "prefecture": "広島県",
+      "language": "ja",
+      "quality_score": 1
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f761c8d72e97d9e0",
+      "name": "Itsukushima Shrine",
+      "description": "With a bold and original layout that borders the sea, this is one of Japan's most famous shrines, showcasing the pinnacle of Heian-period shinden-zukuri architecture. It was built in its current form by Taira no Kiyomori in the 12th century. The grounds, which are located on 
+```
+
+=== Case L1-16 ===
+Topic / intent: 那智の滝
+Query: ¿Qué es Nachi Falls en Wakayama?
+Tool: search_area({"q": "那智", "lang": "en"})
+Expected entities (ground truth, may be empty): 那智の滝, Nachi Falls, Nachi-no-taki, 飛瀧神社, 熊野那智大社
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "那智",
+  "match_count": 90,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1365882",
+      "name_ja": "那智滝",
+      "name_en": "Nachi Falls",
+      "description_en": "waterfall in Wakayama Prefecture, Japan",
+      "coordinates": {
+        "lat": 33.672,
+        "lng": 135.891
+      },
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "prominence_score": 0.9500000000000001,
+      "kinds": [
+        "waterfall"
+      ],
+      "heritage_designations": [
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642740",
+      "name_ja": "那智原始林",
+      "name_en": "Nachi Primeval Forest",
+      "description_en": "forest in Japan",
+      "coordinates": {
+        "lat": 33.6761,
+        "lng": 135.894
+      },
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q43113623",
+        "Q122904442"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Nationally-designated Natural Monument"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107045004",
+      "name_ja": "那智滝図",
+      "name_en": "Nachi Waterfall",
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.66225,
+        "lng": 139.717
+      },
+      "prefecture_code": "13",
+      "prefecture": "東京都",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642741",
+      "name_ja": "那智四十八滝",
+      "name_en": "48 Waterfalls of Nachi",
+      "description_en": null,
+      "coordinates": {
+        "lat": 33.67532349,
+        "lng": 135.88760376
+      },
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "waterfall"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642744",
+      "name_ja": "那智山",
+      "name_en": "Mount Nachi",
+      "description_en": "mountain in Wakayama Prefecture in Japan",
+      "coordinates": {
+        "lat": 33.683333333,
+        "lng": 135.883333333
+      },
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "mountain_range"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642746",
+      "name_ja": "那智高原公園",
+      "name_en": "Nachi Kōgen Park",
+      "description_en": "park in Nachikatsuura, Japan",
+      "coordinates": null,
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "municipality",
+      "code": "304212",
+      "name": "那智勝浦町",
+      "prefecture": "和歌山県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "ae02fbb6d344b191",
+      "name": "STAY YAMAGATA",
+      "description": "季节推荐景点 春 樱花报春来，草木吐新芽 以大自然的恩惠充电蓄能 more 夏 前往名峰、瀑布等凉爽景点 樱桃、萤火虫也正是时节 more 秋 红叶尽染群山之时 水果采摘季节也到来 more 冬 雪怪“雾凇”决不可错过 不妨沉浸在梦幻般的雪灯风情中 more 春 樱花报春来，草木吐新芽 以大自然的恩惠充电蓄能 more 夏 前往名峰、瀑布等凉爽景点 樱桃、萤火虫也正是时节 more 秋 红叶尽染群山之时 水果采摘季节也到来 more 冬 雪怪“雾凇”决不可错过 不妨沉浸在梦幻般的雪灯风情中 more 按旅游主题搜索 夏祭 more 樱花名胜 more 红叶名胜 more 冬季活动 more 雪灯・冰雪节 more 亲子之旅 more 心灵之旅 more 花
+```
+
+=== Case L1-17 ===
+Topic / intent: 知床半島
+Query: मुझे होक्काइदो में शिरेतोको प्रायद्वीप के बारे में बताइए।
+Tool: search_area({"q": "知床", "lang": "en"})
+Expected entities (ground truth, may be empty): 知床半島, Shiretoko, 知床国立公園, Shiretoko Peninsula, Shiretoko Goko
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "知床",
+  "match_count": 96,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q17208861",
+      "name_ja": "知床",
+      "name_en": "Shiretoko",
+      "description_en": null,
+      "coordinates": {
+        "lat": 43.933333333,
+        "lng": 144.95
+      },
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "prominence_score": 0.7000000000000001,
+      "kinds": null,
+      "heritage_designations": [
+        "Q9259"
+      ],
+      "heritage_designations_labels": [
+        "UNESCO World Heritage Site"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q629238",
+      "name_ja": "知床半島",
+      "name_en": "Shiretoko Peninsula",
+      "description_en": "peninsula in Hokkaido, Japan",
+      "coordinates": {
+        "lat": 44.05,
+        "lng": 145.1
+      },
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "prominence_score": 0.9000000000000001,
+      "kinds": null,
+      "heritage_designations": [
+        "Q9259"
+      ],
+      "heritage_designations_labels": [
+        "UNESCO World Heritage Site"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q739391",
+      "name_ja": "知床国立公園",
+      "name_en": "Shiretoko National Park",
+      "description_en": "national park in Hokkaidō, Japan",
+      "coordinates": {
+        "lat": 44.161944,
+        "lng": 145.235556
+      },
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "prominence_score": 0.8500000000000001,
+      "kinds": [
+        "park"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q4202646",
+      "name_ja": "硫黄山",
+      "name_en": "Mount Io",
+      "description_en": "mountain in Rausu and Shari, Hokkaido, Japan",
+      "coordinates": {
+        "lat": 44.130833,
+        "lng": 145.165278
+      },
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "prominence_score": 0.75,
+      "kinds": null,
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11584569",
+      "name_ja": "知床世界遺産センター",
+      "name_en": "Shiretoko World Heritage Conservation Center",
+      "description_en": null,
+      "coordinates": {
+        "lat": 44.0695,
+        "lng": 144.991194
+      },
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "prominence_score": 0.75,
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q8528441",
+      "name_ja": "知床岳",
+      "name_en": "Mount Shiretoko",
+      "description_en": "mountain in Hokkaido, Japan",
+      "coordinates": {
+        "lat": 44.23647,
+        "lng": 145.27308
+      },
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "prominence_score": 0.65,
+      "kinds": null,
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11584572",
+      "name_ja": "知床八景",
+      "name_en": "Eight Views of Shiretoko",
+      "description_en": null,
+      "coordinates": null,
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "prominence_score": 0.65,
+      "kinds": [
+        "tourist_attraction"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "f0533fdf90b5422b",
+      "name": "Zhongje Ryokan（中濟日式旅館）",
+      "description": "使用本網站即表示你同意設置和使用Cookie。有關詳細信息，請參閱隱私政策。",
+      "url": "https://iwatetabi.jp/tw/spots/87876",
+      "municipality": "九戸村",
+      "prefecture": "岩手県"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid":
+```
+
+=== Case L1-18 ===
+Topic / intent: 出羽三山
+Query: Tell me about Dewa Sanzan in Yamagata.
+Tool: search_area({"q": "出羽", "lang": "en"})
+Expected entities (ground truth, may be empty): 出羽三山, Dewa Sanzan, 羽黒山, 月山, 湯殿山
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "出羽",
+  "match_count": 76,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1155726",
+      "name_ja": "出羽三山",
+      "name_en": "Three Mountains of Dewa",
+      "description_en": "mountains in Yamagata Prefecture, Japan",
+      "coordinates": {
+        "lat": 38.700277777,
+        "lng": 140.000277777
+      },
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.9000000000000001,
+      "kinds": null,
+      "heritage_designations": [
+        "Q18382798"
+      ],
+      "heritage_designations_labels": [
+        "Japan Heritage (Bunka-cho program)"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11395786",
+      "name_ja": "出羽島",
+      "name_en": "Tebajima",
+      "description_en": "Island in Tokushima Pref., Japan",
+      "coordinates": {
+        "lat": 33.631667,
+        "lng": 134.424167
+      },
+      "prefecture_code": "36",
+      "prefecture": "徳島県",
+      "prominence_score": 0.7000000000000001,
+      "kinds": null,
+      "heritage_designations": [
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q66560964",
+      "name_ja": "出羽桜美術館",
+      "name_en": "Dewazakura Museum of Art",
+      "description_en": "building in Yamagata Prefecture, Japan",
+      "coordinates": {
+        "lat": 38.349677,
+        "lng": 140.370802
+      },
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.7000000000000001,
+      "kinds": [
+        "museum",
+        "memorial"
+      ],
+      "heritage_designations": [
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q4171960",
+      "name_ja": "出羽山地",
+      "name_en": "Dewa Mountains",
+      "description_en": "mountain range in Japan",
+      "coordinates": {
+        "lat": 39.5,
+        "lng": 140.16
+      },
+      "prefecture_code": "02",
+      "prefecture": "青森県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "mountain_range"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q120682042",
+      "name_ja": "出羽三山神社",
+      "name_en": "Dewa Sanzan Shrine",
+      "description_en": "Dewasanzan shrine",
+      "coordinates": null,
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11395802",
+      "name_ja": "出羽神社",
+      "name_en": "Dewa Shrine",
+      "description_en": "Shinto shrine in Yamagata Prefecture, Japan",
+      "coordinates": {
+        "lat": 38.702548,
+        "lng": 139.981354
+      },
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q28683339",
+      "name_ja": "出羽公園",
+      "name_en": "Dewa Park",
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.87481,
+        "lng": 139.76611
+      },
+      "prefecture_code": "11",
+      "prefecture": "埼玉県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "garden",
+        "park"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q65249244",
+      "name_ja": "出羽三山歴史博物館",
+
+```
+
+=== Case L1-19 ===
+Topic / intent: 屋久島
+Query: Fale-me sobre a ilha de Yakushima.
+Tool: search_area({"q": "屋久島", "lang": "en"})
+Expected entities (ground truth, may be empty): 屋久島, Yakushima, 縄文杉, Yakushima Island
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "屋久島",
+  "match_count": 94,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q242176",
+      "name_ja": "屋久島",
+      "name_en": "Yakushima",
+      "description_en": "island in Kagoshima, Japan",
+      "coordinates": {
+        "lat": 30.358611111,
+        "lng": 130.528611111
+      },
+      "prefecture_code": "46",
+      "prefecture": "鹿児島県",
+      "prominence_score": 1,
+      "kinds": null,
+      "heritage_designations": [
+        "Q137572758",
+        "Q19683138",
+        "Q9259",
+        "Q106611640"
+      ],
+      "heritage_designations_labels": [
+        "Wilderness Area (Japan, Nature Conservation Law)",
+        "Ramsar Wetland (Japan)",
+        "UNESCO World Heritage Site",
+        "Protected Forest (Japan, Forestry Agency)"
+      ]
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11465642",
+      "name_ja": "屋久島国立公園",
+      "name_en": "Yakushima National Park",
+      "description_en": "national park in Kyushu, Japan",
+      "coordinates": {
+        "lat": 30.337306,
+        "lng": 130.503833
+      },
+      "prefecture_code": "46",
+      "prefecture": "鹿児島県",
+      "prominence_score": 0.75,
+      "kinds": [
+        "park"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q127416300",
+      "name_ja": "屋久島世界遺産センター",
+      "name_en": "Yakushima World Heritage Conservation Center",
+      "description_en": null,
+      "coordinates": {
+        "lat": 30.308781,
+        "lng": 130.631624
+      },
+      "prefecture_code": "46",
+      "prefecture": "鹿児島県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q127608800",
+      "name_ja": "屋久島町歴史民俗資料館",
+      "name_en": "Yakushima History and Folk Museum",
+      "description_en": "museum in Yakushima, Kagoshima, Japan",
+      "coordinates": {
+        "lat": 30.420598,
+        "lng": 130.568946
+      },
+      "prefecture_code": "46",
+      "prefecture": "鹿児島県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q130283583",
+      "name_ja": "屋久島大社",
+      "name_en": "Yakushima-taisha",
+      "description_en": "Shinto shrine in Kagoshima Prefecture, Japan",
+      "coordinates": {
+        "lat": 30.415222,
+        "lng": 130.590315
+      },
+      "prefecture_code": "46",
+      "prefecture": "鹿児島県",
+      "prominence_score": 0.65,
+      "kinds": [
+        "shinto_shrine"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q127698516",
+      "name_ja": "屋久島総合自然公園",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 30.41173,
+        "lng": 130.54754
+      },
+      "prefecture_code": "46",
+      "prefecture": "鹿児島県",
+      "prominence_score": 0.55,
+      "kinds": [
+        "garden",
+        "park"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "municipality",
+      "code": "465054",
+      "name": "屋久島町",
+      "prefecture": "鹿児島県"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q127416253",
+      "name_ja": "屋久町立屋久杉自然館",
+      "description_en": "museum in Yakushima, Kagoshima, Japan",
+      "prefecture_code": "46",
+      "prefecture": "鹿児島県",
+      "municipality": "屋久島町",
+      "heritage_designations": null,
+      "heritage_designations_labels": null
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11465681",
+      "nam
+```
+
+=== Case L1-20 ===
+Topic / intent: 佐渡島
+Query: 사도섬에 대해 알려주세요.
+Tool: get_japan_heritage({"prefecture": "Niigata", "lang": "ko"})
+Expected entities (ground truth, may be empty): 佐渡島, 佐渡, Sado, Sado Island, 金山, Sado Gold Mine
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "15",
+  "region": null,
+  "region_prefecture_codes": null,
+  "theme_filter": null,
+  "q": null,
+  "lang": "ko",
+  "count": 5,
+  "items": [
+    {
+      "key": "japan_heritage:026",
+      "story_id": "026",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "「なんだ、コレは！」 信濃川流域の火焔型土器と雪国の文化",
+      "subtitle_ja": null,
+      "title": "「이게 뭐야！」 시나노강 유역의 화염형 토기와 설국의 문화",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの「なんだ、コレは！」 信濃川流域の火焔型土器と雪国の文化について。新潟県を南から北に流れる信濃川は、総延長367kmにおよぶ日本一",
+      "summary": "일본유산（Japan Heritage）포털사이트의 「이게 뭐야！」 시나노강 유역의 화염형 토기와 설국의 문화에 대하여. 니가타현을 남쪽에서 북쪽으로 흐르는 시나노강은 총 연장 367km에 달하는 일본 제일의 강입니다.",
+      "body_ja": "日本一の大河・信濃川の流域は、8000年前に気候が変わり、世界有数の雪国となった。この雪国から5000年前に誕生した「火焔型土器」は大仰な４つの突起があり、縄文土器を代表するものである。火焔型土器の芸術性を発見した岡本太郎は、この土器を見て「なんだ、コレは！」と叫んだという。火焔型土器を作った人々のムラは信濃川流域を中心としてあり、その規模と密集度は日本有数である。このムラの跡に佇めば、5000年前と変わらぬ独特の景観を追体験できる。また、山・川・海の幸とその加工・保存の技術、アンギン、火焔型土器の技を継承するようなモノづくりなど、信濃川流域には縄文時代に起源をもつ文化が息づいている。火焔型土器は日本文化の源流であり、浮世絵、歌舞伎と並ぶ日本文化そのものなのである。\n\n新潟県を南から北に流れる信濃川は、総延長367kmにおよぶ日本一の大河である。その広大な流域を選んだ1万3000年以上前の人々は、世界に先駆けて土器づくりを始めた。縄文時代の幕開けである。特に上流域では、この時期の遺跡が全国的に見ても多く密集している。豊かな森と水に恵まれ、多種多様な動植物の宝庫となった信濃川流域には、1万年ものあいだ途切れることなく、自然と共生する縄文人の営みが見られた。信濃川流域の縄文人たちは、8000年前に大きな環境変化に見舞われた。日本海に対馬暖流が流れ込んだ影響で、雪が多く降るようになったのである。現在に続く世界有数の雪国は縄文時代に誕生した。豪雪は縄文人の生活を阻む半面、四季の瑞々しい美しさを生み、人々の感性や発想を豊かに育んだ。\n\nそして、この雪国から縄文時代中期の5000年前に誕生したのが「火焔型土器」である。力強く燃える焔、また見る者によっては水の流れや波などをイメージさせる意匠、造形は圧倒的である。この造形の中で「突起」を持つということが縄文土器の特徴であり、中でも特に大仰な4つの突起を持つ火焔型土器は縄文土器を代表するものである。\n\n大仰な突起は、煮炊きする具の出し入れにはかえって邪魔になる。つまり現実の用途にかなった器ではなく、縄文人の世界観から紡ぎだされた観念を表現した器なのである。古今東西の焼物の中で突起を持つものは、火焔型土器に代表される日本の縄文土器だけであり、世界の中で際立った存在である。縄文文化は、日本文化の源流であり、その意味で火焔型土器は浮世絵や歌舞伎ととともに、日本文化そのものなのである。\n\nこの火焔型土器の美を最初に発見したのは、芸術家・岡本太郎であった。「縄文土器の荒々しい、不協和な形態、紋様に心構えなしにふれると、誰でもドギッとする。なかんずく爛熟した中期の土器の凄まじさは言語を絶するのである。」の書き出しで始まる『縄文土器論』を記した太郎は、火焔型土器を見て「なんだ、コレは！」と叫んだという。そして、「火焔土器の激しさ優美さ」の言葉も残している。太郎を驚愕させた火焔型土器はほぼ新潟県域にしかなく、その本場が信濃川流域である。それはまさにこの地が「火焔土器のクニ」であり、山、川、海を通じた周辺地域との交流点であったからである。\n\n火焔型土器を作った人々のムラは、信濃川流域の河岸段丘上にあり、その多くは湧水の近くに作られた。中央の広場を囲むように50軒ほどの竪穴住居が配置された直径100ｍほどの「環状集落」である。祭祀の場にもなった広場を中心に、馬蹄形に竪穴住居がめぐり、住居と広場の間には穴を掘って死者を葬った墓地が見つかっている。さらに木の実などを保存した貯蔵穴が並び、ムラのはずれには使われなくなった道具などを廃棄したゴミ捨て場、獣を追い込んで捕えた落とし穴もある。そのゾーニングは、整然として極めて計画的である。",
+      "themes": [
+        "海・水辺",
+        "森・木",
+        "祭礼",
+        "繊維・染料",
+        "食文化・酒",
+        "鉱石・鉱物"
+      ],
+      "periods": [
+        "縄文"
+      ],
+      "related_areas_text": "新潟県（十日町市，新潟市，三条市，長岡市，魚沼市, 津南町）",
+      "prefecture_codes": [
+        "15"
+      ],
+      "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story026/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:26:55.437Z",
+        "confidence": "medium"
+      },
+      "relevance_score": null
+    },
+    {
+      "key": "japan_heritage:089",
+      "story_id": "089",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "究極の雪国とおかまち",
+      "subtitle_ja": "―真説！豪雪地ものがたり―",
+      "title": "궁극의 설국 도카마치 — 진설! 폭설 지대 이야기",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの究極の雪国とおかまちについて。豪雪地では、雪で大地がふさがれる期間が４月頃まで続く。そのた",
+      "summary": "일본유산(Japan Heritage) 포털사이트의 '궁극의 설국 도카마치'에 대한 정보. 폭설 지대에서는 눈으로 대지가 덮이는 기간이 4월경까지 계속된다.",
+      "body_ja": "世界有数の豪雪地として知られる新潟県十日町市。ここには豪雪に育まれた「着もの・食べもの・建もの・まつり・美」のものがたりが揃っている。人々は雪と闘いながらもその恵みを活かして暮らし、雪の中に楽しみさえも見出してこの地に住み継いできた。ここは真の豪雪地ものがたりを体感できる究極の雪国である。\n\n日本の国土のうちおよそ半分は「雪国」である。中でも、日本の中央部に位置する新潟県十日町市は、市街地でも平年の積雪深が２ｍを超える世界でも有数の豪雪地。「雪国」の中の「雪国」である。この地に大量の雪が降るようになった縄文時代中期以来、人々は雪と闘いながらもその恵みを活かして暮らし、現在まで住み継いできた。ここには、豪雪に育まれてきた歴史と文化の「ものがたり」がある。\n\n日本列島ではカラムシなどの植物繊維を素材とする編布の伝統が縄文時代から続いていたが、中世の法衣を最後に途絶えたといわれ、長らく「幻の布」といわれていた。しかし、全国でも十日町市周辺にのみ「アンギン」等の名で残存し、主に農民の作業衣として近世まで製作・使用されていた。最後の作り手といわれた人からの聞き取りによって奇跡的に製法が復元・伝承され、現在も編み継がれている。\n\n一方、越後では古代からカラムシの繊維でつくる「青苧(あおそ)」を材料とした上質な麻織物「越後布」が生産されていた。戦国時代、青苧や越後布は上杉氏の度重なる戦の費用を賄う重要な財源となった。江戸時代になって越後布に改良を重ね、より高い付加価値を生み出したのが特産品「越後縮」である。越後縮は将軍家や大奥などでも愛用された。主産地であるこの地域には縮市が開設され、京、大阪、江戸から商人が盛んに出入りし、取引の中心地として大いに栄えた。
+```
+
+=== Case L2-01 ===
+Topic / intent: 東北 秘湯ranges
+Query: What are some traditional onsen ryokan in the Tohoku region?
+Tool: get_hotels({"prefecture": "Akita"})
+Expected entities (ground truth, may be empty): (none specified)
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "e330465eef3e",
+      "confidence": "confirmed",
+      "name": "ANAクラウンプラザホテル秋田",
+      "name_en": "ANA Crowne Plaza Akita",
+      "name_zh": "秋田全日空皇冠假日酒店",
+      "name_ko": "아키타 호텔",
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 39.7174191,
+        "lng": 140.1263726
+      },
+      "phone": "+81-18-832-1111",
+      "website": "https://www.anacpakita.jp",
+      "postal_code": "010-0001",
+      "street": "010-0001 秋田県秋田市中通2-6-1",
+      "prefecture_code": "05",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q76021053",
+          "url": "https://www.wikidata.org/wiki/Q76021053"
+        },
+        {
+          "source": "osm",
+          "id": "node/5506391439",
+          "url": "https://www.openstreetmap.org/node/5506391439"
+        }
+      ]
+    },
+    {
+      "id": "147da2cfb50b",
+      "confidence": "confirmed",
+      "name": "HOTEL RADISH HOUSE",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "guest_house",
+      "coordinates": {
+        "lat": 39.7649496,
+        "lng": 140.7501762
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "05",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/11002766905",
+          "url": "https://www.openstreetmap.org/node/11002766905"
+        },
+        {
+          "source": "osm",
+          "id": "way/1184589796",
+          "url": "https://www.openstreetmap.org/way/1184589796"
+        }
+      ]
+    },
+    {
+      "id": "8196f86f75be",
+      "confidence": "confirmed",
+      "name": "towadako backpackers",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "guest_house",
+      "coordinates": {
+        "lat": 40.4256535,
+        "lng": 140.8995865
+      },
+      "phone": "0176752606",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "05",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4196579489",
+          "url": "https://www.openstreetmap.org/node/4196579489"
+        },
+        {
+          "source": "osm",
+          "id": "node/6872378687",
+          "url": "https://www.openstreetmap.org/node/6872378687"
+        }
+      ]
+    },
+    {
+      "id": "7d12638e8742",
+      "confidence": "confirmed",
+      "name": "グランデール有浦",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "apartment",
+      "lodging_type": "apartment",
+      "coordinates": {
+        "lat": 40.2824573,
+        "lng": 140.5640421
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "05",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/9936335617",
+          "url": "https://www.openstreetmap.org/node/9936335617"
+        },
+        {
+          "source": "osm",
+          "id": "node/9936936518",
+          "url": "https://www.openstreetmap.org/node/9936936518"
+        }
+      ]
+    },
+    {
+      "id": "f1ef70580714",
+      "confidence": "confirmed",
+      "name": "ホテル・プラザクリプトン (秋田県森林学習交流館)",
+      "name_en": "Plaza Crypton",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 39.6263968,
+        "lng": 140.203075
+      },
+      "phone": "018-882-4811",
+      "website": null,
+      "postal_code": "019-2611",
+      "street": null,
+      "prefecture_code": "05",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4212327062",
+          "url": "https://www.openstreetmap.org/node/4212327062"
+        },
+        {
+          "source": "osm",
+          "id": "way/373719000",
+          "url": "https://www.openstreetmap.org/way/373719000"
+        }
+      ]
+    },
+    {
+      "
+```
+
+=== Case L2-02 ===
+Topic / intent: 四国遍路 宿坊
+Query: 四国の「お遍路」で泊まれる宿坊を教えて
+Tool: get_hotels({"prefecture": "Tokushima"})
+Expected entities (ground truth, may be empty): (none specified)
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "e37574247bf3",
+      "confidence": "confirmed",
+      "name": "Togenkyo-Iya",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "guest_house",
+      "coordinates": {
+        "lat": 33.8820316,
+        "lng": 133.9359482
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "36",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/389540433",
+          "url": "https://www.openstreetmap.org/way/389540433"
+        },
+        {
+          "source": "osm",
+          "id": "way/389540434",
+          "url": "https://www.openstreetmap.org/way/389540434"
+        }
+      ]
+    },
+    {
+      "id": "9c0f3bd6c052",
+      "confidence": "confirmed",
+      "name": "いやしの温泉郷",
+      "name_en": "Iyashi-no-Onsenkyo",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 33.8686484,
+        "lng": 133.9788609
+      },
+      "phone": "0883-88-2975",
+      "website": "http://iyashino-onsenkyo.com/",
+      "postal_code": "778-0201",
+      "street": "東祖谷菅生",
+      "prefecture_code": "36",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/3718179777",
+          "url": "https://www.openstreetmap.org/node/3718179777"
+        },
+        {
+          "source": "osm",
+          "id": "way/312538774",
+          "url": "https://www.openstreetmap.org/way/312538774"
+        }
+      ]
+    },
+    {
+      "id": "de082f6d33d7",
+      "confidence": "confirmed",
+      "name": "三笠屋旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 34.072731,
+        "lng": 134.3573179
+      },
+      "phone": "0883-24-2511",
+      "website": null,
+      "postal_code": "776-0010",
+      "street": "鴨島町鴨島",
+      "prefecture_code": "36",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/13441905162",
+          "url": "https://www.openstreetmap.org/node/13441905162"
+        },
+        {
+          "source": "osm",
+          "id": "way/311484641",
+          "url": "https://www.openstreetmap.org/way/311484641"
+        }
+      ]
+    },
+    {
+      "id": "e2ceee070462",
+      "confidence": "confirmed",
+      "name": "丸徳旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 34.070875,
+        "lng": 134.5498288
+      },
+      "phone": "088-623-3385",
+      "website": null,
+      "postal_code": "770-0846",
+      "street": "南内町",
+      "prefecture_code": "36",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/310188686",
+          "url": "https://www.openstreetmap.org/way/310188686"
+        },
+        {
+          "source": "osm",
+          "id": "way/310188721",
+          "url": "https://www.openstreetmap.org/way/310188721"
+        }
+      ]
+    },
+    {
+      "id": "f79547dc5c0b",
+      "confidence": "confirmed",
+      "name": "喜楽",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 34.0776142,
+        "lng": 134.563647
+      },
+      "phone": "088-625-4275",
+      "website": "https://ki-raku.info/",
+      "postal_code": "770-0814",
+      "street": "南常三島町",
+      "prefecture_code": "36",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/310168080",
+          "url": "https://www.openstreetmap.org/way/310168080"
+        },
+        {
+          "source": "osm",
+          "id": "way/310168600",
+          "url": "https://www.openstreetmap.org/way/310168600"
+        }
+      ]
+    },
+    {
+      "id": "a3de10430d1a",
+      "confidence": "confirmed",
+      "name": "土柱パラダイス",
+   
+```
+
+=== Case L2-03 ===
+Topic / intent: 北海道 農業体験
+Query: 推荐一些北海道的农家体验。
+Tool: get_spots({"prefecture": "Hokkaido", "limit": 50})
+Expected entities (ground truth, may be empty): (none specified)
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1143974",
+      "name": "松前城",
+      "name_en": "Matsumae Castle",
+      "name_zh": "松前城",
+      "name_ko": "마쓰마에성",
+      "description_en": "Japanese castle in Matsumae, Hokkaido",
+      "coordinates": {
+        "lat": 41.429833,
+        "lng": 140.108389
+      },
+      "url": "https://www.wikidata.org/wiki/Q1143974",
+      "municipality": "北海道",
+      "municipality_code": "010006",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle"
+      ],
+      "prominence_score": 1,
+      "heritage_designations": [
+        "Q123130241",
+        "Q11403686",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Component of Nationally-designated Historic Site",
+        "Hokkaido Heritage",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1196357",
+      "name": "五稜郭",
+      "name_en": "Goryōkaku",
+      "name_zh": "五稜郭",
+      "name_ko": "고료카쿠",
+      "description_en": "fortress",
+      "coordinates": {
+        "lat": 41.796944,
+        "lng": 140.756944
+      },
+      "url": "https://www.wikidata.org/wiki/Q1196357",
+      "municipality": "北海道",
+      "municipality_code": "010006",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "monument"
+      ],
+      "prominence_score": 1,
+      "heritage_designations": [
+        "Q30834580",
+        "Q26764449",
+        "Q11403686"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Special Historic Site of Japan",
+        "Hokkaido Heritage"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1138090",
+      "name": "昭和新山",
+      "name_en": "Shōwa-shinzan",
+      "name_zh": "昭和新山",
+      "name_ko": "쇼와신산",
+      "description_en": "volcano in Sobetsu, Hokkaido, Japan",
+      "coordinates": {
+        "lat": 42.5425,
+        "lng": 140.864444444
+      },
+      "url": "https://www.wikidata.org/wiki/Q1138090",
+      "municipality": "壮瞥町",
+      "municipality_code": "015750",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "prominence_score": 0.95,
+      "heritage_designations": [
+        "Q122904442",
+        "Q96207459"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument",
+        "Special Natural Monument of Japan"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1140619",
+      "name": "札幌市時計台",
+      "name_en": "Sapporo Clock Tower",
+      "name_zh": "札幌市鐘樓",
+      "name_ko": "삿포로 시계탑",
+      "description_en": "building in Chuo-ku, Hokkaido Prefecture, Japan",
+      "coordinates": {
+        "lat": 43.062602,
+        "lng": 141.353681
+      },
+      "url": "https://www.wikidata.org/wiki/Q1140619",
+      "municipality": "中央区",
+      "municipality_code": "011011",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "museum"
+      ],
+      "prominence_score": 0.95,
+      "heritage_designations": [
+        "Q6804492",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Q6804492",
+        "Important Cultural Property of Japan"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11511817",
+      "name": "旭橋",
+      "name_en": "Asahi Bridge",
+      "name_zh": "旭橋",
+      "name_ko": "아사히교",
+      "description_en": "bridge in Asahikawa, Japan",
+      "coordinates": {
+        "lat": 43.778333333,
+        "lng": 142.36
+      },
+      "url": "https://www.wikidata.org/wiki/Q11511817",
+      "municipality": "旭川市",
+      "municipality_code": "012041",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "prominence_score": 0.95,
+      "heritage_designations": [
+        "Q11423672",
+        "Q11403686"
+      ],
+      "heritage_designations_labels": [
+        "JSCE Selected Civil Engineering Heritage",
+        "Hokkaido Heritage"
+      ]
+    },
+    {
+      "source": "wikidata",
+      "
+```
+
+=== Case L2-04 ===
+Topic / intent: 九州 陶芸窯元
+Query: Where can I see traditional pottery being made in Kyushu?
+Tool: get_local_specialty({"prefecture": "Saga", "category": "craft", "lang": "en"})
+Expected entities (ground truth, may be empty): (none specified)
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "41",
+  "category_filter": "craft",
+  "q": null,
+  "lang": "en",
+  "count": 3,
+  "items": [
+    {
+      "key": "meti_densan:0123",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0123",
+      "name_ja": "博多織",
+      "name": "Hakata Ori (Hakata Weave)",
+      "description_ja": "「献上博多」に代表される平織（ひらおり）は優美華麗なあでやかさを、紋織（もんおり）は繊細緻密な織柄と見事な色合いを見せています。博多帯は締めやすく、締める時の「キュッキュッ」という絹鳴りは博多織ならではのものです。",
+      "description": "The plain weave (hiraori) typified by \"Kenjo Hakata\" displays elegant and brilliant beauty, while the figured weave (mon'ori) exhibits finely detailed woven patterns and splendid coloring. Hakata obi sashes are easy to tie, and the distinctive silken rustling sound—a crisp \"squeak\"—made when tying them is unique to Hakata Ori.",
+      "designation_date": "昭和51年6月14日",
+      "production_area_text": "福岡市、筑紫野市、大野城市他、佐賀県／唐津市他、大分県",
+      "prefecture_codes": [
+        "40",
+        "41",
+        "44"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0123/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.798Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0424",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "陶磁器",
+      "craft_id": "0424",
+      "name_ja": "伊万里・有田焼",
+      "name": "Imari-Arita Ware",
+      "description_ja": "伊万里・有田焼は、白く美しい磁肌や華やかな絵付け、食器としての使いやすさや丈夫さがその特色です。",
+      "description": "Imari-Arita Ware is characterized by its white and beautiful porcelain surface, vibrant painted decorations, and its practicality and durability as tableware.",
+      "designation_date": "昭和52年10月14日",
+      "production_area_text": "伊万里市、武雄市、嬉野市、西松浦郡有田町",
+      "prefecture_codes": [
+        "41"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0424/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0425",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "陶磁器",
+      "craft_id": "0425",
+      "name_ja": "唐津焼",
+      "name": "Karatsu Ware",
+      "description_ja": "唐津焼の魅力は、土の味わいと素朴な作風にあります。描かれている模様は野趣に富み、土の温もりを感じさせます。製品では特に茶陶器として有名です。",
+      "description": "The appeal of Karatsu ware lies in its earthy quality and unpretentious style. The patterns depicted are rich in rustic charm and evoke the warmth of the clay. Among its products, it is particularly renowned as tea ceremony ceramics.",
+      "designation_date": "昭和63年6月9日",
+      "production_area_text": "唐津市、武雄市、多久市、伊万里市、嬉野市、東松浦郡玄海町、西松浦郡有田町、杵島郡白石町",
+      "prefecture_codes": [
+        "41",
+        "24"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0425/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "農林水産省 (MAFF) Geographical Indication",
+      "category": "food"
+    },
+    {
+      "name": "経済産業省 (METI) Traditional Crafts (伝統的工芸品)",
+      "category": "craft"
+    }
+  ],
+  "note": "Only items officially designated by MAFF or METI appear. Non-designated regional foods/crafts are intentionally excluded.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+=== Case L2-05 ===
+Topic / intent: 東北 祭り
+Query: 도호쿠 지방의 전통 축제를 알려주세요.
+Tool: get_festivals({"prefecture": "Aomori", "lang": "ko"})
+Expected entities (ground truth, may be empty): (none specified)
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "02",
+  "lang": "ko",
+  "count": 2,
+  "total_matching": 2,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q5637073",
+      "name_ja": "八戸三社大祭",
+      "name_en": "Hachinohe Sansha Taisai",
+      "name": "하치노헤 산샤 타이사이",
+      "description_ja": "青森県八戸市で行われる祭礼",
+      "description_en": "festival of Hachinohe, Aomori, Japan",
+      "description": "아오모리현 하치노헤시에서 열리는 제례.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": "1721-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q5637073",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q862407",
+      "name_ja": "青森ねぶた",
+      "name_en": "Aomori Nebuta Matsuri",
+      "name": "아오모리 네부타",
+      "description_ja": "日本の青森県青森市で毎年8月に開催される祭",
+      "description_en": "Japanese summer festival",
+      "description": "일본 아오모리현 아오모리시에서 매년 8월에 개최되는 축제.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q862407",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "national_heritage": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "다이니치도 부가쿠",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "아키타현 가즈노시의 다이니치레이키 신사에 전해 내려오는 민속 예능.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00275",
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11511418",
+      "name_ja": "早池峰神楽",
+      "name_en": "Hayachine Kagura",
+      "name": "하야치네 가구라",
+      "description_ja": null,
+      "description_en": "type of dance",
+      "description": "춤의 한 종류.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00272",
+      "source_url": "https://www.wikidata.org/wiki/Q11511418",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "low"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "가와고에 히카와 마쓰리",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "사이타마현 가와고에시의 가와고에 히카와 신사의 제례.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11271139",
+      "name_ja": "たてもん祭り",
+      "name_en": "Uozu Tatemon Festival",
+      "name": "다테몬 축제",
+      "description_ja": "富山県魚津市の諏訪神社の夏季祭礼",
+      "description_en": null,
+      "description": "도야마현 우오즈시의 스와 신사에서 열리는 여름 제례.",
+      "designation": "UNESCO Inta
+```

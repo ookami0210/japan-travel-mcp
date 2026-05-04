@@ -1,0 +1,100 @@
+{
+  "id": "eda438576485",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 12m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111406753",
+      "source_url": "https://www.wikidata.org/wiki/Q111406753",
+      "name": "リッチモンドホテル成田",
+      "name_en": "Richmond Hotel Narita",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.7771,
+        "lng": 140.31777
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://richmondnarita.com-hotel.info/",
+      "type": null,
+      "prefecture_code": "12",
+      "raw": {
+        "qid": "Q111406753",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111406753",
+        "name_ja": "リッチモンドホテル成田",
+        "name_en": "Richmond Hotel Narita",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Narita, Japan",
+        "coordinates": {
+          "lat": 35.7771,
+          "lng": 140.31777
+        },
+        "prefecture_code": "12",
+        "admin_code": "122114",
+        "admin_name": "成田市",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://richmondnarita.com-hotel.info/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/9347940049",
+      "source_url": "https://www.openstreetmap.org/node/9347940049",
+      "name": "リッチモンドホテル",
+      "name_en": "Richmond Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.7771686,
+        "lng": 140.3178777
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "http://narita.richmondhotel.jp/",
+      "type": "hotel",
+      "prefecture_code": "12",
+      "raw": {
+        "osm_id": "node/9347940049",
+        "osm_url": "https://www.openstreetmap.org/node/9347940049",
+        "type": "hotel",
+        "name": "リッチモンドホテル",
+        "name_en": "Richmond Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.7771686,
+          "lng": 140.3178777
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": "http://narita.richmondhotel.jp/",
+        "stars": null,
+        "raw_tags": {
+          "branch:en": "Narita",
+          "name": "リッチモンドホテル",
+          "name:en": "Richmond Hotel",
+          "name:ja": "リッチモンドホテル",
+          "tourism": "hotel",
+          "website": "http://narita.richmondhotel.jp/",
+          "wikidata": "Q111406753"
+        }
+      }
+    }
+  ]
+}
