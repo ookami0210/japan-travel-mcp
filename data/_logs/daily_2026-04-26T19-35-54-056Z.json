@@ -1,0 +1,20 @@
+{
+  "run_type": "daily",
+  "municipalities_processed": 70,
+  "prefectures_touched": [
+    "01"
+  ],
+  "total_spots": 899,
+  "total_errors": 277,
+  "started_at": "2026-04-26T18:57:44.508Z",
+  "finished_at": "2026-04-26T19:35:54.056Z",
+  "elapsed_seconds": 2290,
+  "aborted": false,
+  "abort_reason": null,
+  "http": {
+    "success": 2716,
+    "fivexx": 0,
+    "fourxx": 695,
+    "network_errors": 3
+  }
+}

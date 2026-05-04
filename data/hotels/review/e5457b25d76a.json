@@ -1,0 +1,98 @@
+{
+  "id": "e5457b25d76a",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 48m",
+    "name similarity 0.71 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q112009143",
+      "source_url": "https://www.wikidata.org/wiki/Q112009143",
+      "name": "GOOD NATURE HOTEL KYOTO",
+      "name_en": "Good Nature Hotel Kyoto",
+      "name_zh": "京都好風景酒店",
+      "name_ko": "굿 네이처 호텔 교토",
+      "coordinates": {
+        "lat": 35.002544,
+        "lng": 135.76912
+      },
+      "phone": null,
+      "street": "600-8022 京都府京都市下京区河原町通四条下ル2丁目稲荷町318-6",
+      "postal_code": null,
+      "website": "https://goodnaturehotel.jp/",
+      "type": null,
+      "prefecture_code": "26",
+      "raw": {
+        "qid": "Q112009143",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q112009143",
+        "name_ja": "GOOD NATURE HOTEL KYOTO",
+        "name_en": "Good Nature Hotel Kyoto",
+        "name_zh": "京都好風景酒店",
+        "name_ko": "굿 네이처 호텔 교토",
+        "description_en": "hotel in Kyoto, Japan",
+        "coordinates": {
+          "lat": 35.002544,
+          "lng": 135.76912
+        },
+        "prefecture_code": "26",
+        "admin_code": "260002",
+        "admin_name": "京都府",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://goodnaturehotel.jp/",
+        "phone": null,
+        "street_address": "600-8022 京都府京都市下京区河原町通四条下ル2丁目稲荷町318-6",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/701367076",
+      "source_url": "https://www.openstreetmap.org/way/701367076",
+      "name": "GOOD NATURE STATION",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.0025277,
+        "lng": 135.7685944
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://goodnaturestation.com/",
+      "type": "hotel",
+      "prefecture_code": "26",
+      "raw": {
+        "osm_id": "way/701367076",
+        "osm_url": "https://www.openstreetmap.org/way/701367076",
+        "type": "hotel",
+        "name": "GOOD NATURE STATION",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.0025277,
+          "lng": 135.7685944
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": "https://goodnaturestation.com/",
+        "stars": null,
+        "raw_tags": {
+          "building": "hotel",
+          "name": "GOOD NATURE STATION",
+          "start_date": "2019-12",
+          "tourism": "hotel",
+          "website": "https://goodnaturestation.com/"
+        }
+      }
+    }
+  ]
+}

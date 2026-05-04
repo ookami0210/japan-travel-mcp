@@ -1,0 +1,97 @@
+{
+  "id": "439a57d74bd1",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 55m",
+    "name similarity 0.71 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q17191396",
+      "source_url": "https://www.wikidata.org/wiki/Q17191396",
+      "name": "熱海後楽園ホテル",
+      "name_en": "Atami Korakuen Hotel",
+      "name_zh": "熱海後樂園",
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.088917,
+        "lng": 139.07895
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.atamikorakuen.co.jp/",
+      "type": null,
+      "prefecture_code": "22",
+      "raw": {
+        "qid": "Q17191396",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q17191396",
+        "name_ja": "熱海後楽園ホテル",
+        "name_en": "Atami Korakuen Hotel",
+        "name_zh": "熱海後樂園",
+        "name_ko": null,
+        "description_en": "hotel in Atami, Japan",
+        "coordinates": {
+          "lat": 35.088917,
+          "lng": 139.07895
+        },
+        "prefecture_code": "22",
+        "admin_code": "220001",
+        "admin_name": "静岡県",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.atamikorakuen.co.jp/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/1119101268",
+      "source_url": "https://www.openstreetmap.org/way/1119101268",
+      "name": "熱海ベイリゾート後楽園",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.0886791,
+        "lng": 139.0794738
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "22",
+      "raw": {
+        "osm_id": "way/1119101268",
+        "osm_url": "https://www.openstreetmap.org/way/1119101268",
+        "type": "hotel",
+        "name": "熱海ベイリゾート後楽園",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.0886791,
+          "lng": 139.0794738
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "landuse": "retail",
+          "layer": "-1",
+          "name": "熱海ベイリゾート後楽園",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

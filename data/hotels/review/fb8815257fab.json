@@ -1,0 +1,96 @@
+{
+  "id": "fb8815257fab",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 12m",
+    "name similarity 0.67 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111219073",
+      "source_url": "https://www.wikidata.org/wiki/Q111219073",
+      "name": "ストリングスホテル名古屋",
+      "name_en": "Strings Hotel Nagoya",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.16366,
+        "lng": 136.88437
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.strings-hotel.jp/nagoya/",
+      "type": null,
+      "prefecture_code": "23",
+      "raw": {
+        "qid": "Q111219073",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111219073",
+        "name_ja": "ストリングスホテル名古屋",
+        "name_en": "Strings Hotel Nagoya",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Nagoya, Japan",
+        "coordinates": {
+          "lat": 35.16366,
+          "lng": 136.88437
+        },
+        "prefecture_code": "23",
+        "admin_code": "230006",
+        "admin_name": "愛知県",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.strings-hotel.jp/nagoya/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/11703600655",
+      "source_url": "https://www.openstreetmap.org/node/11703600655",
+      "name": "ストリングスホテル",
+      "name_en": "Strings Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.1637651,
+        "lng": 136.884335
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "23",
+      "raw": {
+        "osm_id": "node/11703600655",
+        "osm_url": "https://www.openstreetmap.org/node/11703600655",
+        "type": "hotel",
+        "name": "ストリングスホテル",
+        "name_en": "Strings Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.1637651,
+          "lng": 136.884335
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "ストリングスホテル",
+          "name:en": "Strings Hotel",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "id": "08b5dc43b196",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 10m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q11569074",
+      "source_url": "https://www.wikidata.org/wiki/Q11569074",
+      "name": "熱海ニューフジヤホテル",
+      "name_en": "Atami New Fujiya Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.097161,
+        "lng": 139.07232
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://www.itoenhotel.com/atami_newfujiyahotel/",
+      "type": null,
+      "prefecture_code": "22",
+      "raw": {
+        "qid": "Q11569074",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q11569074",
+        "name_ja": "熱海ニューフジヤホテル",
+        "name_en": "Atami New Fujiya Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": null,
+        "coordinates": {
+          "lat": 35.097161,
+          "lng": 139.07232
+        },
+        "prefecture_code": "22",
+        "admin_code": "220001",
+        "admin_name": "静岡県",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.itoenhotel.com/atami_newfujiyahotel/",
+        "phone": null,
+        "street_address": null,
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/1488574075",
+      "source_url": "https://www.openstreetmap.org/node/1488574075",
+      "name": "ニューフジヤホテル",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.0971535,
+        "lng": 139.0724301
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "22",
+      "raw": {
+        "osm_id": "node/1488574075",
+        "osm_url": "https://www.openstreetmap.org/node/1488574075",
+        "type": "hotel",
+        "name": "ニューフジヤホテル",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.0971535,
+          "lng": 139.0724301
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "ニューフジヤホテル",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

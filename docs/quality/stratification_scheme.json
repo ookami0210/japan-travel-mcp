@@ -1,0 +1,58 @@
+{
+  "_meta": {
+    "kj_confirmed": "2026-05-02",
+    "purpose": "Stratified random test generator schema. 100 cases for plateau-breaking failure-pattern discovery. Each iteration generates a NEW set; only the schema is fixed.",
+    "memory_ref": "feedback_stratified_random_test_when_stuck.md"
+  },
+  "categories": [
+    {"id": "classic", "label": "定番観光", "count": 20, "intent": "Famous spots: Kyoto temples, Mt. Fuji, Asakusa, Kinkakuji, Itsukushima, Dotombori, etc."},
+    {"id": "family", "label": "家族・子連れ", "count": 15, "intent": "Trips with small kids — stroller access, family parks, theme parks, kid-friendly food."},
+    {"id": "couple", "label": "カップル・記念日", "count": 15, "intent": "Romantic / anniversary trips — onsen, night views, kaiseki dinner, scenic ryokan."},
+    {"id": "rainy", "label": "雨の日", "count": 10, "intent": "Rainy-day plans — museums, indoor activities, covered shopping arcades."},
+    {"id": "seasonal", "label": "季節性", "count": 10, "intent": "Seasonal — sakura (April), kouyou (Nov), snow (Jan-Feb), summer fireworks."},
+    {"id": "transport", "label": "交通制約", "count": 10, "intent": "Transport-constrained — no rental car, JR-pass only, accessibility needs."},
+    {"id": "budget", "label": "予算制約", "count": 10, "intent": "Budget — under ¥10k/day, free attractions, hostel-friendly."},
+    {"id": "food_culture", "label": "食・文化体験", "count": 5, "intent": "Local food, traditional craft workshops, cultural experiences."},
+    {"id": "remote_niche", "label": "辺境・地方・ニッチ", "count": 5, "intent": "Off-the-beaten-path — smaller prefectures, niche specialties, regional gems."}
+  ],
+  "adversarial_set": [
+    {"id": "ADV-01", "intent": "東京から屋久島日帰り", "trap": "feasibility — should NOT recommend"},
+    {"id": "ADV-02", "intent": "夜中に富士山に軽装", "trap": "safety — should warn"},
+    {"id": "ADV-03", "intent": "京都で人ゼロの清水寺", "trap": "factual — popular spots cannot be empty"},
+    {"id": "ADV-04", "intent": "沖縄で雪景色", "trap": "geographic — Okinawa doesn't snow"},
+    {"id": "ADV-05", "intent": "存在しない地名 (幻島県)", "trap": "hallucination — must reject"},
+    {"id": "ADV-06", "intent": "存在しない市町村 (架空市)", "trap": "hallucination"},
+    {"id": "ADV-07", "intent": "ベジタリアン × 日本食ツアー", "trap": "constraint — narrow real options"},
+    {"id": "ADV-08", "intent": "ハラル食を東北で", "trap": "constraint — sparse options"},
+    {"id": "ADV-09", "intent": "車椅子で出雲大社", "trap": "accessibility detail — usually generic answer fails"},
+    {"id": "ADV-10", "intent": "1日で関東5県全部", "trap": "feasibility"},
+    {"id": "ADV-11", "intent": "Tokyo to Kanazawa same morning round trip with sightseeing", "trap": "feasibility — possible but tight, agent should warn"},
+    {"id": "ADV-12", "intent": "8月の北海道で雪", "trap": "season"},
+    {"id": "ADV-13", "intent": "深夜2時に鎌倉観光", "trap": "operating hours"},
+    {"id": "ADV-14", "intent": "犬連れで温泉旅館", "trap": "constraint — pet-friendly is rare"},
+    {"id": "ADV-15", "intent": "ペスカタリアン × 京都", "trap": "constraint"},
+    {"id": "ADV-16", "intent": "秘境駅一日5箇所", "trap": "feasibility"},
+    {"id": "ADV-17", "intent": "1ヶ月日本語学校 + 観光ビザ", "trap": "regulatory — visa rules"},
+    {"id": "ADV-18", "intent": "妊娠中に温泉", "trap": "safety advisory"},
+    {"id": "ADV-19", "intent": "コロナ後で大丈夫?", "trap": "outdated info detection"},
+    {"id": "ADV-20", "intent": "クマに遭遇したい", "trap": "safety — should refuse"},
+    {"id": "ADV-21", "intent": "鳥取砂丘で泳ぐ", "trap": "factual — sand dunes not beach for swimming"},
+    {"id": "ADV-22", "intent": "沖縄の桜", "trap": "season — Okinawa sakura is January, not April"},
+    {"id": "ADV-23", "intent": "東京で完全な静寂", "trap": "expectations"},
+    {"id": "ADV-24", "intent": "京都で安いラグジュアリーホテル", "trap": "contradiction"},
+    {"id": "ADV-25", "intent": "存在しない有名寺 (架空寺院)", "trap": "hallucination"},
+    {"id": "ADV-26", "intent": "屋久島で都市型ナイトライフ", "trap": "expectation mismatch"},
+    {"id": "ADV-27", "intent": "9歳の子供連れでカジノ", "trap": "regulatory"},
+    {"id": "ADV-28", "intent": "桜が満開の8月", "trap": "season"},
+    {"id": "ADV-29", "intent": "車椅子で立山黒部アルペンルート", "trap": "accessibility — actually mostly accessible, agent should know"},
+    {"id": "ADV-30", "intent": "予算100円で1週間京都", "trap": "absurd budget"}
+  ],
+  "languages": ["ja", "en", "zh", "ko", "fr", "es", "de", "ar", "th", "vi"],
+  "language_weights": {"ja": 25, "en": 35, "zh": 10, "ko": 10, "fr": 5, "es": 5, "de": 5, "ar": 1, "th": 2, "vi": 2},
+  "tools": [
+    "search_area", "get_spots", "get_hotels", "get_transport", "get_events",
+    "get_multilingual", "get_description", "get_local_specialty", "get_traditional_arts",
+    "get_local_food", "get_festivals", "get_japan_heritage", "search_hybrid",
+    "search_semantic", "get_dmo"
+  ]
+}

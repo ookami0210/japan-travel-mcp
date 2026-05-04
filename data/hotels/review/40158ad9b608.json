@@ -1,0 +1,104 @@
+{
+  "id": "40158ad9b608",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 20m",
+    "name similarity 0.68 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q111866679",
+      "source_url": "https://www.wikidata.org/wiki/Q111866679",
+      "name": "天然温泉 玉藻の湯 ドーミーイン高松中央公園前",
+      "name_en": "Dormy Inn Takamatsuchuokoenmae Natural Hot Spring",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.33978,
+        "lng": 134.04742
+      },
+      "phone": null,
+      "street": "〒760-0018香川県高松市天神前1番3号",
+      "postal_code": null,
+      "website": "https://dormy-hotels.com/dormyinn/hotels/takamatsuchuo/",
+      "type": null,
+      "prefecture_code": "37",
+      "raw": {
+        "qid": "Q111866679",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q111866679",
+        "name_ja": "天然温泉 玉藻の湯 ドーミーイン高松中央公園前",
+        "name_en": "Dormy Inn Takamatsuchuokoenmae Natural Hot Spring",
+        "name_zh": null,
+        "name_ko": null,
+        "description_en": "hotel in Takamatsu, Japan",
+        "coordinates": {
+          "lat": 34.33978,
+          "lng": 134.04742
+        },
+        "prefecture_code": "37",
+        "admin_code": "370002",
+        "admin_name": "香川県",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://dormy-hotels.com/dormyinn/hotels/takamatsuchuo/",
+        "phone": null,
+        "street_address": "〒760-0018香川県高松市天神前1番3号",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/10304532169",
+      "source_url": "https://www.openstreetmap.org/node/10304532169",
+      "name": "ドーミーイン高松中央公園前",
+      "name_en": "Dormy Inn Takamatsuchuokoenmae",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.3398268,
+        "lng": 134.0472059
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "760-0018",
+      "website": "https://www.hotespa.net/hotels/chuotakamatsu/",
+      "type": "hotel",
+      "prefecture_code": "37",
+      "raw": {
+        "osm_id": "node/10304532169",
+        "osm_url": "https://www.openstreetmap.org/node/10304532169",
+        "type": "hotel",
+        "name": "ドーミーイン高松中央公園前",
+        "name_en": "Dormy Inn Takamatsuchuokoenmae",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.3398268,
+          "lng": 134.0472059
+        },
+        "postal_code": "760-0018",
+        "full_address": null,
+        "city": "高松市",
+        "street": null,
+        "phone": null,
+        "website": "https://www.hotespa.net/hotels/chuotakamatsu/",
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "3",
+          "addr:city": "高松市",
+          "addr:neighbourhood": "1",
+          "addr:postcode": "760-0018",
+          "addr:province": "香川県",
+          "addr:quarter": "天神前",
+          "name": "ドーミーイン高松中央公園前",
+          "name:en": "Dormy Inn Takamatsuchuokoenmae",
+          "tourism": "hotel",
+          "website": "https://www.hotespa.net/hotels/chuotakamatsu/",
+          "wikidata": "Q111866679"
+        }
+      }
+    }
+  ]
+}

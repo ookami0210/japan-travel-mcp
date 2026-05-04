@@ -1,0 +1,110 @@
+{
+  "id": "c7296038ab5d",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 29m",
+    "name similarity 0.67 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q41723388",
+      "source_url": "https://www.wikidata.org/wiki/Q41723388",
+      "name": "三井ガーデンホテル札幌",
+      "name_en": "Mitsui Garden Hotel Sapporo",
+      "name_zh": "三井花園飯店札幌",
+      "name_ko": "미츠이 가든 호텔 삿포로",
+      "coordinates": {
+        "lat": 43.066388888,
+        "lng": 141.346944444
+      },
+      "phone": null,
+      "street": "060-0005 北海道札幌市中央区北五条西6丁目18-3",
+      "postal_code": null,
+      "website": "https://www.gardenhotels.co.jp/sapporo/",
+      "type": null,
+      "prefecture_code": "01",
+      "raw": {
+        "qid": "Q41723388",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q41723388",
+        "name_ja": "三井ガーデンホテル札幌",
+        "name_en": "Mitsui Garden Hotel Sapporo",
+        "name_zh": "三井花園飯店札幌",
+        "name_ko": "미츠이 가든 호텔 삿포로",
+        "description_en": "hotel in Chuo-ku, Sapporo, Hokkaido, Japan",
+        "coordinates": {
+          "lat": 43.066388888,
+          "lng": 141.346944444
+        },
+        "prefecture_code": "01",
+        "admin_code": "010006",
+        "admin_name": "北海道",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.gardenhotels.co.jp/sapporo/",
+        "phone": null,
+        "street_address": "060-0005 北海道札幌市中央区北五条西6丁目18-3",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/7235253002",
+      "source_url": "https://www.openstreetmap.org/node/7235253002",
+      "name": "三井ガーデンホテル札幌ウエスト",
+      "name_en": "Mitsui Garden Hotel Sapporo West",
+      "name_zh": "三井花园饭店札幌西",
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.0665278,
+        "lng": 141.3466496
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "060-0005",
+      "website": "https://www.gardenhotels.co.jp/sapporo-west/",
+      "type": "hotel",
+      "prefecture_code": "01",
+      "raw": {
+        "osm_id": "node/7235253002",
+        "osm_url": "https://www.openstreetmap.org/node/7235253002",
+        "type": "hotel",
+        "name": "三井ガーデンホテル札幌ウエスト",
+        "name_en": "Mitsui Garden Hotel Sapporo West",
+        "name_zh": "三井花园饭店札幌西",
+        "name_ko": null,
+        "coordinates": {
+          "lat": 43.0665278,
+          "lng": 141.3466496
+        },
+        "postal_code": "060-0005",
+        "full_address": null,
+        "city": "札幌市",
+        "street": null,
+        "phone": null,
+        "website": "https://www.gardenhotels.co.jp/sapporo-west/",
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "2",
+          "addr:city": "札幌市",
+          "addr:housenumber": "4",
+          "addr:neighbourhood": "北5条西6丁目",
+          "addr:postcode": "060-0005",
+          "addr:province": "北海道",
+          "addr:suburb": "中央区",
+          "brand": "三井ガーデンホテル",
+          "internet_access": "yes",
+          "name": "三井ガーデンホテル札幌ウエスト",
+          "name:en": "Mitsui Garden Hotel Sapporo West",
+          "name:ja": "三井ガーデンホテル札幌ウエスト",
+          "name:zh": "三井花园饭店札幌西",
+          "operator": "三井不動産ホテルマネジメント",
+          "start_date": "2020-02-20",
+          "tourism": "hotel",
+          "website": "https://www.gardenhotels.co.jp/sapporo-west/"
+        }
+      }
+    }
+  ]
+}

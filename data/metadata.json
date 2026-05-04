@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "project": "japan-travel-mcp",
+  "license": {
+    "data": "CC BY 4.0",
+    "code": "MIT"
+  },
+  "attribution": "Japan Travel MCP by KJ Sunada / KabuK Style Inc.",
+  "sources": [
+    {
+      "name": "全国地方公共団体コード",
+      "publisher": "総務省 (Ministry of Internal Affairs and Communications)",
+      "url": "https://www.soumu.go.jp/denshijiti/code.html",
+      "type": "official_registry",
+      "license": "public_domain"
+    },
+    {
+      "name": "Wikidata",
+      "publisher": "Wikimedia Foundation",
+      "url": "https://www.wikidata.org/",
+      "type": "open_data",
+      "license": "CC0"
+    },
+    {
+      "name": "Municipal tourism pages",
+      "publisher": "Each municipality (varies)",
+      "type": "self_published",
+      "note": "robots.txt is read on every domain. See DATA_POLICY.md."
+    }
+  ],
+  "coverage": {
+    "prefectures_total": 47,
+    "entities_total": 1938,
+    "of_which_municipalities": 1741,
+    "of_which_designated_city_wards": 197,
+    "note": "All 1,938 entities are treated in parallel. The 1,741 figure is the conventional 'municipality' count (市町村 + 特別区); the 197 are 政令指定都市の行政区 which carry their own JIS codes."
+  },
+  "schedule": {
+    "freshness_target": "30 days",
+    "freshness_target_note": "We aim to refresh every record within 30 days. This is the freshness target, not a load mitigation.",
+    "implementation": {
+      "cron": "GitHub Actions, 03:00 JST daily",
+      "batch_size": 70,
+      "selection": "70 entities with the oldest last_scraped_at",
+      "full_cycle_days": 28
+    },
+    "rate_limit": {
+      "steady_state": "5 seconds minimum between requests to the same domain",
+      "initial_bootstrap": "2 seconds minimum, used only for the first build to complete in hours"
+    }
+  },
+  "data_freshness_promise": "No record left stale beyond 30 days under steady-state operation."
+}

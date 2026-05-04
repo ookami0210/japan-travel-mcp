@@ -1,0 +1,85 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test / Coverage
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.next/
+.parcel-cache/
+
+# Scraper runtime artifacts
+scrapers/.cache/
+scrapers/.state/
+data/_cache/
+*.tmp
+*.lock
+
+# Python (in case scrapers ever use Python helpers)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Translation batch state (contains Anthropic batch IDs, no secrets but transient)
+data/_state/translation_batch_descriptions.json
+data/_state/translation_batch_multilingual.json
+data/_state/r3_parse_failures_*.jsonl
+
+# Bulk runtime data — lives on Hugging Face datasets:
+#   https://huggingface.co/datasets/kjsunada/japan-travel-mcp-data
+# The MCP server downloads these to ~/.japan-travel-mcp/data/ on first run.
+# Scrapers (scrapers/*) write into the local data/ tree at dev time, but the
+# results aren't committed back to git — they get re-uploaded to HF.
+data/translations/
+data/prefectures/*.json
+data/hotels/master.json
+data/hotels/raw/
+data/glossary/
+data/_state/wikidata_attractions.json
+data/_state/municipalities.json
+data/_state/municipality_centroids.json
+data/_state/official_urls.json
+data/_state/dmo_seed_urls.json
+data/r3/*.json
+data/r3/translations/
+
+# Vector embeddings — large, regeneratable from data/ via `npm run embed:build`.
+data/embeddings/
+
+# Quality observability — per-spot scores are big (~10MB / 25k spots).
+# The summary md/json are kept (they're snapshot baselines worth diffing).
+data/_logs/quality_scores_*.jsonl
+
+# Discover-script run state — internal marker only, regenerated each run.
+data/_state/tourism_org_discovery_state.json
+
+# Test harness raw output — large (~8MB), regenerable by re-running the harness.
+docs/quality/test_results.jsonl

@@ -1,0 +1,102 @@
+{
+  "id": "6ac30bebd935",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 2m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/368715624",
+      "source_url": "https://www.openstreetmap.org/node/368715624",
+      "name": "테마모텔",
+      "name_en": "Theme Motel",
+      "name_zh": null,
+      "name_ko": "테마모텔",
+      "coordinates": {
+        "lat": 37.5400685,
+        "lng": 127.216312
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "motel",
+      "prefecture_code": null,
+      "raw": {
+        "osm_id": "node/368715624",
+        "osm_url": "https://www.openstreetmap.org/node/368715624",
+        "type": "motel",
+        "name": "테마모텔",
+        "name_en": "Theme Motel",
+        "name_zh": null,
+        "name_ko": "테마모텔",
+        "coordinates": {
+          "lat": 37.5400685,
+          "lng": 127.216312
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "테마모텔",
+          "name:en": "Theme Motel",
+          "name:ko": "테마모텔",
+          "name:ko-Latn": "Temamotel",
+          "tourism": "motel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/551009277",
+      "source_url": "https://www.openstreetmap.org/way/551009277",
+      "name": "테마호텔",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 37.5400793,
+        "lng": 127.2162873
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "motel",
+      "prefecture_code": null,
+      "raw": {
+        "osm_id": "way/551009277",
+        "osm_url": "https://www.openstreetmap.org/way/551009277",
+        "type": "motel",
+        "name": "테마호텔",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 37.5400793,
+          "lng": 127.2162873
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:housenumber": "38-12",
+          "building": "commercial",
+          "height": "27.55",
+          "name": "테마호텔",
+          "tourism": "motel"
+        }
+      }
+    }
+  ]
+}

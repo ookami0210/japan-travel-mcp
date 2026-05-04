@@ -1,0 +1,85 @@
+{
+  "name": "japan-travel-mcp",
+  "version": "1.0.0",
+  "description": "Comprehensive Japanese travel data for AI agents \u2014 47 prefectures, 1,741 municipalities, multilingual content, all from public sources.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "bin": {
+    "japan-travel-mcp": "dist/src/index.js"
+  },
+  "files": [
+    "dist/src",
+    "data",
+    "README.md",
+    "DATA_POLICY.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x dist/src/index.js",
+    "start": "node dist/src/index.js",
+    "dev": "tsx watch src/index.ts",
+    "scrape:municipality": "tsx scrapers/municipal/run.ts",
+    "scrape:daily": "tsx scrapers/daily.ts",
+    "scrape:pilot": "tsx scrapers/pilot.ts",
+    "scrape:r3": "tsx scrapers/r3_refresh.ts",
+    "translate:r3": "tsx scrapers/translate/translate_r3.ts",
+    "fetch:municipalities": "tsx scrapers/sources/fetch_municipalities.ts",
+    "fetch:maff_gi": "tsx scrapers/sources/fetch_maff_gi.ts",
+    "fetch:meti_densan": "tsx scrapers/sources/fetch_meti_densan.ts",
+    "fetch:japan_heritage": "tsx scrapers/sources/fetch_japan_heritage.ts",
+    "fetch:bunka_intangible": "tsx scrapers/sources/fetch_bunka_intangible.ts",
+    "fetch:unesco_japan": "tsx scrapers/sources/fetch_unesco_japan.ts",
+    "discover:tourism_orgs": "tsx scrapers/sources/discover_tourism_orgs.ts",
+    "scrape:enriched": "tsx scrapers/run_enriched_scrape.ts",
+    "scrape:dmo_websites": "tsx scrapers/sources/scrape_dmo_websites.ts",
+    "embed:build": "tsx scrapers/embed/build_embeddings.ts",
+    "quality:report": "tsx scrapers/quality/quality_report.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:all": "tsc --project tsconfig.scrapers.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "validate:data-sources": "tsx scripts/validate_data_sources.ts"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "japan",
+    "travel",
+    "tourism",
+    "ai-agents",
+    "open-data"
+  ],
+  "author": "KJ Sunada",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ookami0210/japan-travel-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ookami0210/japan-travel-mcp/issues"
+  },
+  "homepage": "https://github.com/ookami0210/japan-travel-mcp#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
+    "@huggingface/transformers": "^4.2.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "cheerio": "^1.0.0",
+    "csv-parse": "^5.5.0",
+    "p-limit": "^6.1.0",
+    "robots-parser": "^3.0.1",
+    "xlsx": "^0.18.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.9"
+  }
+}

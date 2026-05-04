@@ -1,0 +1,66 @@
+# Validate data sources consistency on every PR.
+#
+# Runs scripts/validate_data_sources.ts which cross-checks:
+#   1. Every fetcher file under scrapers/ is documented in DATA_SOURCES.md
+#   2. Every active entry has fetcher + channel + cadence + output
+#   3. R3-channel sources are registered in scrapers/r3_refresh.ts
+#   4. Documented workflow files exist in .github/workflows/
+#
+# Why: prevents the kind of drift that bit us 2026-05-04 (we claimed
+# a thing wasn't scraped when it was, root cause = no SSOT).
+#
+# Triggers on:
+#   - Any PR touching scrapers/ or DATA_SOURCES.md or workflows
+#   - Manual workflow_dispatch
+#
+# Failure → CI red → cannot merge until DATA_SOURCES.md + fetcher inventory
+# + workflow yml + r3_refresh.ts are reconciled.
+
+name: Validate data sources
+
+on:
+  pull_request:
+    paths:
+      - "scrapers/**"
+      - "DATA_SOURCES.md"
+      - ".github/workflows/**"
+      - "scripts/validate_data_sources.ts"
+      - "package.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "scrapers/**"
+      - "DATA_SOURCES.md"
+      - ".github/workflows/**"
+      - "scripts/validate_data_sources.ts"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run DATA_SOURCES.md validation
+        run: npm run validate:data-sources
+
+      - name: Helpful failure message
+        if: failure()
+        run: |
+          echo ""
+          echo "::error::DATA_SOURCES.md is out of sync with fetcher inventory or rotation schedulers."
+          echo "::error::Read the errors above. Likely actions:"
+          echo "::error::  - Added a new fetcher? → register it in DATA_SOURCES.md (assign Channel/Cadence/Output)"
+          echo "::error::  - Added an R3 source? → also add to scrapers/r3_refresh.ts SOURCE_INFO"
+          echo "::error::  - Removed a fetcher? → set DATA_SOURCES.md status=deprecated or delete the entry"
+          echo "::error::  - See .github/pull_request_template.md for the full checklist."

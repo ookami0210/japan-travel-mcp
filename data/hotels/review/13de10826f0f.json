@@ -1,0 +1,104 @@
+{
+  "id": "13de10826f0f",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 29m",
+    "name similarity 0.78 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "wikidata",
+      "source_id": "Q11337859",
+      "source_url": "https://www.wikidata.org/wiki/Q11337859",
+      "name": "JRホテルクレメント徳島",
+      "name_en": "JR Hotel Clement Tokushima",
+      "name_zh": "JR德島克雷緬特飯店",
+      "name_ko": "JR 호텔 클레멘트 도쿠시마",
+      "coordinates": {
+        "lat": 34.074433,
+        "lng": 134.551072
+      },
+      "phone": null,
+      "street": "770-0831 徳島県徳島市寺島本町西1丁目61",
+      "postal_code": null,
+      "website": "https://www.jrclement.co.jp/tokushima/",
+      "type": null,
+      "prefecture_code": "36",
+      "raw": {
+        "qid": "Q11337859",
+        "wikidata_url": "https://www.wikidata.org/wiki/Q11337859",
+        "name_ja": "JRホテルクレメント徳島",
+        "name_en": "JR Hotel Clement Tokushima",
+        "name_zh": "JR德島克雷緬特飯店",
+        "name_ko": "JR 호텔 클레멘트 도쿠시마",
+        "description_en": null,
+        "coordinates": {
+          "lat": 34.074433,
+          "lng": 134.551072
+        },
+        "prefecture_code": "36",
+        "admin_code": "362018",
+        "admin_name": "徳島市",
+        "types": [
+          "Q27686"
+        ],
+        "website": "https://www.jrclement.co.jp/tokushima/",
+        "phone": null,
+        "street_address": "770-0831 徳島県徳島市寺島本町西1丁目61",
+        "postal_code": null
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/2938246353",
+      "source_url": "https://www.openstreetmap.org/node/2938246353",
+      "name": "ホテルクレメント徳島",
+      "name_en": "JR Hotel Clement Tokushima",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.0746406,
+        "lng": 134.5508769
+      },
+      "phone": "088-656-3131",
+      "street": "寺島本町西",
+      "postal_code": "770-0831",
+      "website": "https://www.jrclement.co.jp/",
+      "type": "hotel",
+      "prefecture_code": "36",
+      "raw": {
+        "osm_id": "node/2938246353",
+        "osm_url": "https://www.openstreetmap.org/node/2938246353",
+        "type": "hotel",
+        "name": "ホテルクレメント徳島",
+        "name_en": "JR Hotel Clement Tokushima",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.0746406,
+          "lng": 134.5508769
+        },
+        "postal_code": "770-0831",
+        "full_address": null,
+        "city": "徳島市",
+        "street": "寺島本町西",
+        "phone": "088-656-3131",
+        "website": "https://www.jrclement.co.jp/",
+        "stars": null,
+        "raw_tags": {
+          "addr:city": "徳島市",
+          "addr:housenumber": "1-61",
+          "addr:postcode": "770-0831",
+          "addr:street": "寺島本町西",
+          "name": "ホテルクレメント徳島",
+          "name:en": "JR Hotel Clement Tokushima",
+          "phone": "088-656-3131",
+          "tourism": "hotel",
+          "website": "https://www.jrclement.co.jp/",
+          "wheelchair": "yes",
+          "wikidata": "Q11337859"
+        }
+      }
+    }
+  ]
+}

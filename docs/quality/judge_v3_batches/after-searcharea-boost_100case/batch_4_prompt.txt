@@ -1,0 +1,1867 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case L3-26 ===
+Topic / intent: 宿坊 体験
+Query: I want to spend the night in a Buddhist temple.
+Tool: search_area({"q": "宿坊", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "宿坊",
+  "match_count": 87,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "9c874fdb2591773c",
+      "name": "中斋旅馆",
+      "description": "使用本网站即表示您同意设置和使用Cookie。有关详细信息，请参阅隐私政策。 距离 JR 宫古站步行 8 分钟，距离鱼类和蔬菜市场步行 5 分钟。 此外，还有 900 多本漫画书供您在参观时欣赏。",
+      "url": "https://iwatetabi.jp/cn/spots/87852",
+      "municipality": "九戸村",
+      "prefecture": "岩手県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "f0533fdf90b5422b",
+      "name": "Zhongje Ryokan（中濟日式旅館）",
+      "description": "使用本網站即表示你同意設置和使用Cookie。有關詳細信息，請參閱隱私政策。",
+      "url": "https://iwatetabi.jp/tw/spots/87876",
+      "municipality": "九戸村",
+      "prefecture": "岩手県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "c072b4771ee3df1c",
+      "name": "温故知新の善光寺門前宿泊施設探訪【体験編】",
+      "description": "温故知新の善光寺門前宿泊施設探訪【体験編】 地域：長野エリア かつては僧侶や参拝者が泊まるための施設だった宿坊。近年は寺社文化に触れる非日常の体験を求めて訪れる観光客が増え、多様化しています。座禅や写経などの体験のほか、住職の特技や個性などにまつわる、一風変わった体験ができる宿坊も。宿坊での多彩な体験が、旅の目的として注目を集めています。 更新日：2025年11月17日 かつては僧侶や参拝者が泊まるための施設だった宿坊。近年は寺社文化に触れる非日常の体験を求めて訪れる観光客が増え、多様化しています。座禅や写経などの体験のほか、住職の特技や個性などにまつわる、一風変わった体験ができる宿坊も。宿坊での多彩な体験が、旅の目的として注目を集めています。 記載の内容は、原稿執筆時点の情報です。営業状況やサービス内容、料金等は変更となる場合がございます。詳細は、各施設へお問い合わせください。 「体験宿坊」として10年ほど前からさまざまな仏教体験を実施している「玉照院」。写経体験やお数珠守りづくりなどスタンダードなもののほか、ウォーキング、ヨガ、近年はスキーなど、一見、仏教とは関係のないようにも思える体験コンテンツを用意しています。「そもそも仏教とは生きている間に人間の心が整うためのものであり、心を整えることで体も整い、体を整えることで心も整う、表裏一体のものです」と山ノ井大樹住職。スキーインストラクターやウォーキング指導員の資格を持ち、自ら体験案内を行っています。いずれの体験にも関係するのが、体内で重要な役割を果たしている神経伝達物質の「セロトニン」。精神の安定や安心感、ストレスに対して効能がある脳内物質で、体を動かすことでセロトニンが分泌され、心が安らぐのだと山ノ井住職は話します。例えば、ウォーキングは正しい歩き方指導で呼吸が楽になり、心身ともに整います。そのフィールドを山に移したものがスキーで、技術的なレッスンはしつつも、基本的には自然のなかの広い環境でスキーを楽しむことを享受してもらうことで、セレトニンの分泌を促します。運動だけでなく呼吸を整えることも重要です。椅子に腰かけて取り組む「マインドフルネス椅子座禅」は、息を整えることで心を整え、椅子の上でもできることから、企業研修などでの体験希望も増えているそう。「こうした体験メニューと法話を組み合わせることで仏教をわかりやすく伝え、誰もが仏教を身近に感じてほしい」というのが、山ノ井住職の思いです。 いずれの体験も電話予約制で一人から受け付けており、宿泊者以外も体験可能。近年は健康志向の30～40代の女性参加者も増えているそうです。 全日本スキー連盟準指導員取得、ミズノ認定ウォーキング指導員、ミズノスポーツ・アクティブリーダーの資格を持つ山ノ井住職 お数珠守りづくりは石の意味にこだわらずリラックスして選びながら願いを込める 山ノ井住職はかつてはスキー場に勤務をしていた。現在は「寺SKI」として、戸隠スキー場で初心者から上級者までレベルに応じたスキー体験を通じて参加者のセロトニンの分泌を促している ©玉照院 写経は書くことだけに集中することが心を整える手段になるという 住職が特におすすめするのが、正しいフォームを身につける「寺ウォーキング」。善光寺の歴史や仏教の話をしつつ、境内をウォーキングしながら案内する ©玉照院",
+      "url": "https://www.go-nagano.net/accommodation/id20056",
+      "municipality": "辰野町",
+      "prefecture": "長野県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "1ad47045b888f173",
+      "name": "关于佐贺",
+      "description": "佐贺县位于日本的南部，可以从主要城市乘坐飞机或新干线轻松前往。县内有许多可以享受历史和文化、自然的观光景点，无论谁都可以尽情享受。这里有丰富的自然环境，包括加入拉姆塞尔公约的湿地（东与贺海滩・肥前鹿岛海滩）和玄海国定公园（虹之松原等）等。秋季登录到联合国教科文组织非物质文化遗产的唐津宫日节和亚洲规模最大的热气球大会都会吸引来许多的游客来访。这里作为伊万里烧和有田烧等陶瓷器的产地，也是从很早的时候就十分出名。这里还有日本三大美肌温泉之一的嬉野温泉和武雄温泉，古汤温泉等温泉可以治愈旅途的疲惫。 从武雄神社的本殿沿着被竹林包围的小道进入内部后，可以见到树龄约3000年的大楠树。 其扎根于地面的姿态极具存在感，会给予观赏之人以力量。 深受领主喜爱的陶瓷之乡。拥有山水画般的风景和卓越的陶瓷器文化的秘窑之里。1660年左右（江户时代）作为佐贺藩锅岛家的御用窑，主要制作技术不外传、不考虑成本的最高品质的「锅岛」瓷器。如今还有30个烧制瓷器的窑坚守着，并向下一代传承着传统的制法工艺。 绵延至唐津湾海滨的虹之松原是国家的特别名胜，也是日本三大松原之一的知名景观。 长约4.5km，宽约0.5km，生长着约100万棵黑松。 伊吕波岛是位于伊万里湾中，大小共48个岛屿的总称。据称是空海（弘法大师）以伊吕波48文字为这些岛屿命名的，在蔚蓝的海洋中漂浮着的绿色岛屿的美丽姿态，据说令弘法大师也感叹无法画出其美丽。",
+      "url": "https://www.asobo-saga.jp/cn",
+      "municipality": "白石町",
+      "prefecture": "佐賀県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "835f37077b920fba",
+      "name": "介紹佐賀",
+      "description": "佐賀縣位於日本南方九州地區，可以從主要都市搭乘飛機或新幹線等輕鬆前往。有很多歷史、文化、自然等任何人都能享受的旅遊景點。 有拉姆薩公約溼地(東與賀干潟、肥前鹿島干潟)和玄海國定公園(虹之松原等)等豐富的自然環境。 秋天還有很多遊客會來參加聯合國教科文組織無形文化遺產-唐津宮日祭和亞洲最大的熱氣球大賽。 伊萬里燒和有田燒等自古聞名的陶瓷產地。 也可以在日本三大美肌溫泉之一的嬉野溫泉和武雄溫泉、古湯溫泉中緩解旅行的疲勞。 從武雄神社本殿沿著被竹林包圍的小路繼續前行，就會看到一棵樹齡3000年的大楠木。紮根於地面充滿生命力的樣子，帶給觀賞的人滿滿的力量。 深受領主喜愛的器皿之鄉，風景宛如山水畫般、有著卓越陶瓷文化的秘窯之里。1660年左右(江戶時代)作為佐賀藩鍋島家的御用官窯，以技術不外洩、不考慮利潤，生產最高品質的瓷器「鍋島」。 現在仍有30個窯場保留著傳統的燒製方法，並傳承給下一代。 唐津灣海濱綿延不斷的虹之松原為國家特別名勝，是日本三大松原之一的風景勝地。 在長約4.5km，寬約0.5km的平原，種植了約100萬棵黑松。 伊呂波島是漂浮在伊萬里灣的48個大小島嶼的總稱。 據說是空海(弘法大師)以伊呂波48文字來命名的，連弘法大師都對蔚藍大海和漂浮在其中的綠色島嶼所形成的美麗景色驚艷不已。",
+      "url": "https://www.asobo-saga.jp/tw"
+```
+
+
+=== Case L3-27 ===
+Topic / intent: 温泉街 浴衣
+Query: Quiet hot spring villages where you can walk in yukata between baths.
+Tool: search_area({"q": "温泉", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "温泉",
+  "match_count": 79,
+  "results": [
+    {
+      "type": "municipality",
+      "code": "285862",
+      "name": "新温泉町",
+      "prefecture": "兵庫県"
+    },
+    {
+      "type": "municipality",
+      "code": "205630",
+      "name": "野沢温泉村",
+      "prefecture": "長野県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "e50ed0eabab65a61",
+      "name": "温泉・宿泊施設",
+      "description": "当サイトを使用することにより、クッキーの設定および使用に同意したことになります。 詳細については、プライバシーポリシーを参照してください。 柳田國男の著書「遠野物語」の舞台である遠野市に佇む、築70年の一棟貸切の宿「リアン遠野」。日本の原風景と呼ばれる古くから変わらぬ美しい田園風景と、懐かしさを感じる古民家は、滞在する人を「遠野物語」の世界に誘います。”物語を感じる”ここでしかできないリアルな体験をしてみませんか？ 清冽な流れが長い年月をかけて見事なまでに渓谷美を造りだした厳美渓。古都平泉や厳美渓を心ゆくまで堪能したら、のんびりお湯につかりたい。 毎分720リットルの湧出量を誇り、源水100％で循環（ろ過）も加温も消毒もせず、一滴の水も加えない源泉を「かけ流し」にした温泉です。リハビリ効果のある歩き湯もあります。栗駒ゴルフ倶楽部隣接。 栗駒山の北麓、標高1,125ｍに位置する須川温泉は湧出量毎分6,000リットルの温泉。その歴史は古く、徳川時代から300年間以上もの間、みちのくの名湯として親しまれている。泉質は日本でも稀な強酸性のミョウバン緑ばん泉で、古くから湯治客が多く、特にリウマチ性疾患、慢性中毒症などに効果がある。雄大な自然の中に千人風呂、家族風呂、名物のおいらん風呂（蒸し風呂）もおすすめ。",
+      "url": "https://iwatetabi.jp/spots/spots_category/onsen-accomodations",
+      "municipality": "一戸町",
+      "prefecture": "岩手県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "1741b681b2af0e5c",
+      "name": "温泉・宿泊施設",
+      "description": "当サイトを使用することにより、クッキーの設定および使用に同意したことになります。 詳細については、プライバシーポリシーを参照してください。 清冽な流れが長い年月をかけて見事なまでに渓谷美を造りだした厳美渓。古都平泉や厳美渓を心ゆくまで堪能したら、のんびりお湯につかりたい。 毎分720リットルの湧出量を誇り、源水100％で循環（ろ過）も加温も消毒もせず、一滴の水も加えない源泉を「かけ流し」にした温泉です。リハビリ効果のある歩き湯もあります。栗駒ゴルフ倶楽部隣接。 栗駒山の北麓、標高1,125ｍに位置する須川温泉は湧出量毎分6,000リットルの温泉。その歴史は古く、徳川時代から300年間以上もの間、みちのくの名湯として親しまれている。泉質は日本でも稀な強酸性のミョウバン緑ばん泉で、古くから湯治客が多く、特にリウマチ性疾患、慢性中毒症などに効果がある。雄大な自然の中に千人風呂、家族風呂、名物のおいらん風呂（蒸し風呂）もおすすめ。 標高1,400m、東日本で最も高いところにある温泉。春は春スキー、秋には蓬莱境を訪れる人々の基地となっている。",
+      "url": "https://iwatetabi.jp/spots/spots_category/onsen-accomodations/ryokan",
+      "municipality": "軽米町",
+      "prefecture": "岩手県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "e9ff0622d65c11a9",
+      "name": "旅のプランニング",
+      "description": "神奈川の温泉といえば「箱根」や「湯河原」などが有名ですが、他にも贅沢な湯量と泉質、風情いっぱいの穴場温泉があることをご存知ですか？比較的混雑せずゆっくりできる穴場温泉は、景色抜群の露天風呂や美肌効果のある人気のお湯など個性たっぷり。心も体も癒される、リフレッシュ効果抜群の温泉をご紹介します。 当サイトでは利便性の向上のため、Cookieを使用しています。 サイトの閲覧を続行した場合、Cookieの使用に同意したことになります。 詳細はクッキーポリシーをご確認ください。",
+      "url": "https://www.kanagawa-kankou.or.jp/features/onsen",
+      "municipality": "真鶴町",
+      "prefecture": "神奈川県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "eac4decf9b349e10",
+      "name": "癒されて美しくなる美肌県しまね温泉旅 | しまね観光ナビ｜島根県公式観光情報サイト",
+      "description": "島根県の温泉が持つ美容力は、1,300年以上前から評判だったと出雲国風土記に記述があります。 さらに、日本でただひとりの温泉ビューティ研究家も目を見張るほど、美肌への可能性を秘めています。 島根県の温泉の泉質、美肌作用の違い、効果的な入浴方法まで、美肌づくりに役立つ情報をたっぷりご紹介。 美肌を目指して、島根の温泉めぐりの旅へ出かけてみてはいかがでしょうか。 島根県は空気中の水分量が多く、紫外線の影響を受けにくい、美肌をはぐくむ気象条件が揃っています。気象だけでなく、温泉にも美肌の恵みがぎっしり。全国の温泉をめぐってきた私も、島根県の温泉の美肌パワーに注目しています。約60ヶ所の温泉地は、美肌へ導く泉質の宝庫。たとえば日本最古の美肌湯として知られる玉造温泉は硫酸塩泉で、しっとり潤い美肌の湯、肌へ水分を運ぶ化粧水のような泉質です。ほかにも塩の成分が塩皮膜となって保温・保湿する塩化物泉や、肌の汚れや古い角質を落として肌をなめらかに整える炭酸水素塩泉やアルカリ性単純温泉、体の芯まで温めて血行促進し、代謝アップも期待できる含鉄泉や二酸化炭素ガスを含む温泉、心身のバランスを整えて元気肌に導く放射能泉など、女性にうれしい美肌力のある温泉が満載。さらに、美肌力を高める入浴法を知っていただき、実際に訪れてその恵みを実感していただけたらと思います。 島根にはいろんな美肌温泉がいっぱい♪気になる項目にチェックを入れて、あなた好みの温泉を見つけよう！ …クレンジング（汚れを落とす） …化粧水（潤す） …乳液（保湿） …その他※温泉法上の温泉を含む",
+      "url": "https://www.kankou-shimane.com/spa/index",
+      "municipality": "隠岐の島町",
+      "prefecture": "島根県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "dcda5beaf02dc743",
+      "name": "観光地",
+      "description": "【古湯温泉】 佐賀市富士（ふじ）町の嘉瀬（かせ）川清流沿いにたたずむ古湯温泉は、約2100年前、まだ中国が秦（しん）と呼ばれていた時代に、始皇帝（しこうてい）の命を受け不老長寿の薬草を求めてやってきた徐福が、神のおつげによって発見したと伝えられています。その後、洪水などにより、温泉は一旦埋もれてしまいますが、寛政3（1791）年にツルが痛めた足を癒しているのを見た村人が、もしやと思い掘り起こし、再発見されたと言い伝えられています。 古湯温泉の魅力はひなびた温泉街と落ち着いた自然。湯治客だけでなく、青木繁（あおきしげる）や斎藤茂吉（さいとうもきち）など多くの芸術家を魅了してきました。特に茂吉は、大正9（1920）年、ここに3週間滞在し、38首の歌を残しています。「うつせみの病やしなふ寂しさは川上川のみなもとどころ」の歌碑を旅館「鶴霊泉」の裏庭近くに見ることができます。少しぬめりのあるお湯は無色、無臭、無味で、温度は34.5から43.6度。泉質はアルカリ性単純温泉で、特に関節痛に効く湯として人気です。 【熊の川温泉】 同じく佐賀市富士町にある熊の川温泉
+```
+
+
+=== Case L3-28 ===
+Topic / intent: クジラ ホエールウォッチング
+Query: Je voudrais voir des baleines au Japon.
+Tool: search_area({"q": "クジラ", "lang": "fr"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "クジラ",
+  "match_count": 87,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "6bea23192c59298c",
+      "name": "新着イベント情報",
+      "description": "平安京が1,200年以上もの長きにわたり都として栄えた背景には、桂川（保津川）の存在がありました。 この川は豊かな丹波の木材を運ぶ物流の大動脈として、京の発展を支えてきたのです。 また、大阪・関西万博をきっかけに62年ぶりに伏見～枚方間を運航した淀川舟運も、 古くは奈良時代から重要な物資輸送の手段として機能してきました。 さらに、京都の夏の風物詩である「鮎」などの川の恵みをもたらす由良川や、 平安時代から和歌に詠み込まれた「歌枕」の名所として名高い宇治川、木津川（泉川）など、 京都府内には数多くの魅力的な川が存在します。 京の歴史と文化を深く彩るこれらの川の魅力を、ぜひ存分にお楽しみください。 宇治川さくらまつり 投稿日: 03月30日(月) 宇治市 新着イベント情報 お花見船Eボート 投稿日: 03月30日(月) 八幡市 新着イベント情報 ガイド付きツアー参加者募集中 投稿日: 12月01日(月) 八幡市 木津川市 新着イベント情報 ガイド付きツアー参加者募集中 投稿日: 12月01日(月) 京都市 新着イベント情報",
+      "url": "https://www.kyoto-kankou.or.jp/kawanokyoto",
+      "municipality": "与謝野町",
+      "prefecture": "京都府"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "60c0278432272c33",
+      "name": "北川村「モネの庭」マルモッタン",
+      "description": "フランス・ジヴェルニーにあるクロード・モネの庭園管理財団から「モネの庭」の名称使用を世界で唯一認められた施設です。植物の選定から配置、色彩設計まで、モネの美学を忠実に再現。本家から定期的に専門家が訪れ、庭の管理にアドバイスを行っています。単なる模倣ではなく、高知の気候風土に合わせながらモネの世界観を表現した、芸術性の高い庭園です。 モネの代表作「睡蓮」の舞台となった池を再現した水の庭は、このスポット最大の見どころです。水面に映る空や周囲の木々、色とりどりの睡蓮が織りなす光景は、まさにモネの絵画そのもの。太鼓橋や藤棚など、モネが愛した要素が随所に配され、どの角度から見ても絵になる空間です。 北川村には第3の庭として「ボルディゲラの庭」が存在します。これは、モネがルノワールとともに旅したイタリア・ボルディゲラの明るい地中海の光景を再現した、北川村オリジナルの庭です。ヤシ科の植物や色鮮やかな花々、柑橘類などが植えられ、他の2つの庭とは全く異なる開放的で南国的な雰囲気を醸し出しています。 【ゴールデンウイーク期間中（4/25～5/6）の営業情報】 休館日：なし 営業時間：9:00～17:00（最終入園16：30） （一般）大人1,000円 小中学生500円 （団体）20名様以上 大人900円 小中学生450円 （その他）年間パスポート3,000円",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=1084",
+      "municipality": "黒潮町",
+      "prefecture": "高知県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "8b187b30e5d644e0",
+      "name": "観光案内",
+      "description": "プライバシーポリシー、クッキーポリシー、推奨環境などを掲載しています。 本サイトに掲載されている情報については、十分注意を払っていますが、諸般の事情により情報の内容が変更になっている場合もあります。掲載内容については保証を行うものではありません。 本サイトを利用したことにより損害を受けた場合においても、その責を負わないことをあらかじめご了承下さい。 本サイトに記載されている会社名、製品名などは、一般に各社の商標あるいは登録商標です。 ※「QRコード」は株式会社デンソーウェーブの登録商標です 本サイトでは個人情報について最大限の注意を払って取り扱っています。登録された個人情報については、適切で必要な措置をもって管理し、常に個人情報の機密保持に努めます。 法令に基づいた要請があった場合、不正アクセス等の違法行為があった場合、その他特段の理由がある場合を除いて、収集した個人情報をその活用以外の目的のために利用したり、第三者への開示・提供を行うなどといったことはいたしません。ただし、本サイトへのアクセス情報、利用者の属性など統計的に処理されたものについては、開示することがあります。 本サイト上の文章、画像等に関する諸権利は、原則として宮崎県に帰属します。本サイトで得た情報を、無断で使用または転載することを禁止します。 利用される場合は許諾を必要とするものとします。ただし、私的な目的での利用についてはこの限りではありません。 本サイトへのリンクはフリーです。掲載許可の承認も必要ありません。ただし、トップページ以外のコンテンツは事前に予告することなく変更する場合もありますので、トップページへのリンクを推奨しています。また、フレーム内に本サイトを表示させる設定はお断りします。",
+      "url": "https://www.kanko-miyazaki.jp/organization/site",
+      "municipality": "高千穂町",
+      "prefecture": "宮崎県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "4e5844c2e57d728d",
+      "name": "石川県観光公式サイト",
+      "description": "国道157号線沿いに延びる長い藤棚が目印。広い園内には、白山の山頂をイメージした「ロックガーデンゾーン」や、春から秋まで彩り鮮やかな一年草を1000ポット植えた「大花壇ゾーン」、夏はギンヤンマが飛び交う「水生植物園ゾーン」、クワガタやカブトムシなどと出会えるかもしれない「針葉樹林ゾーン」などがあり、歩いているだけでうれしくなるスポット。「エントランス広場ゾーン」の公園センターにはカフェもあります。 広い園内には、白山の山頂をイメージした「ロックガーデンゾーン」や、春から秋まで彩り鮮やかな一年草を1000ポット植えた「大花壇ゾーン」、夏はギンヤンマが飛び交う「水生植物園ゾーン」、クワガタやカブトムシなどと出会えるかもしれない「針葉樹林ゾーン」などがあり、歩いているだけでうれしくなるスポット。 「エントランス広場ゾーン」の公園センターにはカフェもあります。 所在地 〒920-2306 石川県白山市河内町吉岡西89 電話番号 076-272-3637 FAX番号 076-272-3937 休業日 無し アクセス（車） 北陸自動車道白山ICより車にて40分 アクセス（公共） 加賀白山バス「吉岡」下車 駐車場 あり 関連リンク 公式サイト 備考 センター内には、カフェや幼児が遊べるコーナーもあります。 ※施設情報が変更される場合があります。最新情報は各公式サイト等をご確認ください。",
+      "url": "https://www.hot-ishikawa.jp/spot/detail_6262.html",
+      "municipality": "能登町",
+      "prefecture": "石川県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "84d79bef099750aa",
+      "name": "岡山観光WEB 晴れの国×くだもの王国",
+      "description": "甘くておいしいのはあたりまえ。くだもの王国・岡山には、特別な日にいただきたい、贅沢な味わいの果物がいっぱい！【フルーツ一覧はこちら】 伝統と歴史に育まれた岡山ブランド『白桃』 もっと見る 気品あふれる味わいの果物の女王『マスカット・オブ・アレキサンドリア』 もっと見る 全国一の生産量を誇る『ピオーネ』を筆頭に、個性を放つ岡山のぶどう もっと見る くだもの王国・岡山の次世代を担う『紫苑』は、気品あふれる冬の宝石。 もっと見る 「こたつブドウ」の異名を持つ『グロー・コールマン』 もっと見る 風味よく、瑞々しい食感の世界最大級の『あたご梨』は、贈答品として人気。 もっと見る 甘いものは幸せな気分にし
+```
+
+
+=== Case L3-29 ===
+Topic / intent: 茶道 本格 体験
+Query: Where can I experience the traditional Japanese tea ceremony deeply, not as a tourist show?
+Tool: get_japan_heritage({"prefecture": "Kyoto", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "26",
+  "theme_filter": null,
+  "lang": "en",
+  "count": 6,
+  "items": [
+    {
+      "key": "japan_heritage:009",
+      "story_id": "009",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "日本茶800年の歴史散歩",
+      "subtitle_ja": null,
+      "title": "An 800-Year History Walk of Japanese Tea",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの日本茶800年の歴史散歩について。京都府南部の山城地域は、日本文化、特にその精神性を語る上で欠",
+      "summary": "Regarding the Japan Heritage portal site's entry on 'An 800-Year History Walk of Japanese Tea': the Yamashiro region in the southern part of Kyoto Prefecture is indispensable for discussing Japanese culture, especially its spirituality —",
+      "body_ja": "お茶が中国から日本に伝えられて以降、京都・南山城は、お茶の生産技術を向上させ、茶の湯に使用される「抹茶」、今日広く飲まれている「煎茶」、高級茶として世界的に広く知られる「玉露」を生み出した。この地域は、約800年間にわたり最高級の多種多様なお茶を作り続け、日本の特徴的文化である茶道など、我が国の喫茶文化の展開を生産、製茶面からリードし、発展をとげてきた歴史と、その発展段階毎の景観を残しつつ今に伝える独特で美しい茶畑、茶問屋、茶まつりなどの代表例が優良な状態で揃って残っている唯一の場所である。\n\n京都府南部の山城地域は、日本文化、特にその精神性を語る上で欠くことのできない「茶道」「茶の湯」の発展を、その萌芽期から茶葉の品質向上や生産拡大の面で支え、茶人や時々の権力者、町衆の支持を得て栽培や製茶技術の工夫・革新を繰り返し、日本茶を代表する「抹茶」「煎茶」「玉露」を生みだした。この地は、日本の生活に根付き、世界にも影響を与えている日本の喫茶文化をリードしてきた、まさに「日本茶のふるさと」と呼ぶに相応しい地であり、その足跡を順次たどり、見て、歩いて、味わうだけでなく、茶摘みや茶揉みの体験などを通じ、日本の文化を紹介することのできる格好の地である。\n\nこの地域は古くから貴族の別業の地として栄え、貴顕の嗜好に応えようとする風土と都との水運、川霧の立つ気候や土壌、植生などの好条件が備わっている。13世紀には栄西禅師が中国からもたらした茶の栽培方法を、明恵上人が宇治の里人に馬を使い教えたとされ、この本格的な宇治茶生産の始まりの地には、『駒蹄影園（こまのあしかげえん）跡碑』が建っている。\n\n15世紀、宇治茶は足利将軍家の評価を勝ち取り「将軍が珍重されている茶」とされ、日本一の茶となった。将軍家や管領家は宇治に特別の茶園「七名園」を設け、露地栽培による最高級の茶葉を作らせた。その茶園の一つ『奥ノ山茶園』は、室町時代からたゆむことなく茶を作り続けている。また、七名園の一つ朝日茶園跡には、日本の茶礼の基礎となった「永平清規」を著した道元禅師を開祖とする曹洞宗『興聖寺（こうしょうじ）』が建立されている。\n\n16世紀、宇治では千利休ら茶人の要望に応え、京都との間にあった巨椋池（おぐらいけ）に生育する葦で編んだ簀を茶畑に覆い掛け、渋みを押さえた茶葉・碾茶（てんちゃ）を作る覆下栽培（おおいしたさいばい）が始まり、鮮やかで濃緑色のうまみの強い「抹茶」を誕生させた。宇治茶は天下人の織田信長、豊臣秀吉、徳川将軍家の庇護を受け茶産地の中でも特別な地位を有し、宇治茶ブランドを確立した。宇治市『白川』では現在でも天然の葦を使った本簀栽培（ほんずさいばい）が行われている。\n\nこの頃の様子は、イエズス会教会司祭であったジョアン・ロドリゲスの「日本教会史」（16世紀後半）により詳しく西洋に紹介された。また、『中宇治地区』は江戸時代には幕府領であり、有力な宇治茶師の屋敷『上林春松（かんばやししゅんしょう）家』をはじめ茶問屋街が形成されている。東端の『宇治川』に架かる日本最古の架橋『宇治橋』のたもとには、同じく最古の茶屋といわれ、狂言にも登場する『通圓（つうえん）茶屋』があり、現在も24代目当主のお茶を味わうことができる。",
+      "themes": [
+        "海・水辺",
+        "森・木",
+        "祭礼",
+        "食文化・酒"
+      ],
+      "periods": [
+        "鎌倉",
+        "室町",
+        "安土",
+        "江戸"
+      ],
+      "related_areas_text": "京都府（宇治市，城陽市，八幡市，京田辺市，木津川市，久御山町， 井手町，宇治田原町，笠置町，和束町，精華町，南山城村）",
+      "prefecture_codes": [
+        "26"
+      ],
+      "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story009/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:26:55.437Z",
+        "confidence": "low"
+      }
+    },
+    {
+      "key": "japan_heritage:035",
+      "story_id": "035",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "鎮守府　横須賀・呉・佐世保・舞鶴",
+      "subtitle_ja": "～日本近代化の躍動を体感できるまち～",
+      "title": "Chinjufu: Yokosuka, Kure, Sasebo, Maizuru — Cities Where You Can Feel the Energy of Japan's Modernization",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの鎮守府 横須賀・呉・佐世保・舞鶴について。富国強兵、これは明治新政府が近代国家を建設するために掲げたス",
+      "summary": "About the Japan Heritage (Japan Heritage) portal site entry for Chinjufu — Yokosuka, Kure, Sasebo, and Maizuru. 'Fukoku kyohei' (enrich the country, strengthen the military) was the slogan raised by the new Meiji government as it set about building a modern nation.",
+      "body_ja": "明治期の日本は、近代国家として西欧列強に渡り合うための海防力を備えることが急務であった。このため、国家プロジェクトにより天然の良港を四つ選び軍港を築いた。静かな農漁村に人と先端技術を集積し、海軍諸機関と共に水道、鉄道などのインフラが急速に整備され、日本の近代化を推し進めた四つの軍港都市が誕生した。百年を超えた今もなお現役で稼働する施設も多く、躍動した往時の姿を残す旧軍港四市は、どこか懐かしくも逞しく、今も訪れる人々を惹きつけてやまない。\n\n富国強兵、これは明治新政府が近代国家を建設するために掲げたスローガンの一つで、その強兵の一翼を担ったのが海軍です。明治政府は西欧列強と対等に渡り合うために、艦艇の配備を進めるとともに、明治17年（1884年）、横須賀に鎮守府を置いた後、同22年に呉と佐世保、同34年に舞鶴で鎮守府を開庁し、島国日本の周辺海域を分割して管轄する海の防衛体制を確立しました。この鎮守府とは軍港に置かれた海軍の本拠地であり、各海軍区を防備し、海軍工廠こうしょう（艦艇の建造・修理、兵器の製造）や海軍病院、軍港水道等、多くの施設の運営・監督を行いました。また、艦艇部隊の統率には鎮守府司令長官があたりました。四つの軍港は、急峻な山に囲まれ、外敵の侵入を拒む湾口、艦艇の航行・停泊が自在にできる湾内、水深の深い穏やかな入江など、厳しい地勢条件を満たして選定されました。軍港の建設から100年以上が経過し、艦艇こそ現代のものに変わり
+```
+
+
+=== Case L3-30 ===
+Topic / intent: ローカル線 山村
+Query: Mountain villages where the train comes once every two hours.
+Tool: search_area({"q": "ローカル", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "ローカル",
+  "match_count": 89,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "26b50386210e64d0",
+      "name": "About This Page",
+      "description": "About This Page Article ID 1029885 PrintPrint in large letters About RSS Links, Copyrights, Disclaimers About the Hiroshima City Website Privacy Policy Article ID 1029885 PrintPrint in large letters",
+      "url": "https://www.city.hiroshima.lg.jp/english/about",
+      "municipality": "広島市佐伯区",
+      "prefecture": "広島県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "8af8e81463b78dce",
+      "name": "About Linking to this Website",
+      "description": "By using this website, you are deemed to have consented to the setting and use of cookies. For more information, please refer to our Privacy Policy. Translation is done using automatic translation software, so some words may not be accurate. Please understand this in advance. In general, you are free to link to this website. If you choose to do so, please provide us with the URL, the name of the entity operating the website (corporation or individual), telephone number, email address, and the duration for which the link will be set up to info@iwatetabi.jp. Links from the following types of websites are not permitted. Please use the web banner below if using a web banner.",
+      "url": "https://iwatetabi.jp/en/link",
+      "municipality": "一戸町",
+      "prefecture": "岩手県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "9eb27a47a884fe58",
+      "name": "旅のプランニング",
+      "description": "当サイトでは利便性の向上のため、Cookieを使用しています。 サイトの閲覧を続行した場合、Cookieの使用に同意したことになります。 詳細はクッキーポリシーをご確認ください。",
+      "url": "https://www.kanagawa-kankou.or.jp/favorite",
+      "municipality": "真鶴町",
+      "prefecture": "神奈川県"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_plan",
+      "key": "dmo_plan:dmo_0072_一社ClanPEONY津軽:16",
+      "name": "（一社）Clan PEONY 津軽 — 形成確立計画 (chunk 17)",
+      "description": "様式１ \n10 \n \n1976（昭和 51）年から、マネジメントエリアを構成する地方公共団体及び観光協会、地域の交通事\n業者で「津軽広域観光圏協議会」を設置し、情報発信サイト「津軽なび」を通したエリア全体の観光\nに関する情報の一元的な発信や、旅行エージェント訪問による誘客促進を実施していた。DMO設立を\n契機に同協議会を解散し、宿泊事業者や地場産業関係事業者を加え、同協議会のエリアをマネジメン\nトエリアとして設定した。 \n また、観光資源の面からみても、ローカル鉄道２社がある当該地域は、移動も観光の一部として旅\n行客に訴えやすく、津軽塗やこぎん刺しなどの文化や歴史の面で共通する資源がある一方、各地域そ\nれぞれが独自色に富んだ特産品を有することから、共通のテーマの下、各自治体が独自の特徴を出し\nて多様なコンテンツを旅行者に対し提示することができるため、マネジメントエリアの範囲として適\n切であると考える。 \n \n【観光客の実態等】 \n項目 \n2019 \n（令和元） \n年度 \n2020 \n（令和２） \n年度 \n2021 \n（令和３） \n年度 \n2022 \n（令和４） \n年度 \n2023 \n（令和５） \n年度 \n観光入込客\n数（人） 11,443,731 7,009,388 6,855,824 8,082,241 9,556,737 \n延べ宿泊者\n数（人） \n1,066,223 \n(60,945) \n614,439 \n（2,908） \n691,328 \n（2,655） \n945,670 \n（15,906） \n1,078,557 \n（58,362） \n※（ ）内の数値はうち訪日外国人旅行者に関する数値 \n \n2017年の青森－天津（中国）便の就航および青森県・函館観光キャンペーン（アフターDC）によ\nり、2018年度まで入込客数は回復傾向にあり、延べ宿泊者数も増加していた。",
+      "url": "https://www.mlit.go.jp/kankocho/content/001883333.pdf"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "71eb949284aacd58",
+      "name": "旅のプランニング",
+      "description": "当サイトでは利便性の向上のため、Cookieを使用しています。 サイトの閲覧を続行した場合、Cookieの使用に同意したことになります。 詳細はクッキーポリシーをご確認ください。",
+      "url": "https://www.kanagawa-kankou.or.jp/",
+      "municipality": "真鶴町",
+      "prefecture": "神奈川県"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_website",
+      "key": "dmo_page:dmo_0001_公社北海道観光機構:https://www.visit-hokkaido.jp/movie/index.html",
+      "name": "動画ライブラリー | 【公式】北海道の観光・旅行情報サイト HOKKAIDO LOVE! (（公社）北海道観光機構)",
+      "description": "人気の動画 手つかずの大自然を巡る～道東 雄大な大地と豊かな自然～道央 日本最北端の風情～道北 時の流れに思いを馳せる～道南 RAIL&ROAD ドローン映像 北海道を色で演出する花々たち 燃ゆる秋、色づく山々 HOKKAIDO, THE ISLANDS OF ADVENTURE（Green Season） 北海道南部の魅力を凝縮！ 「新しい旅のスタイル」新型コロナウイルス感染症対策紹介動画（宿泊施設篇） 「新しい旅のスタイル」新型コロナウイルス感染症対策紹介動画（観光施設篇） 手つかずの大自然を巡る～道東 雄大な大地と豊かな自然～道央 日本最北端の風情～道北 時の流れに思いを馳せる～道南 RAIL&ROAD ドローン映像 北海道を色で演出する花々たち 燃ゆる秋、色づく山々 HOKKAIDO, THE ISLANDS OF ADVENTURE（Green Season） 北海道南部の魅力を凝縮！ 「新しい旅のスタイル」新型コロナウイルス感染症対策紹介動画
+```
+
+
+=== Case L4-01 ===
+Topic / intent: 伝統食 知られざる
+Query: Tell me about Japan's traditional food culture that hasn't gone mainstream yet.
+Tool: get_local_food({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "lang": "en",
+  "count": 507,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:1",
+      "registration_number": 1,
+      "name_ja": "あおもりカシス",
+      "name": "Aomori Cassis",
+      "description_ja": "品種は「あおもりカシス」。さわやかな酸味や独特の芳香があり、アントシアニンも豊富。完熟したものから選別し、全て手摘みで収穫。",
+      "description": "The variety is 'Aomori Cassis'. It has a refreshing acidity and a distinctive aroma, and is also rich in anthocyanins. Berries are selected from fully ripened fruit and harvested entirely by hand-picking.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "東青地域(青森県青森市、青森県東津軽郡平内町、青森県東津軽郡今別町、青森県東津軽郡蓬田村、青森県東津軽郡外ヶ浜町)",
+      "prefecture_codes": [
+        "02"
+      ],
+      "producer_group": "青森県青森市栄町2丁目4番6号 2階あおもりカシスの会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0001/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.349Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:2",
+      "registration_number": 2,
+      "name_ja": "但馬牛",
+      "name": "Tajima Beef",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B2等級以上に格付けされた枝肉であり、肉そのものが柔らかい。",
+      "description": "Carcass meat graded A or B, grade 2 or higher, produced by fattening Tajima cattle—a breed refined over many years in the mountain valleys of the Tajima region in northern Hyogo Prefecture—as feeder cattle. The meat itself is tender.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0002/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:3",
+      "registration_number": 3,
+      "name_ja": "神戸ビーフ",
+      "name": "Kobe Beef",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B4等級以上でBMSNo6以上に格付けされた枝肉であり、最高級の霜ふり肉。",
+      "description": "Carcass meat graded A or B grade 4 or higher and BMS No. 6 or higher, produced by fattening Tajima cattle—a breed refined over many years in the mountain villages of the Tajima region in northern Hyogo Prefecture—as the base stock; it is the highest-grade marbled beef.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0003/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:4",
+      "registration_number": 4,
+      "name_ja": "夕張メロン",
+      "name": "Yubari Melon",
+      "description_ja": "果実は、内部色はオレンジ色で、繊維質が少ないことから非常に柔らかく、ジューシー。 芳醇な香りが強い「夕張キング」という品種を使用しており、糖度は10度以上。",
+      "description": "The flesh is orange in color, very soft and juicy due to its low fiber content. The variety used is 'Yubari King,' which has a strong, rich aroma, with a sugar content of 10 degrees Brix or higher.",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "北海道夕張市",
+      "prefecture_codes": [
+        "01"
+      ],
+      "producer_group": "北海道夕張市沼ノ沢213番地27夕張市農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0004/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:52:44.059Z"
+```
+
+
+=== Case L4-02 ===
+Topic / intent: L4-01の日本語版
+Query: まだメジャーじゃない日本の伝統的な食文化を教えて。
+Tool: get_local_food({"lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "lang": "ja",
+  "count": 507,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:1",
+      "registration_number": 1,
+      "name_ja": "あおもりカシス",
+      "name": "あおもりカシス",
+      "description_ja": "品種は「あおもりカシス」。さわやかな酸味や独特の芳香があり、アントシアニンも豊富。完熟したものから選別し、全て手摘みで収穫。",
+      "description": "品種は「あおもりカシス」。さわやかな酸味や独特の芳香があり、アントシアニンも豊富。完熟したものから選別し、全て手摘みで収穫。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "東青地域(青森県青森市、青森県東津軽郡平内町、青森県東津軽郡今別町、青森県東津軽郡蓬田村、青森県東津軽郡外ヶ浜町)",
+      "prefecture_codes": [
+        "02"
+      ],
+      "producer_group": "青森県青森市栄町2丁目4番6号 2階あおもりカシスの会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0001/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.349Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:2",
+      "registration_number": 2,
+      "name_ja": "但馬牛",
+      "name": "但馬牛",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B2等級以上に格付けされた枝肉であり、肉そのものが柔らかい。",
+      "description": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B2等級以上に格付けされた枝肉であり、肉そのものが柔らかい。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0002/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:3",
+      "registration_number": 3,
+      "name_ja": "神戸ビーフ",
+      "name": "神戸ビーフ",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B4等級以上でBMSNo6以上に格付けされた枝肉であり、最高級の霜ふり肉。",
+      "description": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B4等級以上でBMSNo6以上に格付けされた枝肉であり、最高級の霜ふり肉。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0003/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:4",
+      "registration_number": 4,
+      "name_ja": "夕張メロン",
+      "name": "夕張メロン",
+      "description_ja": "果実は、内部色はオレンジ色で、繊維質が少ないことから非常に柔らかく、ジューシー。 芳醇な香りが強い「夕張キング」という品種を使用しており、糖度は10度以上。",
+      "description": "果実は、内部色はオレンジ色で、繊維質が少ないことから非常に柔らかく、ジューシー。 芳醇な香りが強い「夕張キング」という品種を使用しており、糖度は10度以上。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "北海道夕張市",
+      "prefecture_codes": [
+        "01"
+      ],
+      "producer_group": "北海道夕張市沼ノ沢213番地27夕張市農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0004/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:52:44.059Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:5",
+      "registration_number": 5,
+      "name_ja": "八女伝統本玉露",
+      "name": "八女伝統本玉露",
+      "description_ja": "茶葉収穫前に稲わら等の天然資材で被覆することにより「覆い香」といわれる香気成分の含有量が高い茶葉が生産される。味は濃厚で非常にうま味が強く、「まろやか」で「こく」がある。",
+      "description": "茶葉収穫前に稲わら等の天然資材で被覆することにより「覆い香」といわれる香気成分の含有量が高い茶葉が生産される。味は濃厚で非常にうま味が強く、「まろやか」で「こく」がある。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "福岡県内",
+      "prefecture_codes": [
+        "40"
+      ],
+      "producer_group": "福岡県八女市本村420-1八女伝統本玉露推進協議会"
+```
+
+
+=== Case L4-03 ===
+Topic / intent: 失われゆく職人技
+Query: Forgotten craftsman skills still alive in Japan.
+Tool: get_traditional_arts({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "category_filter": null,
+  "lang": "en",
+  "count": 183,
+  "items": [
+    {
+      "key": "bunka_intangible:Q1037119",
+      "category": "important",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形文化財 (Important Intangible Cultural Property)",
+      "qid": "Q1037119",
+      "name_ja": "能楽",
+      "name_en": "nōgaku",
+      "name": "Nogaku",
+      "description_ja": "日本の伝統芸能。 能や狂言などの総称",
+      "description_en": "classical Japanese musical drama. \"Nohgaku\" conclude Noh, Kyōgen and etc.",
+      "description": "A traditional performing art of Japan. A collective term for Noh, Kyogen, and related forms.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q1037119",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q105338690",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q105338690",
+      "name_ja": "貴船まつり",
+      "name_en": "Kibune Matsuri",
+      "name": "Kifune Festival",
+      "description_ja": "神奈川県真鶴町の貴船神社の例大祭",
+      "description_en": null,
+      "description": "The annual grand festival of Kifune Shrine in Manazuru Town, Kanagawa Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q105338690",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q109598617",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q109598617",
+      "name_ja": "お熊甲祭",
+      "name_en": "Okuma Kabuto Festival",
+      "name": "Okumakabuto Festival",
+      "description_ja": "石川県七尾市にある久麻加夫都阿良加志比古神社の例祭",
+      "description_en": null,
+      "description": "The annual festival of Kumakabuto Aragakashihiko Shrine, located in Nanao City, Ishikawa Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q109598617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q109598841",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q109598841",
+      "name_ja": "呼子大綱引き",
+      "name_en": null,
+      "name": "Yobuko Otsunahiki",
+      "description_ja": "佐賀県唐津市呼子町に伝わる伝統行事",
+      "description_en": null,
+      "description": "A traditional event passed down in Yobuko-machi, Karatsu City, Saga Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q109598841",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q11019445",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Kawagoe Hikawa Festival",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "The festival of Kawagoe Hikawa Shrine in Kawagoe City, Saitama Prefecture.",
+      "inception": "1648-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+      
+```
+
+
+=== Case L4-04 ===
+Topic / intent: 浮世絵風景
+Query: Japanese landscapes that look like a Hokusai woodblock print.
+Tool: search_area({"q": "富士", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "富士",
+  "match_count": 103,
+  "results": [
+    {
+      "type": "municipality",
+      "code": "015199",
+      "name": "利尻富士町",
+      "prefecture": "北海道"
+    },
+    {
+      "type": "municipality",
+      "code": "203629",
+      "name": "富士見町",
+      "prefecture": "長野県"
+    },
+    {
+      "type": "municipality",
+      "code": "112356",
+      "name": "富士見市",
+      "prefecture": "埼玉県"
+    },
+    {
+      "type": "municipality",
+      "code": "222071",
+      "name": "富士宮市",
+      "prefecture": "静岡県"
+    },
+    {
+      "type": "municipality",
+      "code": "222101",
+      "name": "富士市",
+      "prefecture": "静岡県"
+    },
+    {
+      "type": "municipality",
+      "code": "192023",
+      "name": "富士吉田市",
+      "prefecture": "山梨県"
+    },
+    {
+      "type": "municipality",
+      "code": "193682",
+      "name": "富士川町",
+      "prefecture": "山梨県"
+    },
+    {
+      "type": "municipality",
+      "code": "194301",
+      "name": "富士河口湖町",
+      "prefecture": "山梨県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "f9372e5db23224d8",
+      "name": "富士山・自然",
+      "description": "日本一の山、富士山を中心に豊かな自然にあふれた山梨県。富士山に登る方におすすめの情報や、富士山を見るのにおすすめなビュースポット、そして山梨ならではの桃のお花見や渓谷を彩る紅葉など、四季折々の豊かな自然を季節ごとにご紹介します。 毎年、世界中から多くの登山客が訪れる富士山。登山の際のお役立ち情報や登山道案内、持ち物など初めての登山の際に知っておいてほしいことなどをお伝えします。 その他、富士山の自然や歴史・文化が学べるコンテンツ、富士山を守る活動やビューポイントなど登山以外での富士山の楽しみ方をご紹介します。 その他、富士山のさらなる楽しみ方を季節に合わせてご紹介。富士吉田市内の富士山の麓と富士河口湖町にあるライブカメラで今の富士山を見ることができます。 山梨の自然の魅力は、富士登山だけではありません。春夏秋冬、一年を通してたくさんの見所に溢れています。",
+      "url": "https://www.yamanashi-kankou.jp/nature",
+      "municipality": "丹波山村",
+      "prefecture": "山梨県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "5f54771c93ac7413",
+      "name": "DISCOVER FUKUI",
+      "description": "Tourist brochures are available in PDF format [Awara City] AWARA ONSEN Download [蘆原市] 蘆原温泉 Download [Sakai City] Trip SAKAI Download [Sakai City] An American's Guide to Mikuni Download [Fukui City] Fukui City Guidebook Download [Fukui City] FUKUI CITY Download [福井市] 福井市 Download [Fukui City] La ville de Fukui Download [Fukui City] Off the Beaten Path Fukui,Japan Download [福井市] 鮮為人知的地方 一位美國年輕人拍下的日本福井 Download [Fukui City] En Dehorg deg Sentierg Battug Fukui,Japan Download Ono City Sightseeing Brochure（English） Ono City is a basin enclosed by mountains in all directions. A region with historic charm ,surrounded by abundant nature and home to many famous places. Download - 1 2 3 4 5 6 7 8 9 10 [Eiheiji Town] ZENTABI Download [Katsuyama City] Hakusan Heisenji Shrine, a National Historic Site Download [勝山市] 国史跡 白山平泉寺 Download [Ono City] Yui no Kuni Echizen Ono Sightseeing Guide Map 2025 Download [Ono City] Castle In The Sky Download [Echizen City] Brand Handbook Download [Echizen Town] Echizen-Gani Crab GUIDE BOOK 2025 Download [Sabae City] Meet Sabae! Download [Minamiechizen Town] A guide to strolling along Kono Kitamae-Senshu street Download [南越前町] 河野北前船主街 遊覧千冊 Download [Minamiechizen Town] The Railway That Crossed the Sea Download [南越前町]觀光指南地圖 Download [Minamiechizen Town] Tourism Guide Map Download [南越前町] 推薦路線 Download [南越前町] 北国街道 今庄宿 巡遊指南 Download [Minamiechizenncho Town] Hokkoku Kido Route Imajo-Shuku Historic Post Town Download [Fukui Pref.] TSURUGA WAKASA-FUKUI- Download [福井縣] 敦賀若狭-福井- Download [Fukui Pref.] R7_Goko Ichi Bus Download [福井縣] R7_Goko Ichi 巴士 Download [若狭町] 觀光導覽手冊 Download [Obama City] SabaKaido Cycling Map Download [Obama City] Audio Guide_onthetrip Download [Obama City] JOURNEY TO WAKASA AND OBAMA Download [Obama City] Soulful Road Download [Obama City] SABAKAIDO ROAD GUIDE MAP Download [Tsuruga City] Tourist Guidebook Download",
+      "url": "https://www.fuku-e.com/en/pamphlet",
+      "municipality": "若狭町",
+      "prefecture": "福井県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "da70f6e732640248",
+      "name": "STAY YAMAGATA",
+      "description": "四季精彩景點 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 m
+```
+
+
+=== Case L4-05 ===
+Topic / intent: UNESCO 知られざる
+Query: Lesser-known UNESCO sites in Japan.
+Tool: get_japan_heritage({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "theme_filter": null,
+  "lang": "en",
+  "count": 104,
+  "items": [
+    {
+      "key": "japan_heritage:001",
+      "story_id": "001",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "近世日本の教育遺産群",
+      "subtitle_ja": "学ぶ心・礼節の本源",
+      "title": "Early Modern Japan's Educational Heritage: The Roots of a Desire to Learn and of Etiquette",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの近世日本の教育遺産群について。近世日本を訪れた外国人は、紀行文に日本人の様子を書き記してい",
+      "summary": "Regarding the early modern Japan educational heritage sites on the Japan Heritage portal site: foreigners who visited early modern Japan recorded observations about the Japanese people in their travel writings.",
+      "body_ja": "我が国では、近代教育制度の導入前から、支配者層である武士のみならず、多くの庶民も読み書き・算術ができ、礼儀正しさを身に付けるなど、高い教育水準を示した。これは、藩校や郷学、私塾など、様々な階層を対象とした学校の普及による影響が大きく、明治維新以降のいち早い近代化の原動力となり、現代においても、学問・教育に力を入れ、礼節を重んじる日本人の国民性として受け継がれている。\n\n近世日本を訪れた外国人は、紀行文に日本人の様子を書き記しています。イギリス領時代のカナダ出身の冒険家、ラナルド・マクドナルドは「日本回想記」の中で、「日本人のすべての人－最上層から最下層まであらゆる階級の男、女、子供－は、紙と筆と墨を携帯しているか、肌身離さずもっている。すべての人が読み書きの教育をうけている。また、下級階級の人びとさえも書く習慣があり、手紙による意思伝達は、わが国におけるよりも広く行われている。」と述べています。また、イタリア人宣教師、アレシャンドゥロ・ヴァリニャーノは、「日本巡察記」で「人々はいずれも色白く、きわめて礼儀正しい。一般庶民や労働者でもその社会では驚歎すべき礼節をもって上品に育てられ、あたかも宮廷の使用人のように見受けられる。この点においては、東洋の他の諸民族のみならず、我等ヨーロッパ人よりも優れている。」と記録しています。これらの記述からは、当時の日本人が、他の諸外国と比較して、身分や性別を越えて高い読み書き 能力を持ち、礼儀正しさを身につけていた様子が分かります。こうした教育の伝統が継承され、明治維新後の日本の近代化が進められたことをロナルド・ドーアなどの欧米の研究者は、「近世日本の教育こそが日本近代化の知的準備をした。」として高く評価しています。このようなエピソードからも分かるように、近世の日本では高い教育を受けた層が社会全体に広がっていました。外国人にとっては、一見しただけで相手の身分を判断することは困難なほどでした。\n\n近世の日本人が高い教養を身につける上で大きく貢献したのが、全国各地に建てられた学校です。その学校の始まりと言えるのが、イエズス会宣教師フランシスコ・ザビエルが「日本国中最も大にして最も有名な坂東の大学」と称した足利学校です。足利学校の創建については諸説ありますが、15世紀、上杉憲実(のりざね)は学規を定め、現在国宝となっている漢籍（かんせき）を寄進するなどして足利学校を再興し、戦乱の時代においても全国から多くの学徒が集まりました。その教えは、儒学を中心としながらも、易学・兵学・医学など多岐にわたり、日本最古の総合大学と呼ぶにふさわしいものでした。江戸時代になると、足利学校は、貴重な書籍の宝庫として、幕府から保護されました。足利学校の自由で開放的な学びと自学自習の精神は、近世の学校の原点と言えます。一方、足利学校以外にも積極的に教育に取り組んだ藩主たちが各地に学校を設立していきました。岡山藩主の池田光政は庶民の教育も不可欠と考え、閑谷学校(しずたにがっこう)を創りました。光政は熊沢蕃山(くまざわばんざん)から学んだ儒教思想にのっとり、緑の生い茂る閑かな山村に教育の理想を体現しました。現在国宝となっている講堂などの建物や石塀などの施設は、火災や雨から守り長持ちさせるための工夫がされており、学校存続への強い願いが表れています。経済基盤としては井田村下井（いたむらしもい）等の学田(がくでん)を持たせて学校の永続を図りました。日本最古の庶民教育学校とも呼べる閑谷学校では、広く門戸を開き、他領からも多くの生徒が集まりました。また、18 世紀以降多数の藩校が建設されますが、その配置計画は閑谷学校のように日本的なものが大多数となっていきます。したがって閑谷学校は日本の学校建築の出発点に位置し、現存最古の代表例といえます。江戸時代後期には、個人が経営する私塾も日本全国に数多く生まれてきました。幕府の代官所が置かれた豊後日田では、町人を中心とした自由な風土が育まれ、廣瀬淡窓(ひろせたんそう)が咸宜園(かんぎえん)という私塾を創設しました。咸宜園では、毎月成績評価を行う「月旦評(げったんひょう)」などの特色ある教育が全国的な評判となり、各地の私塾に影響を与えるとともに、全国60か国以上から5,000人を超える門下生を集め、日本最大規模の私塾となりました。咸宜園に隣接する豆田町には、淡窓の日記や入門簿・会計録などの史料が伝わる淡窓旧宅や長福寺などの町並みが残り、その周辺では、咸宜園である前身の桂林園跡（けいりんえんあと）や塾主の墓を見ることができます。また、幕末に頻繁に起こった外国船の接触によって、時代を切り開く力を持った有能な人材の育成が必要となり、実力主義や幅広い科目を教える学校が広がっていきました。弘道館は、水戸藩主の徳川斉昭(なりあき)が教育によって人心を安定させ、国を興すために設立した日本最大規模の藩校です。水戸藩には、歴史書『大日本史』を編集した彰考館(しょうこうかん)があり、昔から学問・教育が盛んでした。弘道館は、歴史だけでなく、医学、兵学、武芸など実用的な科目も備えた総合大学ともいえるもので、その教育方針や施設、運営方法等は松代藩校文武学校や庄内藩校致道館等の他藩の藩校にも大きな影響を与えました。一方、偕楽園は勉学の休息の場として位置づけられ、弘道館と対をなしていました。偕楽園の梅は、非常食になる実用的側面と、学問を好む「好文」という異名を持つことから斉昭が植樹を奨励したもので、水戸藩の学問興隆の象徴となっています。郊外にも個性重視の教育を行った日新塾など、特徴的な私塾が建てられ、多彩な門人を輩出しました。こうした日本の学校は、中央政府である幕府ではなく、民間や藩が主導して発展していったことに特徴があり、幅広い教育を行うことができました。\n\nこれまで紹介してきた、近世日本を代表する教育遺産群では、現在でも論語の素読やいろはかるたなど、当時の教育内容を同じように体験することができます。これら学校は、過去の遺産ではなく、現在でも生きた学びの場であり続けています。\n\n近世学校の原点としての威厳が漂う足利学校では、国内に現存する最古の聖廟(せいびょう)が残り、11 月には孔子を祀る釋奠(せきてん)という祭礼が行われます。足利学校と同じく孔子を祀る釈菜（せきさい）という祭礼が受け継がれている“学びの原郷”閑谷学校では、日曜日になると、論語の朗誦（ろうしょう）が静かな山間に響き渡り、往時の姿を偲ばせます。\n\n咸宜園と豆田の町並みを歩けば、江戸時代の「学園都市」や町人文化の空気に触れられますし、弘道館や偕楽園を訪れると、ほんのり甘い梅の香りとともに、水戸藩の学問の伝統を感じられるでしょう。近世の日本ではこうした学校とその周辺を取り巻く環境を舞台に営まれてきた教育の成果によって、世界でも類を見ないほどの高い教育水準を実現し、それが明治維新以降のいち早い近代化の達成につながりました。一方、こうした教育は、礼節を重んじるという日本人の国民性を形づくってきました。現在、日本人のマナーの良さは世界中で高く評価されています。まさに近世日本の教育は、現代にも継承されている「世界に誇る日本の教育」だったと言えるでしょう。",
+      "themes": [
+        "城"
+      ],
+      "periods": [
+        "江戸"
+      ],
+      "related_areas_text": "茨城県（水戸市）・栃木県（足利市）・岡山県（備前市）・大分県（日田市）",
+      "prefecture_codes": [
+        "08",
+        "09",
+        "33",
+        "44"
+      ]
+```
+
+
+=== Case L4-06 ===
+Topic / intent: 縄文文化 現代
+Query: Areas in Japan where the old Joumon-era culture still influences daily life.
+Tool: search_area({"q": "縄文", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "縄文",
+  "match_count": 83,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "eef17aabaec5469b",
+      "name": "奈良県への教育旅行・修学旅行 お役立ちサイト",
+      "description": "日本の源流を知り､今を考え､未来を見つめる学びの旅へ！～ 奈良で “日本の歴史を学ぶ” ～ 「日本」の国づくりは、奈良ではじまりました。飛鳥時代から奈良時代、古代日本の歴史を大きく動かした、歴史の教科書にも登場する“人物ゆかりの現場”へタイムトリップしてみましょう！ 1300年の時を経て守り受け継がれてきた社寺の建造物や宝物・仏像など貴重な文化財の数々。それら“本物を体感”できるのは奈良だけです。この旅でたくさんの“気づき”を見つけて、奈良で得た学びや感動が、忘れられない経験になりますように。 学習 日本の国づくりは､奈良ではじまった！ 日本の国のはじまりから成立まで。古代日本の歴史を大きく動かした、教科書にも登場する人物ゆかりの現場へタイムトリップ！ モデルコースはこちら 体験 バラエティに富んだ､体験プログラム！ 写経・座禅、能・狂言・雅楽、墨・筆・陶芸、柿の葉ずし、鹿の生態観察、林業体験など。奈良の風物詩「鹿寄せ」「なら燈花会」の体験も！ 体験プログラムはこちら 学習 日本の国づくりは､奈良ではじまった！ 日本の国のはじまりから成立まで。古代日本の歴史を大きく動かした、教科書にも登場する人物ゆかりの現場へタイムトリップ！ モデルコースはこちら 日本の国のはじまりから成立まで。古代日本の歴史を大きく動かした、教科書にも登場する人物ゆかりの現場へタイムトリップ！",
+      "url": "https://yamatoji.nara-kankou.or.jp/029education",
+      "municipality": "川上村",
+      "prefecture": "奈良県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "f09b411fd0698c1c",
+      "name": "縄文に入門！～縄文人の素養を身につける３つの修行を体験しよう～",
+      "description": "縄文に入門！～縄文人の素養を身につける３つの修行を体験しよう～ 地域：上田エリア , 芸術 , 工芸 もし縄文時代にタイムトリップしたら、私たちはその時代を生きられるだろうか？縄文人の素養を身につけるために、当時の暮らしを追体験しながらその術を身につける。編布、勾玉、骨角器作りから見えた、彼らの道具の秘密とは？ 更新日：2024年02月29日 もし縄文時代にタイムトリップしたら、私たちはその時代を生きられるだろうか？縄文人の素養を身につけるために、当時の暮らしを追体験しながらその術を身につける。編布、勾玉、骨角器作りから見えた、彼らの道具の秘密とは？ 長野県では、縄文時代の息遣いを身近に感じることができる。八ヶ岳山麓では多くのムラが栄え、日本でも有数の人口が暮らしていたという。国宝でもある土偶「縄文のヴィーナス」や「仮面の女神」など、多数の歴史的資料も発見されている。霧ヶ峰高原東北端にある星糞（ほしくそ）峠には黒曜石の原産地があり、信州ブランドの美しい黒曜石が日本各地へと運ばれた。つまりここは、縄文時代の中心地のひとつだったのだ。世界情勢や環境危機など、不安定で先行きが見えない現代。1万年も続いた縄文の平和な時代に、何かヒントがあるような気がしてならない。私たちが忘れてしまった大切なものが、きっとそこにあるのではなかろうか。自然と共に生き、人と助け合って暮らした、縄文人の生活。可能であるならば、ぜひ当時の暮らしをしてみたい、と時々思う。でも、待てよ。もし今、万が一、縄文時代にタイムトリップしても、私は本当にそこで生きられるのだろうか？いや、無理だろう。“便利”に慣れ切った私の生きる力は、かなり低い。もっと縄文時代に行っても恥ずかしくない素養を身につけなければ…そんな時に思い浮かんだのが、星糞峠の麓にある体験型博物館『黒耀石体験ミュージアム』だ。姉妹館の『原始・古代ロマン体験館』と合わせて様々な体験メニューがあり、実は以前の記事で既に“黒曜石の矢じり”と“縄文土器”を作っている。が、それだけではまだ、縄文時代を生き抜けない。縄文人にがっかりされないような素養をもっと、身に付けたい…！毎回お世話になっている学芸員の大竹さんにそんな旨を相談したところ、ぜひ縄文体験にいらしてください、と快く歓迎してくださった。前日の記録的な大雪がまだ残る山道を抜け、スキー場の目の前にある『黒耀石体験ミュージアム』に向かう。縄文人はこの厳しい寒さの中で、暮らしていたのか。…やはり私には無理か、と一瞬頭をよぎったが、いや、気合いだ、と気持ちを入れ直し、ミュージアムの扉を開けるのであった。 『黒曜石体験ミュージアム』に並ぶ信州ブランドの美しい黒曜石。つい見とれてしまう 今私たちが使うさまざまな道具。そのルーツは縄文時代にあったものも多い ここは様々な体験メニューがある体験型ミュージアム。ぜひ展示と共に楽しんでほしい 『黒曜石体験ミュージアム』に並ぶ信州ブランドの美しい黒曜石。つい見とれてしまう",
+      "url": "https://www.go-nagano.net/tradition-and-culture/id21621",
+      "municipality": "辰野町",
+      "prefecture": "長野県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "be64cb4352af764d",
+      "name": "【縄文さんぽ Vol.3】土器の中にひそむモノ―山梨で出会う縄文の物語",
+      "description": "縄文の遺跡を掘ると、たいてい山ほどの土器が出てくる。おそらく、縄文土器がまったく出ない縄文時代の遺跡などないのではないか。それほど土器は、彼らの暮らしに欠かせない存在だった。なにしろ、縄文土器は彼らの調理具のほとんどを占めるくらいのお鍋だ。それを使ってドングリなどのアクを抜いたり、肉をやわらかく煮たりすることによって、それまでよりもはるかに多くの食材を活かせるようになった。そのことが、西アジアの新石器文化と違い、農耕をしなくても一年を通して同じ場所に住み続けられた理由のひとつと考えられている。けれど、土器の役割は命をつなぐだけではなかったようだ。炎のうねりや水の流れを思わせる立体的で大胆な造形、器面を埋めつくす原始の文様。実用品の枠をはるかに超えた表現が、私たちの心を強く引きつける。その理由は、単なる造形のすごさだけではなく、そこに“縄文の物語”の気配を感じるからだ。今回は、その世界への入り口をそっと覗いてみたい。※トップの写真は笛吹市一の沢遺跡【展示施設：山梨県立考古博物館】 大学で縄文を学び、縄文遺跡の多い山梨へ就職。縁もゆかりもなかった山梨だけど、今は豊かな自然やここで暮らした人々の生活にトキメキが止まらない。山梨の縄文をみんなに広めたい。 縄文土器は、形も文様も驚くほど個性豊かだ。特に、遺跡の数がいちばん増える縄文時代中期（約5,300〜4,500年前）の造形は圧倒的である。ここでは、その中でも「生き物」が登場する土器に目を向けてみる。 まずは、この土器を見てほしい。同じ生き物が登場しているのだが、わかるだろうか。 カエルだ。どのカエルも、だいたい似た姿で土器に“ぺたん”と張り付いている。愛嬌のあるような、不思議なような、そんな存在感だ。",
+      "url": "https://www.yamanashi-kankou.jp/special/jomon/episode03.html",
+      "municipality": "丹波山村",
+      "prefecture": "山梨県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "44ccc414fedf69e2",
+      "name": "縄文のムラはどこ？～甲府盆地と山のふもとに広がる縄文の暮らし～",
+      "description": "前回（※注1）は縄文時代のライフスタイルについて、1つ前の時代の旧石器時代と比べながら紹介した。特に注目したのは、転々とキャンプしながら生活をしていた旧石器時代と違い、縄文人はムラをつくって定住し始めるということ。縄文を代表する縄文土器やドングリなどをすりつぶしたと思われる石皿の利用など、縄文らしいモノに囲まれた生活を可能にしたのは、定住してムラを営んだからこそだ。縄文を語るのにムラは欠かせない。ところで、そんなムラを山梨の縄文人たちはどんなところにつくったのだろう？ 大学で縄文を学び、縄文遺跡の多い山梨へ就職。縁もゆかりもなかった山梨だけど、今は豊かな自然やここで暮らした人々の
+```
+
+
+=== Case L4-07 ===
+Topic / intent: 発酵食 全国
+Query: 日本各地有什么特色的发酵食品文化？
+Tool: get_local_food({"lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "lang": "zh",
+  "count": 507,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:1",
+      "registration_number": 1,
+      "name_ja": "あおもりカシス",
+      "name": "青森黑加仑",
+      "description_ja": "品種は「あおもりカシス」。さわやかな酸味や独特の芳香があり、アントシアニンも豊富。完熟したものから選別し、全て手摘みで収穫。",
+      "description": "品种为\"青森黑加仑\"。具有清爽的酸味和独特的芳香，富含花青素。从完全成熟的果实中精选，全部手工采摘收获。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "東青地域(青森県青森市、青森県東津軽郡平内町、青森県東津軽郡今別町、青森県東津軽郡蓬田村、青森県東津軽郡外ヶ浜町)",
+      "prefecture_codes": [
+        "02"
+      ],
+      "producer_group": "青森県青森市栄町2丁目4番6号 2階あおもりカシスの会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0001/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.349Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:2",
+      "registration_number": 2,
+      "name_ja": "但馬牛",
+      "name": "但马牛",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B2等級以上に格付けされた枝肉であり、肉そのものが柔らかい。",
+      "description": "以兵库县北部但马地方山谷中经过漫长岁月不断改良的但马牛为基础牛进行育肥，所得枝肉经格级评定达到A·B2等级以上，肉质本身柔软。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0002/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:3",
+      "registration_number": 3,
+      "name_ja": "神戸ビーフ",
+      "name": "神户牛肉",
+      "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B4等級以上でBMSNo6以上に格付けされた枝肉であり、最高級の霜ふり肉。",
+      "description": "以在兵库县北部但马地区山村中经过长年改良的但马牛为基础牛只进行育肥，经评级达到A·B4等级以上且BMS No.6以上的牛胴体，属最高级别的雪花牛肉。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "兵庫県内",
+      "prefecture_codes": [
+        "28"
+      ],
+      "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0003/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:4",
+      "registration_number": 4,
+      "name_ja": "夕張メロン",
+      "name": "夕张甜瓜",
+      "description_ja": "果実は、内部色はオレンジ色で、繊維質が少ないことから非常に柔らかく、ジューシー。 芳醇な香りが強い「夕張キング」という品種を使用しており、糖度は10度以上。",
+      "description": "果肉呈橙色，因纤维质少而非常柔软多汁。使用芳香浓郁的\"夕张King\"品种，糖度在10度以上。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "北海道夕張市",
+      "prefecture_codes": [
+        "01"
+      ],
+      "producer_group": "北海道夕張市沼ノ沢213番地27夕張市農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0004/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:52:44.059Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:5",
+      "registration_number": 5,
+      "name_ja": "八女伝統本玉露",
+      "name": "八女传统本玉露",
+      "description_ja": "茶葉収穫前に稲わら等の天然資材で被覆することにより「覆い香」といわれる香気成分の含有量が高い茶葉が生産される。味は濃厚で非常にうま味が強く、「まろやか」で「こく」がある。",
+      "description": "在茶叶采收前，用稻草等天然材料进行覆盖，由此生产出含有被称为\"覆盖香\"（覆い香）香气成分含量较高的茶叶。口感浓郁，鲜味极强，\"柔和\"而\"醇厚\"。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "福岡県内",
+      "prefecture_codes": [
+        "40"
+      ],
+      "producer_group": "福岡県八女市本村420-1八女伝統本玉露推進協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/regis
+```
+
+
+=== Case L4-08 ===
+Topic / intent: 山岳信仰 シャーマン
+Query: Hidden mountain villages where shamanic traditions still exist.
+Tool: get_traditional_arts({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "category_filter": null,
+  "lang": "en",
+  "count": 183,
+  "items": [
+    {
+      "key": "bunka_intangible:Q1037119",
+      "category": "important",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形文化財 (Important Intangible Cultural Property)",
+      "qid": "Q1037119",
+      "name_ja": "能楽",
+      "name_en": "nōgaku",
+      "name": "Nogaku",
+      "description_ja": "日本の伝統芸能。 能や狂言などの総称",
+      "description_en": "classical Japanese musical drama. \"Nohgaku\" conclude Noh, Kyōgen and etc.",
+      "description": "A traditional performing art of Japan. A collective term for Noh, Kyogen, and related forms.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q1037119",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q105338690",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q105338690",
+      "name_ja": "貴船まつり",
+      "name_en": "Kibune Matsuri",
+      "name": "Kifune Festival",
+      "description_ja": "神奈川県真鶴町の貴船神社の例大祭",
+      "description_en": null,
+      "description": "The annual grand festival of Kifune Shrine in Manazuru Town, Kanagawa Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q105338690",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q109598617",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q109598617",
+      "name_ja": "お熊甲祭",
+      "name_en": "Okuma Kabuto Festival",
+      "name": "Okumakabuto Festival",
+      "description_ja": "石川県七尾市にある久麻加夫都阿良加志比古神社の例祭",
+      "description_en": null,
+      "description": "The annual festival of Kumakabuto Aragakashihiko Shrine, located in Nanao City, Ishikawa Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q109598617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q109598841",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q109598841",
+      "name_ja": "呼子大綱引き",
+      "name_en": null,
+      "name": "Yobuko Otsunahiki",
+      "description_ja": "佐賀県唐津市呼子町に伝わる伝統行事",
+      "description_en": null,
+      "description": "A traditional event passed down in Yobuko-machi, Karatsu City, Saga Prefecture.",
+      "inception": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q109598841",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "bunka_intangible:Q11019445",
+      "category": "folk",
+      "authority": "文化庁 (via Wikidata)",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "qid": "Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Kawagoe Hikawa Festival",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "The festival of Kawagoe Hikawa Shrine in Kawagoe City, Saitama Prefecture.",
+      "inception": "1648-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+      
+```
+
+
+=== Case L4-09 ===
+Topic / intent: 戦争遺跡 日常
+Query: Areas in Japan where nuclear bomb history is part of daily landscape.
+Tool: search_area({"q": "原爆", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "原爆",
+  "match_count": 74,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "da70f6e732640248",
+      "name": "STAY YAMAGATA",
+      "description": "四季精彩景點 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 從旅遊主題搜尋 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 點閱率排行榜 山寺（寶珠山立石寺） more 山形城遺址、霞城公園 more 藏王樹冰 ／ Juhyo ／ Snow Monster （Zao’s Juhyo ／ Zao’s Rime ／ Frost Covered Trees of Zao） more 置賜公園香草園（置賜公園香草園展） more 天童温泉♨（Tendo Onsen） more 最上川堤防千本櫻 more Nakano Kanko Kajuen more Benihana Musuem more Michi-no-Eki Sagae Cherry Land more 月山 more Zao Bodaira Highlands more 更多景點 更多活動",
+      "url": "https://yamagatakanko.com/zh_TW",
+      "municipality": "白鷹町",
+      "prefecture": "山形県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "ae02fbb6d344b191",
+      "name": "STAY YAMAGATA",
+      "description": "季节推荐景点 春 樱花报春来，草木吐新芽 以大自然的恩惠充电蓄能 more 夏 前往名峰、瀑布等凉爽景点 樱桃、萤火虫也正是时节 more 秋 红叶尽染群山之时 水果采摘季节也到来 more 冬 雪怪“雾凇”决不可错过 不妨沉浸在梦幻般的雪灯风情中 more 春 樱花报春来，草木吐新芽 以大自然的恩惠充电蓄能 more 夏 前往名峰、瀑布等凉爽景点 樱桃、萤火虫也正是时节 more 秋 红叶尽染群山之时 水果采摘季节也到来 more 冬 雪怪“雾凇”决不可错过 不妨沉浸在梦幻般的雪灯风情中 more 按旅游主题搜索 夏祭 more 樱花名胜 more 红叶名胜 more 冬季活动 more 雪灯・冰雪节 more 亲子之旅 more 心灵之旅 more 花卉名胜 more 夏祭 more 樱花名胜 more 红叶名胜 more 冬季活动 more 雪灯・冰雪节 more 亲子之旅 more 心灵之旅 more 花卉名胜 more 访问排名 银山温泉 more 烏帽子山公园 more Zao Echo Line more 滑翔伞体验 / Nanyo Sky Park more Takeda Winery more Kasugasan Rinsenji Temple more 月山 more 山形城遗迹・霞城公园 more 肘折温泉 more Zuishin-mon more Denkoku No Mori Yonezawa City Uesugi Museum more 更多景点 更多活动",
+      "url": "https://yamagatakanko.com/zh_CN",
+      "municipality": "白鷹町",
+      "prefecture": "山形県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "0ec135a1a1b03153",
+      "name": "关于熊本                 |                         【官方】熊本县旅游网站 更多、更多！更多熊本信息",
+      "description": "位于日本西南方向的九州中央的熊本。 在世界上以丰富的自然引以为豪。 不想在日本传统文化的土地上散步吗？ 熊本，以世界最大级的破火山口而自豪的山「阿苏」，被美丽的海包围的约120个岛浮在海上的「天草」。这个阿苏的山和天草的海，被日本政府指定为国立公园。熊本，是「山」和「海」都有的国立公园，在日本也是非常少见的区域。 阿苏拥有在全世界有名的活火山。因这个活火山能源的恩惠，在熊本有很多有风趣的温泉地。熊本在日本也是很受欢迎的温泉地。在丰富自然中的熊本的温泉，不仅仅是身体舒服，心里也很舒服。 阿苏的火山的恩惠，不仅仅是温泉。通过喷火，根据形成的地层被过滤的清水，从县内的各个地方涌出，以水美丽而有名。（熊本最多人口的是熊本市，饮用水全部用天然的地下水供给。） 矿物质丰富的美丽的水和受惠于丰富的自然的熊本，大米和柑橘，黄牛等「山珍」，大虾和刀鱼，鲷鱼等「海产品」，等素材本来的味道，好吃的食材很丰富。在熊本，使用这些丰富的食材，做成的绝品美食，来款待大家。",
+      "url": "https://kumamoto.guide/zh/about",
+      "municipality": "苓北町",
+      "prefecture": "熊本県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "39110f578e1ebf39",
+      "name": "Realities of the Atomic Bombing",
+      "description": "Realities of the Atomic Bombing Article ID 1029920 PrintPrint in large letters The Realities of the Atomic Bombing Guide Map for Peace-Related Exhibition Facilities & A-bombed Buildings and Trees (Hiroshima Peace Memorial Museum and city center areas) Exhibit Facility for Atomic-Bombed Remnants Article ID 1029920 PrintPrint in large letters",
+      "url": "https://www.city.hiroshima.lg.jp/english/peace/1029920",
+      "municipality": "広島市佐伯区",
+      "prefecture": "広島県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "d948e2650c94e75c",
+      "name": "Visit Oita",
+      "description": "應該有很多人想體驗看看日本的溫泉文化，卻沒什麼機會實際泡到溫泉吧？這裡就用簡單易懂的方式，為大家介紹泡溫泉的注意事項。 大分縣乃是全球知名的溫泉區，有許多獨一無二的體驗希望能讓外國朋友一起參與！以下介紹來到大分縣應該怎麼泡溫泉。 大分縣初遊者指南 https://oita-tourism.com/zh-TW/stories/firstvisit 如何享受由布院 https://oita-tourism.com/zh-TW/stories/yufuin 刺青友善溫泉特輯 https://oita-tourism.com/zh-TW/onsenStories/detail_67.html 美食體驗 做起來很有趣！吃得飽飽的！別府名產“地獄蒸” https://oita-tourism.com/zh-TW/stories/jigokumushi 歷史臼杵：和服散步指南 https://oita-tourism.com/zh-TW/stories/usukikimono 
+```
+
+
+=== Case L4-10 ===
+Topic / intent: 工芸の町
+Query: Japanese towns built around a single craft industry.
+Tool: get_local_specialty({"category": "craft", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "category_filter": "craft",
+  "lang": "en",
+  "count": 231,
+  "items": [
+    {
+      "key": "meti_densan:0101",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0101",
+      "name_ja": "二風谷アットゥㇱ",
+      "name": "Nibutani Attus",
+      "description_ja": "アットゥㇱとは、アッニ（オヒョウ）等の樹皮の繊維で糸を作り、アットゥㇱカㇻペ（機織り機）を使って織られた反物のことを言います。水に強く、通気性に優れ、天然繊維としては類稀な強靱さと独特の風合いを持っています。\n※アットゥㇱの「シ」、アットゥㇱカㇻペの「シ」と「ラ」はアイヌ語表記上小文字で表します。",
+      "description": "Attus refers to a woven textile made using thread spun from the bark fibers of the ohyo elm (Ulmus laciniata) and other trees, woven on a loom called an attus-karpe. It is highly resistant to water, has excellent breathability, and possesses an exceptionally rare toughness and distinctive texture for a natural fiber.\n※ In the Ainu-language notation, the 'si' in 'Attus' and the 'si' and 'ra' in 'Attus-karpe' are written in small letters.",
+      "designation_date": "平成25年3月8日",
+      "production_area_text": "沙流郡平取町",
+      "prefecture_codes": [
+        "01"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0101/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.788Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0102",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0102",
+      "name_ja": "置賜紬",
+      "name": "Oitama Tsumugi",
+      "description_ja": "置賜紬は、この地区で生産されている織物すべての呼び名です。その種類は米琉板締小絣、白鷹板締小絣、緯総絣、併用絣、草木染紬、紅花紬の6品種ありますが、いずれも糸を先に染めてから織る先染めの平織（ひらおり）です。",
+      "description": "Oitama Tsumugi is the collective name for all textiles produced in this region. There are six varieties: Yoneryū Itajime Kogasuri, Shirataka Itajime Kogasuri, Nuki Sogasuri, Heiyō Gasuri, Kusa-ki-zome Tsumugi, and Benibana Tsumugi. All are plain-weave (hiraori) fabrics made using the pre-dyeing method, in which the threads are dyed before weaving.",
+      "designation_date": "昭和51年2月26日",
+      "production_area_text": "米沢市、長井市、西置賜郡白鷹町",
+      "prefecture_codes": [
+        "06"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0102/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0103",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0103",
+      "name_ja": "羽越しな布",
+      "name": "Ugo Shina Cloth",
+      "description_ja": "羽越地域の山間部に生育するシナノキ、オオバボダイジュ又はノジリボダイジュの樹皮から取れる靭皮（じんぴ）繊維で糸を作り、布状に織り上げたもの。 日本では、縄文や弥生時代から衣装や装飾品などに利用され、今日、山形県鶴岡市関川地区や新潟県岩船郡山北町において受け継がれています。原料が樹皮の繊維であることから、その風合いは粗々しいものの、ざっくりとした手触りと落ち着きのある風合いに特徴があり、帯地ばかりでなくバッグ、帽子等多くの日用品にも加工されています。",
+      "description": "A woven fabric made from bast fibers derived from the bark of the Japanese linden (Shina-no-ki), large-leaved linden (Ooba-bodaiju), or Nojiri linden (Nojiri-bodaiju) trees that grow in the mountainous areas of the Ugo region. In Japan, these fibers have been used for clothing and ornaments since the Jomon and Yayoi periods, and the tradition is preserved today in the Sekikawa district of Tsuruoka City, Yamagata Prefecture, and in Sanpoku-cho, Iwafune-gun, Niigata Prefecture. Because the raw material is tree bark fiber, the texture is somewhat coarse; however, it is characterized by a rough, rustic feel and a calm, understated quality. It is processed not only into obi sashes but also into many everyday items such as bags and hats.",
+      "designation_date": "平成17年9月22日",
+      "production_area_text": "鶴岡市 新潟県／村上市",
+      "prefecture_codes": [
+        "15"
+      ],
+      "source_url": "https://koug
+```
+
+
+=== Case L4-11 ===
+Topic / intent: 産業遺産
+Query: Where can I see Japan's response to industrial decline preserved?
+Tool: search_area({"q": "産業遺産", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "産業遺産",
+  "match_count": 89,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "0a5a1b26eee429e0",
+      "name": "観光案内",
+      "description": "平成27年7月、幕末から明治期までの、日本の産業化を示す8県11市にある23の資産が 「明治日本の産業革命遺産」として世界文化遺産に登録されました。\n鹿児島からは、島津斉彬が始めた「集成館事業」に関する「旧集成館」「寺山炭窯跡」「関吉の疎水溝」 の3つが含まれています。県内にはこの集成館事業にまつわる遺産が多数広がっています。\n「かごしま産業遺産の道」では、これらの遺産をストーリーとして展開。皆さまに楽しみながら周遊していただき、集成館事業をより深く理解していただくことを目的としています。\n集成館事業をキーワードに、「日本を強く豊かにする」ための歴史を紐解く新たな発見の旅に出てみませんか？\n\n集成館事業の概要説明（PDFダウンロード）",
+      "url": "https://www.kagoshima-kankou.com/feature/industrial-heritage",
+      "municipality": "三島村",
+      "prefecture": "鹿児島県"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_website",
+      "key": "dmo_page:dmo_0194_公財名古屋観光コンベンションビューロー:https://www.nagoya-info.jp/industries/",
+      "name": "名古屋の産業観光 | 名古屋の産業観光 (（公財）名古屋観光コンベンションビューロー)",
+      "description": "産業観光とは、歴史的、文化的価値のある産業文化財（機械器具、工場遺構等）、生産現場（工場、工房等）及び製品などを観光資源とし、それらを通じてモノづくりの心に触れる観光です。 身近な製品がどのように作られているのか、「現場」「製品」「歴史」を「見て」「学び」「体験する」モノづくり見学が注目されています！ 名古屋を中心とした東海地方は昔から製造業を中心として栄えてきた地域であり、さまざまな分野の「モノづくり」の土壌があります。 名古屋圏は工場見学をはじめ伝統工芸や産業遺産・企業ミュージアムなど直接触れ合うことができるスポットの宝庫です。 トヨタグループ発祥の地に残されていた大正時代の工場を貴重な産業遺… 陶磁器メーカー「ノリタケ」が創立100周年を記念してオープン。緑あ… 名古屋城西側の地域には伝統技能として受け継がれている名古屋友禅や… ドーム内径35mの世界最大級のプラネタリウムドーム「ＦＵＪＩスカイ…",
+      "url": "https://www.nagoya-info.jp/industries/"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_plan",
+      "key": "dmo_plan:dmo_0019_公財群馬県観光物産国際協会:20",
+      "name": "（公財）群馬県観光物産国際協会 — 形成確立計画 (chunk 21)",
+      "description": "○取組方針 \n 修学旅行、塾やスポーツスクール等の合宿など、教育・研修向けに利用できる宿泊施設、農泊地域\nや体験プログラム等のコンテンツを可視化する。 \n○挑戦的ターゲット層（4） \n コンベンション（PCO・主催者等） \n○選定の理由 \n当協会では、令和4（2022）年度初 より、 「群馬県コンベンションビューロー」の事務局を擁してい\nる。 \n様式１ \n12 \n \n○取組方針 \n 従来、観光資源として取り上げてこなかった地域資源を含め、ユニークベニューやエキスカーショ\nン向けプログラムなどのコンテンツを可視化する。当協会が事業の柱としてきた観光、物産、多文化\n共生のシナジーを最大化させることで、MICE 誘致につなげていく。 \n \n \n \n（４）観光地域づくりのコンセプト \n①コンセプト Re：ぐんま \n～Refresh, Retreat, and Return～ \n②コンセプトの考え方 群馬県は、首都圏に近接しながらも、美しい自然や人々を癒す温泉を有して\nおり、ここに根付く「東国文化」は、古墳や「世界の記憶」に登録された上\n野三碑などの歴史的資源にも見られ、古くから自然、環境、資源に恵まれた\n土地であったことを示している。古代から蓄積された力が、近代には、世界\n遺産「富岡製糸場と絹産業遺産群」や自動車産業等に象徴されるように、も\nのづくり県として脈々と受け継がれている。これらの群馬の誇りを、来訪者\nの多様化するニーズに合わせた魅力として「再『価値』化」する観光地域づ\nくりの取り組みを通じ、訪れる人に「Refresh」「Retreat」できる体験を提\n供し、活力を与える世界水準の観光地域への変革を果たす。大都市圏に近い\n地理的条件と恵まれた環境という強みを生かしながら、また訪れたい土地、\n帰ってきたい土地であり続けることをめざし、その意味を「Return」に込め\nる。",
+      "url": "https://www.mlit.go.jp/kankocho/content/001766838.pdf"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_plan",
+      "key": "dmo_plan:dmo_0100_一財会津若松観光ビューロー:8",
+      "name": "（一財）会津若松観光ビューロー — 形成確立計画 (chunk 9)",
+      "description": "また、 、旅行業2 種取得により昨年以上に数多くの着地型旅\n行商品の企画造成を進めたほか、販売のためのWEB ページ作\n成や予約決済システムの英語バージョンの導入、2 年目とな\nる多言語整備事業の採択による中国版 WEB サイトの多言語整\n備、ワーキンググループリーダー会議の定例化による受け入\nれ環境整備や、事業推進体制強化と事業の企画提案なども行\nった。 \nまた施設環境では、鶴ヶ城天守閣をリニューアルオープン、\nより快適で観覧しやすい環境が整った \n \n観光資源の\n磨き上げ \n【2017 年～】 \n「サムライコンテンツ」に着目したプロモーションや着地型\n旅行商品の造成を行い、 「剣道」 「なぎなた」 「弓道」など体\n験型商品を造成した。 \n訪日外国人観光客誘致のため策定した「農資源」や地域の\n「食」を活用した「農泊食文化海外発信地域取り組み計画」\nが農林水産省よりSAVOR JAPAN として認定され、この計画に\n様式１ \n6 \n \n基づき、 「農」や「食」に関する受け入れのための事業、着\n地型旅行商品型の造成などを行った。 \nまた、工場見学や産業遺産等を観光資源として活用する「会\n津若松産業資産利活用推進事業」を実施。 \n各企業に対し受け入れの要請やPR（ 「専用ウェブサイト」に\nよる）を行い、新たな観光資源の磨き上げを実施した。 \n \n【2021 年】 \n企画特集「海なし会津のおいしいお寿司屋さん」を組んだほ\nか、10 月1 日に全線運転を再開したJR 只見線の情報発信と\nあわせ、旅行商品を造成・販売して、広域周遊の地域の隠れ\nた魅力発掘にも努めた。",
+      "url": "https://www.mlit.go.jp/kankocho/content/001766821.pdf"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_plan",
+      "key": "dmo_plan:dmo_0089_株かづの観光物産公社:16",
+      "name": "（株）かづの観光物産公社 — 形成確立計画 (chunk 17)",
+      "description": "その日にとれた町内産の農産物や加工品、園芸品等が\n並びます。店内には喫茶コーナーがあり、コーヒーを飲みながら休憩することが可能。 \n \n・小坂七滝ワイナリー \n2017（平成29）年に完成。幾度の苦難を乗り越え産地化に成功した「山ブドウ」交配品種にこだわ\nった「日本ワイン」を醸造。 \n \n・十和田ふるさとセンター \n十和田湖西湖畔の大川岱地区にある観光施設。カヤックやサップなどの水上アクティビティなどが\n楽しめる拠点となっている施設です。施設内にはコワーキングスペース、バーベキューコーナーなど\nもあり、ボリューム満点のハンバーガーなどが楽しめる。 \n \n◯歴史・文化 \n・世界文化遺産「大湯環状列石」 （令和3 年7 月27 日「北海道・北東北の縄文遺跡群」として登録） 
+```
+
+
+=== Case L4-12 ===
+Topic / intent: 宗教多様性
+Query: 일본의 종교적 다양성을 가장 잘 보여주는 지역은?
+Tool: get_japan_heritage({"lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "theme_filter": null,
+  "lang": "ko",
+  "count": 104,
+  "items": [
+    {
+      "key": "japan_heritage:001",
+      "story_id": "001",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "近世日本の教育遺産群",
+      "subtitle_ja": "学ぶ心・礼節の本源",
+      "title": "근세 일본의 교육 유산군　배움의 마음・예절의 본원",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの近世日本の教育遺産群について。近世日本を訪れた外国人は、紀行文に日本人の様子を書き記してい",
+      "summary": "일본유산（Japan Heritage）포털사이트의 근세 일본 교육 유산군에 관하여. 근세 일본을 방문한 외국인들은 기행문에 일본인의 모습을 기록하였다.",
+      "body_ja": "我が国では、近代教育制度の導入前から、支配者層である武士のみならず、多くの庶民も読み書き・算術ができ、礼儀正しさを身に付けるなど、高い教育水準を示した。これは、藩校や郷学、私塾など、様々な階層を対象とした学校の普及による影響が大きく、明治維新以降のいち早い近代化の原動力となり、現代においても、学問・教育に力を入れ、礼節を重んじる日本人の国民性として受け継がれている。\n\n近世日本を訪れた外国人は、紀行文に日本人の様子を書き記しています。イギリス領時代のカナダ出身の冒険家、ラナルド・マクドナルドは「日本回想記」の中で、「日本人のすべての人－最上層から最下層まであらゆる階級の男、女、子供－は、紙と筆と墨を携帯しているか、肌身離さずもっている。すべての人が読み書きの教育をうけている。また、下級階級の人びとさえも書く習慣があり、手紙による意思伝達は、わが国におけるよりも広く行われている。」と述べています。また、イタリア人宣教師、アレシャンドゥロ・ヴァリニャーノは、「日本巡察記」で「人々はいずれも色白く、きわめて礼儀正しい。一般庶民や労働者でもその社会では驚歎すべき礼節をもって上品に育てられ、あたかも宮廷の使用人のように見受けられる。この点においては、東洋の他の諸民族のみならず、我等ヨーロッパ人よりも優れている。」と記録しています。これらの記述からは、当時の日本人が、他の諸外国と比較して、身分や性別を越えて高い読み書き 能力を持ち、礼儀正しさを身につけていた様子が分かります。こうした教育の伝統が継承され、明治維新後の日本の近代化が進められたことをロナルド・ドーアなどの欧米の研究者は、「近世日本の教育こそが日本近代化の知的準備をした。」として高く評価しています。このようなエピソードからも分かるように、近世の日本では高い教育を受けた層が社会全体に広がっていました。外国人にとっては、一見しただけで相手の身分を判断することは困難なほどでした。\n\n近世の日本人が高い教養を身につける上で大きく貢献したのが、全国各地に建てられた学校です。その学校の始まりと言えるのが、イエズス会宣教師フランシスコ・ザビエルが「日本国中最も大にして最も有名な坂東の大学」と称した足利学校です。足利学校の創建については諸説ありますが、15世紀、上杉憲実(のりざね)は学規を定め、現在国宝となっている漢籍（かんせき）を寄進するなどして足利学校を再興し、戦乱の時代においても全国から多くの学徒が集まりました。その教えは、儒学を中心としながらも、易学・兵学・医学など多岐にわたり、日本最古の総合大学と呼ぶにふさわしいものでした。江戸時代になると、足利学校は、貴重な書籍の宝庫として、幕府から保護されました。足利学校の自由で開放的な学びと自学自習の精神は、近世の学校の原点と言えます。一方、足利学校以外にも積極的に教育に取り組んだ藩主たちが各地に学校を設立していきました。岡山藩主の池田光政は庶民の教育も不可欠と考え、閑谷学校(しずたにがっこう)を創りました。光政は熊沢蕃山(くまざわばんざん)から学んだ儒教思想にのっとり、緑の生い茂る閑かな山村に教育の理想を体現しました。現在国宝となっている講堂などの建物や石塀などの施設は、火災や雨から守り長持ちさせるための工夫がされており、学校存続への強い願いが表れています。経済基盤としては井田村下井（いたむらしもい）等の学田(がくでん)を持たせて学校の永続を図りました。日本最古の庶民教育学校とも呼べる閑谷学校では、広く門戸を開き、他領からも多くの生徒が集まりました。また、18 世紀以降多数の藩校が建設されますが、その配置計画は閑谷学校のように日本的なものが大多数となっていきます。したがって閑谷学校は日本の学校建築の出発点に位置し、現存最古の代表例といえます。江戸時代後期には、個人が経営する私塾も日本全国に数多く生まれてきました。幕府の代官所が置かれた豊後日田では、町人を中心とした自由な風土が育まれ、廣瀬淡窓(ひろせたんそう)が咸宜園(かんぎえん)という私塾を創設しました。咸宜園では、毎月成績評価を行う「月旦評(げったんひょう)」などの特色ある教育が全国的な評判となり、各地の私塾に影響を与えるとともに、全国60か国以上から5,000人を超える門下生を集め、日本最大規模の私塾となりました。咸宜園に隣接する豆田町には、淡窓の日記や入門簿・会計録などの史料が伝わる淡窓旧宅や長福寺などの町並みが残り、その周辺では、咸宜園である前身の桂林園跡（けいりんえんあと）や塾主の墓を見ることができます。また、幕末に頻繁に起こった外国船の接触によって、時代を切り開く力を持った有能な人材の育成が必要となり、実力主義や幅広い科目を教える学校が広がっていきました。弘道館は、水戸藩主の徳川斉昭(なりあき)が教育によって人心を安定させ、国を興すために設立した日本最大規模の藩校です。水戸藩には、歴史書『大日本史』を編集した彰考館(しょうこうかん)があり、昔から学問・教育が盛んでした。弘道館は、歴史だけでなく、医学、兵学、武芸など実用的な科目も備えた総合大学ともいえるもので、その教育方針や施設、運営方法等は松代藩校文武学校や庄内藩校致道館等の他藩の藩校にも大きな影響を与えました。一方、偕楽園は勉学の休息の場として位置づけられ、弘道館と対をなしていました。偕楽園の梅は、非常食になる実用的側面と、学問を好む「好文」という異名を持つことから斉昭が植樹を奨励したもので、水戸藩の学問興隆の象徴となっています。郊外にも個性重視の教育を行った日新塾など、特徴的な私塾が建てられ、多彩な門人を輩出しました。こうした日本の学校は、中央政府である幕府ではなく、民間や藩が主導して発展していったことに特徴があり、幅広い教育を行うことができました。\n\nこれまで紹介してきた、近世日本を代表する教育遺産群では、現在でも論語の素読やいろはかるたなど、当時の教育内容を同じように体験することができます。これら学校は、過去の遺産ではなく、現在でも生きた学びの場であり続けています。\n\n近世学校の原点としての威厳が漂う足利学校では、国内に現存する最古の聖廟(せいびょう)が残り、11 月には孔子を祀る釋奠(せきてん)という祭礼が行われます。足利学校と同じく孔子を祀る釈菜（せきさい）という祭礼が受け継がれている“学びの原郷”閑谷学校では、日曜日になると、論語の朗誦（ろうしょう）が静かな山間に響き渡り、往時の姿を偲ばせます。\n\n咸宜園と豆田の町並みを歩けば、江戸時代の「学園都市」や町人文化の空気に触れられますし、弘道館や偕楽園を訪れると、ほんのり甘い梅の香りとともに、水戸藩の学問の伝統を感じられるでしょう。近世の日本ではこうした学校とその周辺を取り巻く環境を舞台に営まれてきた教育の成果によって、世界でも類を見ないほどの高い教育水準を実現し、それが明治維新以降のいち早い近代化の達成につながりました。一方、こうした教育は、礼節を重んじるという日本人の国民性を形づくってきました。現在、日本人のマナーの良さは世界中で高く評価されています。まさに近世日本の教育は、現代にも継承されている「世界に誇る日本の教育」だったと言えるでしょう。",
+      "themes": [
+        "城"
+      ],
+      "periods": [
+        "江戸"
+      ],
+      "related_areas_text": "茨城県（水戸市）・栃木県（足利市）・岡山県（備前市）・大分県（日田市）",
+      "prefecture_codes": [
+        "08",
+        "09",
+        "33",
+        "44"
+      ],
+      "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story001/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:2
+```
+
+
+=== Case L4-13 ===
+Topic / intent: 消えゆく祭り
+Query: Lost or dying festivals that still happen in remote Japan.
+Tool: get_festivals({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "lang": "en",
+  "count": 81,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q105338690",
+      "name_ja": "貴船まつり",
+      "name_en": "Kibune Matsuri",
+      "name": "Kifune Festival",
+      "description_ja": "神奈川県真鶴町の貴船神社の例大祭",
+      "description_en": null,
+      "description": "The annual grand festival of Kifune Shrine in Manazuru Town, Kanagawa Prefecture.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q105338690",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q109598617",
+      "name_ja": "お熊甲祭",
+      "name_en": "Okuma Kabuto Festival",
+      "name": "Okumakabuto Festival",
+      "description_ja": "石川県七尾市にある久麻加夫都阿良加志比古神社の例祭",
+      "description_en": null,
+      "description": "The annual festival of Kumakabuto Aragakashihiko Shrine, located in Nanao City, Ishikawa Prefecture.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q109598617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Kawagoe Hikawa Festival",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "The festival of Kawagoe Hikawa Shrine in Kawagoe City, Saitama Prefecture.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": "1648-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q11271139",
+      "name_ja": "たてもん祭り",
+      "name_en": "Uozu Tatemon Festival",
+      "name": "Tatemon Festival",
+      "description_ja": "富山県魚津市の諏訪神社の夏季祭礼",
+      "description_en": null,
+      "description": "A summer festival held at Suwa Shrine in Uozu City, Toyama Prefecture.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11271139",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q11280345",
+      "name_ja": "やすらい祭",
+      "name_en": "Yasurai Matsuri",
+      "name": "Yasurai Festival",
+      "description_ja": null,
+      "description_en": null,
+      "description": null,
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11280345",
+      "translation_meta": {
+        "source": "official_only",
+        "generated_at": null,
+        "confidence": null
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q11360316",
+      "name_ja": "上野天神祭",
+      "name_en": "Ueno Tenjin Festival",
+      "name": "Ueno Tenjin Festival",
+      "description_ja": "三重県伊賀市の菅原神社で行なわれる秋祭り",
+      "description_en": null,
+      "description": "An autumn festival held at Sugawara Shrine in Iga City, Mie Prefecture.",
+      "designation": "重要無形民俗文化財 (Imp
+```
+
+
+=== Case L4-14 ===
+Topic / intent: 震災復興 沿岸
+Query: Japanese coastal areas shaped by the 2011 tsunami, ten years on.
+Tool: search_area({"q": "震災", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "震災",
+  "match_count": 93,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "677ab839d1d7e14b",
+      "name": "仙台歴史文化観光シンポジウム―震災から15年 政宗公に学ぶ仙台の未来―を開催します",
+      "description": "ホーム > 市政情報 > 広報・広聴 > 記者発表資料 > 記者発表資料 2025年度（令和7年度） > 2月 > 仙台歴史文化観光シンポジウム―震災から15年 政宗公に学ぶ仙台の未来―を開催します 世界から選ばれる観光MICE都市を目指す本市の進むべき方向性について考えるとともに、伊達政宗公の新たな大河ドラマの実現を目指して、仙台歴史文化観光シンポジウム-震災から15年 政宗公に学ぶ仙台の未来-を開催します。ぜひお申し込みの上、ご参加ください。 仙台国際センター 展示棟 展示室1・2 （青葉区青葉山無番地） 1.市長あいさつ「世界から選ばれる観光MICE都市を目指して」 仙台歴史文化観光シンポジウム―震災から15年政宗公に学ぶ仙台の未来―申し込みフォーム（外部サイトへリンク）よりお申込みください。",
+      "url": "https://www.city.sendai.jp/kankosuishin/kishahappyou/symposiumr7.html",
+      "municipality": "仙台市泉区",
+      "prefecture": "宮城県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "abb81019b5ca7155",
+      "name": "石川県観光公式サイト",
+      "description": "今回、5軒の民宿を取材し、震災後のお話をいろいろと伺いました。被害状況はそれぞれ異なりますが、皆さん共通していたのは、震災後すぐに復旧に関わる方々を受け入れ、宿を“能登復興の拠点”として再開していたことです。中には、震災から1週間も経たないうちに営業を再開された方もいらっしゃいました。そして、今年に入り少しずつ観光のお客様の受け入れも始まり、宿泊者の数も徐々に増えているとのこと。それでも、まだまだ観光客の数は十分とは言えないのが現状です。「能登って今、どういう状況なの？」「宿って観光客向けに営業しているの？」「まだ観光で行かない方がいいのかな？」そんな風に、今の能登がどうなっているのか分からず、旅行を迷っている方も多いのではないでしょうか。ですが、現地の宿の方々をはじめ、地域の皆さんは口をそろえて、「ぜひ、能登に遊びに来てください！」とおっしゃっています。どうか、迷わず自信を持って、能登に足を運んでみてください。そして訪れた際には、ぜひ民宿に泊まり、ご主人や女将さんとの会話を楽しみながら、能登の暮らしにふれてみてください。きっと、心が温まる、能登ならではの民宿体験になるはずです。 今回、5軒の民宿を取材し、震災後のお話をいろいろと伺いました。被害状況はそれぞれ異なりますが、皆さん共通していたのは、震災後すぐに復旧に関わる方々を受け入れ、宿を“能登復興の拠点”として再開していたことです。中には、震災から1週間も経たないうちに営業を再開された方もいらっしゃいました。そして、今年に入り少しずつ観光のお客様の受け入れも始まり、宿泊者の数も徐々に増えているとのこと。それでも、まだまだ観光客の数は十分とは言えないのが現状です。 「能登って今、どういう状況なの？」「宿って観光客向けに営業しているの？」「まだ観光で行かない方がいいのかな？」 そんな風に、今の能登がどうなっているのか分からず、旅行を迷っている方も多いのではないでしょうか。ですが、現地の宿の方々をはじめ、地域の皆さんは口をそろえて、「ぜひ、能登に遊びに来てください！」とおっしゃっています。 どうか、迷わず自信を持って、能登に足を運んでみてください。そして訪れた際には、ぜひ民宿に泊まり、ご主人や女将さんとの会話を楽しみながら、能登の暮らしにふれてみてください。きっと、心が温まる、能登ならではの民宿体験になるはずです。",
+      "url": "https://www.hot-ishikawa.jp/feature/detail_453.html",
+      "municipality": "能登町",
+      "prefecture": "石川県"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_website",
+      "key": "dmo_page:dmo_0081_株かまいしDMC:https://travel-guide.kamaishi-dmc.com/learn/",
+      "name": "学ぶ › KAMAISHI TRAVEL GUIDE - 岩手県釜石市の観光ポータルサイト (（株）かまいしDMC)",
+      "description": "釜石の防災プログラムサイト 東日本大震災で多大な被害を受けたものの、不屈の精神で復興を成し遂げてきたまち釜石。震災当時の出来事や復興過程からの教訓を、各種プログラムにてお届けいたします。 個人旅行者様向け 釜石オープン・フィールド・ミュージアム 防災プログラム 企業・団体の皆様向け 釜石オープン・フィールド・ミュージアム 研修プログラム より深く防災を学びたい方向け うのすまい・トモス いのちをつなぐ未来館 学ぶに関するニュース一覧 釜石の日常に根付く学びの情報はこちら powerd byMORE 東日本大震災で多大な被害を受けたものの、不屈の精神で復興を成し遂げてきたまち釜石。震災当時の出来事や復興過程からの教訓を、各種プログラムにてお届けいたします。",
+      "url": "https://travel-guide.kamaishi-dmc.com/learn/"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_website",
+      "key": "dmo_page:dmo_0075_公財さんりく基金:https://sanriku-travel.jp/archive/p20230403115804",
+      "name": "東日本大震災津波伝承館「いわてTSUNAMIメモリアル」＜陸前高田市＞ | さんりく旅しるべ 〜いわて三陸観光ガイド〜 (（公財）さんりく基金)",
+      "description": "更新日 2023年3月14日 東日本大震災津波伝承館「いわてTSUNAMIメモリアル」＜陸前高田市＞ 震災津波の事実と教訓を後世に伝承し、復興の姿を国内外の人々に発信していきます 陸前高田市 施設 震災津波の事実と教訓を後世に伝承し、復興の姿を国内外の人々に発信していきます ◆入館時の「マスク着用」の見直しについて（2023.3.14更新） 東日本大震災津波伝承館では、令和５年３月13日（月）から、ご来館のお客様に入館時のマスク着用を求めないこととしましたのでお知らせします。なお、基本的な感染症拡大防止対策（検温、手指消毒、咳エチケットなど）は継続して参りますので、引き続きご協力をお願いします。 ◆【企画展示】「いわて三陸沿岸のいま 2022」（2023.2.16更新）",
+      "url": "https://sanriku-travel.jp/archive/p20230403115804"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_plan",
+      "key": "dmo_plan:dmo_0086_一社気仙沼地域戦略:14",
+      "name": "（一社）気仙沼地域戦略 — 形成確立計画 (chunk 15)",
+      "description": "平成２３年、東日本大震災発災後の震災復興基本計画において、水\n産業に次ぐ第二の基幹産業として「観光業」を育てる事を決断、平成２４年の観光戦略\n会議、平成２８年の気仙沼観光推進機構設立準備委員会の検討を経て、平成２９年に地\n域ＤＭＯとして「気仙沼観光推進機構」を設立、同時に事務局およびマーケティング機\n能を担うＤＭＯ法人として「一般社団法人気仙沼地域戦略」を設立した。 \n 気仙沼市の内部環境としては、日本有数の漁港として豊富な水産資源を有している、\n日本初のスローフード都市宣言のまちであり「食のまち気仙沼」のブランド力がある、\n東日本大震災を契機に全国各地に関係人口を有している、被災経験・震災遺構を活用し\nた防災教育の対応環境が整っている等の強みを有する。一方、有名な神社仏閣等の歴史\n遺産を有していない、被災の道路復旧が完了していないことでの不便、２次交通が整っ\nていない等の弱みを抱えている。 \n 外部環境としては、令和３年３月に三陸自動車道の開通による交通アクセスの改善、\n気仙沼湾横断橋見学の
+```
+
+
+=== Case L4-15 ===
+Topic / intent: 擬洋風建築
+Query: Architecture that blends Western and Japanese styles from Meiji era.
+Tool: search_area({"q": "擬洋風", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "擬洋風",
+  "match_count": 84,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "32ac3072d44981f7",
+      "name": "DISCOVER FUKUI",
+      "description": "福井縣位於日本北陸地區，連結著京都和金澤，瀕臨日本海，是美食愛好者的天堂，福井縣南部的若狹地區更是長年為皇室提供新鮮海味等美味食材，有“御食之國”的美譽。福井縣還有著歷史悠久的傳統工藝技術，推動著地域產業的發展。在禪宗總本山「永平寺」周邊，感受重視地域聯繫與自然調和的生活，感知福井不為人知的純粹魅力。在洋溢著鄉土風情的福井，邂逅愜意的時光。 從 京都 京都 鐵路＆新幹線 約1小時18分鐘 福井 從 金澤 金澤 新幹線 約23分鐘 福井 從 東京 東京 新幹線 約2小時51分鐘 福井 歷史文化 福井邀您探索雄偉的城堡、迷人的古鎮景觀、寧靜的寺廟與神社，以及充滿歷史的博物館——近距離體驗日本的豐富文化遺產。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__11__0_____.html 傳統工藝 探索福井的傳統工藝——精湛的越前刀、精美的漆器，以及流傳數百年的技藝，讓日本的文化遺產生動呈現。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__10__0_____.html 自然景觀 體驗福井壯麗的大自然——漫步崎嶇海岸、悠閒享受潔淨海灘、徒步壯麗步道，欣賞四季花卉，從櫻花到繽紛秋葉。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__2__0_____.html 溫泉/休養 在福井寧靜的溫泉與養生勝地放鬆身心。浸泡療癒的溫泉，享受悠閒的水療體驗，沉浸於地區平和的自然環境中，滋養身心靈。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__16__0_____.html 美食/美酒 品味福井的美食——新鮮海鮮、當季佳餚，以及以在地食材釀造的精緻清酒，呈現地區獨特的飲食文化。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__1__0_____.html 體驗/玩樂/運動 深入體驗福井的生活——參與農耕與捕魚，加入動手工作坊，品嚐在地美食，探索戶外景色，感受地區豐富的歷史與文化。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__20__0_____.html 恐龍 踏入福井的恐龍世界——日本的恐龍之都。探索化石遺址，參觀福井恐龍博物館，揭開史前奇觀，讓這裡成為恐龍迷必訪之地。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__9__0_____.html 購物 探索福井的購物樂趣——從在地市場與特色商店，到充滿獨特紀念品與地方產品的迷人街道，真實體驗福井的文化與工藝。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__17__0_____.html 祭典/活動/優惠 透過福井的祭典、文化活動與季節性活動，體驗充滿活力的福井精神——這些慶典凝聚社群，展現地區傳統、創意與熱鬧的在地文化。 https://www.fuku-e.com/zh-TW/events/index.html 福井邀您探索雄偉的城堡、迷人的古鎮景觀、寧靜的寺廟與神社，以及充滿歷史的博物館——近距離體驗日本的豐富文化遺產。 https://www.fuku-e.com/zh-TW/attractions/index_1_2__11__0_____.html 福井邀您探索雄偉的城堡、迷人的古鎮景觀、寧靜的寺廟與神社，以及充滿歷史的博物館——近距離體驗日本的豐富文化遺產。",
+      "url": "https://www.fuku-e.com/zh-TW",
+      "municipality": "若狭町",
+      "prefecture": "福井県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "30a17faacd9ed1cf",
+      "name": "欢迎来到宫崎",
+      "description": "宫崎位于九州南部，是一个气候温暖的度假胜地。 这里有美丽的海岸线，日本屈指可数的高尔夫球场和冲浪点，吸引着世界各地的粉丝纷至沓来。 这里还保留着古代日本的传说和神话，神社和历史遗迹也是一大看点。 还有宫崎牛、炭烤本地鸡、全熟芒果等丰富的美食。 高千穂峡 高千穗峡是宫崎县代表性的旅游景点，吸引着来自国内外的众多游客。据说，这条美丽的峡谷是由于阿苏山火山活动喷发出的火山碎屑流冷却凝固后，被五濑川侵蚀而形成。如果来高千穗峡，请一定要试试租船游览。从船上眺望瀑布，充满了梦幻般的氛围，更能感受到大自然的壮丽。 更多信息 高千穗峡是宫崎县代表性的旅游景点，吸引着来自国内外的众多游客。据说，这条美丽的峡谷是由于阿苏山火山活动喷发出的火山碎屑流冷却凝固后，被五濑川侵蚀而形成。如果来高千穗峡，请一定要试试租船游览。从船上眺望瀑布，充满了梦幻般的氛围，更能感受到大自然的壮丽。 青岛 / 日南海岸 日南海岸是宫崎县代表性的兜风路线，可以欣赏到碧海蓝天的壮丽景色。在约100公里的海岸延长线上，分布着青岛、堀切峠、鹈户神宫等旅游景点，充满了热带风情。 其中，青岛是游客必游景点。这是一个周长约1.5公里的小岛，据说该岛本身就是一个能量景点。还有很多其他地方也值得一去。何不去青岛感受一下它的神秘能量呢？ 更多信息 日南海岸是宫崎县代表性的兜风路线，可以欣赏到碧海蓝天的壮丽景色。在约100公里的海岸延长线上，分布着青岛、堀切峠、鹈户神宫等旅游景点，充满了热带风情。 其中，青岛是游客必游景点。这是一个周长约1.5公里的小岛，据说该岛本身就是一个能量景点。还有很多其他地方也值得一去。何不去青岛感受一下它的神秘能量呢？",
+      "url": "https://www.kanko-miyazaki.jp/zh-CN",
+      "municipality": "高千穂町",
+      "prefecture": "宮崎県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "da70f6e732640248",
+      "name": "STAY YAMAGATA",
+      "description": "四季精彩景點 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 從旅遊主題搜尋 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 點閱率排行榜 山寺（寶珠山立石寺） more 山形城遺址、霞城公園 more 藏王樹冰 ／ Juhyo ／ Snow Monster （Zao’s Juhyo ／ Zao’s Rime ／ Frost Covered Trees of Zao） more 置賜公園香草園（置賜公園香草園展） more 天童温泉♨（Tendo Onsen） more 最上川堤防千本櫻 more Nakano Kanko Kajuen more Benihana Musuem more Michi-no-Eki Sagae Cherry Land more 月山 more Zao Bodaira Highlands more 更多景點 更多活動",
+      "url": "https://yamagatakanko.com/zh_TW",
+      "municipality": "白鷹町",
+      "prefecture": "山形県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "835f37077b920fba",
+      "name": "介紹佐賀",
+ 
+```
+
+
+=== Case L4-16 ===
+Topic / intent: 隠れキリシタン
+Query: Japan's hidden Christian heritage.
+Tool: get_japan_heritage({"prefecture": "Nagasaki", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "42",
+  "theme_filter": null,
+  "lang": "en",
+  "count": 8,
+  "items": [
+    {
+      "key": "japan_heritage:017",
+      "story_id": "017",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "国境の島　壱岐・対馬・五島",
+      "subtitle_ja": "～古代からの架け橋～",
+      "title": "Islands on the Border: Iki, Tsushima, and Goto — Bridges from Ancient Times",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの国境の島 壱岐・対馬・五島について。日本は大小14,125の島から成り、長崎県には日本最多の1,479の島",
+      "summary": "Information on the border islands of Iki, Tsushima, and Goto on the Japan Heritage (Japan Heritage) portal site. Japan consists of 14,125 islands large and small, and Nagasaki Prefecture has 1,479 islands, the most in Japan.",
+      "body_ja": "日本本土と大陸の中間に位置することから、長崎県の島は、古代よりこれらを結ぶ海上交通の要衝であり、交易・交流の拠点であった。特に朝鮮との関わりは深く、壱岐は弥生時代、海上交易で王都を築き、対馬は中世以降、朝鮮との貿易と外交実務を独占し、中継貿易の拠点や迎賓地として栄えた。その後、中継地の役割は希薄になったが、古代住居跡や城跡、庭園等は当時の興隆を物語り、焼酎や麺類等の特産品、民俗行事等にも交流の痕跡が窺える。国境の島ならではの融和と衝突を繰り返しながらも、連綿と交流が続くこれらの島は、国と国、民と民の深い絆が感じられる稀有な地域である。\n\n日本は大小14,125の島から成り、長崎県には日本最多の1,479の島がある。朝鮮半島との間に飛び石のように浮かぶ壱岐と対馬、大陸との間の東シナ海に鎖状に浮かぶ五島列島は、いにしえより、日本と大陸を結ぶ「海の道」の要衝であり、大陸との交流のインターフェースでもあった。とりわけ、朝鮮半島と指呼の間にある国境の島、壱岐と対馬は、その最前線であった。\n\n日本がまだ「倭」の国とよばれていた時代、中国の使節は、朝鮮半島から対馬、壱岐を経由して、倭の国の女王がいる邪馬台国を目指した。対馬、壱岐を旅した中国の使節の足跡を辿るとき、『魏志倭人伝』に記されたとおりの原風景が目の前に広がる。中国の使節が訪れた「一支国」の「原の辻」は、海上交易で王都を築いた国際交流都市の先駆けであった。倭の国のどこよりも早く海外の情報をキャッチできる原の辻には、日本人だけでなく、朝鮮半島から移り住んだ人もいて、活気に満ちあふれていた。朝鮮半島系土器、ムンクの『叫び』のような人面石など多様な遺物が出土しているこの地は、まさに弥生時代のデパートであった。なかでも、きらきらと青色に輝く中国製トンボ玉は、女性や子どもたちの心を捉えたに違いない。\n\n県内有数の穀倉地帯でもある遺跡の周辺は、古代米が栽培されており、復元がる眺めは、訪れた人を弥生時代へタイムスリップさせてくれる。\n\n最先端の文化の導入と交流が行われる一方、国境の島は異国へとつながる海の道の最終中継地、国防の最前線としての顔を持つ。壱岐は、大和政権が朝鮮半島へ進出する際の兵站基地としての役割を担っていた。壱岐古墳群は、当時としては日本有数の墳丘・石室の規模を誇っており、ひんやりと涼しい石室の中に身を置くと、古墳に眠った人物の権勢が静かに伝わってくる。663年、白村江の戦い以降、日本と新羅との外交関係が悪化すると、遣唐使は、壱岐、対馬を経て中国に渡るルートから、五島列島を経て東シナ海を渡る危険なルートをとらざるをえなくなった。当時の船の構造、航海技術では、ほとんど無事には帰ってこられなかった時代、万葉の都人にとって五島は、日本の最果ての地であり、亡くなった人に会える「みみらくのしま」と称された。千年以上も昔と変わらぬ東シナ海の大海原を目の前にすると、この地を最後に異国へと旅だった人々と送り出す家族の覚悟や想い、弘法大師空海の「辞本涯」(本涯＝日本の果て)の言葉が、時代を超えてこだまする。一方、壱岐と対馬でも、白村江の戦い後、国防のために防人と烽火が置かれ、対馬には亡命百済人の技術による朝鮮式の山城「金田城」も築かれた。\n\n複雑に入り込んだ海岸に囲まれた浅芽湾と天然の絶壁を利用して築かれた金田城跡に立ち、国境の海を見下ろすと、はるか東国から送られてきた防人たちの望郷の念に胸がつまる。",
+      "themes": [
+        "城",
+        "古墳",
+        "海・水辺",
+        "祭礼"
+      ],
+      "periods": [
+        "弥生",
+        "奈良"
+      ],
+      "related_areas_text": "長崎県（対馬市，壱岐市，五島市，新上五島町）",
+      "prefecture_codes": [
+        "42"
+      ],
+      "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story017/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:26:55.437Z",
+        "confidence": "medium"
+      }
+    },
+    {
+      "key": "japan_heritage:023",
+      "story_id": "023",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "「北総四都市江戸紀行・江戸を感じる北総の町並み」",
+      "subtitle_ja": "佐倉・成田・佐原・銚子：百万都市江戸を支えた江戸近郊の四つの代表的町並み群",
+      "title": "\"Kitaso Four Cities Edo Journey: Kitaso Townscapes That Evoke Edo\" — Sakura, Narita, Sawara, Choshi: Four Representative Townscape Groups on the Outskirts of Edo That Supported the Million-Person City of Edo",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの「北総四都市江戸紀行・江戸を感じる北総の町並み」について。「お江戸見たけりゃ佐原へござれ、佐原本町江戸優り」。江戸時代",
+      "summary": "From the Japan Heritage (Japan Heritage) portal site entry for 'Kitaso Four Cities Edo Journey: Kitaso Townscapes That Evoke Edo.' 'If you want to see Edo, come to Sawara — Sawara's Honcho is even better than Edo.' Edo period.",
+      "body_ja": "北総地域は、百万都市江戸に隣接し、関東平野と豊かな漁場の太平洋を背景に、利根川東遷により発達した水運と江戸に続く街道を利用して江戸に東国の物産を供給し、江戸のくらしや経済を支えた。こうした中、江戸文化を取り入れることにより、城下町の佐倉、成田山の門前町成田、利根水運の河岸、香取神宮の参道の起点の佐原、漁港・港町、そして磯巡りの観光客で賑わった銚子という4つの特色ある都市が発展した。これら四都市では、江戸庶民も訪れた4種の町並みや風景が残り、今も東京近郊にありながら江戸情緒を体感することができる。成田空港からも近いこれらの都市は、世界から一番近い「江戸」といえる。\n\n「お江戸見たけりゃ佐原へござれ、佐原本町江戸優り」。江戸時代の戯れ歌に唄われた当時の佐原の繁栄ぶりである。江戸に近接する北総地域は、江戸に続く街道と利根川水運を活かし、江戸を様々な形で支えながら発展した。そして、江戸との盛んな人と物の交流は、江戸の文化をこの地域に豊かにもたらしその繁栄を支え、特色ある都市群が形成された。\n\n千葉県の北部に位置する北総地域は、古代から河川
+```
+
+
+=== Case L4-17 ===
+Topic / intent: 庭園 知られざる
+Query: Traditional Japanese gardens designed by lesser-known garden masters.
+Tool: search_area({"q": "庭園", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "庭園",
+  "match_count": 68,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "529dc5acce6b775a",
+      "name": "こけむしろ",
+      "description": "こけむしろ こけむしろ こけむしろ入口からギャラリー・喫茶に続く。左右には一面苔の庭園が広がる。 入口付近の料金箱に入庭料を入れて、中に入る。 広々とした庭に広がる一面の苔。繊細な苔を踏まないよう、石畳の上を歩く。 木漏れ日が降り注ぐこけむしろ。風がよく通り、夏も涼しい。 天気のいい日は屋外のウッドデッキで抹茶やコーヒー、スイーツを楽しみたい。 庭園ひっそりとある狸の置物。庭園には水車も設置されている。 店内でも喫茶を楽しむことができる。 こけむしろ入口からギャラリー・喫茶に続く。左右には一面苔の庭園が広がる。 入口付近の料金箱に入庭料を入れて、中に入る。 広々とした庭に広がる一面の苔。繊細な苔を踏まないよう、石畳の上を歩く。 木漏れ日が降り注ぐこけむしろ。風がよく通り、夏も涼しい。 天気のいい日は屋外のウッドデッキで抹茶やコーヒー、スイーツを楽しみたい。 庭園ひっそりとある狸の置物。庭園には水車も設置されている。 店内でも喫茶を楽しむことができる。 こけむしろ入口からギャラリー・喫茶に続く。左右には一面苔の庭園が広がる。 広々とした庭に広がる一面の苔。繊細な苔を踏まないよう、石畳の上を歩く。 天気のいい日は屋外のウッドデッキで抹茶やコーヒー、スイーツを楽しみたい。",
+      "url": "https://www.iyokannet.jp/spot/7387",
+      "municipality": "愛南町",
+      "prefecture": "愛媛県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "71810d45e3e24f63",
+      "name": "イベント",
+      "description": "園主が大切に育てた藤の花が世界中の人々を魅了する、季節限定の絶景 初開催のライトアップも！色とりどりのツツジを愛でながら自然散策 日本庭園×デジタルアート！夏の夜を彩る神秘的なイルミネーション スケッチ大会にステージイベント、かわいいポニーもやってくる！ ライトアップあり！春の訪れを告げるチューリップと桜のコラボレーション",
+      "url": "https://www.crossroadfukuoka.jp/event",
+      "municipality": "上毛町",
+      "prefecture": "福岡県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "930920672672f497",
+      "name": "北方文化博物館",
+      "description": "建物や庭園から美術品のコレクションにいたるまで、新潟の伝統と芸術にあふれる豪農の館。 「北方文化博物館」は、越後の大地主伊藤家の旧大邸宅を保存・公開しています。 思わず息をのんでしまうほどの美しさと豪壮さを備える館は8年の歳月をかけて築かれました。 広大な8,800坪の敷地には主屋、大広間、茶室、蔵といった建物をはじめ、越後が生んだ庭匠（にわしょう）・田中泰阿弥（たなか たいあみ）による池泉回遊式庭園、歴代当主によるコレクションなどの美術品を鑑賞できます。 中庭には、樹齢150年、幹まわり1m60cm以上、一本の木から広がる大藤があります。 開花は4月下旬から5月上旬、甘い香りを放って藤色の花を房状に咲かせます。開花に合わせ、この大藤のライトアップを実施します。 また、11月頃の庭園は、錦の山を移したかのような紅葉に彩られ、100畳敷の大広間から眺める回遊式庭園の彩りは必見。 モミジの朱や黄に松の緑が重なる美しい色の対比をお楽しみいただけます。 紅葉の見頃には庭園のライトアップも実施。ライトアップによって庭園全体の奥行きや立体感も印象的にご覧いただけます。 おみやげ処、喫茶、食事処（予約制）、宿泊施設（予約制）など施設も充実。新潟の歴史と美が詰まった空間をゆっくりとご堪能ください。 藤と紅葉が有名ですが、ほかにも春の桜、夏のハス、冬の雪景色など四季折々の風情ある表情でいつ訪れても楽しめる場所です。 エリア 新潟・阿賀エリア カテゴリー 豪農の館 美術館・博物館 絶景・景勝地・天然記念物 花・木 庭園 その他の花 新潟県の紅葉スポット 条件 ガイドサービス有 建物や庭園から美術品のコレクションにいたるまで、新潟の伝統と芸術にあふれる豪農の館。 「北方文化博物館」は、越後の大地主伊藤家の旧大邸宅を保存・公開しています。 思わず息をのんでしまうほどの美しさと豪壮さを備える館は8年の歳月をかけて築かれました。 広大な8,800坪の敷地には主屋、大広間、茶室、蔵といった建物をはじめ、越後が生んだ庭匠（にわしょう）・田中泰阿弥（たなか たいあみ）による池泉回遊式庭園、歴代当主によるコレクションなどの美術品を鑑賞できます。 中庭には、樹齢150年、幹まわり1m60cm以上、一本の木から広がる大藤があります。 開花は4月下旬から5月上旬、甘い香りを放って藤色の花を房状に咲かせます。開花に合わせ、この大藤のライトアップを実施します。 また、11月頃の庭園は、錦の山を移したかのような紅葉に彩られ、100畳敷の大広間から眺める回遊式庭園の彩りは必見。 モミジの朱や黄に松の緑が重なる美しい色の対比をお楽しみいただけます。 紅葉の見頃には庭園のライトアップも実施。ライトアップによって庭園全体の奥行きや立体感も印象的にご覧いただけます。 おみやげ処、喫茶、食事処（予約制）、宿泊施設（予約制）など施設も充実。新潟の歴史と美が詰まった空間をゆっくりとご堪能ください。 藤と紅葉が有名ですが、ほかにも春の桜、夏のハス、冬の雪景色など四季折々の風情ある表情でいつ訪れても楽しめる場所です。 エリア 新潟・阿賀エリア カテゴリー 豪農の館 美術館・博物館 絶景・景勝地・天然記念物 花・木 庭園 その他の花 新潟県の紅葉スポット 条件 ガイドサービス有 大藤 中庭には、樹齢150年の大藤があります。開花は4月下旬から5月上旬、甘い香りを放って咲く藤色の花を見に多くの人が訪れます。開花に合わせ、行われる大藤のライトアップが空間を幻想的に演出します。 紅葉 大広間からの紅葉 銅門付近の紅葉 蹲と紅葉 三楽亭付近 大広間で静かに紅葉を。 11月頃の庭園は、錦の山を移したかのような紅葉に彩られ、100畳敷の大広間から眺める回遊式庭園の彩りは必見。モミジの朱や黄に松の緑が重なる美しい色のコントラストを楽しむことができます。紅葉の見頃には庭園のライトアップも実施され庭園全体の奥行きや立体感も印象的にご覧いただけます。館内は冷え込みが予想されるので暖かい服装でいくことをおすすめします。 大藤 中庭には、樹齢150年の大藤があります。開花は4月下旬から5月上旬、甘い香りを放って咲く藤色の花を見に多くの人が訪れます。開花に合わせ、行われる大藤のライトアップが空間を幻想的に演出します。",
+      "url": "https://niigata-kankou.or.jp/spot/5559",
+      "municipality": "粟島浦村",
+      "prefecture": "新潟県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "4d289380edd86e2e",
+      "name": "『長野新潟ガーデンロード』を巡り、「庭園」の魅力にふれる旅に出かけよう",
+      "description": "『長野新潟ガーデンロード』を巡り、「庭園」の魅力にふれる旅に出かけよう 長野県と新潟県に点在する魅力的なガーデンを結びながら、周囲の景観を楽しみ、食を楽しみ、豊かな時間を満喫してもらおうと企画された「長野新潟ガーデンロード」。歴史ある庭園文化の魅力に迫りながら、長野県から新潟県まで、標高差1,000m以上の旅へ皆さまをご案内します。 更新日：2026年03月30日 長野県と新潟県に点在する魅力的なガーデンを結びながら、周囲の景観を楽しみ、食を楽しみ、豊かな時間を満喫してもらおうと企画された「長野新潟ガーデンロード」。歴史ある庭園文化の魅力に迫りながら、長野県から新潟県まで、標高差1,000m以上の旅へ皆さまをご案内します。 TOP PHOTO：©蓼科高原バラクライングリッシュガーデン 「長野新潟ガーデンロード」は、長野県茅野市にある「バラクライングリッシュガーデン」と新潟県見附市にある「みつけイングリッシュガーデン」をつないで国内を縦断する観光ルートです。長野新潟ガーデンロード協議会の会長を務めるケイ山田さんは、国内初の英国庭園「バラクライングリッシュガーデン」のオーナーであり、
+```
+
+
+=== Case L4-18 ===
+Topic / intent: 染色 伝統技法
+Query: Where can I experience Japan's traditional textile dyeing techniques?
+Tool: get_local_specialty({"category": "craft", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "category_filter": "craft",
+  "lang": "en",
+  "count": 231,
+  "items": [
+    {
+      "key": "meti_densan:0101",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0101",
+      "name_ja": "二風谷アットゥㇱ",
+      "name": "Nibutani Attus",
+      "description_ja": "アットゥㇱとは、アッニ（オヒョウ）等の樹皮の繊維で糸を作り、アットゥㇱカㇻペ（機織り機）を使って織られた反物のことを言います。水に強く、通気性に優れ、天然繊維としては類稀な強靱さと独特の風合いを持っています。\n※アットゥㇱの「シ」、アットゥㇱカㇻペの「シ」と「ラ」はアイヌ語表記上小文字で表します。",
+      "description": "Attus refers to a woven textile made using thread spun from the bark fibers of the ohyo elm (Ulmus laciniata) and other trees, woven on a loom called an attus-karpe. It is highly resistant to water, has excellent breathability, and possesses an exceptionally rare toughness and distinctive texture for a natural fiber.\n※ In the Ainu-language notation, the 'si' in 'Attus' and the 'si' and 'ra' in 'Attus-karpe' are written in small letters.",
+      "designation_date": "平成25年3月8日",
+      "production_area_text": "沙流郡平取町",
+      "prefecture_codes": [
+        "01"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0101/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.788Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0102",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0102",
+      "name_ja": "置賜紬",
+      "name": "Oitama Tsumugi",
+      "description_ja": "置賜紬は、この地区で生産されている織物すべての呼び名です。その種類は米琉板締小絣、白鷹板締小絣、緯総絣、併用絣、草木染紬、紅花紬の6品種ありますが、いずれも糸を先に染めてから織る先染めの平織（ひらおり）です。",
+      "description": "Oitama Tsumugi is the collective name for all textiles produced in this region. There are six varieties: Yoneryū Itajime Kogasuri, Shirataka Itajime Kogasuri, Nuki Sogasuri, Heiyō Gasuri, Kusa-ki-zome Tsumugi, and Benibana Tsumugi. All are plain-weave (hiraori) fabrics made using the pre-dyeing method, in which the threads are dyed before weaving.",
+      "designation_date": "昭和51年2月26日",
+      "production_area_text": "米沢市、長井市、西置賜郡白鷹町",
+      "prefecture_codes": [
+        "06"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0102/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0103",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0103",
+      "name_ja": "羽越しな布",
+      "name": "Ugo Shina Cloth",
+      "description_ja": "羽越地域の山間部に生育するシナノキ、オオバボダイジュ又はノジリボダイジュの樹皮から取れる靭皮（じんぴ）繊維で糸を作り、布状に織り上げたもの。 日本では、縄文や弥生時代から衣装や装飾品などに利用され、今日、山形県鶴岡市関川地区や新潟県岩船郡山北町において受け継がれています。原料が樹皮の繊維であることから、その風合いは粗々しいものの、ざっくりとした手触りと落ち着きのある風合いに特徴があり、帯地ばかりでなくバッグ、帽子等多くの日用品にも加工されています。",
+      "description": "A woven fabric made from bast fibers derived from the bark of the Japanese linden (Shina-no-ki), large-leaved linden (Ooba-bodaiju), or Nojiri linden (Nojiri-bodaiju) trees that grow in the mountainous areas of the Ugo region. In Japan, these fibers have been used for clothing and ornaments since the Jomon and Yayoi periods, and the tradition is preserved today in the Sekikawa district of Tsuruoka City, Yamagata Prefecture, and in Sanpoku-cho, Iwafune-gun, Niigata Prefecture. Because the raw material is tree bark fiber, the texture is somewhat coarse; however, it is characterized by a rough, rustic feel and a calm, understated quality. It is processed not only into obi sashes but also into many everyday items such as bags and hats.",
+      "designation_date": "平成17年9月22日",
+      "production_area_text": "鶴岡市 新潟県／村上市",
+      "prefecture_codes": [
+        "15"
+      ],
+      "source_url": "https://koug
+```
+
+
+=== Case L4-19 ===
+Topic / intent: 街道 宿場町
+Query: Areas where you can still see remnants of Edo-period highway culture.
+Tool: search_area({"q": "宿場", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "宿場",
+  "match_count": 91,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "10d594a0833d6481",
+      "name": "新旧が同居する上田城下の宿場町で、 ゆるやかに、ひとときの時間旅行を",
+      "description": "新旧が同居する上田城下の宿場町で、 ゆるやかに、ひとときの時間旅行を 地域：上田エリア , 歴史的建造物 北国街道の歴史を繋ぐ宿場町「柳町」。300mほどの小さな通りには古い町家を生かした食事処やカフェが集まり、古さと新しさが共存する心地のよい空間となっています。 更新日：2024年02月14日 北国街道の歴史を繋ぐ宿場町「柳町」。300mほどの小さな通りには古い町家を生かした食事処やカフェが集まり、古さと新しさが共存する心地のよい空間となっています。 上田駅からまっすぐに伸びる中央通りを、一歩西にそれたところにある小さな通りが「柳町」。江戸時代には旅籠や呉服屋、酒屋などが軒を連ね、北国街道を行き交う旅人にひと時の休息をもたらした宿場町です。今、その旧街道沿いに老舗の酒蔵や天然酵母のベーカリー、ブックカフェなど、個性的な店舗が集い、地域のコミュニティーとしての新たな魅力を見せています。 白い土壁に格子戸やうだつの上がる町並みは、訪れる人を遠い江戸の旅路に誘うよう。明治期の呉服屋をそのまま利用する喫茶店「森文」、絹問屋の建物を再生させたそばの名店「おお西」など、町家再生の町としても知られ、築200年に渡るほどの建物の来歴を伺うだけでも楽しそうです。2002年には「柳町まちづくり景観協定」が締結。この先の未来にも、通りや建物の風情あるたたずまいは長く残されていきます。端から端まで歩いても300mほどなので、ちょっとした散策にもおすすめです。石畳が整備され、車いすの方や高齢の方が訪れやすいのも魅力。柳の枝を揺らす風を感じ、一つひとつのお店をのぞきながら、通りが紡いできた歴史物語を堪能してください。 森文 明治期の重厚な商家で、昔ながらの喫茶メニューを用意。昔ながらの中華そばやおこわなど、体と心に染み入るランチをいただけます おお西 街道筋に湧く保命水の脇に立つ、石臼自家製粉・十割打ちそばの名店。発芽したそばの実で打ち上げる独自の発芽そばも評判です",
+      "url": "https://www.go-nagano.net/tradition-and-culture/id17677",
+      "municipality": "辰野町",
+      "prefecture": "長野県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "0baf35ae8164b4f1",
+      "name": "特集・静けさを旅する、木曽の夏。──阿寺渓谷と、宿場と、もうひとつの中山道　Vol.2 暮らしの続く道──中山道、須原宿と野尻宿を歩く",
+      "description": "特集・静けさを旅する、木曽の夏。──阿寺渓谷と、宿場と、もうひとつの中山道 Vol.2 暮らしの続く道──中山道、須原宿と野尻宿を歩く 地域：木曽エリア , 中山道 江戸時代、中山道の宿場として栄えた「須原宿」と「野尻宿」。歴史と暮らしが重なり合う二つの宿場町を写真家･宮崎純一さんが写真に記憶する。 更新日：2025年07月30日 江戸時代、中山道の宿場として栄えた「須原宿」と「野尻宿」。歴史と暮らしが重なり合う二つの宿場町を写真家･宮崎純一さんが写真に記憶する。 中山道六十九次、三十九番目の宿場である「須原宿」。六十九次の中では最も新しい年代に建築され、木曽路を行き交う旅人や物資の中継地として大いににぎわったといわれている。この宿場町に残る江戸の面影や静謐な空気感を写真家・宮崎純一が写し取る。 【MAP①】江戸時代の旅籠の面影が今も色濃く残るエリアもある 須原宿の町並みを歩くと、通り沿いで静かに水を湛える「水舟」が目に入る。江戸時代から受け継がれてきた生活水の文化で、かつては井戸水を使った水場が十数軒単位で整備されていたという。上下水道の普及により一度は姿を消したが、地域の手によって復興され、今も住民たちの手で丁寧に守られ、暮らしのなかに息づいている。",
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn25-7-2",
+      "municipality": "辰野町",
+      "prefecture": "長野県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "26b50386210e64d0",
+      "name": "About This Page",
+      "description": "About This Page Article ID 1029885 PrintPrint in large letters About RSS Links, Copyrights, Disclaimers About the Hiroshima City Website Privacy Policy Article ID 1029885 PrintPrint in large letters",
+      "url": "https://www.city.hiroshima.lg.jp/english/about",
+      "municipality": "広島市佐伯区",
+      "prefecture": "広島県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "da70f6e732640248",
+      "name": "STAY YAMAGATA",
+      "description": "四季精彩景點 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 從旅遊主題搜尋 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 點閱率排行榜 山寺（寶珠山立石寺） more 山形城遺址、霞城公園 more 藏王樹冰 ／ Juhyo ／ Snow Monster （Zao’s Juhyo ／ Zao’s Rime ／ Frost Covered Trees of Zao） more 置賜公園香草園（置賜公園香草園展） more 天童温泉♨（Tendo Onsen） more 最上川堤防千本櫻 more Nakano Kanko Kajuen more Benihana Musuem more Michi-no-Eki Sagae Cherry Land more 月山 more Zao Bodaira Highlands more 更多景點 更多活動",
+      "url": "https://yamagatakanko.com/zh_TW",
+      "municipality": "白鷹町",
+      "prefecture": "山形県"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "321e4ca2802b88c5",
+      "name": "旅の特集",
+      "description": "当サイトを使用することにより、クッキーの設定および使用に同意したことになります。 詳細については、プライバシーポリシーを参照してください。",
+      "url": "https://iwatetabi.jp/feature",
+      "municipality": "一戸町",
+      "prefecture": "岩手県"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_website",
+      "key": 
+```
+
+
+=== Case L4-20 ===
+Topic / intent: 巡礼 88以外
+Query: Japan's spiritual pilgrimages beyond Shikoku 88.
+Tool: get_japan_heritage({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "theme_filter": null,
+  "lang": "en",
+  "count": 104,
+  "items": [
+    {
+      "key": "japan_heritage:001",
+      "story_id": "001",
+      "authority": "文化庁 (Agency for Cultural Affairs)",
+      "title_ja": "近世日本の教育遺産群",
+      "subtitle_ja": "学ぶ心・礼節の本源",
+      "title": "Early Modern Japan's Educational Heritage: The Roots of a Desire to Learn and of Etiquette",
+      "summary_ja": "日本遺産（Japan Heritage）ポータルサイトの近世日本の教育遺産群について。近世日本を訪れた外国人は、紀行文に日本人の様子を書き記してい",
+      "summary": "Regarding the early modern Japan educational heritage sites on the Japan Heritage portal site: foreigners who visited early modern Japan recorded observations about the Japanese people in their travel writings.",
+      "body_ja": "我が国では、近代教育制度の導入前から、支配者層である武士のみならず、多くの庶民も読み書き・算術ができ、礼儀正しさを身に付けるなど、高い教育水準を示した。これは、藩校や郷学、私塾など、様々な階層を対象とした学校の普及による影響が大きく、明治維新以降のいち早い近代化の原動力となり、現代においても、学問・教育に力を入れ、礼節を重んじる日本人の国民性として受け継がれている。\n\n近世日本を訪れた外国人は、紀行文に日本人の様子を書き記しています。イギリス領時代のカナダ出身の冒険家、ラナルド・マクドナルドは「日本回想記」の中で、「日本人のすべての人－最上層から最下層まであらゆる階級の男、女、子供－は、紙と筆と墨を携帯しているか、肌身離さずもっている。すべての人が読み書きの教育をうけている。また、下級階級の人びとさえも書く習慣があり、手紙による意思伝達は、わが国におけるよりも広く行われている。」と述べています。また、イタリア人宣教師、アレシャンドゥロ・ヴァリニャーノは、「日本巡察記」で「人々はいずれも色白く、きわめて礼儀正しい。一般庶民や労働者でもその社会では驚歎すべき礼節をもって上品に育てられ、あたかも宮廷の使用人のように見受けられる。この点においては、東洋の他の諸民族のみならず、我等ヨーロッパ人よりも優れている。」と記録しています。これらの記述からは、当時の日本人が、他の諸外国と比較して、身分や性別を越えて高い読み書き 能力を持ち、礼儀正しさを身につけていた様子が分かります。こうした教育の伝統が継承され、明治維新後の日本の近代化が進められたことをロナルド・ドーアなどの欧米の研究者は、「近世日本の教育こそが日本近代化の知的準備をした。」として高く評価しています。このようなエピソードからも分かるように、近世の日本では高い教育を受けた層が社会全体に広がっていました。外国人にとっては、一見しただけで相手の身分を判断することは困難なほどでした。\n\n近世の日本人が高い教養を身につける上で大きく貢献したのが、全国各地に建てられた学校です。その学校の始まりと言えるのが、イエズス会宣教師フランシスコ・ザビエルが「日本国中最も大にして最も有名な坂東の大学」と称した足利学校です。足利学校の創建については諸説ありますが、15世紀、上杉憲実(のりざね)は学規を定め、現在国宝となっている漢籍（かんせき）を寄進するなどして足利学校を再興し、戦乱の時代においても全国から多くの学徒が集まりました。その教えは、儒学を中心としながらも、易学・兵学・医学など多岐にわたり、日本最古の総合大学と呼ぶにふさわしいものでした。江戸時代になると、足利学校は、貴重な書籍の宝庫として、幕府から保護されました。足利学校の自由で開放的な学びと自学自習の精神は、近世の学校の原点と言えます。一方、足利学校以外にも積極的に教育に取り組んだ藩主たちが各地に学校を設立していきました。岡山藩主の池田光政は庶民の教育も不可欠と考え、閑谷学校(しずたにがっこう)を創りました。光政は熊沢蕃山(くまざわばんざん)から学んだ儒教思想にのっとり、緑の生い茂る閑かな山村に教育の理想を体現しました。現在国宝となっている講堂などの建物や石塀などの施設は、火災や雨から守り長持ちさせるための工夫がされており、学校存続への強い願いが表れています。経済基盤としては井田村下井（いたむらしもい）等の学田(がくでん)を持たせて学校の永続を図りました。日本最古の庶民教育学校とも呼べる閑谷学校では、広く門戸を開き、他領からも多くの生徒が集まりました。また、18 世紀以降多数の藩校が建設されますが、その配置計画は閑谷学校のように日本的なものが大多数となっていきます。したがって閑谷学校は日本の学校建築の出発点に位置し、現存最古の代表例といえます。江戸時代後期には、個人が経営する私塾も日本全国に数多く生まれてきました。幕府の代官所が置かれた豊後日田では、町人を中心とした自由な風土が育まれ、廣瀬淡窓(ひろせたんそう)が咸宜園(かんぎえん)という私塾を創設しました。咸宜園では、毎月成績評価を行う「月旦評(げったんひょう)」などの特色ある教育が全国的な評判となり、各地の私塾に影響を与えるとともに、全国60か国以上から5,000人を超える門下生を集め、日本最大規模の私塾となりました。咸宜園に隣接する豆田町には、淡窓の日記や入門簿・会計録などの史料が伝わる淡窓旧宅や長福寺などの町並みが残り、その周辺では、咸宜園である前身の桂林園跡（けいりんえんあと）や塾主の墓を見ることができます。また、幕末に頻繁に起こった外国船の接触によって、時代を切り開く力を持った有能な人材の育成が必要となり、実力主義や幅広い科目を教える学校が広がっていきました。弘道館は、水戸藩主の徳川斉昭(なりあき)が教育によって人心を安定させ、国を興すために設立した日本最大規模の藩校です。水戸藩には、歴史書『大日本史』を編集した彰考館(しょうこうかん)があり、昔から学問・教育が盛んでした。弘道館は、歴史だけでなく、医学、兵学、武芸など実用的な科目も備えた総合大学ともいえるもので、その教育方針や施設、運営方法等は松代藩校文武学校や庄内藩校致道館等の他藩の藩校にも大きな影響を与えました。一方、偕楽園は勉学の休息の場として位置づけられ、弘道館と対をなしていました。偕楽園の梅は、非常食になる実用的側面と、学問を好む「好文」という異名を持つことから斉昭が植樹を奨励したもので、水戸藩の学問興隆の象徴となっています。郊外にも個性重視の教育を行った日新塾など、特徴的な私塾が建てられ、多彩な門人を輩出しました。こうした日本の学校は、中央政府である幕府ではなく、民間や藩が主導して発展していったことに特徴があり、幅広い教育を行うことができました。\n\nこれまで紹介してきた、近世日本を代表する教育遺産群では、現在でも論語の素読やいろはかるたなど、当時の教育内容を同じように体験することができます。これら学校は、過去の遺産ではなく、現在でも生きた学びの場であり続けています。\n\n近世学校の原点としての威厳が漂う足利学校では、国内に現存する最古の聖廟(せいびょう)が残り、11 月には孔子を祀る釋奠(せきてん)という祭礼が行われます。足利学校と同じく孔子を祀る釈菜（せきさい）という祭礼が受け継がれている“学びの原郷”閑谷学校では、日曜日になると、論語の朗誦（ろうしょう）が静かな山間に響き渡り、往時の姿を偲ばせます。\n\n咸宜園と豆田の町並みを歩けば、江戸時代の「学園都市」や町人文化の空気に触れられますし、弘道館や偕楽園を訪れると、ほんのり甘い梅の香りとともに、水戸藩の学問の伝統を感じられるでしょう。近世の日本ではこうした学校とその周辺を取り巻く環境を舞台に営まれてきた教育の成果によって、世界でも類を見ないほどの高い教育水準を実現し、それが明治維新以降のいち早い近代化の達成につながりました。一方、こうした教育は、礼節を重んじるという日本人の国民性を形づくってきました。現在、日本人のマナーの良さは世界中で高く評価されています。まさに近世日本の教育は、現代にも継承されている「世界に誇る日本の教育」だったと言えるでしょう。",
+      "themes": [
+        "城"
+      ],
+      "periods": [
+        "江戸"
+      ],
+      "related_areas_text": "茨城県（水戸市）・栃木県（足利市）・岡山県（備前市）・大分県（日田市）",
+      "prefecture_codes": [
+        "08",
+        "09",
+        "33",
+        "44"
+      ]
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.
