@@ -5,6 +5,8 @@ import {
   matchPrefecturesSync,
   matchPrefecturesByMunicipalitiesSync,
   extractPrefectureCodes,
+  matchPrefectures,
+  loadPrefectureRows,
 } from "../../scrapers/lib/prefecture_match.js";
 
 interface PrefectureRow {
@@ -119,5 +121,31 @@ describe("extractPrefectureCodes (combined)", () => {
 
   it("returns empty when the text contains neither prefecture nor known municipality", () => {
     expect(extractPrefectureCodes("xxxxxxxx", prefs, munis)).toEqual([]);
+  });
+});
+
+describe("matchPrefectures (async, loads japan_regions.json)", () => {
+  it("returns empty for empty input without hitting disk twice", async () => {
+    expect(await matchPrefectures("")).toEqual([]);
+  });
+
+  it("matches an explicit prefecture name from the live taxonomy", async () => {
+    const got = await matchPrefectures("青森県のりんご");
+    expect(got).toContain("02");
+  });
+
+  it("does not over-match 京都 inside 東京都 in live taxonomy", async () => {
+    const got = await matchPrefectures("東京都の桜");
+    expect(got).toEqual(["13"]);
+  });
+});
+
+describe("loadPrefectureRows (cache hit)", () => {
+  it("returns the same cached array on repeated calls", async () => {
+    const a = await loadPrefectureRows();
+    const b = await loadPrefectureRows();
+    expect(a).toBe(b);
+    // Sanity: 47 prefectures
+    expect(a.length).toBe(47);
   });
 });
