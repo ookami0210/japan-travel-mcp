@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Final local safety net: scan every commit being pushed (both message
+# and diff) for forbidden internal-narrative patterns.
+#
+# Runs even when bypassing pre-commit / commit-msg via --no-verify on
+# individual commits. Only --no-verify on the push itself bypasses this.
+# CI runs the same check server-side and cannot be bypassed.
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCANNER="$HOOK_DIR/_scan.sh"
+
+zero='0000000000000000000000000000000000000000'
+violations=0
+
+while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+  # Skip branch deletions
+  [ "$local_sha" = "$zero" ] && continue
+
+  # Determine the range of new commits
+  if [ "$remote_sha" = "$zero" ]; then
+    # New ref — check commits not reachable from any other origin ref
+    range=$(git rev-list "$local_sha" --not --remotes=origin 2>/dev/null || git rev-list "$local_sha")
+  else
+    range=$(git rev-list "$remote_sha..$local_sha")
+  fi
+
+  [ -z "$range" ] && continue
+
+  for sha in $range; do
+    short=$(git rev-parse --short "$sha")
+
+    # Check commit message
+    if msg_match=$(git log -1 --format=%B "$sha" | bash "$SCANNER"); then
+      :
+    else
+      echo "❌ pre-push: forbidden pattern in commit $short message:"
+      echo "$msg_match" | head -10
+      violations=$((violations + 1))
+    fi
+
+    # Check additions in the diff
+    additions=$(git show --format= --no-color "$sha" | grep -E '^\+' | grep -vE '^\+\+\+ ' || true)
+    if [ -n "$additions" ]; then
+      if diff_match=$(printf '%s\n' "$additions" | bash "$SCANNER"); then
+        :
+      else
+        echo "❌ pre-push: forbidden pattern in commit $short diff:"
+        echo "$diff_match" | head -10
+        violations=$((violations + 1))
+      fi
+    fi
+  done
+done
+
+if [ "$violations" -gt 0 ]; then
+  echo ""
+  echo "Push blocked: $violations forbidden-pattern occurrence(s)."
+  echo "Allowed: 'KJ Sunada' (author attribution)."
+  echo "Fix the offending commits (rebase / amend) before retrying."
+  exit 1
+fi
+
+exit 0
