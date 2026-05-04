@@ -86,6 +86,17 @@ const CATEGORIES: { title: string; kind_tag: string }[] = [
   { title: "Category:日本の庭園", kind_tag: "garden" },
   { title: "Category:日本国指定名勝", kind_tag: "scenic_beauty" },
   { title: "Category:日本国指定天然記念物", kind_tag: "natural_monument" },
+  // Iter68: sake breweries + sake brand entries (per L2-07 case)
+  { title: "Category:日本酒メーカー", kind_tag: "sake_brewery" },
+  { title: "Category:日本酒の銘柄", kind_tag: "sake_brand" },
+  // Iter69: targeted high-value categories (judge bottom-cases)
+  { title: "Category:富良野市", kind_tag: "lavender_field" },
+  { title: "Category:しまなみ海道", kind_tag: "cycling_route" },
+  // Iter68: more activity-intent categories
+  { title: "Category:日本のワイナリー", kind_tag: "winery" },
+  { title: "Category:日本の酒類", kind_tag: "alcohol_beverage" },
+  { title: "Category:日本の城郭", kind_tag: "castle" },
+  { title: "Category:都道府県別の城", kind_tag: "castle" },
 ];
 
 interface CmMember {

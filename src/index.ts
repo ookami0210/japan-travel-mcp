@@ -1642,6 +1642,13 @@ async function populateFromHybrid(
   lesserKnownIntent = false,
   intentKinds: Set<string> = new Set(),
 ): Promise<boolean> {
+  // Iter69: short-query name-substring guard. When query is 1-3 chars
+  // and intent dictionary didn't fire (no kinds boost), demote hybrid
+  // hits where entity name doesn't literally contain the query.
+  // Solves L1-13 直島 vs 直方 sub-token leak, L3-25 鶴 → 鶴林寺 etc.
+  const queryLower = query.toLowerCase().trim();
+  const isShortKanjiQuery = /^[一-龥]{1,3}$/u.test(query.trim());
+  const shouldGuardSubstring = isShortKanjiQuery && intentKinds.size === 0;
   const candidateRoots = [dataRoot()];
   const repoLocal = resolve(findPackageRoot(), "data");
   if (!candidateRoots.includes(repoLocal)) candidateRoots.push(repoLocal);
@@ -1691,6 +1698,14 @@ async function populateFromHybrid(
           // we don't see). -50 brings ~85 score down to ~35, well below
           // the must_see/notable bands.
           intentKindsDemote = -50;
+        }
+      }
+      // Iter 69: short-query substring guard. Solves 直島↔直方, 鶴↔鶴林寺
+      // sub-token leak in BM25/e5 hybrid retriever.
+      if (shouldGuardSubstring) {
+        const eName = (e.name ?? "").toLowerCase();
+        if (!eName.includes(queryLower)) {
+          intentKindsDemote -= 60;
         }
       }
 
