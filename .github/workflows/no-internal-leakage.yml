@@ -1,0 +1,91 @@
+name: no-internal-leakage
+
+# Final, bypass-proof guard: scan tracked content + commit messages for
+# forbidden internal-narrative patterns. Local hooks under .githooks/
+# can be skipped with --no-verify; this CI run cannot.
+#
+# Forbidden patterns are defined in .githooks/_scan.sh (single source
+# of truth, used by both local hooks and this CI job). Allowed: the
+# legitimate author phrase, see _scan.sh.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  scan-tracked-content:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan all tracked text files via .githooks/_scan.sh
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x .githooks/_scan.sh
+          violations=0
+          while IFS= read -r f; do
+            # Skip binary file extensions
+            case "$f" in
+              *.png|*.jpg|*.jpeg|*.gif|*.ico|*.pdf|*.zip|*.gz|*.parquet|*.bin) continue ;;
+            esac
+            if out=$(bash .githooks/_scan.sh < "$f" 2>/dev/null); then
+              continue
+            fi
+            echo "❌ $f:"
+            printf '%s\n' "$out" | head -5
+            echo ""
+            violations=$((violations + 1))
+          done < <(git ls-files)
+          if [ "$violations" -gt 0 ]; then
+            echo "Files with forbidden patterns: $violations"
+            exit 1
+          fi
+          echo "✅ Tracked content is clean."
+
+  scan-commit-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan commit messages on this push / PR via .githooks/_scan.sh
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x .githooks/_scan.sh
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+            range="$base..$head"
+          else
+            before="${{ github.event.before }}"
+            after="${{ github.event.after }}"
+            if [ "$before" = "0000000000000000000000000000000000000000" ]; then
+              range="$(git rev-list --max-count=200 "$after")"
+            else
+              range="$before..$after"
+            fi
+          fi
+
+          violations=0
+          for sha in $(git rev-list "$range" 2>/dev/null || true); do
+            if msg=$(git log -1 --format=%B "$sha" | bash .githooks/_scan.sh); then
+              continue
+            fi
+            short=$(git rev-parse --short "$sha")
+            echo "❌ commit $short:"
+            printf '%s\n' "$msg" | head -5
+            echo ""
+            violations=$((violations + 1))
+          done
+
+          if [ "$violations" -gt 0 ]; then
+            echo "Commits with forbidden patterns: $violations"
+            exit 1
+          fi
+          echo "✅ Commit messages are clean."

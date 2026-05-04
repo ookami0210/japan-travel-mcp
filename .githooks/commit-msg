@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Block forbidden internal-narrative patterns from commit messages.
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCANNER="$HOOK_DIR/_scan.sh"
+MSG_FILE="$1"
+
+if matches=$(cat "$MSG_FILE" | bash "$SCANNER"); then
+  exit 0
+fi
+
+echo "❌ commit-msg: forbidden internal-narrative pattern in commit message."
+echo ""
+echo "$matches" | head -20
+echo ""
+echo "Reason: commit messages are public. Internal proper nouns, AI"
+echo "co-author signatures, and decision-provenance markers must not"
+echo "appear in commit messages. See .githooks/_scan.sh for patterns."
+echo ""
+echo "Allowed: 'KJ Sunada' (legitimate author attribution)."
+exit 1

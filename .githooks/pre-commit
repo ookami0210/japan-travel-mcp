@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Block forbidden internal-narrative patterns from being committed.
+# Scans staged additions only (lines starting with '+' in `git diff --cached`).
+#
+# To bypass (NOT recommended), use --no-verify. The pre-push hook + CI
+# workflow will still catch it on push.
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCANNER="$HOOK_DIR/_scan.sh"
+
+# Collect staged additions, excluding the diff header markers (+++)
+added_lines=$(git diff --cached --unified=0 --no-color --no-renames \
+  | grep -E '^\+' | grep -vE '^\+\+\+ ' || true)
+
+if [ -z "$added_lines" ]; then
+  exit 0
+fi
+
+if matches=$(printf '%s\n' "$added_lines" | bash "$SCANNER"); then
+  exit 0
+fi
+
+echo "❌ pre-commit: forbidden internal-narrative pattern in staged content."
+echo ""
+echo "$matches" | head -20
+echo ""
+echo "Reason: git is public. Internal proper nouns, AI co-author signatures,"
+echo "and decision-provenance comments must not be committed."
+echo "See .githooks/_scan.sh for the exact forbidden patterns."
+echo ""
+echo "Allowed: 'KJ Sunada' (legitimate author attribution)."
+echo "To bypass (NOT recommended): git commit --no-verify"
+exit 1
