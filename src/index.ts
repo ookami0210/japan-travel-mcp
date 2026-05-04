@@ -190,7 +190,9 @@ const NAME_KIND_RE: { kinds: string[]; re: RegExp }[] = [
   { kinds: ["shotengai"], re: /(商店街)/u },
   { kinds: ["jokamachi"], re: /(城下町)/u },
   { kinds: ["shukuba"], re: /(宿場|宿場町)/u },
-  { kinds: ["kaido"], re: /(街道|海道|古道)/u },
+  // Iter68 fix: 海道 alone false-positive on 北海道 (prefecture name).
+  // Restrict to specific kaido tokens that are clearly kaido routes.
+  { kinds: ["kaido"], re: /(街道|古道|東海道|中山道|甲州街道|奥州街道|日光街道|熊野古道|善光寺街道|京街道)/u },
   { kinds: ["buke_yashiki"], re: /(武家屋敷|侍屋敷)/u },
   { kinds: ["machiya", "preservation_district"], re: /(町家|町並み|古い町並)/u },
   // ── Landscape / agriculture ─────────────────────────────────────────

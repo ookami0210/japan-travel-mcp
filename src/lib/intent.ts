@@ -107,6 +107,10 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   {
     id: "shukuba",
     re: /(宿場|宿場町|shukuba|post\s*town|post-town|post\s*station)/iu,
+    // Iter68: target_kinds=["shukuba"] so heritage_class_match kinds-gate
+    // demotes non-shukuba items with Q850649 designation. D2 name regex
+    // tags 妻籠/馬籠/奈良井. Also tags Wikipedia-list "shukuba" entries.
+    target_kinds: ["shukuba"],
     target_heritage_qids: ["Q850649"],
     semantic_tags: ["post town", "shukuba", "kaido"],
     rationale_en: "Shukuba — Edo-era post town along the major highways (Nakasendo / Tokaido / etc.).",
