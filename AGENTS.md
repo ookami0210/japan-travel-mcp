@@ -6,8 +6,19 @@ this file is the **engineering** brief.
 
 > **`CLAUDE.md` is a symlink to this file** — keep edits in `AGENTS.md`.
 
+> ## ⚠️ READ FIRST — applies to every git output
+>
+> [`AGENT_VOICE_POLICY.md`](AGENT_VOICE_POLICY.md) is a **mandatory** read
+> for all AI agents before producing any commit, PR text, or code comment.
+> Mechanical hooks (`.githooks/_scan.sh`) and a CI workflow
+> (`.github/workflows/no-internal-leakage.yml`) block violations — bypassing
+> with `--no-verify` only delays the fix.
+>
+> @AGENT_VOICE_POLICY.md
+
 > Companion documents (read these before changing the corresponding area):
 >
+> - [`AGENT_VOICE_POLICY.md`](AGENT_VOICE_POLICY.md) — git voice / forbidden content rules (read FIRST, see above)
 > - [`DATA_POLICY.md`](DATA_POLICY.md) — what we crawl / robots.txt stance / 30-day SLA
 > - [`DATA_SOURCES.md`](DATA_SOURCES.md) — **single source of truth** for every fetcher (CI-enforced)
 > - [`docs/EDITORIAL_POLICY.md`](docs/EDITORIAL_POLICY.md) — what content we surface ("公式の積み上げ", no curation)
@@ -349,7 +360,7 @@ and commit the DELTA so the change is reviewable against the rubric.
 
 ### Commits & PRs
 
-- **Don't add a `Co-Authored-By: Claude …` trailer** to commits in this repo.
+- **Don't add commit trailers identifying AI agents as co-authors** in this repo.
 - Commit style is short, prefix-emoji + scope:
   `✨ DMO URL discovery via Claude API (Haiku 4.5 + strict 'official' prompt)`,
   `🧹 DMO data hygiene: 12 manual URLs + isolate 201 contaminated plans`,
@@ -378,7 +389,7 @@ If you add a new MCP tool, it must satisfy the Editorial Policy:
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | `scrape.yml` (legacy) | daily cron 03:00 JST + manual | Active steady scraper today; `daily.ts` + `r3_refresh.ts`, commits state, syncs to HF. To be retired when `steady-scrape.yml` is enabled. |
-| `steady-scrape.yml` | manual + (cron commented; flip when KJ approves) | Replacement for `scrape.yml` with dynamic muni picker (overdue-first, 65–130 / day). |
+| `steady-scrape.yml` | manual + (cron commented; flip when ready)      | Replacement for `scrape.yml` with dynamic muni picker (overdue-first, 65–130 / day). |
 | `burst-scrape.yml` | manual + PR label `burst-required` | Full re-scrape across 6 batches (3-1 … 3-6); `shallow` (~4-6h) or `full` (~12h) mode. |
 | `translate.yml` | manual only | Anthropic Batch API translation pass for missing names. |
 | `validate-data-sources.yml` | PR touching `scrapers/` / `DATA_SOURCES.md` / workflows + manual | Runs `validate:data-sources` — the SSOT gate. |
