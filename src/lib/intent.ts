@@ -133,6 +133,15 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
     rationale_en: "Buke-yashiki — samurai residence / district, typically in preservation areas.",
     rationale_ja: "武家屋敷。重要伝統的建造物群保存地区にも多い。",
   },
+  {
+    id: "juden_preservation_district",
+    re: /(重伝建|重要伝統的建造物群|important\s*preservation\s*district|traditional\s*building\s*preservation)/iu,
+    target_kinds: ["preservation_district"],
+    target_heritage_qids: ["Q850649"], // 重要伝統的建造物群保存地区
+    semantic_tags: ["juden", "preservation district", "traditional buildings"],
+    rationale_en: "Juden — Important Preservation District for Groups of Traditional Buildings (Q850649). Designation by 文化庁; 130+ districts nationwide.",
+    rationale_ja: "重要伝統的建造物群保存地区 (重伝建)。文化庁指定 130 地区超。",
+  },
   // ── Religious / pilgrimage ────────────────────────────────────────────
   {
     id: "henro_junrei",
@@ -171,11 +180,22 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   {
     id: "sand_dune",
     re: /(砂丘|sand\s*dune|dune|tottori\s*sand)/iu,
-    target_kinds: ["natural_monument"],
+    // Narrowed (iter74) — natural_monument target was too broad and
+    // bled crane reserves / waterfalls / etc. onto sand-dune queries.
+    target_kinds: ["sand_dune"],
     target_heritage_qids: ["Q43113623", "Q11414752"], // 天然記念物 / 名勝
     semantic_tags: ["sand dune", "tottori"],
-    rationale_en: "Sand dune — primarily Tottori Sakyu and a handful of smaller dunes.",
-    rationale_ja: "砂丘。鳥取砂丘が代表、他は小規模。",
+    rationale_en: "Sand dune — primarily Tottori Sakyu and a handful of smaller dunes (Wikipedia 砂丘 category).",
+    rationale_ja: "砂丘。鳥取砂丘が代表、他は小規模。Wikipedia 砂丘 category 経由で 7 entries。",
+  },
+  {
+    id: "beach",
+    re: /(ビーチ|beach|海水浴|swimming\s*beach|seaside|沿岸)/iu,
+    target_kinds: ["beach", "nagisa_100"],
+    target_heritage_qids: ["Q11414752"], // 名勝
+    semantic_tags: ["beach", "swimming beach", "coastal"],
+    rationale_en: "Beach — Wikidata Q40080 (beach) plus 日本の渚百選 (Nagisa-100). Demotes amusement parks (e.g. 南知多ビーチランド) that share substring.",
+    rationale_ja: "ビーチ・海水浴場。Q40080 + 日本の渚百選。南知多ビーチランド (遊園地) 等の同名substringを除外。",
   },
   {
     id: "tana_bata_terrace_field",
@@ -217,7 +237,7 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   },
   {
     id: "local_railway",
-    re: /(ローカル線|ローカル鉄道|local\s*rail(way)?|country\s*train|secondary\s*line|赤字路線|鈍行|普通列車|閑散線区|ロー\s*カル鉄)/iu,
+    re: /(ローカル線|ローカル鉄道|ローカル(?:な)?(?:電車|路線|鉄道|旅|の鉄)?|local\s*rail(way)?|country\s*train|secondary\s*line|赤字路線|鈍行|普通列車|閑散線区|ロー\s*カル鉄|^ローカル$)/iu,
     // Iter62: removed wrong target_kinds=["bridge"] (judge L3-23 confirmed
     // it surfaced bridges instead of railways). No good kinds match in
     // current corpus; rely on lexical retrieval only until Wikipedia
@@ -269,11 +289,11 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   },
   {
     id: "stargazing",
-    re: /(星空|stargaz|night\s*sky|dark\s*sky|天体観測|プラネタリウム|planetarium|流星群|meteor\s*shower)/iu,
-    target_kinds: ["national_park", "observation"],
-    semantic_tags: ["stargazing", "dark sky", "astronomy"],
-    rationale_en: "Stargazing — high-altitude observatories or designated dark-sky regions (Bisei, Iriomote, Hatoyama).",
-    rationale_ja: "星空観測。美星・西表・鳩山等が代表。",
+    re: /(星空|stargaz|night\s*sky|dark\s*sky|天体観測|プラネタリウム|planetarium|流星群|meteor\s*shower|オーロラ|aurora|northern\s*lights)/iu,
+    target_kinds: ["national_park", "observation", "observatory"],
+    semantic_tags: ["stargazing", "dark sky", "astronomy", "aurora-fallback"],
+    rationale_en: "Stargazing or rare-sky phenomena (incl. aurora) — defaults to dark-sky observatories (Bisei, Iriomote, Hatoyama). Auroras are not visible in mainland Japan; safety guard emits geographic_impossibility for aurora queries.",
+    rationale_ja: "星空観測・希少天体現象 (オーロラ含む)。美星・西表・鳩山等が代表。日本本土でオーロラは見えないため safety で警告。",
   },
   {
     id: "cycling_route",
@@ -293,11 +313,14 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   {
     id: "cherry_blossom",
     re: /(桜|cherry\s*blossom|sakura|花見|hanami|お花見)/iu,
-    target_heritage_qids: ["Q11414752"], // 名勝
-    target_kinds: ["park", "preservation_district"],
+    target_heritage_qids: ["Q11414752", "Q94987823"], // 名勝 / 特別名勝
+    // Narrowed (iter72) — park/preservation_district are too broad and
+    // 桜井駅跡 / 桜井茶臼山古墳 etc. surface as park members. Keep the
+    // sakura-specific kind tags merged from Wikipedia 桜の名所 / 100選 lists.
+    target_kinds: ["sakura_meisho_100", "sakura_meisho", "kouyou_meisho"],
     semantic_tags: ["cherry blossom", "sakura"],
-    rationale_en: "Cherry blossom viewing — peak typically late March to early April for honshu.",
-    rationale_ja: "桜・お花見。本州は 3 月下旬〜4 月上旬がピーク。",
+    rationale_en: "Cherry blossom viewing — peak typically late March to early April for honshu. Kinds-gates to canonical sakura sites (Wikipedia 桜の名所 / 日本さくら名所100選) so 桜井駅跡 / 桜田門 / 桜井茶臼山古墳 substring matches are demoted.",
+    rationale_ja: "桜・お花見。本州は 3 月下旬〜4 月上旬がピーク。日本さくら名所100選 / 桜の名所 wiki kind を用いて 桜井駅跡 / 桜田門 / 桜井古墳 等の名前substringを除外。",
   },
   {
     id: "fall_foliage",
@@ -360,6 +383,47 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
     semantic_tags: ["sanmeibaku"],
     rationale_en: "Three Great Waterfalls of Japan: 那智の滝 / 華厳の滝 / 袋田の滝.",
     rationale_ja: "日本三名瀑。",
+  },
+  {
+    id: "volcano",
+    // Cover both 火山 (broad) and 活火山 (narrow) plus famous-name aliases.
+    // Kinds-gate to volcano / active_volcano filters out generic mountain
+    // entities — the famous volcanoes themselves get the active_volcano tag
+    // via NAME_KIND_RE in src/index.ts even when their Wikidata P31 is Q8502.
+    re: /(活火山|active\s*volcano|volcanoes?\s*(in|of)|噴火|fumarole|crater\s*lake|火口|噴気|火山|阿蘇山|桜島|浅間山|有珠山|草津白根|霧島山|雲仙岳|箱根山|三原山|蔵王連峰|御嶽山|焼岳)/iu,
+    target_kinds: ["volcano", "active_volcano"],
+    semantic_tags: ["active volcano", "volcano"],
+    rationale_en: "Active volcano — JMA-monitored peaks (Aso, Sakurajima, Asama, Usu, Kusatsu-Shirane, Kirishima, Unzen, Hakone, Mihara, Ontake, Yake) and Wikidata Q204324 / Q11197 crater entities. Distinct from generic mountain.",
+    rationale_ja: "活火山。気象庁監視対象 (阿蘇・桜島・浅間・有珠・草津白根・霧島・雲仙・箱根・三原・御嶽・焼岳) と Wikidata Q204324 / Q11197 火口湖系。",
+  },
+  {
+    id: "crane_wintering",
+    // 鶴/ツル alone covers the L3-25 query but kinds-gate to crane_wintering/
+    // natural_monument filters out shrines/temples (鶴岡八幡宮/鶴林寺) whose
+    // kinds are shinto_shrine/buddhist_temple, not natural_monument.
+    re: /(タンチョウ|tancho|grus\s*japonensis|crane.{0,3}(wintering|migrat|sanctuary|reserve)|鶴.{0,3}(渡来|飛来|越冬|の渡|サンクチュアリ)|出水.{0,3}(の)?ツル|釧路湿原.{0,3}タンチョウ|^(鶴|ツル|tsuru)$)/iu,
+    target_kinds: ["crane_wintering", "natural_monument", "national_park"],
+    target_heritage_qids: ["Q43113623", "Q122904442"], // 国の天然記念物 / 国指定天然記念物
+    semantic_tags: ["crane wintering", "tancho", "wildlife"],
+    rationale_en: "Crane wintering / Tancho — Izumi (Kagoshima) wintering site, Kushiro Marsh (Hokkaido) red-crowned crane sanctuary. Natural Monument designation. The bare query 鶴/ツル/tsuru kinds-gates to natural_monument so 鶴林寺/鶴岡八幡宮 etc. are demoted.",
+    rationale_ja: "鶴の渡来地・タンチョウ。出水市ツル渡来地 (鹿児島)・釧路湿原 (北海道)。国指定天然記念物。鶴/ツル 単独 query は kinds-gate で寺社を除外。",
+  },
+  {
+    id: "henro_88_temple",
+    re: /(四国八十八|88\s*temples?|お遍路|お?遍路|henro|shikoku\s*(pilgrim|pilgrimage|88))/iu,
+    target_kinds: ["pilgrimage_site", "buddhist_temple"],
+    semantic_tags: ["shikoku 88 temples", "henro pilgrimage"],
+    rationale_en: "Shikoku 88-temple pilgrimage (お遍路) — pilgrimage circuit across 徳島 / 高知 / 愛媛 / 香川.",
+    rationale_ja: "四国八十八箇所お遍路。徳島・高知・愛媛・香川にまたがる巡礼路。",
+  },
+  {
+    id: "kominka_stay",
+    // separate from existing kominka intent which targets preservation_district landmarks
+    re: /(古民家(ステイ|宿|ホテル|泊)|kominka\s*(stay|inn|guesthouse|lodging)|renovated\s*(traditional|farmhouse))/iu,
+    target_kinds: ["preservation_district", "ryokan", "guesthouse"],
+    semantic_tags: ["kominka stay", "renovated farmhouse", "traditional lodging"],
+    rationale_en: "Kominka lodging — renovated traditional farmhouse stays (Bed and Craft, Higashiyama 古民家ホテル, etc.).",
+    rationale_ja: "古民家宿・古民家ホテル。Bed and Craft 七尾、越中八尾古民家、東山等。",
   },
   // ── Cultural concepts ─────────────────────────────────────────────────
   {
