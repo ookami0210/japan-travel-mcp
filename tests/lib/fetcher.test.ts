@@ -268,18 +268,19 @@ describe("rateLimitedFetch — happy path", () => {
     expect(r.body).toBe("<root/>");
   });
 
-  it("treats missing content-type as text", async () => {
-    stubFetch(
-      async () =>
-        new Response("no-ct-but-text", {
-          status: 200,
-          // no content-type header
-        }),
-    );
+  it("treats missing content-type as text (covers the !lastContentType branch)", async () => {
+    // undici/Response auto-synthesises a content-type for non-empty bodies,
+    // so we have to force the headers.get spy to return null. That's the
+    // only way to actually exercise the `!lastContentType` short-circuit in
+    // fetcher.ts.
+    stubFetch(async () => {
+      const res = new Response("no-ct-but-text", { status: 200 });
+      vi.spyOn(res.headers, "get").mockReturnValue(null);
+      return res;
+    });
     const r = await rateLimitedFetch(uniqUrl(), fastOpts());
-    // Note: undici/Response always synthesises a content-type for non-empty
-    // bodies, so this asserts the *shape* — body present, status 200.
     expect(r.status).toBe(200);
+    expect(r.contentType).toBeNull();
     expect(r.body).toBe("no-ct-but-text");
   });
 
@@ -330,13 +331,9 @@ describe("rateLimitedFetch — request shape", () => {
     expect(init.redirect).toBe("follow");
   });
 
-  it("passes an AbortSignal to fetch (so timeout can fire)", async () => {
-    const fetchMock = stubFetch(async () => makeResponse("ok"));
-    await rateLimitedFetch(uniqUrl(), fastOpts());
-    const init = fetchMock.mock.calls[0][1] as RequestInit;
-    expect(init.signal).toBeDefined();
-    expect(init.signal).toBeInstanceOf(AbortSignal);
-  });
+  // Note: AbortSignal-presence is exercised end-to-end by the timeout test
+  // below — keeping a separate "is instanceof AbortSignal" check would just
+  // duplicate that coverage.
 });
 
 describe("rateLimitedFetch — invalid URL", () => {

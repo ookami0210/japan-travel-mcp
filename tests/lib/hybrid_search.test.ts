@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { randomUUID } from "node:crypto";
 import type { SemanticEntry } from "../../src/lib/semantic.js";
+import { makeSemanticEntry } from "./_helpers.js";
 
 // ─── Mock the semantic module ────────────────────────────────────────
 //
@@ -30,28 +31,13 @@ vi.mock("../../src/lib/semantic.js", () => ({
   semanticSearch: vi.fn(async () => semanticState.semantic),
 }));
 
-import {
-  tryLoadBm,
-  hybridSearch,
-  tokenize,
-} from "../../src/lib/hybrid.js";
+import { tryLoadBm, hybridSearch } from "../../src/lib/hybrid.js";
 
 function uniqRoot(): string {
   return `/tmp/hybrid-test-${randomUUID()}`;
 }
 
-function entry(over: Partial<SemanticEntry> & { key: string; name: string }): SemanticEntry {
-  return {
-    kind: "spot",
-    source: "test",
-    description: null,
-    prefecture_code: null,
-    prefecture_name: null,
-    municipality: null,
-    url: null,
-    ...over,
-  };
-}
+const entry = makeSemanticEntry;
 
 beforeEach(() => {
   semanticState.index = null;
@@ -378,16 +364,3 @@ describe("BM25 ranking (via hybridSearch)", () => {
   });
 });
 
-// ─── re-export sanity: tokenize is already covered separately, but the
-//     hybridSearch flow depends on it. One smoke check ensures the public
-//     surface stays in sync.
-
-describe("tokenize — smoke (public re-export still works)", () => {
-  it("emits CJK unigrams + bigrams plus latin runs", () => {
-    const out = tokenize("Tokyo 東京");
-    expect(out).toContain("tokyo");
-    expect(out).toContain("東");
-    expect(out).toContain("京");
-    expect(out).toContain("東京");
-  });
-});

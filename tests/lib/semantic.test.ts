@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { SemanticEntry } from "../../src/lib/semantic.js";
+import { makeSemanticEntry } from "./_helpers.js";
 
 // ─── Mock @huggingface/transformers ──────────────────────────────────
 //
@@ -84,18 +84,8 @@ async function writeFixture(
   );
 }
 
-function fixtureEntry(over: Partial<SemanticEntry> & { key: string; name: string }): SemanticEntry {
-  return {
-    kind: "spot",
-    source: "fixture",
-    description: null,
-    prefecture_code: null,
-    prefecture_name: null,
-    municipality: null,
-    url: null,
-    ...over,
-  };
-}
+// Alias for the shared builder so existing call sites stay short.
+const fixtureEntry = makeSemanticEntry;
 
 // ─── Module cache reset ──────────────────────────────────────────────
 //
@@ -109,6 +99,28 @@ async function mkRoot(): Promise<string> {
   const d = await mkdtemp(join(tmpdir(), "jtm-semantic-"));
   tmpRoots.push(d);
   return d;
+}
+
+/**
+ * Write a self-consistent embeddings fixture (`spots.f16.bin` +
+ * `spots.index.json`) under a fresh tmp root and load it. Throws if the
+ * loader rejects the fixture — tests of the failure path use writeFixture
+ * directly instead.
+ */
+async function loadF16Fixture(rows: number[][]): Promise<NonNullable<Awaited<ReturnType<typeof tryLoadSemanticIndex>>>> {
+  const root = await mkRoot();
+  const entries = rows.map((_, i) => fixtureEntry({ key: `k${i}`, name: `n${i}` }));
+  await writeFixture(root, buildBin(rows), {
+    model: "x",
+    dim: DIM,
+    dtype: "f16",
+    count: rows.length,
+    built_at: "now",
+    entries,
+  });
+  const idx = await tryLoadSemanticIndex(root);
+  if (!idx) throw new Error("loadF16Fixture: tryLoadSemanticIndex returned null");
+  return idx;
 }
 
 beforeEach(() => {
@@ -190,103 +202,37 @@ describe("tryLoadSemanticIndex — file presence", () => {
 });
 
 // ─── tryLoadSemanticIndex — f16 → f32 conversion table ───────────────
+//
+// Each pair is (half-float bit pattern → expected f32 value). Cases that
+// need richer assertions (signed zero via Object.is, subnormal via
+// toBeCloseTo) live in dedicated tests below.
+
+const F16_NORMAL_CASES: ReadonlyArray<[label: string, hex: number, expected: number]> = [
+  ["+1.0", 0x3c00, 1.0],
+  ["+2.0", 0x4000, 2.0],
+  ["+3.0", 0x4200, 3.0],
+  ["-1.0", 0xbc00, -1.0],
+  ["-2.0", 0xc000, -2.0],
+  ["+0.5", 0x3800, 0.5],
+  ["+Inf", 0x7c00, Infinity],
+  ["-Inf", 0xfc00, -Infinity],
+];
 
 describe("tryLoadSemanticIndex — f16 → f32 conversion", () => {
-  it("decodes positive normals (1.0, 2.0, 3.0)", async () => {
-    const root = await mkRoot();
-    const row = [0x3c00, 0x4000, 0x4200];
-    await writeFixture(root, buildBin([row]), {
-      model: "x",
-      dim: DIM,
-      dtype: "f16",
-      count: 1,
-      built_at: "now",
-      entries: [fixtureEntry({ key: "k", name: "n" })],
-    });
-    const idx = await tryLoadSemanticIndex(root);
-    expect(idx).not.toBeNull();
-    expect(idx!.matrix[0]).toBe(1.0);
-    expect(idx!.matrix[1]).toBe(2.0);
-    expect(idx!.matrix[2]).toBe(3.0);
-  });
-
-  it("decodes negative normals (-1.0, -2.0)", async () => {
-    const root = await mkRoot();
-    const row = [0xbc00, 0xc000];
-    await writeFixture(root, buildBin([row]), {
-      model: "x",
-      dim: DIM,
-      dtype: "f16",
-      count: 1,
-      built_at: "now",
-      entries: [fixtureEntry({ key: "k", name: "n" })],
-    });
-    const idx = await tryLoadSemanticIndex(root);
-    expect(idx!.matrix[0]).toBe(-1.0);
-    expect(idx!.matrix[1]).toBe(-2.0);
-  });
-
-  it("decodes 0.5 (the smallest exponent before subnormal)", async () => {
-    const root = await mkRoot();
-    const row = [0x3800];
-    await writeFixture(root, buildBin([row]), {
-      model: "x",
-      dim: DIM,
-      dtype: "f16",
-      count: 1,
-      built_at: "now",
-      entries: [fixtureEntry({ key: "k", name: "n" })],
-    });
-    const idx = await tryLoadSemanticIndex(root);
-    expect(idx!.matrix[0]).toBe(0.5);
+  it.each(F16_NORMAL_CASES)("decodes %s (0x%i)", async (_label, hex, expected) => {
+    const idx = await loadF16Fixture([[hex]]);
+    expect(idx.matrix[0]).toBe(expected);
   });
 
   it("decodes signed zeros (+0, -0)", async () => {
-    const root = await mkRoot();
-    const row = [0x0000, 0x8000];
-    await writeFixture(root, buildBin([row]), {
-      model: "x",
-      dim: DIM,
-      dtype: "f16",
-      count: 1,
-      built_at: "now",
-      entries: [fixtureEntry({ key: "k", name: "n" })],
-    });
-    const idx = await tryLoadSemanticIndex(root);
-    expect(idx!.matrix[0]).toBe(0);
-    expect(Object.is(idx!.matrix[0], 0)).toBe(true); // +0
-    expect(Object.is(idx!.matrix[1], -0)).toBe(true); // -0
-  });
-
-  it("decodes infinities (+Inf, -Inf)", async () => {
-    const root = await mkRoot();
-    const row = [0x7c00, 0xfc00];
-    await writeFixture(root, buildBin([row]), {
-      model: "x",
-      dim: DIM,
-      dtype: "f16",
-      count: 1,
-      built_at: "now",
-      entries: [fixtureEntry({ key: "k", name: "n" })],
-    });
-    const idx = await tryLoadSemanticIndex(root);
-    expect(idx!.matrix[0]).toBe(Infinity);
-    expect(idx!.matrix[1]).toBe(-Infinity);
+    const idx = await loadF16Fixture([[0x0000, 0x8000]]);
+    expect(Object.is(idx.matrix[0], 0)).toBe(true); // +0
+    expect(Object.is(idx.matrix[1], -0)).toBe(true); // -0
   });
 
   it("decodes the smallest positive subnormal (0x0001 → 2^-24)", async () => {
-    const root = await mkRoot();
-    const row = [0x0001];
-    await writeFixture(root, buildBin([row]), {
-      model: "x",
-      dim: DIM,
-      dtype: "f16",
-      count: 1,
-      built_at: "now",
-      entries: [fixtureEntry({ key: "k", name: "n" })],
-    });
-    const idx = await tryLoadSemanticIndex(root);
-    expect(idx!.matrix[0]).toBeCloseTo(Math.pow(2, -24), 30);
+    const idx = await loadF16Fixture([[0x0001]]);
+    expect(idx.matrix[0]).toBeCloseTo(Math.pow(2, -24), 30);
   });
 
   it("populates count + builtAt from the index json", async () => {
@@ -446,5 +392,25 @@ describe("semanticSearch — ranking", () => {
     const sent = (call.input as string[])[0];
     expect(sent.startsWith("query: ")).toBe(true);
     expect(sent.length).toBe("query: ".length + 512);
+  });
+
+  it("creates the extractor pipeline only once across multiple queries", async () => {
+    // semantic.ts caches the extractor at module scope (singleton). Loading
+    // the multilingual-e5 model is expensive in production, so this test
+    // pins the cache contract.
+    //
+    // Note: the singleton survives across tests within this file. We assert
+    // that pipeline is called *at most* once after this test runs — earlier
+    // tests may have warmed the cache, which is exactly the contract we
+    // want to verify.
+    const root = await setupRanking();
+    const before = mockState.pipelineCalls;
+    await semanticSearch(root, "q1", 1);
+    await semanticSearch(root, "q2", 1);
+    await semanticSearch(root, "q3", 1);
+    const delta = mockState.pipelineCalls - before;
+    expect(delta).toBeLessThanOrEqual(1);
+    // Three queries → three extractor calls regardless of pipeline reuse.
+    expect(mockState.extractorCalls.length).toBeGreaterThanOrEqual(3);
   });
 });

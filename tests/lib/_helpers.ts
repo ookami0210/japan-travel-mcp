@@ -1,5 +1,6 @@
 import { expect } from "vitest";
 import type { FetchResult } from "../../scrapers/lib/types.js";
+import type { SemanticEntry } from "../../src/lib/semantic.js";
 
 /**
  * Asserts a value is defined (non-null, non-undefined) and narrows the
@@ -41,4 +42,26 @@ export function httpOk(body: string, contentType = "text/plain"): FetchResult {
 /** Non-200 response with empty body (used for missing/failed fetches). */
 export function httpStatus(status: number): FetchResult {
   return makeFetchResult({ status });
+}
+
+/**
+ * Build a `SemanticEntry` with reasonable defaults. The required fields are
+ * `key` and `name`; pass overrides for whatever the test cares about.
+ *
+ * Used by both `hybrid_search.test.ts` and `semantic.test.ts` — keep the
+ * defaults aligned with the SemanticEntry contract in `src/lib/semantic.ts`.
+ */
+export function makeSemanticEntry(
+  over: Partial<SemanticEntry> & Pick<SemanticEntry, "key" | "name">,
+): SemanticEntry {
+  return {
+    kind: "spot",
+    source: "fixture",
+    description: null,
+    prefecture_code: null,
+    prefecture_name: null,
+    municipality: null,
+    url: null,
+    ...over,
+  };
 }
