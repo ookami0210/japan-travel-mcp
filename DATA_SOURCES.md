@@ -431,21 +431,32 @@ requires either extending an existing channel or creating a new one.
   reach those semantics.
 - **Status**: `scaffolded`
 
-### Wikipedia list articles (SCAFFOLDED)
+### Wikipedia list articles
 
 #### #29 — Japanese Wikipedia list articles for canonical enumerations
 - **Authority**: Wikipedia (Wikimedia Foundation)
 - **URL**: https://ja.wikipedia.org/w/api.php (action=parse on list articles)
 - **License**: CC BY-SA 4.0
 - **Fetcher**: `scrapers/sources/fetch_wikipedia_lists.ts`
-- **Output**: `data/r3/wikipedia_lists.json` (planned)
-- **Cadence (planned)**: monthly+
-- **Channel (planned)**: planned new `WIKIPEDIA-ABSTRACT` channel (or
-  GLOSSARY extension), complementary to #28
-- **Coverage**: target list articles such as 日本の花火大会一覧 / 日本の祭り一覧 /
-  etc. Categories index by topic; list articles enumerate canonical entries
-  (e.g. fireworks category had 4 entries, the list article has 250+).
-- **Status**: `scaffolded`
+- **Output**: `data/r3/wikipedia_lists.json`
+- **Inject**: `scripts/inject_wikipedia_lists.py` folds non-festival lists
+  into master via `wikipedia_kind_tags[]`; festival-class kinds (hanabi /
+  yuki_matsuri / matsuri / matsuri_top / fire_festival / bon_odori) are
+  consumed directly by `get_festivals` and intentionally skipped here.
+- **Cadence**: monthly+
+- **Channel**: WD-FOUNDATION (manual) — was previously planned for
+  `WIKIPEDIA-ABSTRACT` channel (#P1); folded under WD-FOUNDATION since
+  the inject ultimately writes into the Wikidata-anchored master.
+- **Coverage**: 28 list articles → 4,906 page-link members; 4,206 are
+  QID-linked + non-noise. After festival-class skip + inject:
+  master +1,969 new / 823 enriched across 23 non-festival lists,
+  including 日本100名城 (404) / 続100名城 (367) / 日本さくら名所100選 (267) /
+  森林浴の森100選 (261) / 日本の渚百選 (261) / 日本の音風景100選 (292) /
+  日本の道100選 (250) / 日本の棚田百選 (191) / 日本三景 (159) /
+  重要伝統的建造物群保存地区 (438) / 重要文化的景観 (322) / 美しい日本の歩きたくなるみち500選 (713) etc.
+  Festival-class lists (#hanabi/#yuki_matsuri/etc) remain consumed
+  directly by get_festivals, not injected to master.
+- **Status**: `active`
 
 ### 文化庁 国指定文化財等データベース (SCAFFOLDED)
 
