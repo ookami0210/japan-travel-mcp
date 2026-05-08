@@ -38,6 +38,10 @@ describe("WD_TYPE_KIND", () => {
     expect(WD_TYPE_KIND.Q22698).toBe("park");
     expect(WD_TYPE_KIND.Q34038).toBe("waterfall");
   });
+
+  it("maps Q11455614 to shukubo (temple lodging)", () => {
+    expect(WD_TYPE_KIND.Q11455614).toBe("shukubo");
+  });
 });
 
 describe("HERITAGE_QID_LABEL", () => {
@@ -126,6 +130,12 @@ describe("nameKindEnrich", () => {
     const dst: string[] = [];
     nameKindEnrich("東海道五十三次", dst);
     expect(dst).toContain("kaido");
+  });
+
+  it("matches 宿坊 with the shukubo rule", () => {
+    const dst: string[] = [];
+    nameKindEnrich("高野山宿坊一覧", dst);
+    expect(dst).toContain("shukubo");
   });
 
   it("matches anchored volcano names exactly", () => {

@@ -274,6 +274,23 @@ requires either extending an existing channel or creating a new one.
 - **Coverage**: 5,567 items with heritage designations + 6 direct-P31 types
 - **Status**: `active` (added iter54, 2026-05-04)
 
+#### #30 — Wikidata shukubo (temple-lodging) anchor
+- **Authority**: Wikidata
+- **URL**: https://query.wikidata.org/sparql
+- **License**: CC0
+- **Fetcher**: `scrapers/sources/fetch_temple_lodgings.ts`
+- **Output**: `data/_state/temple_lodgings.json` (sidecar; folded into master via `scripts/inject_temple_lodgings.py`)
+- **Cadence**: monthly+
+- **Channel**: WD-FOUNDATION (manual)
+- **Coverage**: 29 unique items typed Q11455614 (shukubō) or its subclasses
+  in Japan. Distribution: 13 高野町 (Wakayama) / 5 富士吉田市 (Yamanashi 御師
+  住宅) / 4 平群町・吉野町 (Nara) / 1 each in Yamagata 鶴岡市 / Tokyo 青梅市 /
+  Nagano / Mie / Gifu / Fukuoka / Nagasaki. **Kyoto coverage 0** —
+  Wikidata has no entities for 知恩院和順会館 / 智積院会館 / 御室会館 / 各宗派
+  塔頭 facilities; closing this gap requires per-sect official-directory
+  scrapers (planned as separate sources).
+- **Status**: `active`
+
 #### #17 — Wikidata hotels
 - **Authority**: Wikidata
 - **URL**: https://query.wikidata.org/sparql

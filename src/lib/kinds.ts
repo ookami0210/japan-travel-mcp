@@ -67,6 +67,7 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q11197: "active_volcano",            // alt to Q204324
   Q16560: "palace",
   Q39614: "buddhist_monastery",        // alt to Q44613
+  Q11455614: "shukubo",                // shukubō (Japanese Buddhist lodging)
 };
 
 // ──────────────────────────────────────────────────────────────────────
@@ -87,6 +88,7 @@ export const NAME_KIND_RE: { kinds: string[]; re: RegExp }[] = [
   { kinds: ["shotengai"], re: /(商店街)/u },
   { kinds: ["jokamachi"], re: /(城下町)/u },
   { kinds: ["shukuba"], re: /(宿場|宿場町)/u },
+  { kinds: ["shukubo"], re: /(宿坊)/u },
   // 海道 alone false-positives on 北海道 (prefecture name); restrict to
   // specific kaido tokens.
   { kinds: ["kaido"], re: /(街道|古道|東海道|中山道|甲州街道|奥州街道|日光街道|熊野古道|善光寺街道|京街道)/u },
