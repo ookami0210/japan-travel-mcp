@@ -274,6 +274,25 @@ requires either extending an existing channel or creating a new one.
 - **Coverage**: 5,567 items with heritage designations + 6 direct-P31 types
 - **Status**: `active` (added iter54, 2026-05-04)
 
+#### #32 — Wikidata railway / train stations (Japan, with coords)
+- **Authority**: Wikidata
+- **URL**: https://query.wikidata.org/sparql
+- **License**: CC0
+- **Fetcher**: `scrapers/sources/fetch_railway_stations.ts`
+- **Output**: `data/_state/railway_stations.json` (sidecar; consumed by `scripts/inject_nearest_transit.py`)
+- **Cadence**: monthly+
+- **Channel**: WD-FOUNDATION (manual)
+- **Coverage**: 11,778 station entities (Q55488 / subclasses) with coords
+  in 47 prefectures + 2,373 stations lacking explicit P131 admin (border /
+  multi-jurisdiction stations).
+- **Status**: `active`
+- **Inject (downstream)**: `scripts/inject_nearest_transit.py` annotates
+  every attraction with coordinates with a `nearest_transit` field
+  (station QID + name (ja/en) + coords + distance_m + walk_minutes
+  (= round(distance_m / 80)) + operator). 5 km cap; same-prefecture +
+  bordering-prefectures candidate set for O(N×k) lookup. Result:
+  41,087 / 74,008 attractions annotated (56%).
+
 #### #31 — Wikidata Japan national-park anchor
 - **Authority**: Wikidata (designations originate from 環境省 / Ministry of the Environment)
 - **URL**: https://query.wikidata.org/sparql
