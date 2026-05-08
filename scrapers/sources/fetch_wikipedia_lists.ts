@@ -67,6 +67,18 @@ const LIST_ARTICLES: { title: string; kind_tag: string; filter?: RegExp }[] = [
   { title: "日本五大桜", kind_tag: "sakura_top5" },
   { title: "新日本観光地100選", kind_tag: "shin_kanko_100" },
   { title: "新・日本街路樹100景", kind_tag: "gairoju_100" },
+  // 2026-05-08 second wave: pilgrimage / kiln / mountain / station 100s
+  { title: "西国薬師四十九霊場", kind_tag: "saigoku_yakushi_49" },
+  { title: "関東三十六不動尊霊場", kind_tag: "kanto_fudo_36" },
+  { title: "中国三十三観音霊場", kind_tag: "chugoku_kannon_33" },
+  { title: "六古窯", kind_tag: "rokkoyo" },
+  { title: "日本三百名山", kind_tag: "nihon_300_meizan" },
+  { title: "日本二百名山", kind_tag: "nihon_200_meizan" },
+  { title: "新日本百名山", kind_tag: "shin_nihon_100_meizan" },
+  { title: "東北の駅百選", kind_tag: "tohoku_eki_100" },
+  { title: "関東の駅百選", kind_tag: "kanto_eki_100" },
+  { title: "近畿の駅百選", kind_tag: "kinki_eki_100" },
+  { title: "中部の駅百選", kind_tag: "chubu_eki_100" },
 ];
 
 async function getCached(url: string): Promise<string> {
