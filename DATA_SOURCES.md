@@ -535,28 +535,30 @@ requires either extending an existing channel or creating a new one.
   directly by get_festivals, not injected to master.
 - **Status**: `active`
 
-### 文化庁 国指定文化財等データベース (SCAFFOLDED)
+### 文化庁 国指定文化財等データベース
 
 #### #25 — 文化庁 国指定文化財等データベース (Bunka kunishitei)
 - **Authority**: 文化庁 (Agency for Cultural Affairs)
 - **URL**: https://kunishitei.bunka.go.jp/bsys/index
 - **License**: 公式機関の公開情報 (一部「無断転載禁止」明示あり、削除依頼即対応)
-- **Fetcher**: `scrapers/sources/fetch_bunka_kunishitei.ts`
-- **Output**: `data/r3/bunka_kunishitei.json`
-- **Cadence (planned)**: weekly (extend R3 rotation, e.g. add Friday slot)
-- **Channel (planned)**: R3
-- **Coverage**: target ~30,000+ records (国宝 / 重要文化財 / 特別史跡 / 史跡 /
-  特別名勝 / 名勝 / 特別天然記念物 / 天然記念物 / 重要伝統的建造物群保存地区 /
-  重要無形文化財 / 重要無形民俗文化財 / 重要文化的景観 / 登録有形文化財 /
-  登録記念物 / 登録有形民俗文化財). **Currently 0 records — fetcher is
-  scaffolded, full implementation pending iter58.** Scaffold predates this
-  inventory work.
-- **Status**: `scaffolded` (fetcher file exists, rotation wiring pending)
-- **Implementation note**: kunishitei DB form requires server-rendered
-  HTML parse OR API endpoint at `/bsys/api/searchlist`. Verify and
-  complete in iter58. Once records > 0, also register in
-  `scrapers/r3_refresh.ts` SOURCE_INFO + add to a DAY_TO_SOURCES slot
-  (recommend Fri).
+- **Fetcher**: `scrapers/sources/fetch_bunka_kunishitei.py`
+- **Output**: `data/r3/bunka_kunishitei.json` + per-type checkpoints under `data/_state/bunka_kunishitei.partial/<register_sub_id>.json`
+- **Cadence**: monthly+ (manual; future: extend R3 rotation when wiring is added to `scrapers/r3_refresh.ts`)
+- **Channel**: WD-FOUNDATION (manual) — promoted to R3 when registered with the rotation scheduler
+- **Coverage**: 国宝 / 重要文化財 (建造物 + 美術工芸品) / 登録有形文化財 / 重要無形文化財 / 重要無形民俗文化財 / 重要有形民俗文化財 / 史跡名勝天然記念物 / 重要文化的景観 / 重要伝統的建造物群保存地区 / 登録美術品 / 登録記念物 / 選定保存技術 / 世界遺産 — 20 designation types in total. Per-record fields: `entry_id` / `register_sub_id` / `name_ja` / `kind_jp` / `classification_jp` / `era_jp` / `prefecture_jp` / `lat` / `lng` (when present) / `source_url`. Coordinates are extracted inline from the result page's `mapChange()` JS handlers and require no per-record drill-down.
+- **Status**: `active`
+- **Implementation note**: the kunishitei DB form requires a `_csrfToken` (extracted from `/bsys/index`) and a session cookie. POST to `/bsys/searchlist` with `register_sub_id` (designation type) + `pageNumber` (the form's pagination control; the `page_no` field is unused). 5 s per-domain interval per `DATA_POLICY.md`. The script is resumable via `--resume`; per-type partial checkpoints survive process restarts.
+
+#### #37 — Kyoto sect-affiliated shukubo (per-temple operator pages)
+- **Authority**: 各宗派 公式 (per-temple operator pages — 浄土宗, 天台宗, 黄檗宗, 真言宗御室派, 真言宗智山派, 浄土真宗本願寺派, 真宗大谷派, 臨済宗妙心寺派, 臨済宗大徳寺派)
+- **URL**: per-facility (e.g. https://www.wajun-kaikan.jp/, https://syukubo.jp/)
+- **License**: 公式機関の公開情報 (operator-published facility pages)
+- **Fetcher**: `scrapers/sources/fetch_kyoto_sect_shukubo.py`
+- **Output**: `data/r3/kyoto_sect_shukubo.json`
+- **Cadence**: monthly+ (manual)
+- **Channel**: WD-FOUNDATION (manual)
+- **Coverage**: closes the Kyoto-area shukubo gap that #30 (Wikidata shukubo anchor) cannot fill — the per-sect facilities like 和順会館 / 御室会館 / 智積院会館 / 同朋会館 are not indexed in Wikidata. Each record carries the head temple's identity, sect affiliation, facility name, and the operator-published page metadata (title / description / phone / address) when the canonical URL fetches successfully. Entries with `fetch_status="pending_url_confirm"` carry the operator identity for the data layer even when the canonical URL has not yet been confirmed; they are filled in on a future revision.
+- **Status**: `active` (currently 3 facilities fetched + 6 pending URL confirmation)
 
 ### Municipal scrape (the largest channel)
 
