@@ -274,6 +274,22 @@ requires either extending an existing channel or creating a new one.
 - **Coverage**: 5,567 items with heritage designations + 6 direct-P31 types
 - **Status**: `active` (added iter54, 2026-05-04)
 
+#### #31 — Wikidata Japan national-park anchor
+- **Authority**: Wikidata (designations originate from 環境省 / Ministry of the Environment)
+- **URL**: https://query.wikidata.org/sparql
+- **License**: CC0
+- **Fetcher**: `scrapers/sources/fetch_national_parks.ts`
+- **Output**: `data/_state/national_parks.json` (sidecar; folded into master via `scripts/inject_national_parks.py`)
+- **Cadence**: monthly+ (designations rare — annual+ is sufficient)
+- **Channel**: WD-FOUNDATION (manual)
+- **Coverage**: 94 unique items — 35 国立公園 (Q1071482) + 59 国定公園 (Q11832860)
+  in 41 prefectures. The 35 NP count matches the official 環境省 list exactly;
+  the 59 QNP count is one above the standard "58" figure due to reorganisation
+  history captured by Wikidata. 3 items skipped (no P131 admin code — typically
+  multi-prefecture-spanning parks; future enhancement: derive prefecture from
+  P706 / P276 / coordinate buckets).
+- **Status**: `active`
+
 #### #30 — Wikidata shukubo (temple-lodging) anchor
 - **Authority**: Wikidata
 - **URL**: https://query.wikidata.org/sparql
