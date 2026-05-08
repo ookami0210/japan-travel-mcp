@@ -274,6 +274,28 @@ requires either extending an existing channel or creating a new one.
 - **Coverage**: 5,567 items with heritage designations + 6 direct-P31 types
 - **Status**: `active` (added iter54, 2026-05-04)
 
+#### #33 — Wikidata description backfill (description_ja + sitelinks)
+- **Authority**: Wikidata
+- **URL**: https://www.wikidata.org/w/api.php (action=wbgetentities)
+- **License**: CC0
+- **Fetcher**: `scrapers/sources/fetch_wikidata_descriptions.ts`
+- **Output**: `data/_state/wikidata_descriptions.json` (sidecar; consumed by `scripts/inject_wikidata_descriptions.py`)
+- **Cadence**: monthly+ (re-run after master expansion to backfill new entries)
+- **Channel**: WD-FOUNDATION (manual)
+- **Coverage**: targets master attractions lacking `description_en`
+  (~38,000 entries). For each QID, retrieves the Wikidata short
+  description (en + ja) and the enwiki / jawiki sitelink titles via
+  batch wbgetentities (50 QIDs / call). Empirically Wikidata has
+  description_ja for ~85% of these (the niche-Japanese-tourism set is
+  well-described in Japanese on Wikidata; description_en is sparse).
+  Sitelinks enable a future Wikipedia REST summary fetch / e5
+  embedding rebuild without re-querying Wikidata.
+- **Status**: `active`
+- **Inject (downstream)**: `scripts/inject_wikidata_descriptions.py`
+  populates `description_ja`, fills any missing `description_en`, and
+  records `wikipedia_titles: { en, ja }` on master + per-prefecture
+  files. Non-destructive: existing values win.
+
 #### #32 — Wikidata railway / train stations (Japan, with coords)
 - **Authority**: Wikidata
 - **URL**: https://query.wikidata.org/sparql

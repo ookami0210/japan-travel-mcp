@@ -138,6 +138,13 @@ interface WikidataAttraction {
   // ontology bridge (Wikipedia categories CC BY-SA).
   wikipedia_kind_tags?: string[];
   wikipedia_kind_tags_merged_at?: string;
+  // Wikidata short description in Japanese (populated by
+  // scripts/inject_wikidata_descriptions.py from wbgetentities backfill).
+  description_ja?: string;
+  // Mapped Wikipedia article titles (populated alongside description_ja).
+  // Keys: 'en' / 'ja'. Used by future enrichment passes for Wikipedia
+  // summary / abstract fetches.
+  wikipedia_titles?: { en?: string; ja?: string };
   // Pre-computed nearest railway station and walk-minute estimate, populated
   // by scripts/inject_nearest_transit.py from data/_state/railway_stations.json.
   // Constraint-encodable Solver input (research_0504 Phase A).
@@ -618,6 +625,9 @@ async function supplementWikidataAttractions(
     "nearest_transit",
     // Pre-computed top-5 nearby POIs within 1.5 km
     "nearby_pois",
+    // Wikidata short descriptions (ja) + Wikipedia article titles
+    "description_ja",
+    "wikipedia_titles",
   ] as const;
 
   for (const p of prefs) {
@@ -3989,8 +3999,10 @@ async function buildEntityCard(
     name_zh: a.name_zh,
     name_ko: a.name_ko,
     description_en: a.description_en,
-    description: langDesc ?? desc?.descriptions.en ?? a.description_en ?? null,
-    description_lang: langDesc ? langCode : (desc ? "en" : null),
+    description_ja: a.description_ja ?? null,
+    description: langDesc ?? desc?.descriptions.en ?? a.description_en ?? a.description_ja ?? null,
+    description_lang: langDesc ? langCode : (desc ? "en" : (a.description_en ? "en" : (a.description_ja ? "ja" : null))),
+    wikipedia_titles: a.wikipedia_titles ?? null,
     coordinates: a.coordinates,
     prefecture: p.prefecture.name,
     prefecture_code: a.prefecture_code,
