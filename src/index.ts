@@ -138,6 +138,19 @@ interface WikidataAttraction {
   // ontology bridge (Wikipedia categories CC BY-SA).
   wikipedia_kind_tags?: string[];
   wikipedia_kind_tags_merged_at?: string;
+  // Pre-computed nearest railway station and walk-minute estimate, populated
+  // by scripts/inject_nearest_transit.py from data/_state/railway_stations.json.
+  // Constraint-encodable Solver input (research_0504 Phase A).
+  nearest_transit?: {
+    station_qid: string;
+    station_name_ja: string | null;
+    station_name_en: string | null;
+    station_coordinates: { lat: number; lng: number } | null;
+    distance_m: number;
+    walk_minutes: number;
+    operator_qid: string | null;
+    operator_name: string | null;
+  };
 }
 
 // Kind classification + heritage labels + query-intent detectors live in
@@ -587,8 +600,10 @@ async function supplementWikidataAttractions(
     "opening_hours", "wheelchair", "tactile_paving",
     "phone", "website", "email", "cuisine", "fee",
     "internet_access", "smoking", "osm_ids", "osm_tags_merged_at",
-    // Iter62: Wikipedia category kind_tags
+    // Wikipedia category kind_tags
     "wikipedia_kind_tags", "wikipedia_kind_tags_merged_at",
+    // Pre-computed nearest transit station + walk-minutes
+    "nearest_transit",
   ] as const;
 
   for (const p of prefs) {
@@ -3985,6 +4000,8 @@ async function buildEntityCard(
     internet_access: a.internet_access ?? null,
     osm_ids: a.osm_ids ?? null,
     osm_tags_merged_at: a.osm_tags_merged_at ?? null,
+    // Pre-computed transit access (Wikidata stations × haversine, ≤5 km cap)
+    nearest_transit: a.nearest_transit ?? null,
     // Kinds-default constraint-encodable
     typical_visit_minutes: kindsDefaults.typical_visit_minutes,
     price_band: kindsDefaults.price_band,
@@ -5381,7 +5398,7 @@ const TOOLS = [
   {
     name: "get_entity_full",
     description:
-      "Returns the full constraint-encodable card for a single Wikidata entity by QID: name (multilingual), description (multilingual when available), coordinates, kinds (Wikidata-typed + name-regex-derived), heritage designations (P1435 with human-readable labels), OSM-derived structured fields (opening_hours / wheelchair / phone / website / fee), and kinds-default constraint fields (typical_visit_minutes / price_band / suitable_for).\n\nUse when the agent wants to fetch one specific entity's complete metadata for itinerary composition. Pair with get_entities_bulk for multi-entity Solver input.",
+      "Returns the full constraint-encodable card for a single Wikidata entity by QID: name (multilingual), description (multilingual when available), coordinates, kinds (Wikidata-typed + name-regex-derived), heritage designations (P1435 with human-readable labels), OSM-derived structured fields (opening_hours / wheelchair / phone / website / fee), nearest_transit (pre-computed nearest railway station within 5 km with walk-minute estimate), and kinds-default constraint fields (typical_visit_minutes / price_band / suitable_for).\n\nUse when the agent wants to fetch one specific entity's complete metadata for itinerary composition. Pair with get_entities_bulk for multi-entity Solver input.",
     inputSchema: {
       type: "object",
       required: ["qid"],
