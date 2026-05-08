@@ -824,6 +824,18 @@ async function searchArea(args: {
       });
     }
   }
+  // Region substring fan-out — for queries that mention a region keyword
+  // alongside a topic ("Tohoku cherry blossoms" / "東北で桜が見たい" /
+  // "Kyushu hot springs"). The exact-match block above only fires on
+  // whole-query region names; cross-prefecture queries with embedded
+  // region tokens were left without geographic anchoring. We collect the
+  // implied prefecture codes here and pass them down to the wikidata
+  // loop and the hybrid retriever as a soft boost (in-region +25).
+  const regionPrefSet = extractRegionPrefCodes(q);
+  // Avoid double-counting when the query is itself an exact region name.
+  if (regionCodes && regionCodes.length > 0) {
+    for (const c of regionCodes) regionPrefSet.delete(c);
+  }
 
   // ── prefectures (47) — direct match against the prefecture index. These
   //    aren't in the embedding corpus, so we keep the legacy lexical scoring.
@@ -957,9 +969,17 @@ async function searchArea(args: {
         intent.wild_only && kinds.some((k) => k === "zoo" || k === "aquarium")
           ? -60
           : 0;
+      // Region fan-out boost — when the query mentions a region keyword
+      // and the entity sits inside that region, small +25 nudges
+      // in-region candidates above same-name out-of-region collisions.
+      const regionBoost =
+        regionPrefSet.size > 0 && a.prefecture_code &&
+        regionPrefSet.has(a.prefecture_code)
+          ? 25
+          : 0;
       const kindsDefaults = enrichKindsDefaults(kinds, a.fee);
       addMatch(
-        s + notability + langBoost + heritageBoost + intentKindsBoost + wildPenalty,
+        s + notability + langBoost + heritageBoost + intentKindsBoost + wildPenalty + regionBoost,
         {
         type: "attraction",
         source: "wikidata",
@@ -1162,7 +1182,14 @@ async function searchArea(args: {
   //    prefecture/municipality matches above.
   //
   //    Falls back to the legacy lexical scan when embeddings aren't built.
-  const hybridUsed = await populateFromHybrid(args.q, limit, addMatch, lesserKnownIntent, intent.recommended_kinds);
+  const hybridUsed = await populateFromHybrid(
+    args.q,
+    limit,
+    addMatch,
+    lesserKnownIntent,
+    intent.recommended_kinds,
+    regionPrefSet,
+  );
   if (!hybridUsed) {
     await populateLegacyLexical(prefs, exactMatch, partialMatch, addMatch, lesserKnownIntent);
   }
@@ -1248,6 +1275,7 @@ async function populateFromHybrid(
   addMatch: (score: number, record: Record<string, unknown>) => void,
   lesserKnownIntent = false,
   intentKinds: Set<string> = new Set(),
+  regionPrefSet: Set<string> = new Set(),
 ): Promise<boolean> {
   // Iter69: short-query name-substring guard. When query is 1-3 chars
   // and intent dictionary didn't fire (no kinds boost), demote hybrid
@@ -1326,6 +1354,16 @@ async function populateFromHybrid(
       // after the nav-chrome filter, generic spot names get less weight.
       if (e.kind === "r3") normalisedScore += 30;
       else if (e.kind === "wikidata") normalisedScore += 20;
+      // Region fan-out boost — when the user mentioned a region keyword in
+      // a longer query (e.g. "Tohoku cherry blossoms"), entries whose
+      // prefecture_code is inside that region's member set get a small
+      // bump. Soft boost so out-of-region candidates remain reachable.
+      if (regionPrefSet.size > 0) {
+        const pcode = (e.prefecture_code ?? "") as string;
+        if (pcode && regionPrefSet.has(pcode)) {
+          normalisedScore += 25;
+        }
+      }
 
       // Iter 54: hybrid path heritage_designations + langCount boost so
       // famous landmarks (UNESCO WHS, 国宝, multilingual entries) outrank
@@ -2740,6 +2778,48 @@ const REGION_TO_PREF_CODES: Record<string, string[]> = {
   // 中国・四国 (Chugoku-Shikoku combined, common Setouchi adjacent grouping)
   "中四国": ["31", "32", "33", "34", "35", "36", "37", "38", "39"],
 };
+
+/**
+ * Extract region-derived prefecture codes from a free-form query string.
+ *
+ * Distinct from REGION_TO_PREF_CODES exact-match lookup: this function
+ * scans the query for region keywords appearing as substrings (or
+ * whole-word matches for ASCII keys) and returns the union of all
+ * prefecture codes implied by those keywords. Used by search_area and
+ * the hybrid retriever to give in-region entries a moderate score boost
+ * when the user mentions a region name in a longer query like
+ * "Tohoku cherry blossoms" or "東北で桜を見たい".
+ *
+ * Returns an empty Set when no region keyword is found.
+ *
+ * The returned set is the union — when multiple regions are mentioned
+ * (e.g. "Tohoku and Kyushu festivals"), entries in either region get
+ * the boost. The intent is to anchor cross-prefecture queries to the
+ * relevant geography without dropping out-of-region candidates entirely.
+ */
+function extractRegionPrefCodes(q: string): Set<string> {
+  const out = new Set<string>();
+  if (!q || q.trim().length === 0) return out;
+  const lower = q.toLowerCase();
+  for (const [key, codes] of Object.entries(REGION_TO_PREF_CODES)) {
+    const isAscii = /^[a-z\s\-]+$/.test(key);
+    let hit = false;
+    if (isAscii) {
+      // Whole-word match for ASCII keys to avoid false positives where
+      // the alias appears as a sub-token of an unrelated word.
+      const escaped = key.replace(/[\s\-]/g, "[\\s-]");
+      const re = new RegExp(`\\b${escaped}\\b`, "i");
+      hit = re.test(lower);
+    } else {
+      // Substring match for CJK keys — Japanese has no spaces.
+      hit = q.includes(key);
+    }
+    if (hit) {
+      for (const c of codes) out.add(c);
+    }
+  }
+  return out;
+}
 
 /**
  * Resolve an input that may be a single-prefecture name OR a region name
