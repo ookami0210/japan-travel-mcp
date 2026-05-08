@@ -592,6 +592,47 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
     rationale_en: "Depachika — basement food hall in department stores.",
     rationale_ja: "デパ地下。百貨店地下食品売場。",
   },
+  // ── Constraint modifiers (Phase B / constraint_handling lift) ────────
+  // These concepts do not select entities directly; they shape ranking
+  // and are surfaced to the calling agent / Solver as constraint hints.
+  {
+    id: "anaba_hidden",
+    re: /(穴場|秘境|秘湯|秘景|隠れ(?:た|ガ)?(?:名所|スポット|場所|宿|温泉)?|knowledge.?spot|hidden\s*(?:gem|spot|place|onsen|destination|treasure)|lesser.?known|off.?the.?beaten|obscure|unsung|underrated|地元.{0,4}(?:知|秘密|だけ)|local'?s?\s*(?:secret|favo))/iu,
+    semantic_tags: ["anaba", "hidden gem", "lesser known"],
+    rationale_en: "Anaba (穴場) / hidden gem — user wants entries that are NOT internationally famous. Demote multilingual / heritage-heavy entries; surface entries with fewer Wikipedia list memberships.",
+    rationale_ja: "穴場・秘境・隠れた名所。国際的に有名なものは避け、Wikipedia list 記載が少ない entry を浮かせる。",
+    polarity: "boost",
+  },
+  {
+    id: "uncrowded",
+    re: /(混雑(?:が)?(?:少|ない|を避|回避)|空いて(?:いる|る)|空い?(?:てる|た)|人(?:が|の)?少な|tourist.?free|few\s*tourists|not\s*crowded|aren'?t\s*crowded|less\s*crowded|uncrowded|quiet\s*(?:place|spot)|静かな(?:場所|名所))/iu,
+    semantic_tags: ["uncrowded", "quiet"],
+    rationale_en: "Uncrowded — user wants destinations without heavy tourist flow. Treated as a sibling of anaba: demote heritage-heavy / multilingual-famous entries.",
+    rationale_ja: "混雑回避・空いている所。anaba の同族として有名 entry を demote する。",
+    polarity: "boost",
+  },
+  {
+    id: "wild_not_captive",
+    re: /(野生(?:の|な)?|wild\s*(?:animal|bird|deer|monkey|bear|fox|crane|whale|dolphin|species)?|in\s*the\s*wild|natural\s*habitat|放鳥|野放し|自然下|野放し飼い)/iu,
+    semantic_tags: ["wild", "natural habitat"],
+    rationale_en: "Wild (野生) — user wants animals in their natural habitat, NOT zoos / aquariums / captive facilities. Pair with bird / mammal / sea-life query — demote zoo, aquarium, animal park.",
+    rationale_ja: "野生の動物観察意図。動物園・水族館・サファリパーク等は demote すべき。",
+    polarity: "boost",
+  },
+  {
+    id: "dying_craft",
+    // Match user phrasing about disappearing / endangered / dying craft.
+    // Faithful integration: this surfaces a constraint hint; it does not
+    // tag entities ourselves. Records that are described as "dying" by
+    // their official source (METI 伝統的工芸品 危機, Wikipedia 廃絶, etc.)
+    // can carry a `dying_craft` semantic tag in their kinds enrichment.
+    re: /(失われ(?:つつある|ゆく|ようとしている)|絶滅危惧|消えゆく|廃れ(?:つつ|た|ゆく)|存続の危機|後継者(?:不足|難)|残り少ない|風前の灯|dying\s*(?:craft|art|tradition|trade)|disappearing\s*(?:craft|art|tradition|trade)|endangered\s*craft|on\s*the\s*verge\s*of\s*extinction|nearly\s*extinct|last\s*(?:practitioners?|artisans?|masters?))/iu,
+    routing_tool: "get_traditional_arts",
+    semantic_tags: ["dying craft", "endangered craft", "disappearing tradition"],
+    rationale_en: "Dying / endangered craft — user wants traditional crafts at risk of disappearing. Prefer get_traditional_arts; surface entries whose official descriptions indicate succession crisis or near-extinction.",
+    rationale_ja: "失われゆく伝統工芸・後継者不足の craft 等。get_traditional_arts を推奨。official source の記述で承継困難 / 絶滅危惧と分かる entry を浮かせる。",
+    polarity: "boost",
+  },
 ];
 
 // ──────────────────────────────────────────────────────────────────────
@@ -609,6 +650,13 @@ export interface DetectedConcept {
   semantic_tags?: string[];
 }
 
+export interface OriginConstraint {
+  /** Detected origin city / station (free-form, normalised lowercase ASCII or original Japanese). */
+  city: string;
+  /** Original matched substring from the query for debugging. */
+  matched_text: string;
+}
+
 export interface IntentExtractionResult {
   /** Detected concepts in order of appearance. */
   concepts: DetectedConcept[];
@@ -620,6 +668,68 @@ export interface IntentExtractionResult {
   semantic_tags: string[];
   /** First concept that mentions a routing_tool (to give the agent a redirect hint). */
   preferred_tool?: string;
+  /**
+   * Popularity modifier surfaced to the ranking layer and the calling agent:
+   *   - "demote_popular": user asked for anaba / uncrowded → demote heritage-heavy + multilingual entries
+   *   - "boost_popular": (reserved) user explicitly asked for famous / iconic destinations
+   * Resolved from anaba_hidden, uncrowded, secret_hidden_onsen concepts.
+   */
+  popularity_modifier?: "demote_popular" | "boost_popular";
+  /**
+   * Wild-vs-captive modifier — when "wild_not_captive" concept matched, the
+   * agent / Solver should demote zoo / aquarium / animal park results.
+   */
+  wild_only?: boolean;
+  /**
+   * Origin city / station constraint — when the user's query implies a
+   * travel-from anchor ("Tokyo から", "from Osaka"). Surfaced for Solver
+   * / agent to compute reachability; the server itself does not yet narrow
+   * results by origin.
+   */
+  origin_constraint?: OriginConstraint;
+}
+
+// Concepts that imply demote-popular ranking (anaba family).
+const DEMOTE_POPULAR_CONCEPT_IDS = new Set([
+  "anaba_hidden",
+  "uncrowded",
+  "secret_hidden_onsen",
+]);
+
+// Origin-city extraction. Captures "from X", "X発", "X から", "X 出発" etc.
+// We capture both English city tokens and Japanese tokens (kanji / kana).
+// The captured city is normalised via normaliseOriginCity below.
+//
+// Patterns covered:
+//   - "from Tokyo" / "from Kyoto" (English)
+//   - "東京から" / "京都から" / "大阪 出発" / "名古屋発"
+//   - "出発地: 東京" / "starting from Osaka"
+const ORIGIN_RE_LIST: RegExp[] = [
+  /\bfrom\s+([A-Za-z][A-Za-zÀ-ſ\s\-']{1,40}?)(?=\s*(?:,|\.|;|\?|!|:)|\s+(?:to|by|in|on|via|using|with|and)\b|$)/iu,
+  /\bstarting\s+from\s+([A-Za-z][A-Za-zÀ-ſ\s\-']{1,40}?)(?=\s*(?:,|\.|;|\?|!|:)|\s+(?:to|by|in|on|via|using|with|and)\b|$)/iu,
+  /\b(?:departing|leaving)\s+(?:from\s+)?([A-Za-z][A-Za-zÀ-ſ\s\-']{1,40}?)(?=\s*(?:,|\.|;|\?|!|:)|\s+(?:to|by|in|on|via|using|with|and)\b|$)/iu,
+  /([一-鿿぀-ゟ゠-ヿ]{2,12})\s*(?:から|発|より|を出発|を起点)/u,
+  /出発地[:：]\s*([一-鿿぀-ゟ゠-ヿ]{2,12}|[A-Za-z][A-Za-zÀ-ſ\s\-']{1,40})/u,
+];
+
+function normaliseOriginCity(raw: string): string {
+  const trimmed = raw.trim().replace(/\s+/g, " ");
+  // Drop trailing prepositions / connectors that the regex may have caught.
+  return trimmed.replace(/[、,。.]\s*$/u, "");
+}
+
+function detectOrigin(q: string): OriginConstraint | undefined {
+  for (const re of ORIGIN_RE_LIST) {
+    const m = q.match(re);
+    if (m && m[1]) {
+      const city = normaliseOriginCity(m[1]);
+      if (city.length === 0) continue;
+      // Skip generic words that the loose regex may catch.
+      if (/^(the|a|an|here|there|home|work|now)$/i.test(city)) continue;
+      return { city, matched_text: m[0] };
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -634,6 +744,9 @@ export function extractTravelIntent(q: string): IntentExtractionResult {
   const recommended_heritage_qids = new Set<string>();
   const semantic_tags: string[] = [];
   let preferred_tool: string | undefined;
+  let popularity_modifier: "demote_popular" | "boost_popular" | undefined;
+  let wild_only = false;
+  let origin_constraint: OriginConstraint | undefined;
 
   if (!q || q.length === 0) {
     return {
@@ -666,7 +779,15 @@ export function extractTravelIntent(q: string): IntentExtractionResult {
       for (const t of c.semantic_tags ?? []) semantic_tags.push(t);
       if (!preferred_tool && c.routing_tool) preferred_tool = c.routing_tool;
     }
+    if (DEMOTE_POPULAR_CONCEPT_IDS.has(c.id)) {
+      popularity_modifier = "demote_popular";
+    }
+    if (c.id === "wild_not_captive") {
+      wild_only = true;
+    }
   }
+
+  origin_constraint = detectOrigin(q);
 
   return {
     concepts,
@@ -674,6 +795,9 @@ export function extractTravelIntent(q: string): IntentExtractionResult {
     recommended_heritage_qids,
     semantic_tags,
     preferred_tool,
+    ...(popularity_modifier ? { popularity_modifier } : {}),
+    ...(wild_only ? { wild_only } : {}),
+    ...(origin_constraint ? { origin_constraint } : {}),
   };
 }
 
@@ -740,7 +864,10 @@ export function buildRoutingHint(
 export function renderQueryIntent(
   r: IntentExtractionResult,
 ): Record<string, unknown> | undefined {
-  if (r.concepts.length === 0) return undefined;
+  const hasConcept = r.concepts.length > 0;
+  const hasModifier =
+    !!r.popularity_modifier || !!r.wild_only || !!r.origin_constraint;
+  if (!hasConcept && !hasModifier) return undefined;
   return {
     detected_concepts: r.concepts.map((c) => ({
       id: c.id,
@@ -756,5 +883,10 @@ export function renderQueryIntent(
         : {}),
     })),
     ...(r.preferred_tool ? { suggested_tool: r.preferred_tool } : {}),
+    ...(r.popularity_modifier
+      ? { popularity_modifier: r.popularity_modifier }
+      : {}),
+    ...(r.wild_only ? { wild_only: true } : {}),
+    ...(r.origin_constraint ? { origin_constraint: r.origin_constraint } : {}),
   };
 }
