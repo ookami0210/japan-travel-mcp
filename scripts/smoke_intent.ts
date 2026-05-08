@@ -44,13 +44,28 @@ const QUERIES = [
   "Tokaido post town",
   "hidden Christian heritage Nagasaki",
   "ukiyo-e museum Tokyo",
+  // Constraint-modifier concepts (anaba / uncrowded / wild / dying / origin):
+  "京都の穴場の寺",
+  "混雑しない 紅葉スポット",
+  "野生のタンチョウを見たい",
+  "失われゆく伝統工芸を訪ねたい",
+  "from Tokyo, 1-day trip to a hidden onsen",
+  "東京から日帰りで行ける秘境",
+  "dying craft last practitioners Niigata",
+  "京都発の観光プラン",
+  "uncrowded sakura viewing spots in Kyoto",
 ];
 
 console.log("Travel Concept Dictionary smoke test\n");
 let totalMatched = 0;
 for (const q of QUERIES) {
   const r = extractTravelIntent(q);
-  if (r.concepts.length === 0) {
+  const hasMatch =
+    r.concepts.length > 0 ||
+    !!r.popularity_modifier ||
+    !!r.wild_only ||
+    !!r.origin_constraint;
+  if (!hasMatch) {
     console.log(`[ NO MATCH ] ${q}`);
     continue;
   }
@@ -64,5 +79,10 @@ for (const q of QUERIES) {
   if (kinds) console.log(`     kinds=${kinds}`);
   if (qids) console.log(`     heritage=${qids}`);
   if (tool !== "-") console.log(`     suggested_tool=${tool}`);
+  if (r.popularity_modifier) console.log(`     popularity_modifier=${r.popularity_modifier}`);
+  if (r.wild_only) console.log(`     wild_only=true`);
+  if (r.origin_constraint) {
+    console.log(`     origin=${r.origin_constraint.city} (matched=${r.origin_constraint.matched_text.trim()})`);
+  }
 }
 console.log(`\n${totalMatched}/${QUERIES.length} queries matched.`);

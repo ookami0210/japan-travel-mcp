@@ -785,7 +785,10 @@ async function searchArea(args: {
   // When this flag is set, the wikidata exact-match path skips the
   // heritage boost (or reverses it as a small demote).
   const LESSER_KNOWN_RE = /(知られざる|穴場|秘境|隠れ|hidden|lesser.?known|off.?the.?beaten|obscure|unsung|underrated|unknown|秘湯|秘景|裏|地元.{0,3}知|local.?secret|not\s*crowded|aren'?t\s*crowded|less\s*crowded|空いて|混雑.{0,4}少|空い|人が少|few\s*tourists|tourist.?free)/i;
-  const lesserKnownIntent = LESSER_KNOWN_RE.test(q);
+  // Union with the explicit concept-dictionary modifier so anaba_hidden /
+  // uncrowded / secret_hidden_onsen all converge into the same ranking flag.
+  const lesserKnownIntent =
+    LESSER_KNOWN_RE.test(q) || intent.popularity_modifier === "demote_popular";
 
   type Match = {
     score: number;
@@ -948,8 +951,16 @@ async function searchArea(args: {
         // kinds_class_match notable matches.
         if (hits === 0) intentKindsBoost = -90;
       }
+      // Wild-only: demote captive zoos / aquariums when the user asked for
+      // animals in their natural habitat.
+      const wildPenalty =
+        intent.wild_only && kinds.some((k) => k === "zoo" || k === "aquarium")
+          ? -60
+          : 0;
       const kindsDefaults = enrichKindsDefaults(kinds, a.fee);
-      addMatch(s + notability + langBoost + heritageBoost + intentKindsBoost, {
+      addMatch(
+        s + notability + langBoost + heritageBoost + intentKindsBoost + wildPenalty,
+        {
         type: "attraction",
         source: "wikidata",
         qid: a.qid,
@@ -1969,7 +1980,18 @@ async function getSpots(args: {
       // Iter 54: heritage_designations bumps prominence (cap at 3 designations
       // to avoid runaway boost on overlapping listings).
       const heritageCount = (a.heritage_designations ?? []).length;
-      const heritageBoost = Math.min(3, heritageCount) * 0.05;
+      // When the user query implies anaba / uncrowded / hidden, flip the
+      // heritage + multilingual prominence boost into a small demote so
+      // internationally-famous landmarks do not occupy the head of the
+      // result list. Mirrors search_area lesserKnownIntent handling.
+      const demotePopular =
+        intent?.popularity_modifier === "demote_popular";
+      const langContribution = demotePopular
+        ? langCount * 0.03
+        : langCount * 0.10;
+      const heritageBoost = demotePopular
+        ? -Math.min(3, heritageCount) * 0.03
+        : Math.min(3, heritageCount) * 0.05;
       // Iter93: wikipedia_kind_tags boost. Entries with specialty kind
       // tags (lavender_field, sake_brewery, snow_festival, sakura_meisho_100,
       // cycling_route, etc.) are canonical for that domain.
@@ -1977,8 +1999,20 @@ async function getSpots(args: {
       // entries (e.g. ファーム富田 with lavender_field + lavender + flower_garden)
       // can clear the heritage_designations 0.15 cap and surface in top-N.
       const wpTags = ((a as unknown) as { wikipedia_kind_tags?: string[] }).wikipedia_kind_tags ?? [];
-      const wpKindBoost = Math.min(4, wpTags.length) * 0.05;
-      const baseScore = 0.45 + langCount * 0.10 + heritageBoost + wpKindBoost;
+      const wpKindBoost = demotePopular
+        ? -Math.min(4, wpTags.length) * 0.03
+        : Math.min(4, wpTags.length) * 0.05;
+      // Wild-only: when the query explicitly asks for animals in the wild,
+      // demote captive facilities (zoo / aquarium / animal park) so the
+      // agent surfaces national parks / sanctuaries / wildlife reserves.
+      const aKindsForWild = wikidataKinds(a);
+      const wildPenalty =
+        intent?.wild_only &&
+        aKindsForWild.some((k) => k === "zoo" || k === "aquarium")
+          ? -0.30
+          : 0;
+      const baseScore =
+        0.45 + langContribution + heritageBoost + wpKindBoost + wildPenalty;
       const qBoost = qRaw ? qRel * 0.003 : 0;
       const wkRec: Record<string, unknown> = {
         source: "wikidata",
