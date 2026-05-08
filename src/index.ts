@@ -36,6 +36,30 @@ import { hybridSearch } from "./lib/hybrid.js";
 import { buildSafetyInput, detectSafetyKeywords } from "./lib/safety.js";
 import { extractTravelIntent, renderQueryIntent, buildRoutingHint } from "./lib/intent.js";
 import { enrichKindsDefaults } from "./lib/kinds_defaults.js";
+import {
+  wikidataKinds,
+  heritageLabels,
+  kindsFromQuery,
+  heritageQidsFromQuery,
+} from "./lib/kinds.js";
+import { haversineMeters, haversineKm, parseWktPoint } from "./lib/geo.js";
+import {
+  PREF_NAME_TO_CODE,
+  PREF_CODE_TO_NAME,
+  inferPrefCode,
+  applyWikidataPrefCorrections,
+} from "./lib/prefecture.js";
+import { classifyLodging, type LodgingType } from "./lib/lodging.js";
+import { pickR3Name, pickR3Description, r3Translation } from "./lib/r3.js";
+import {
+  compileKeywordMatcher,
+  isPrefWidePortalUrl,
+  isNavChromeSpotName,
+  isFoodText,
+  isFestivalText,
+} from "./lib/text_filters.js";
+import { scoreSpotQuality } from "./lib/spot_quality.js";
+import { dataAsOf } from "./lib/dataset.js";
 
 const DISCLAIMER =
   "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.";
@@ -116,252 +140,8 @@ interface WikidataAttraction {
   wikipedia_kind_tags_merged_at?: string;
 }
 
-// Iter 28: human-friendly kind labels for Wikidata type QIDs. Coverage
-// follows fetch_wikidata_attractions_v2.ATTRACTION_TYPES.
-const WD_TYPE_KIND: Record<string, string> = {
-  Q570116: "tourist_attraction",
-  Q15303351: "historic_site",
-  Q839954: "archaeological_site",
-  Q44613: "buddhist_temple",
-  Q845945: "shinto_shrine",
-  Q23413: "castle",
-  Q33506: "museum",
-  Q22698: "park",
-  Q1107656: "garden",
-  Q4989906: "monument",
-  Q4087053: "natural_monument",
-  Q174782: "plaza",
-  Q34038: "waterfall",
-  Q23397: "lake",
-  Q35509: "cave",
-  Q40080: "beach",
-  Q204324: "volcano",
-  Q39816: "valley",
-  Q46831: "mountain_range",
-  Q14888011: "onsen_resort",
-  Q12536: "hot_spring",
-  Q1542076: "national_park",
-  Q1370978: "great_buddha",
-  Q488205: "designated_cultural_property_jp",
-  Q1496967: "pilgrimage_site",
-  Q15243209: "preservation_district",
-  Q3960: "lighthouse",
-  Q1500350: "resort",
-  Q2087181: "memorial",
-  Q635155: "theater",
-  Q1248784: "airport",
-  // Iter 54 additions: Japanese castle subclasses (P31 chain to Q23413
-  // does not reach these — fetcher v2 silently dropped 2,047 of these).
-  // QIDs verified by rdfs:label@ja lookup 2026-05-04 (earlier draft had
-  // typos that mapped to Hungarian opera singers, etc., now removed).
-  Q92026: "japanese_castle",
-  Q11482498: "hilltop_castle",
-  Q11482300: "plains_castle",
-  Q15710038: "mountain_castle",
-  Q11588709: "sacred_mountain",
-  Q1051606: "great_buddha",
-  // Iter56.5: alt-type QIDs that v2 fetcher uses but were missing from
-  // kind map. Many items have ONLY these types in their `types` array,
-  // so without these mappings the kinds field returns []. Adding so
-  // agents see useful kind labels.
-  Q5393308: "buddhist_temple",        // alt to Q44613 — Kōtoku-in tagged here
-  Q697295: "shinto_shrine",           // alt to Q845945
-  Q24398318: "religious_building",    // broader (some items only have this)
-  Q830356: "designated_cultural_property_jp",  // alt to Q488205
-  Q8502: "mountain",
-  Q11197: "active_volcano",            // alt to Q204324
-  Q16560: "palace",
-  Q39614: "buddhist_monastery",        // alt to Q44613
-};
-
-// Iter 58: name-regex semantic tag enrichment. Wikidata
-// types[] alone misses common Japanese travel concepts whose Wikidata type
-// is generic (Q570116 tourist_attraction etc.) but whose name encodes the
-// concept (e.g. ○○横丁 / ○○棚田 / ○○宿 / ○○商店街). Adding these tags
-// to `kinds[]` so the intent dictionary's recommended_kinds path can match
-// them in get_spots / search_area.
-//
-// IMPORTANT: regex must be precise (anchored with prefix or suffix) to
-// avoid false positives on long entity names. Each entry triggers ONLY
-// when the entity name contains the literal Japanese / English token.
-const NAME_KIND_RE: { kinds: string[]; re: RegExp }[] = [
-  // ── Lodging / district patterns ─────────────────────────────────────
-  { kinds: ["yokocho"], re: /(横丁|横町)/u },
-  { kinds: ["shotengai"], re: /(商店街)/u },
-  { kinds: ["jokamachi"], re: /(城下町)/u },
-  { kinds: ["shukuba"], re: /(宿場|宿場町)/u },
-  // Iter68 fix: 海道 alone false-positive on 北海道 (prefecture name).
-  // Restrict to specific kaido tokens that are clearly kaido routes.
-  { kinds: ["kaido"], re: /(街道|古道|東海道|中山道|甲州街道|奥州街道|日光街道|熊野古道|善光寺街道|京街道)/u },
-  { kinds: ["buke_yashiki"], re: /(武家屋敷|侍屋敷)/u },
-  { kinds: ["machiya", "preservation_district"], re: /(町家|町並み|古い町並)/u },
-  // ── Landscape / agriculture ─────────────────────────────────────────
-  { kinds: ["tanada"], re: /(棚田|段々畑)/u },
-  { kinds: ["sand_dune"], re: /(砂丘|砂漠)/u },
-  { kinds: ["yakei", "observation"], re: /(展望(台|所|広場|室)|スカイデッキ|スカイ.{0,2}ツリー|ロープウェイ)/u },
-  // ── Industrial / mining heritage ────────────────────────────────────
-  { kinds: ["mining_heritage"], re: /(鉱山|銀山|金山|炭鉱|炭礦|鉱業)/u },
-  { kinds: ["industrial_heritage"], re: /(製鉄所|工場跡|紡績|造船|発電所跡)/u },
-  // ── Active volcanoes (most-famous JMA-monitored peaks). Wikidata
-  //    types Q204324 / Q11197 only catch ~24 crater-lakes; the famous
-  //    active volcanoes themselves are typed Q8502 (mountain), so the
-  //    volcano intent could not gate to them without a name regex.
-  //    NOTE: anchored name match — name must equal the volcano name
-  //    exactly (no shrine/museum/visitor-center suffixes), else we get
-  //    612 false positives like 静岡県富士山世界遺産センター / 鳥海山大物忌神社.
-  { kinds: ["active_volcano", "volcano", "mountain"],
-    re: /^(阿蘇山|阿蘇中岳|桜島|浅間山|御嶽山|雲仙岳|普賢岳|有珠山|草津白根山|霧島山|新燃岳|三原山|北海道駒ヶ岳|樽前山|十勝岳|蔵王連峰|安達太良山|磐梯山|吾妻山|富士山|焼岳|焼山|那須岳|日光白根山|諏訪之瀬島|口永良部島|箱根山|大涌谷|岩木山|岩手山|秋田駒ヶ岳|鳥海山|栗駒山|赤城山|榛名山|白山|蔵王山|妙高山|新潟焼山|乗鞍岳|燧ヶ岳|九重山|阿武火山群|男鹿目潟火山群|新潟焼山|阿寒岳)$/u },
-  // ── Henro / 88-temple pilgrimage (each name 第N番札所 or 霊山寺/極楽寺/etc.)
-  //    Adding pilgrimage_site kind to entities whose name signals fudasho.
-  { kinds: ["pilgrimage_site", "buddhist_temple"],
-    re: /(.+番札所|遍路.+寺|.+霊場|.+巡礼)/u },
-  // ── Kominka / traditional-house lodging — name-pattern match, since
-  //    Wikidata typing is ad-hoc (some are Q3947 house, Q1497364 farmhouse).
-  { kinds: ["kominka", "preservation_district"],
-    re: /(古民家|庄屋(屋敷)?|曲屋|曲り家|武家屋敷)/u },
-  // ── Local railway lines — Wikipedia category 日本の鉄道路線 covers most.
-  //    Name-suffix 線 catches 飯田線 / 只見線 / 木次線 / 三江線 / 小海線 / etc.
-  //    Restricted to 4+ char names ending in 線 to avoid 桜井線 noise.
-  { kinds: ["local_railway", "railway_line"],
-    re: /^[一-龥ァ-ヴーぁ-ん]{1,5}線$/u },
-  // ── Crane wintering / nature reserves (per L3-25). Uses ONLY the
-  //    specific crane_wintering tag — natural_monument was too broad
-  //    and crossed over to sand_dune query (L3-21 regression).
-  { kinds: ["crane_wintering"],
-    re: /(ツル渡来|鶴渡来|タンチョウ|丹頂鶴|ツルセンター|鶴居)/u },
-  // ── Sake brewery / brand — name-pattern catches 酒造 / 蔵元 / 銘酒.
-  //    Wikidata typing uses Q220659 which is NOT in our ATTRACTION_TYPES,
-  //    so name regex is the only signal until a SPARQL fetch is added.
-  { kinds: ["sake_brewery"],
-    re: /(酒造(株式会社|株式|有限会社|有限|社|所)?$|.+酒造$|蔵元|.+酒造店$|醸造所|造り酒屋)/u },
-  // ── Sake brand suffix patterns (○○正宗 / ○○一統 / ○○八海)
-  //    Limited list to avoid catching unrelated brand names.
-  { kinds: ["sake_brand"],
-    re: /(.+正宗$|.+菊酒$|.+大関$|越の三梅|越乃寒梅|八海山(?!尊神社)|久保田(?!児童公園)|獺祭|十四代|黒龍)/u },
-  // ── Hanabi event names — ○○花火大会
-  { kinds: ["hanabi"],
-    re: /(.+花火大会$|.+花火祭$|花火フェスティバル|納涼花火)/u },
-  // ── Yuki matsuri / snow festivals
-  { kinds: ["yuki_matsuri"],
-    re: /(.+雪まつり|.+雪祭|.+氷瀑|スノーフェスティバル|氷雪まつり)/u },
-  // ── Religious patterns (extras to WD_TYPE_KIND) ─────────────────────
-  { kinds: ["shinto_shrine"], re: /(神社|大社|稲荷|八幡宮|天満宮|宮$)/u },
-  { kinds: ["buddhist_temple"], re: /(寺$|寺院|大師堂|観音堂|本堂|奥之院|奥の院)/u },
-  { kinds: ["pilgrimage_site"], re: /(霊場|札所|遍路|巡礼)/u },
-  { kinds: ["sacred_mountain"], re: /(霊山|御山|出羽三山|大峰山|高野山)/u },
-  // ── Architectural style ─────────────────────────────────────────────
-  { kinds: ["giyofu"], re: /(擬洋風|洋館|旧.{0,5}館|レトロ建築)/u },
-  // ── Food / venues ───────────────────────────────────────────────────
-  { kinds: ["depachika"], re: /(デパ地下)/u },
-  { kinds: ["michi_no_eki"], re: /(道の駅)/u },
-  // ── Recreation ──────────────────────────────────────────────────────
-  { kinds: ["ski_resort"], re: /(スキー場|ゲレンデ|スキー\s*リゾート)/u },
-  { kinds: ["onsen_resort"], re: /(温泉郷|温泉街|温泉地)/u },
-  { kinds: ["aquarium"], re: /(水族館)/u },
-  { kinds: ["zoo"], re: /(動物園|サファリパーク)/u },
-  // ── Industrial / scenic infrastructure ──────────────────────────────
-  { kinds: ["bridge"], re: /(大橋$|橋$|つり橋|吊り橋|跨線橋)/u },
-  { kinds: ["lighthouse"], re: /(灯台)/u },
-  { kinds: ["dam"], re: /(ダム)/u },
-];
-
-function nameKindEnrich(name: string | null | undefined, dst: string[]): void {
-  if (!name) return;
-  for (const { kinds, re } of NAME_KIND_RE) {
-    if (re.test(name)) {
-      for (const k of kinds) if (!dst.includes(k)) dst.push(k);
-    }
-  }
-}
-
-function wikidataKinds(a: WikidataAttraction): string[] {
-  const types = a.types ?? [];
-  const out: string[] = [];
-  for (const t of types) {
-    const k = WD_TYPE_KIND[t];
-    if (k && !out.includes(k)) out.push(k);
-  }
-  // Iter 58: enrich with name-regex tags. Runs against ja, en, and zh
-  // names — yokocho / tanada etc. are most reliable in ja but English
-  // names like "Tokaido" / "Nakasendo" trigger kaido here too.
-  nameKindEnrich(a.name_ja, out);
-  nameKindEnrich(a.name_en, out);
-  // Iter 62: Wikipedia category-derived semantic tags. Catches concepts
-  // not covered by Wikidata type ontology (giyofu / sand_dune / mining /
-  // hanabi / yokocho / etc.).
-  if (a.wikipedia_kind_tags) {
-    for (const t of a.wikipedia_kind_tags) {
-      if (!out.includes(t)) out.push(t);
-    }
-  }
-  return out;
-}
-
-// Iter 54: heritage-designation QID → human-readable label.
-// Built from the most-common P1435 values seen in the 5,567-item P1435
-// fetch. Agents consuming `heritage_designations: ["Q9259", "Q1188622"]`
-// should not need an extra Wikidata lookup to know what those mean.
-// Verified by rdfs:label@ja against Wikidata 2026-05-04.
-const HERITAGE_QID_LABEL: Record<string, { ja: string; en: string }> = {
-  // Verified by Wikidata rdfs:label@ja lookup 2026-05-04. Top P1435 values
-  // observed in the 5,567-item heritage fetch are listed first.
-  Q1188622:     { ja: "重要文化財", en: "Important Cultural Property of Japan" }, // 2024 in dataset
-  Q1139795:     { ja: "国宝", en: "National Treasure of Japan" },                  // 1396
-  Q30834580:    { ja: "国の史跡", en: "Historic Site of Japan" },                   // 1139
-  Q11579194:    { ja: "登録有形文化財", en: "Registered Tangible Cultural Property of Japan" }, // 547
-  Q43113623:    { ja: "国の天然記念物", en: "Natural Monument of Japan" },          // 304
-  Q11414752:    { ja: "名勝", en: "Place of Scenic Beauty (Japan)" },               // 287
-  Q122904442:   { ja: "国指定天然記念物", en: "Nationally-designated Natural Monument" }, // 145
-  Q23790:       { ja: "天然記念物", en: "Natural Monument" },                       // 120
-  Q850649:      { ja: "重要伝統的建造物群保存地区", en: "Important Preservation District for Groups of Traditional Buildings" }, // 107
-  Q26764449:    { ja: "国の特別史跡", en: "Special Historic Site of Japan" },        // 68
-  Q11423672:    { ja: "土木学会選奨土木遺産", en: "JSCE Selected Civil Engineering Heritage" }, // 66
-  Q123010864:   { ja: "都道府県指定史跡", en: "Prefecture-designated Historic Site" }, // 59
-  Q19683138:    { ja: "ラムサール条約登録地", en: "Ramsar Wetland (Japan)" },          // 51
-  Q9259:        { ja: "UNESCO世界遺産", en: "UNESCO World Heritage Site" },          // 28
-  Q11525886:    { ja: "東京都選定歴史的建造物", en: "Tokyo Selected Historic Building" }, // 26
-  Q94987823:    { ja: "特別名勝", en: "Special Place of Scenic Beauty" },           // 41
-  Q123130241:   { ja: "日本国指定史跡構成資産", en: "Component of Nationally-designated Historic Site" }, // 45
-  Q123011316:   { ja: "市町村指定有形民俗文化財", en: "Municipality-designated Folkloric Property" }, // 43
-  Q11403686:    { ja: "北海道遺産", en: "Hokkaido Heritage" },                       // 19
-  Q24398318:    { ja: "宗教的建造物", en: "Religious Building" },
-  Q24405128:    { ja: "ユネスコ無形文化遺産", en: "UNESCO Intangible Cultural Heritage" },
-  Q1186017:     { ja: "国宝（建造物）", en: "National Treasure (architectural)" },
-  // Iter54.11: extend coverage to drop "Q-id raw" leakage flagged by
-  // v4-data scoring of iter54-baseline. Top remaining unmapped P1435 values.
-  Q64576748:    { ja: "重要文化的景観", en: "Important Cultural Landscape (Japan)" },          // 47 in dataset
-  Q7309389:     { ja: "登録記念物", en: "Registered Monument of Japan" },                     // 41
-  Q96207459:    { ja: "特別天然記念物", en: "Special Natural Monument of Japan" },              // 38
-  Q18382798:    { ja: "日本遺産", en: "Japan Heritage (Bunka-cho program)" },                  // 31
-  Q114950428:   { ja: "市町村指定文化財", en: "Municipality-designated Cultural Property" },     // 23
-  Q2901860:     { ja: "有形文化財", en: "Tangible Cultural Property of Japan" },               // 21
-  Q123010988:   { ja: "市町村指定史跡", en: "Municipality-designated Historic Site" },           // 18
-  Q95652804:    { ja: "被爆建造物", en: "Atomic-bombed Building" },                            // 18
-  Q11638384:    { ja: "近代化産業遺産", en: "Modernization Industrial Heritage (METI)" },        // 12
-  Q123197814:   { ja: "日本国宝構成資産", en: "Component of National Treasure (Japan)" },         // 11
-  Q123011498:   { ja: "都道府県指定有形文化財", en: "Prefecture-designated Tangible Cultural Property" }, // 9
-  Q858308:      { ja: "日本の文化財", en: "Cultural Property of Japan" },                       // 9
-  Q11644858:    { ja: "重要有形民俗文化財", en: "Important Tangible Folk Cultural Property" },     // 9
-  Q22127466:    { ja: "かんがい施設遺産", en: "Heritage Irrigation Structure" },                  // 9
-  Q114967308:   { ja: "都道府県指定文化財", en: "Prefecture-designated Cultural Property" },       // 8
-  Q1459900:     { ja: "暫定世界遺産", en: "Tentative UNESCO World Heritage Site" },             // 7
-  Q11462154:    { ja: "小樽市指定歴史的建造物", en: "Otaru-designated Historic Building" },         // 7
-  Q11543174:    { ja: "横浜市認定歴史的建造物", en: "Yokohama-certified Historic Building" },       // 7
-  Q137572758:   { ja: "原生自然環境保全地域", en: "Wilderness Area (Japan, Nature Conservation Law)" },
-  Q106611640:   { ja: "保護林", en: "Protected Forest (Japan, Forestry Agency)" },
-  Q123011161:   { ja: "市町村指定天然記念物", en: "Municipality-designated Natural Monument" },
-};
-
-function heritageLabels(designations: string[] | undefined): string[] | undefined {
-  if (!designations || designations.length === 0) return undefined;
-  const out: string[] = [];
-  for (const qid of designations) {
-    const lab = HERITAGE_QID_LABEL[qid];
-    if (lab) out.push(lab.en);
-    else out.push(qid);  // unmapped QIDs surface as raw — better than dropping
-  }
-  return out.length > 0 ? out : undefined;
-}
+// Kind classification + heritage labels + query-intent detectors live in
+// ./lib/kinds.js (imported above).
 
 interface PrefectureFile {
   prefecture: { code: string; name: string; name_en?: string };
@@ -697,9 +477,7 @@ let cachedR3Translations: Map<string, R3TranslationRecord> | null = null;
 // actually in Kagawa (37). Fix at load time so every tool sees correct
 // data without a re-scrape. Add new entries here as more upstream errors
 // are discovered.
-const WIKIDATA_PREF_CORRECTIONS: Record<string, string> = {
-  Q11337011: "37",  // ベネッセアートサイト直島 — Naoshima is Kagawa, not Okayama
-};
+// WIKIDATA_PREF_CORRECTIONS → ./lib/prefecture.js.
 
 // Iter 19: hotel master corrections. The Wikidata+OSM
 // merge step assigns prefecture_code by reverse-geocoding lat/lng, but
@@ -773,29 +551,7 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   return out;
 }
 
-function applyWikidataPrefCorrections(prefs: PrefectureFile[]): void {
-  // Re-home each corrected Wikidata entry from its current (wrong) prefecture
-  // to its correct one. Mutates `prefs` in place.
-  const byCode = new Map(prefs.map((p) => [p.prefecture.code, p]));
-  for (const [qid, correctCode] of Object.entries(WIKIDATA_PREF_CORRECTIONS)) {
-    let moved: WikidataAttraction | null = null;
-    for (const p of prefs) {
-      const idx = (p.wikidata_attractions ?? []).findIndex((a) => a.qid === qid);
-      if (idx >= 0) {
-        moved = (p.wikidata_attractions ?? [])[idx];
-        p.wikidata_attractions!.splice(idx, 1);
-        break;
-      }
-    }
-    if (!moved) continue;
-    moved.prefecture_code = correctCode;
-    const target = byCode.get(correctCode);
-    if (target) {
-      target.wikidata_attractions = target.wikidata_attractions ?? [];
-      target.wikidata_attractions.push(moved);
-    }
-  }
-}
+// applyWikidataPrefCorrections → ./lib/prefecture.js.
 
 async function supplementWikidataAttractions(
   prefs: PrefectureFile[],
@@ -942,75 +698,14 @@ async function loadNames(): Promise<Map<string, MultilingualNameRecord>> {
   return map;
 }
 
-function dataAsOf(prefs: PrefectureFile[]): string | null {
-  if (prefs.length === 0) return null;
-  return prefs.map((p) => p.data_as_of).sort().pop() ?? null;
-}
+// dataAsOf → ./lib/dataset.js.
 
 // ──────────────────────────────────────────────────────────────────────
 // Tool: search_area
 
-// Iter56.3: kinds-keyword detector. When the query is in
-// English (or romaji Japanese) and uses category words like "shrine" /
-// "temple" / "castle" / "garden", surface items with matching kinds even
-// when the entity name is in Japanese (e.g. 厳島神社 doesn't match the
-// English string "shrine" via lexical search).
-const KINDS_KEYWORD_RE: { kinds: string[]; re: RegExp }[] = [
-  { kinds: ["shinto_shrine"], re: /(\bshrine\b|\bjinja\b|\btaisha\b|神社|大社|稲荷)/iu },
-  { kinds: ["buddhist_temple"], re: /(\btemple\b|\bdera\b|寺院|大師)/iu },
-  { kinds: ["castle", "japanese_castle", "hilltop_castle", "plains_castle", "mountain_castle"], re: /(\bcastle\b|城跡|の城)/iu },
-  { kinds: ["garden"], re: /(\bgarden\b|\bteien\b|庭園|名園)/iu },
-  { kinds: ["museum"], re: /(\bmuseum\b|\bhakubutsukan\b|博物館|美術館)/iu },
-  { kinds: ["waterfall"], re: /(\bwaterfall\b|\bfalls\b|\bcascade\b|の滝|大滝)/iu },
-  { kinds: ["onsen_resort", "hot_spring"], re: /(\bonsen\b|hot\s*spring|温泉)/iu },
-  { kinds: ["lake"], re: /(\blake\b|湖)/iu },
-  { kinds: ["beach"], re: /(\bbeach\b|海岸|海浜|浜辺)/iu },
-  { kinds: ["volcano"], re: /(\bvolcano\b|火山|噴火口)/iu },
-  { kinds: ["pilgrimage_site"], re: /(\bpilgrimage\b|巡礼|遍路|参詣)/iu },
-];
-
-function kindsFromQuery(q: string): Set<string> {
-  const out = new Set<string>();
-  for (const { kinds, re } of KINDS_KEYWORD_RE) {
-    if (re.test(q)) {
-      for (const k of kinds) out.add(k);
-    }
-  }
-  return out;
-}
-
-// Iter 54: heritage-keyword detector for search_area /
-// get_spots. When the query talks about heritage classes ("UNESCO" /
-// "国宝" / "world heritage" / "重要文化財" etc.) but the items themselves
-// don't mention those words in their name or description, surface items
-// with matching heritage_designations as a separate boost.
-//
-// Returns the set of heritage QIDs the query implies. Empty when the
-// query is not heritage-themed.
-const HERITAGE_KEYWORD_RE: { qids: string[]; re: RegExp }[] = [
-  { qids: ["Q9259"], re: /(unesco|world\s*heritage|世界遺産|世界文化遺産)/i },
-  { qids: ["Q1139795", "Q1186017"], re: /(国宝|national\s*treasure)/i },
-  { qids: ["Q1188622"], re: /(重要文化財|important\s*cultural\s*property|icp)/i },
-  { qids: ["Q94987823"], re: /(特別名勝|special.*scenic\s*beauty)/i },
-  { qids: ["Q11414752"], re: /(名勝|place\s*of\s*scenic\s*beauty)/i },
-  { qids: ["Q26764449"], re: /(特別史跡|special.*historic\s*site)/i },
-  { qids: ["Q30834580"], re: /(史跡|historic\s*site)/i },
-  { qids: ["Q43113623"], re: /(天然記念物|natural\s*monument)/i },
-  { qids: ["Q850649"], re: /(伝統的建造物|traditional\s*buildings|preservation\s*district|重伝建)/i },
-  { qids: ["Q24405128"], re: /(無形文化遺産|intangible.*heritage)/i },
-  { qids: ["Q19683138"], re: /(ラムサール|ramsar|wetland)/i },
-  { qids: ["Q11403686"], re: /(北海道遺産|hokkaido\s*heritage)/i },
-];
-
-function heritageQidsFromQuery(q: string): Set<string> {
-  const out = new Set<string>();
-  for (const { qids, re } of HERITAGE_KEYWORD_RE) {
-    if (re.test(q)) {
-      for (const qid of qids) out.add(qid);
-    }
-  }
-  return out;
-}
+// kindsFromQuery + heritageQidsFromQuery (and their constants
+// KINDS_KEYWORD_RE / HERITAGE_KEYWORD_RE) live in ./lib/kinds.js — see
+// imports at the top of this file.
 
 async function searchArea(args: {
   q: string;
@@ -1486,220 +1181,7 @@ async function searchArea(args: {
   };
 }
 
-/**
- * Iter65: prefecture-wide tourism portal domain detector.
- * Used to filter scraped spots whose URL is from a domain that aggregates
- * many cities under a misleading municipality assignment. The pipeline
- * tagged these spots with the wrong municipality_code (e.g. dive-hiroshima.com
- * pages marked as 尾道市 when they actually cover 大久野島 in 竹原市).
- *
- * Returns true when the URL is from a known prefecture-wide portal that
- * the agent should be cautious about trusting the municipality field.
- */
-const PREF_WIDE_PORTAL_DOMAINS: string[] = [
-  "dive-hiroshima.com",
-  "yamatoji.nara-kankou.or.jp",
-  "atochi.jp",
-  "vill.hakuba.lg.jp",
-  "san3kan.net",
-  "info.pref.fukui",
-  "kanko-sanyo.com",
-  "okayama-kanko.net",
-  "tourism.iwate",
-  "wakayama-kanko.jp",
-  "vekanko.jp",
-  "tic-toyama.jp",
-  "kanko.kyoto-fukuchiyama",
-  // Iter67: expanded list flagged by iter65 judges
-  "iwatetabi.jp",  // Iwate prefecture-wide
-  "fuku-e.com",  // Fukui DISCOVER FUKUI
-  "fukuoka-kanko.com",
-  "tabi-aichi.jp",
-  "honokuni.or.jp",  // 山陰観光
-  "yamagatakanko.com",
-  "tochigiji.or.jp",
-  "kanko-shimane.com",
-  "tottori-tour.jp",
-  "discover-niigata.com",
-  "saitama-kanko.com",
-  "gunma-trip.jp",
-  "kankou-shiga.jp",
-  "miyazaki-kankou.jp",
-  "kankou-japan.go.jp",
-  "japan.travel",
-];
-
-function isPrefWidePortalUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const lower = url.toLowerCase();
-  return PREF_WIDE_PORTAL_DOMAINS.some((d) => lower.includes(d));
-}
-
-/**
- * Detect spot names that are clearly nav-chrome / index pages / encoding
- * garbage rather than real assets. Used to filter the hybrid retriever's
- * spot results before they reach the user. Patterns drawn from a quick
- * audit of the post-burst embedding corpus (2026-05-01).
- */
-function isNavChromeSpotName(name: string | null | undefined): boolean {
-  if (!name) return true;
-  const trimmed = name.trim();
-  if (trimmed.length === 0) return true;
-  // Encoding garbage — Mojibake characters or non-printable runs.
-  if (/[�]/.test(trimmed)) return true;
-  if (/^[�¿À-ÿ]+$/.test(trimmed)) return true;
-  const lower = trimmed.toLowerCase();
-  // Generic English nav labels.
-  const navWords = [
-    "main menu", "menu", "news", "videos", "video", "video library",
-    "home", "top", "sitemap", "site map", "site search", "search",
-    "login", "sign in", "sign up", "register", "press", "press room",
-    "rss", "rss feed", "subscribe", "twitter", "facebook", "youtube",
-    "instagram", "language", "english", "日本語",
-    "ご意見", "お問い合わせ", "プライバシーポリシー", "サイトマップ",
-    "サイト内検索", "関連リンク", "リンク集", "メインメニュー",
-    "観光パンフレット等のご案内", "観光客のおもてなし",
-    // Iter 12: random-130 surfaced these as leakage from
-    // municipal-website navigation — they're admin chrome, not real spots.
-    "ホーム", "ホームページ", "くらし・手続き", "暮らし・手続き",
-    "観光パンフレット", "観光案内", "観光情報",
-    "新着情報", "更新情報", "お知らせ", "イベント情報",
-    "アクセス", "アクセス情報", "アクセスマップ", "交通アクセス",
-    "問い合わせ", "お知らせ一覧",
-    "各スキー場統計", "各キャンプ場統計",  // generic stat pages
-    "観光ガイド", "施設一覧", "イベント一覧",
-    "guide", "events", "event", "guide map", "tourist information",
-  ];
-  if (navWords.includes(lower)) return true;
-  if (navWords.includes(trimmed)) return true;
-  // "おすすめ特集" / "Special Feature" style boilerplate that appears on every page.
-  if (/^(おすすめ特集|special feature)$/i.test(trimmed)) return true;
-  // Iter 40: more chrome from spot audit on tokyo.json.
-  // These are exact-name matches (not contains) — bare meta-page titles.
-  const navExactExtra = [
-    "イベント・お知らせ", "新着情報一覧", "ピックアップ", "topics",
-    "トピックス", "観光スポット", "観光ガイド・パンフレット",
-    "刊行物・行政資料", "区役所・出張所", "文化・観光・スポーツ",
-    "文化・観光", "芸術・文化振興", "芸術・文化・歴史",
-    "芸術・文化イベント", "生涯学習・スポーツ", "文化・観光施設",
-    "スポーツ施設", "おすすめ情報",
-    "主な行事・祭り", "見どころ・まち歩き", "ゆかりの地・人物",
-    // Iter 41 partially reverted: generic terms like
-    // "イベント" / "観光情報" / "観光ガイド" caught too many real spots
-    // (Sat 21→12, Min 59→54, 15 losers). Kept only specific multi-word
-    // patterns + suffix regex.
-    "検索メニュー", "サイト内検索", "よく検索されるキーワード",
-    "キーワードでスポットを検索", "情報をさがす",
-    "くらし・行政情報", "くらしの情報", "このサイトについて",
-    "新着のお知らせ", "お知らせ・新着情報",
-    "緊急情報", "緊急のお知らせ", "重要なお知らせ", "重要情報",
-    // Iter 54: dive-hiroshima.com / similar prefecture
-    // tourism portal widgets that the Onomichi (尾道市) data leak surfaced
-    // in iter54-baseline as L1-15 hallucination=false. These are
-    // sidebar/ widget labels, not real tourist spots.
-    "注目ワード", "モデルコース", "スポット・体験", "イベントを探す",
-    "ボランティアガイド", "各施設や地域の情報", "ガイドブック", "旅のしおり",
-    "観光案内所一覧", "観光案内所一覧情報",
-    // Iter 60: CMS section header patterns flagged by
-    // iter59 judges as leaking from yamatoji.nara-kankou.or.jp /
-    // vill.hakuba.lg.jp etc. Top-level menu items that appear with
-    // multiple kanji+separator structure.
-    "温泉・宿泊", "宿泊・温泉", "グルメ・買う", "食べる・買う",
-    "景観・環境・観光", "観光・景観", "学ぶ・知る",
-    "アクセス・駐車場", "アクセス・交通",
-    "観光に役立つ情報", "観光情報", "観光情報サイト",
-    "宿泊予約", "宿泊・予約",
-    "イベント・体験", "体験・アクティビティ",
-    "歴史・文化", "文化・歴史", "自然・歴史",
-    "見る・遊ぶ", "見る", "遊ぶ", "学ぶ", "買う",
-    "泊まる", "食べる", "歩く", "ふれる",
-    // Iter 59: generic-category-name placeholder titles
-    // that judges flagged in iter58 (L3-30, L2-21, L3-26 shukubo).
-    "神社・仏閣", "寺院・神社", "神社", "仏閣", "寺院",
-    "観光地", "名所", "名所旧跡", "観光名所",
-    "公園", "庭園", "城",
-    "美術館・博物館", "博物館・美術館", "資料館",
-    "温泉", "温泉地", "温泉郷",
-    "祭り・イベント", "イベント", "イベント・祭り",
-    "アクティビティ", "体験",
-    "グルメ", "ご当地グルメ", "ご当地",
-    "土産", "お土産",
-    "ショッピング", "shopping",
-    "住所", "電話", "url", "URL", "ホームページ",
-    // Iter 58: more chrome from spot audit. Generic CTA /
-    // listing widgets / shrink-wrap reservation prompts. All seen in
-    // municipal portals as scraped "spot" pages.
-    "ご予約はこちら", "予約はこちら", "予約・問い合わせ", "ご利用案内",
-    "ご利用について", "サービスのご案内", "ご案内", "案内",
-    "ランキング", "人気ランキング", "おすすめランキング", "話題のスポット",
-    "ピックアップ記事", "特集記事", "特集一覧", "コラム", "コラム一覧",
-    "メルマガ登録", "メールマガジン", "公式SNS", "公式アカウント",
-    "ライブカメラ", "天気・ライブカメラ",
-    "404 not found", "ページが見つかりません", "page not found",
-    "メンテナンス中", "サイトメンテナンス", "under maintenance",
-    "このページについて", "このサイトの使い方", "サイトの使い方",
-    "閉じる", "戻る", "次のページ", "前のページ",
-    "詳細を見る", "もっと見る", "see more", "view more", "read more",
-    "予約する", "Book now", "申込み", "申し込み",
-  ];
-  if (navExactExtra.includes(trimmed)) return true;
-  // Suffix patterns (X市観光情報サイト / X観光協会公式サイト etc. — generic
-  // city portal landing pages with only a generic name).
-  // Iter 43: added Latin 'navi' / 'tourism' / 'guide' forms
-  // (e.g. '兵庫観光navi'), 観光物産協会, 観光連盟, ツーリズム協議会 etc.
-  if (
-    /(観光協会公式サイト|観光情報サイト|観光ナビ|観光navi|観光NAVI|観光連盟|観光物産協会|観光物産振興協会|エコツーリズム推進協議会|フィルムコミッション)$/iu.test(
-      trimmed,
-    )
-  )
-    return true;
-  // Iter 26: more nav-chrome patterns surfaced in random
-  // scoring (cookie consent, "about this page", language selector banners).
-  // Match name-anywhere on the most distinctive markers.
-  const navContains = [
-    "about this page", "about this site", "ページについて",
-    "クッキーポリシー", "cookie policy", "cookie 同意", "cookie consent",
-    "プライバシーポリシー", "privacy policy",
-    "サイトポリシー", "site policy",
-    "免責事項", "disclaimer",
-    "言語選択", "language selector", "language selection",
-    "ナビゲーション", "navigation",
-    "コンテンツへスキップ", "skip to content", "skip to main content",
-    "戻る", "back to top", "ページの先頭", "ページトップ",
-    // Iter 54: dive-hiroshima.com style portal widgets
-    "外国人旅行者向け情報", "魅力を動画でご紹介",
-    // Iter 58: more contains-style chrome
-    "qrコードを読み", "qrコード読み取", "qr code", "qr コード",
-    "ライセンス・著作権", "著作権について", "credit",
-    "本サイトについて", "サイト運営", "運営者情報", "運営会社",
-    "アクセシビリティ", "accessibility statement",
-    "予約サイトへ", "外部リンク", "別サイト", "外部サイト",
-    "メールアドレス", "ファックス番号", "電話番号一覧",
-    "閲覧履歴", "閲覧したページ", "履歴",
-    // Iter 59: more nav-chrome flagged by iter58 judges.
-    // L3-30 (local rail), L2-21 (砂丘), L1-15 (Onomichi) all surfaced
-    // these as scrape leakage in must_see / notable bands.
-    "リンクについて", "link policy", "リンクポリシー",
-    "施設のご案内", "施設一覧", "施設情報",
-    "ご利用条件", "利用条件", "利用規約",
-    "個人情報", "個人情報の取り扱い",
-    "カテゴリー一覧", "カテゴリ一覧", "category list",
-    "投稿", "口コミ", "レビュー",
-    "クーポン", "coupon",
-    "観光課", "観光振興課", "観光商工課", "観光振興室",
-    "観光まちづくり課", "観光物産課", "観光企画課",
-    "コラム記事一覧", "ニュース一覧",
-    "観光統計", "観光振興計画", "観光戦略",
-  ];
-  for (const pat of navContains) {
-    if (lower.includes(pat) || trimmed.includes(pat)) return true;
-  }
-  // Pure punctuation / ASCII-symbol names (≤ 2 visible chars).
-  if (/^[\s\-・·•·]+$/.test(trimmed)) return true;
-  // 短い hiragana-only / katakana-only label (1-3 chars) はだいたい label
-  if (/^[぀-ヿ]{1,3}$/.test(trimmed)) return true;
-  return false;
-}
+// PREF_WIDE_PORTAL_DOMAINS / isPrefWidePortalUrl / isNavChromeSpotName → ./lib/text_filters.js.
 
 /**
  * Run the hybrid retriever and map each result into search_area's record
@@ -2579,94 +2061,12 @@ async function getSpots(args: {
   };
 }
 
-// Quality scoring — mirrors scrapers/lib/quality_score.ts but inlined
-// here because the runtime can't reach the scrapers/ directory once
-// shipped. The two MUST stay in sync; tests in tests/lib/quality_score.test.ts
-// pin the rubric.
-function scoreSpotQuality(s: {
-  description?: string | null;
-  body_paragraphs?: string[];
-  address?: string | null;
-  coordinates?: { lat: number; lng: number } | null;
-  coordinate_precision?: string | null;
-  images?: string[];
-  schema_events?: unknown[];
-  schema_places?: unknown[];
-}): number {
-  let score = 0;
-  if (s.description) {
-    score += 0.2;
-    score += Math.min(0.15, ((s.description.length ?? 0) / 120) * 0.15);
-  }
-  const bodies = s.body_paragraphs ?? [];
-  score += Math.min(0.2, (bodies.length / 2) * 0.2);
-  if (s.address) score += 0.1;
-  if (s.coordinates) {
-    if (s.coordinate_precision === "exact") score += 0.1;
-    else if (s.coordinate_precision === "address_geocoded") score += 0.07;
-    else score += 0.04;
-  }
-  const sn = (s.schema_events?.length ?? 0) + (s.schema_places?.length ?? 0);
-  if (sn > 0) score += 0.15;
-  if ((s.images?.length ?? 0) > 0) score += 0.1;
-  return score;
-}
+// scoreSpotQuality → ./lib/spot_quality.js.
+// haversineMeters / haversineKm / parseWktPoint → ./lib/geo.js.
+// LodgingType + classifyLodging → ./lib/lodging.js.
 
 // ──────────────────────────────────────────────────────────────────────
 // Tool: get_hotels (pending)
-
-const EARTH_R = 6_371_000;
-function haversine(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const la1 = toRad(a.lat);
-  const la2 = toRad(b.lat);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
-  return 2 * EARTH_R * Math.asin(Math.sqrt(h));
-}
-
-// Lodging-type classifier — runs over the master at load time.
-// The OSM tourism=* tags in source data only give us hotel/motel/guesthouse/
-// hostel/apartment, but Japanese travelers (and the agents querying this
-// server) expect ryokan / onsen ryokan / shukubo / kominka as first-class
-// distinctions. Iter 4: tag entries by JA/EN name keywords
-// so hotel_type filter works without re-scraping.
-type LodgingType =
-  | "ryokan"
-  | "onsen_ryokan"
-  | "shukubo"
-  | "kominka"
-  | "minshuku"
-  | "hostel"
-  | "guest_house"
-  | "apartment"
-  | "motel"
-  | "hotel";
-
-function classifyLodging(h: HotelRecord): LodgingType {
-  const name = (h.name ?? "") + " " + (h.name_en ?? "").toLowerCase();
-  // Order matters — most specific first.
-  if (name.includes("宿坊") || name.toLowerCase().includes("shukubo") ||
-      name.toLowerCase().includes("temple lodging")) return "shukubo";
-  if (name.includes("古民家") || name.toLowerCase().includes("kominka") ||
-      name.includes("町家") || name.toLowerCase().includes("machiya")) return "kominka";
-  if ((name.includes("温泉") || name.toLowerCase().includes("onsen")) &&
-      (name.includes("旅館") || name.toLowerCase().includes("ryokan"))) return "onsen_ryokan";
-  if (name.includes("旅館") || name.toLowerCase().includes("ryokan")) return "ryokan";
-  if (name.includes("民宿") || name.toLowerCase().includes("minshuku")) return "minshuku";
-  // Onsen-bearing hotel without 旅館 → still likely a ryokan-ish onsen inn
-  if (name.includes("温泉") || name.toLowerCase().includes("onsen")) return "onsen_ryokan";
-  // Fall through to OSM-tagged type
-  const t = (h.type ?? "hotel") as LodgingType;
-  if (["hostel","guest_house","apartment","motel","hotel"].includes(t)) return t;
-  return "hotel";
-}
 
 async function getHotels(args: {
   city?: string;
@@ -2747,12 +2147,12 @@ async function getHotels(args: {
     const center = { lat: args.lat, lng: args.lng };
     const r = args.radius;
     hotels = hotels.filter(
-      (h) => h.coordinates && haversine(h.coordinates, center) <= r,
+      (h) => h.coordinates && haversineMeters(h.coordinates, center) <= r,
     );
     // Sort by distance
     hotels.sort((a, b) => {
-      const da = a.coordinates ? haversine(a.coordinates, center) : Infinity;
-      const db = b.coordinates ? haversine(b.coordinates, center) : Infinity;
+      const da = a.coordinates ? haversineMeters(a.coordinates, center) : Infinity;
+      const db = b.coordinates ? haversineMeters(b.coordinates, center) : Infinity;
       return da - db;
     });
   }
@@ -3066,7 +2466,7 @@ async function getTransport(args: {
       for (const h of file.hotels) {
         if (!h.coordinates) continue;
         if (h.prefecture_code && h.prefecture_code !== spot.prefecture_code) continue;
-        const d = haversine(spot.coordinates, h.coordinates);
+        const d = haversineMeters(spot.coordinates, h.coordinates);
         if (!best || d < best.d) best = { hotel: h, d };
       }
       if (best) {
@@ -3119,14 +2519,6 @@ interface FestivalSparqlBinding {
   startTime?: { value: string };
   coord?: { value: string };
   adminLabel?: { value: string };
-}
-
-function parseWktPoint(
-  v: string,
-): { lat: number; lng: number } | null {
-  const m = v.match(/Point\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i);
-  if (!m) return null;
-  return { lng: parseFloat(m[1]), lat: parseFloat(m[2]) };
 }
 
 async function fetchFestivals(prefCode: string): Promise<unknown[]> {
@@ -3294,34 +2686,7 @@ async function resolvePrefectureCodes(input: string): Promise<string[] | null> {
   return single ? [single] : null;
 }
 
-// Bare prefecture name (e.g. "山梨" without "県") — used to text-match
-// against records whose schema doesn't carry a prefecture_code (bunka
-// intangible, free-form descriptions).
-/**
- * Compile a case-insensitive substring matcher for the optional `keyword`
- * argument used by aggregator tools (get_festivals / get_traditional_arts /
- * get_local_food). Returns a function that returns true iff any of the
- * passed-in fields contains the keyword. When `keyword` is missing/empty
- * the function always returns true.
- *
- * Added 2026-05-01 (Phase 1 GAP_ANALYSIS L4) so callers can narrow large
- * result sets like `get_festivals(prefecture='秋田県', keyword='花火')`.
- */
-function compileKeywordMatcher(
-  keyword: string | undefined,
-): (...fields: (string | null | undefined)[]) => boolean {
-  const k = (keyword ?? "").trim();
-  if (!k) return () => true;
-  const lower = k.toLowerCase();
-  return (...fields: (string | null | undefined)[]): boolean => {
-    for (const f of fields) {
-      if (!f) continue;
-      if (f.includes(k)) return true;
-      if (f.toLowerCase().includes(lower)) return true;
-    }
-    return false;
-  };
-}
+// compileKeywordMatcher → ./lib/text_filters.js.
 
 async function bareNameForPref(prefCode: string): Promise<string | null> {
   const prefs = await loadAllPrefectures();
@@ -3553,29 +2918,8 @@ async function loadWikipediaLists(): Promise<WikiListsFile | null> {
   }
 }
 
-// Pref-name → 2-digit code map for inferring prefecture from extract text.
-const PREF_NAME_TO_CODE: Record<string, string> = {
-  "北海道": "01", "青森県": "02", "岩手県": "03", "宮城県": "04", "秋田県": "05",
-  "山形県": "06", "福島県": "07", "茨城県": "08", "栃木県": "09", "群馬県": "10",
-  "埼玉県": "11", "千葉県": "12", "東京都": "13", "神奈川県": "14", "新潟県": "15",
-  "富山県": "16", "石川県": "17", "福井県": "18", "山梨県": "19", "長野県": "20",
-  "岐阜県": "21", "静岡県": "22", "愛知県": "23", "三重県": "24", "滋賀県": "25",
-  "京都府": "26", "大阪府": "27", "兵庫県": "28", "奈良県": "29", "和歌山県": "30",
-  "鳥取県": "31", "島根県": "32", "岡山県": "33", "広島県": "34", "山口県": "35",
-  "徳島県": "36", "香川県": "37", "愛媛県": "38", "高知県": "39", "福岡県": "40",
-  "佐賀県": "41", "長崎県": "42", "熊本県": "43", "大分県": "44", "宮崎県": "45",
-  "鹿児島県": "46", "沖縄県": "47",
-};
-const PREF_CODE_TO_NAME: Record<string, string> = Object.fromEntries(
-  Object.entries(PREF_NAME_TO_CODE).map(([k, v]) => [v, k])
-);
-function inferPrefCode(text: string | null | undefined): string | null {
-  if (!text) return null;
-  for (const [name, code] of Object.entries(PREF_NAME_TO_CODE)) {
-    if (text.includes(name)) return code;
-  }
-  return null;
-}
+// PREF_NAME_TO_CODE / PREF_CODE_TO_NAME / inferPrefCode now live in
+// ./lib/prefecture.js.
 
 async function loadHitoYuKai(): Promise<R3SourceFile<HitoYuKaiRecord> | null> {
   if (cachedHitoYuKai) return cachedHitoYuKai;
@@ -3653,48 +2997,7 @@ async function loadR3Translations(): Promise<Map<string, R3TranslationRecord>> {
   return map;
 }
 
-/** Return the best-available name in `lang` for an R-3 record. */
-function pickR3Name(
-  fallback: string | null,
-  rec: R3TranslationRecord | undefined,
-  lang: string | undefined,
-): string | null {
-  if (lang && rec?.name?.[lang as SupportedLang]) {
-    return rec.name[lang as SupportedLang]!;
-  }
-  return fallback;
-}
-
-/** Return the best-available description in `lang` for an R-3 record. */
-function pickR3Description(
-  fallbackJa: string | null,
-  rec: R3TranslationRecord | undefined,
-  lang: string | undefined,
-): string | null {
-  if (lang && rec?.description?.[lang as SupportedLang]) {
-    return rec.description[lang as SupportedLang]!;
-  }
-  if (!lang || lang === "ja") return fallbackJa;
-  return fallbackJa; // fallback to ja when target lang missing
-}
-
-function r3Translation(
-  rec: R3TranslationRecord | undefined,
-  lang: string | undefined,
-): {
-  source: "official_translated" | "official_only";
-  generated_at: string | null;
-  confidence: "high" | "medium" | "low" | null;
-} {
-  if (lang && rec?.description?.[lang as SupportedLang]) {
-    return {
-      source: "official_translated",
-      generated_at: rec.generated_at ?? null,
-      confidence: rec.confidence ?? null,
-    };
-  }
-  return { source: "official_only", generated_at: null, confidence: null };
-}
+// pickR3Name / pickR3Description / r3Translation → ./lib/r3.js.
 
 // ──────────────────────────────────────────────────────────────────────
 // Tool: get_local_specialty
@@ -4766,20 +4069,6 @@ async function getEntitiesBulk(args: {
 // safety_keywords-derived flags. Server-side, no Solver — just a sanity
 // gate so an agent's itinerary doesn't blatantly fail before the user
 // sees it.
-function haversineKm(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): number {
-  const R = 6371;
-  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
-  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
-  const lat1 = (a.lat * Math.PI) / 180;
-  const lat2 = (b.lat * Math.PI) / 180;
-  const x =
-    Math.sin(dLat / 2) ** 2 +
-    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
-  return 2 * R * Math.asin(Math.sqrt(x));
-}
 
 async function planFeasibilityCheck(args: {
   itinerary: { qid: string; arrive_iso?: string; minutes?: number }[];
@@ -5035,29 +4324,7 @@ async function searchHybrid(args: {
 // regional dishes that don't have a formal designation but are nonetheless
 // what the prefecture's tourism portal foregrounds.
 
-const FOOD_KEYWORDS_JA = [
-  "グルメ", "ご当地グルメ", "ご当地", "名物", "名産",
-  "銘菓", "銘酒", "地酒", "和菓子", "郷土料理",
-  "ご当地スイーツ", "麺", "ラーメン", "うどん", "そば",
-  "丼", "弁当", "B級グルメ",
-];
-
-const FOOD_KEYWORDS_EN = [
-  "cuisine", "gourmet", "local food", "local-food", "specialty",
-  "dish", "noodle", "ramen", "udon", "soba", "sushi", "sake",
-];
-
-function isFoodText(text: string | null | undefined): boolean {
-  if (!text) return false;
-  for (const k of FOOD_KEYWORDS_JA) {
-    if (text.includes(k)) return true;
-  }
-  const low = text.toLowerCase();
-  for (const k of FOOD_KEYWORDS_EN) {
-    if (low.includes(k)) return true;
-  }
-  return false;
-}
+// FOOD_KEYWORDS_* + isFoodText → ./lib/text_filters.js.
 
 async function getLocalFood(args: {
   prefecture?: string;
@@ -5242,28 +4509,7 @@ async function getLocalFood(args: {
 //   - get_events (live Wikidata SPARQL) — exposed separately, not merged
 //                              here because of latency
 
-const FESTIVAL_KEYWORDS_JA = [
-  "祭", "祭り", "祭礼", "まつり", "マツリ",
-  "神事", "神楽", "神輿", "舞楽",
-  "行事", "縁日", "灯籠", "山車", "山鉾", "花火",
-];
-
-const FESTIVAL_KEYWORDS_EN = [
-  "festival", "matsuri", "fire festival", "lantern festival",
-  "ritual", "rite", "ceremony",
-];
-
-function isFestivalText(text: string | null | undefined): boolean {
-  if (!text) return false;
-  for (const k of FESTIVAL_KEYWORDS_JA) {
-    if (text.includes(k)) return true;
-  }
-  const low = text.toLowerCase();
-  for (const k of FESTIVAL_KEYWORDS_EN) {
-    if (low.includes(k)) return true;
-  }
-  return false;
-}
+// FESTIVAL_KEYWORDS_* + isFestivalText → ./lib/text_filters.js.
 
 async function getFestivals(args: {
   prefecture?: string;
