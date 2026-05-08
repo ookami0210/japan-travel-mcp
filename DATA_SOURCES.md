@@ -274,6 +274,42 @@ requires either extending an existing channel or creating a new one.
 - **Coverage**: 5,567 items with heritage designations + 6 direct-P31 types
 - **Status**: `active` (added iter54, 2026-05-04)
 
+#### #34 — Wikipedia ja summaries (description_ja upgrade)
+- **Authority**: Wikipedia (Wikimedia Foundation)
+- **URL**: https://ja.wikipedia.org/w/api.php (action=query&prop=extracts&exintro=1&exsentences=2&explaintext=1)
+- **License**: CC BY-SA 4.0 (with attribution requirement on downstream consumers)
+- **Fetcher**: `scrapers/sources/fetch_wikipedia_ja_summaries.ts`
+- **Output**: `data/_state/wikipedia_ja_summaries.json` (sidecar; per-cache HTML at `data/_state/wikipedia_ja_summaries_cache/`)
+- **Cadence**: monthly+ (re-run after master expansion or after #33 adds new ja sitelinks)
+- **Channel**: WD-FOUNDATION (manual) — produces sidecar consumed by master inject; not part of MUNI/R3 rotation.
+- **Coverage**: every master attraction whose `wikipedia_titles.ja` exists. Wikipedia's intro extract (1–2 sentences, ~50–200 chars) is significantly richer than the Wikidata short description Stage 1 backfill (#33) captured. Empirically upgrades 2,800+ entries from a 10–25 char stub to a usable description.
+- **Status**: `active`
+- **Inject (downstream)**: `scripts/inject_wikipedia_ja_summaries.py` overwrites `description_ja` only when the new extract strictly improves on the existing value (length × content heuristics).
+
+#### #35 — Wikipedia en summaries (description_en upgrade)
+- **Authority**: Wikipedia (Wikimedia Foundation)
+- **URL**: https://en.wikipedia.org/w/api.php (action=query&prop=extracts&exintro=1&exsentences=2&explaintext=1)
+- **License**: CC BY-SA 4.0
+- **Fetcher**: `scrapers/sources/fetch_wikipedia_en_summaries.ts`
+- **Output**: `data/_state/wikipedia_en_summaries.json` (sidecar; per-cache HTML at `data/_state/wikipedia_en_summaries_cache/`)
+- **Cadence**: monthly+
+- **Channel**: WD-FOUNDATION (manual)
+- **Coverage**: every master attraction whose `wikipedia_titles.en` exists (collected by #36 enwiki sitelinks). Combined with #36 the path now lifts roughly 35,000 entries from "no English description" to a usable English intro for retrieval embedding.
+- **Status**: `active`
+- **Inject (downstream)**: `scripts/inject_wikipedia_en_summaries.py` populates `description_en` where the existing field is null or shorter than the extract.
+
+#### #36 — Wikidata enwiki sitelinks (whole-master)
+- **Authority**: Wikidata
+- **URL**: https://www.wikidata.org/w/api.php (action=wbgetentities&props=sitelinks&sitefilter=enwiki)
+- **License**: CC0
+- **Fetcher**: `scrapers/sources/fetch_enwiki_sitelinks.ts`
+- **Output**: `data/_state/enwiki_sitelinks.json` (sidecar; consumed downstream by #35)
+- **Cadence**: monthly+ (re-run alongside or just before #35)
+- **Channel**: WD-FOUNDATION (manual)
+- **Coverage**: every master QID. Distinct from the #33 Stage 1 backfill (which only covered entries lacking `description_en`) — this fetcher pulls enwiki titles for the FULL master so that entries already carrying a Wikidata short description can also gain a richer Wikipedia intro via #35. The scraping is rate-limited to the standard wbgetentities batch budget; partial output is checkpointed under `data/_state/wikidata_attractions.partial/` so reruns can resume.
+- **Status**: `active`
+- **Inject (downstream)**: merged into master `wikipedia_titles.en` via the same inject pass that #33 already runs for the en/ja sitelinks captured by the Stage 1 backfill (idempotent).
+
 #### #33 — Wikidata description backfill (description_ja + sitelinks)
 - **Authority**: Wikidata
 - **URL**: https://www.wikidata.org/w/api.php (action=wbgetentities)
