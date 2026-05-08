@@ -70,6 +70,47 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q11455614: "shukubo",                // shukubō (Japanese Buddhist lodging)
   Q1071482: "national_park",           // national park of Japan (環境省指定)
   Q11832860: "quasi_national_park",    // quasi-national park of Japan (国定公園)
+  // 2026-05-08 batch: high-coverage Japan-tourism QIDs that surfaced in
+  // master.types[] but had no entry in this map. Each is a meaningful
+  // tourism category, not a generic structural type.
+  Q1141225: "kofun",                   // ancient burial mound (241 hits)
+  Q11268718: "zenpou_kouenfun",        // keyhole-shaped kofun (115 hits)
+  Q11411019: "kofungun",               // tumulus cluster (84 hits)
+  Q11394747: "circular_kofun",         // round kofun (43 hits)
+  Q11381412: "traditional_craft",      // 伝統工芸品 (234 hits)
+  Q5773747: "historic_house",          // 歴史的家屋 (85 hits)
+  Q35112127: "historic_building",      // 歴史的建造物 (66 hits)
+  Q11411321: "kominka",                // 日本の古民家 (60 hits)
+  Q11486287: "former_buddhist_temple", // 廃寺 (45 hits)
+  Q1000809: "buddha_statue",           // 仏像 (79 hits)
+  Q10901138: "chokuganji",             // 勅願寺 (61 hits)
+  Q134917286: "shikinaisha",           // 式内社 — Engishiki-listed shrine (70 hits)
+  Q17051413: "temple_main_hall",       // 本堂 (55 hits)
+  Q2044994: "shrine_main_building",    // 本殿 (43 hits)
+  Q1152199: "midden",                  // 貝塚 (52 hits)
+  Q4312270: "railway_station",         // 鉄道の地上駅 (48 hits) — alt to Q55488
+  Q55488: "railway_station",           // 鉄道駅 (56 hits)
+  Q1081138: "historic_site",           // 史跡 — alt to Q15303351 (37 hits)
+  Q207694: "art_museum",               // 美術館 — narrower alt to Q33506 (42 hits)
+  Q811534: "remarkable_tree",          // 著名な木 (44 hits)
+  Q11479807: "giant_tree",             // 巨樹 (30 hits)
+  Q23442: "island",                    // 島 (48 hits)
+  // Garden / shrine / temple specialised types
+  Q11420231: "strolling_garden",       // 回遊式庭園 (29 hits)
+  Q11433351: "daimyo_garden",          // 大名庭園 (29 hits)
+  Q15835: "japanese_garden",           // 日本庭園 (26 hits)
+  Q11390939: "hachiman_shrine",        // 八幡宮 (27 hits)
+  Q1207757: "provincial_temple",       // 国分寺 (26 hits)
+  Q131908135: "provincial_nunnery",    // 国分尼寺 (28 hits)
+  Q9769742: "tatchu_subtemple",        // 塔頭 (22 hits)
+  Q1129474: "cultural_landscape",      // 文化的景観 (27 hits)
+  Q1044204: "gusuku",                  // グスク (Ryukyu castle, 22 hits)
+  Q11504353: "square_kofun",           // 方墳 (26 hits)
+  Q39715: "lighthouse",                // 灯台 — alt to Q3960 (24 hits)
+  Q10624527: "biographical_museum",    // 人物記念館 (26 hits)
+  Q537127: "road_bridge",              // 道路橋 (21 hits)
+  Q96086399: "former_school_building", // 旧学校施設 (24 hits)
+  Q85882206: "unmanned_station",       // 無人駅 (23 hits)
 };
 
 // ──────────────────────────────────────────────────────────────────────
