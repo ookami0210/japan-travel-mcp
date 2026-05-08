@@ -68,6 +68,8 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q16560: "palace",
   Q39614: "buddhist_monastery",        // alt to Q44613
   Q11455614: "shukubo",                // shukubō (Japanese Buddhist lodging)
+  Q1071482: "national_park",           // national park of Japan (環境省指定)
+  Q11832860: "quasi_national_park",    // quasi-national park of Japan (国定公園)
 };
 
 // ──────────────────────────────────────────────────────────────────────

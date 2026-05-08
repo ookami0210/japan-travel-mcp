@@ -42,6 +42,11 @@ describe("WD_TYPE_KIND", () => {
   it("maps Q11455614 to shukubo (temple lodging)", () => {
     expect(WD_TYPE_KIND.Q11455614).toBe("shukubo");
   });
+
+  it("maps Japan-specific national-park QIDs", () => {
+    expect(WD_TYPE_KIND.Q1071482).toBe("national_park");
+    expect(WD_TYPE_KIND.Q11832860).toBe("quasi_national_park");
+  });
 });
 
 describe("HERITAGE_QID_LABEL", () => {
