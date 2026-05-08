@@ -234,9 +234,21 @@ async function harvestSpots(limit: number | null): Promise<IndexEntry[]> {
           if (label && !heritageLabels.includes(label)) heritageLabels.push(label);
         }
       }
+      // Include description_ja (from Wikidata short or Wikipedia intro
+      // backfill commits bc287dd / 4ab4cc6) so semantic search ranks via
+      // Japanese text content for niche-Japanese-tourism entries that
+      // typically lack description_en. multilingual-e5 indexes ja and en
+      // in the same vector space.
+      const descJa = (a as { description_ja?: string | null }).description_ja ?? "";
+      // Include wikipedia_kind_tags (canonical-list memberships from
+      // commits 4d8cb22 / 6397b20 / c8b0eba — 100名城 / 桜名所100 / etc)
+      // so queries like "桜の名所" match list-tagged entries directly.
+      const wpTags = (a as { wikipedia_kind_tags?: string[] }).wikipedia_kind_tags ?? [];
       const desc = [
         a.description_en ?? "",
+        descJa,
         heritageLabels.length > 0 ? `[${heritageLabels.join(" / ")}]` : "",
+        wpTags.length > 0 ? `[${wpTags.slice(0, 6).join(" / ")}]` : "",
       ]
         .filter((s) => s.length > 0)
         .join(" ")
