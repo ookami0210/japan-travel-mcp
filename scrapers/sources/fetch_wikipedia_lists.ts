@@ -54,6 +54,19 @@ const LIST_ARTICLES: { title: string; kind_tag: string; filter?: RegExp }[] = [
   { title: "日本の音風景100選", kind_tag: "soundscape_100" },
   { title: "日本100名橋", kind_tag: "nihon_100_meihashi" },
   { title: "新日本旅行地100選", kind_tag: "shin_ryoko_100" },
+  // 2026-05-08 additions: pilgrimage routes + nature 100s + extra
+  // canonical lists missing from the original LIST_ARTICLES set.
+  { title: "西国三十三所", kind_tag: "saigoku_33" },
+  { title: "坂東三十三観音", kind_tag: "bando_33" },
+  { title: "名水百選", kind_tag: "meisui_100" },
+  { title: "平成の名水百選", kind_tag: "heisei_meisui_100" },
+  { title: "日本の白砂青松100選", kind_tag: "hakusha_seishou_100" },
+  { title: "日本の歴史公園100選", kind_tag: "rekishi_park_100" },
+  { title: "日本の地質百選", kind_tag: "chishitsu_100" },
+  { title: "日本三大花火大会", kind_tag: "hanabi_top3" },
+  { title: "日本五大桜", kind_tag: "sakura_top5" },
+  { title: "新日本観光地100選", kind_tag: "shin_kanko_100" },
+  { title: "新・日本街路樹100景", kind_tag: "gairoju_100" },
 ];
 
 async function getCached(url: string): Promise<string> {
