@@ -784,7 +784,15 @@ async function searchArea(args: {
   // / sand sites were promoted above the obscure ones the user wanted.
   // When this flag is set, the wikidata exact-match path skips the
   // heritage boost (or reverses it as a small demote).
-  const LESSER_KNOWN_RE = /(知られざる|穴場|秘境|隠れ|hidden|lesser.?known|off.?the.?beaten|obscure|unsung|underrated|unknown|秘湯|秘景|裏|地元.{0,3}知|local.?secret|not\s*crowded|aren'?t\s*crowded|less\s*crowded|空いて|混雑.{0,4}少|空い|人が少|few\s*tourists|tourist.?free)/i;
+  // Narrowed 2026-05-09: bare 隠れ / hidden / unknown / 裏 / 空い matched
+  // far more than anaba intent. 隠れキリシタン was being demoted (= UNESCO
+  // heritage), 裏側 / 裏面 / 空いた席 / unknown error all triggered the
+  // demote_popular flip on heritage-correct queries. The pattern now
+  // requires anaba/hidden markers to be paired with anaba-relevant nouns
+  // (家 / 里 / 名所 / 宿 / 温泉 / スポット ...) in CJK, or with
+  // recognisable anaba phrases in English.
+  const LESSER_KNOWN_RE =
+    /(知られざる|穴場|秘境|秘湯|秘景|隠れ家|隠れ里|隠れ宿|隠れ(?:た)?(?:名所|スポット|場所|宿|温泉|絶景|お店|名店)|hidden\s*(?:gem|spot|place|onsen|destination|treasure|inn|ryokan|hotsprings?)|lesser.?known|off.?the.?beaten(?:\s*(?:path|track))?|underrated\s*(?:spot|place|destination|town|onsen|inn|gem)|地元(?:しか|だけ|の人(?:しか|のみ)?(?:知|秘密))|local'?s?\s*(?:secret|favo(?:u)?rite)|not\s*crowded|aren'?t\s*crowded|less\s*crowded|空いて(?:いる|る|い)|混雑(?:が)?(?:少|ない|を避|回避)|人(?:が|の)?少な|few\s*tourists|tourist.?free|uncrowded)/i;
   // Union with the explicit concept-dictionary modifier so anaba_hidden /
   // uncrowded / secret_hidden_onsen all converge into the same ranking flag.
   const lesserKnownIntent =

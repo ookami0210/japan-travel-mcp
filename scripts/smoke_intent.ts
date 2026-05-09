@@ -54,6 +54,15 @@ const QUERIES = [
   "dying craft last practitioners Niigata",
   "京都発の観光プラン",
   "uncrowded sakura viewing spots in Kyoto",
+  // Negative cases (must NOT trigger anaba_hidden / wild_not_captive):
+  "隠れキリシタン関連遺産を巡りたい",
+  "hidden Christian heritage UNESCO Nagasaki",
+  "hidden cost of the Shinkansen Green Car",
+  "野生児として育った主人公の映画",
+  "野生味のある料理",
+  "wild guess for Kyoto restaurants",
+  "席が空いた新幹線の予約",
+  "裏側から見る東京タワー",
 ];
 
 console.log("Travel Concept Dictionary smoke test\n");

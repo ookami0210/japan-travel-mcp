@@ -597,7 +597,15 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   // and are surfaced to the calling agent / Solver as constraint hints.
   {
     id: "anaba_hidden",
-    re: /(穴場|秘境|秘湯|秘景|隠れ(?:た|ガ)?(?:名所|スポット|場所|宿|温泉)?|knowledge.?spot|hidden\s*(?:gem|spot|place|onsen|destination|treasure)|lesser.?known|off.?the.?beaten|obscure|unsung|underrated|地元.{0,4}(?:知|秘密|だけ)|local'?s?\s*(?:secret|favo))/iu,
+    // Narrowed 2026-05-09: the previous pattern matched bare `隠れ` and
+    // bare `hidden`, which fired on `隠れキリシタン` (= UNESCO heritage,
+    // very NOT anaba), `hidden Christian heritage`, `hidden cost`, etc.
+    // Now we require the anaba/hidden marker to be paired with an
+    // anaba-relevant noun in CJK, or with a specific anaba phrase in
+    // English. Bare `隠れ` no longer matches; `隠れキリシタン` is left to
+    // the kakure_kirishitan concept which carries the correct heritage
+    // QID hint.
+    re: /(穴場|秘境|秘湯|秘景|隠れ家|隠れ里|隠れ宿|隠れ(?:た)?(?:名所|スポット|場所|宿|温泉|絶景|お店|名店|レストラン|カフェ)|hidden\s*(?:gem|spot|place|onsen|destination|treasure|inn|ryokan|hotsprings?)|knowledge.?spot|lesser.?known|off.?the.?beaten(?:\s*(?:path|track))?|underrated\s*(?:spot|place|destination|town|onsen|inn)|地元.{0,4}(?:知|秘密|だけ)|local'?s?\s*(?:secret|favo(?:u)?rite))/iu,
     semantic_tags: ["anaba", "hidden gem", "lesser known"],
     rationale_en: "Anaba (穴場) / hidden gem — user wants entries that are NOT internationally famous. Demote multilingual / heritage-heavy entries; surface entries with fewer Wikipedia list memberships.",
     rationale_ja: "穴場・秘境・隠れた名所。国際的に有名なものは避け、Wikipedia list 記載が少ない entry を浮かせる。",
@@ -605,7 +613,11 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   },
   {
     id: "uncrowded",
-    re: /(混雑(?:が)?(?:少|ない|を避|回避)|空いて(?:いる|る)|空い?(?:てる|た)|人(?:が|の)?少な|tourist.?free|few\s*tourists|not\s*crowded|aren'?t\s*crowded|less\s*crowded|uncrowded|quiet\s*(?:place|spot)|静かな(?:場所|名所))/iu,
+    // Narrowed 2026-05-09: bare 空い(た|てる) matched 席が空いた / 空いた皿
+    // / 空き家 etc. Require an uncrowded marker to be paired with a
+    // tourism-relevant noun in CJK; in English keep the explicit
+    // uncrowded / few-tourists phrasings.
+    re: /(混雑(?:が)?(?:少|ない|を避|回避)|空いて(?:いる|る)\s*(?:場所|スポット|時|時期|時間|お?店|名所|温泉|寺|神社|観光地)|人(?:が|の)?少な(?:い|め)?\s*(?:場所|スポット|名所|時間|時期|寺|神社|観光地)|tourist.?free|few\s*tourists|not\s*crowded|aren'?t\s*crowded|less\s*crowded|uncrowded|quiet\s*(?:place|spot|destination|town|onsen)|静かな(?:場所|名所|寺|神社|温泉|観光地))/iu,
     semantic_tags: ["uncrowded", "quiet"],
     rationale_en: "Uncrowded — user wants destinations without heavy tourist flow. Treated as a sibling of anaba: demote heritage-heavy / multilingual-famous entries.",
     rationale_ja: "混雑回避・空いている所。anaba の同族として有名 entry を demote する。",
@@ -613,7 +625,11 @@ export const TRAVEL_CONCEPTS: TravelConcept[] = [
   },
   {
     id: "wild_not_captive",
-    re: /(野生(?:の|な)?|wild\s*(?:animal|bird|deer|monkey|bear|fox|crane|whale|dolphin|species)?|in\s*the\s*wild|natural\s*habitat|放鳥|野放し|自然下|野放し飼い)/iu,
+    // Narrowed 2026-05-09: bare `野生` + `wild` matched 野生児 / 野生味 /
+    // wild taste / wild guess on queries that had nothing to do with
+    // animal-watching. Now we only fire on phrases where 野生 / wild is
+    // explicitly tied to an animal-watching context.
+    re: /(野生(?:の|な)?\s*(?:動物|鳥|鹿|サル|猿|熊|クマ|狐|キツネ|鶴|ツル|タンチョウ|鯨|クジラ|イルカ|オオカミ|狼|羆|ヒグマ|オオワシ|ライチョウ)|wild\s*(?:animal|bird|deer|monkey|bear|fox|crane|whale|dolphin|wolf|species|fauna|wildlife|encounter|sighting)|in\s*the\s*wild|natural\s*habitat|放鳥|野放し(?:飼い)?|自然下|wildlife\s*(?:reserve|sanctuary|tour|watch))/iu,
     semantic_tags: ["wild", "natural habitat"],
     rationale_en: "Wild (野生) — user wants animals in their natural habitat, NOT zoos / aquariums / captive facilities. Pair with bird / mammal / sea-life query — demote zoo, aquarium, animal park.",
     rationale_ja: "野生の動物観察意図。動物園・水族館・サファリパーク等は demote すべき。",
@@ -718,6 +734,15 @@ function normaliseOriginCity(raw: string): string {
   return trimmed.replace(/[、,。.]\s*$/u, "");
 }
 
+// Spatial / positional nouns that are not origins. The CJK from-pattern
+// would otherwise catch them (e.g. 裏側から見る東京タワー → "裏側" mistaken
+// for an origin).
+const ORIGIN_STOP_TOKENS = new Set([
+  "裏側", "正面", "横", "上", "下", "中", "前", "後", "右", "左", "外", "内",
+  "そこ", "ここ", "あそこ", "今", "昔", "後ろ", "向こう", "近所", "遠く",
+  "頂上", "麓", "海側", "山側", "川", "海", "山", "空", "中心",
+]);
+
 function detectOrigin(q: string): OriginConstraint | undefined {
   for (const re of ORIGIN_RE_LIST) {
     const m = q.match(re);
@@ -725,7 +750,8 @@ function detectOrigin(q: string): OriginConstraint | undefined {
       const city = normaliseOriginCity(m[1]);
       if (city.length === 0) continue;
       // Skip generic words that the loose regex may catch.
-      if (/^(the|a|an|here|there|home|work|now)$/i.test(city)) continue;
+      if (/^(the|a|an|here|there|home|work|now|today|yesterday|tomorrow)$/i.test(city)) continue;
+      if (ORIGIN_STOP_TOKENS.has(city)) continue;
       return { city, matched_text: m[0] };
     }
   }
