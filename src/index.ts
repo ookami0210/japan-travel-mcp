@@ -4796,16 +4796,21 @@ async function getFestivals(args: {
   keyword?: string;
   lang?: string;
 }): Promise<unknown> {
+  // Tier 6 region fan-out for festivals — region keywords (Tohoku /
+  // Kansai / etc.) compute the union of bare-prefecture-name matchers.
   let prefCode: string | null = null;
+  let prefCodeSet: Set<string> | null = null;
   if (args.prefecture) {
-    prefCode = await resolvePrefectureCode(args.prefecture);
-    if (!prefCode) {
+    const codes = await resolvePrefectureCodes(args.prefecture);
+    if (!codes || codes.length === 0) {
       return {
         error: `unknown_prefecture: ${args.prefecture}`,
-        hint: "Use Japanese name (e.g. '京都府'), English slug, or 2-digit JIS code.",
+        hint: "Use Japanese name (e.g. '京都府'), region (e.g. '東北' / 'Tohoku'), English slug, or 2-digit JIS code.",
         disclaimer: DISCLAIMER,
       };
     }
+    if (codes.length === 1) prefCode = codes[0];
+    else prefCodeSet = new Set(codes);
   }
   const lang = args.lang;
   const keywordRe = compileKeywordMatcher(args.keyword);
@@ -4849,21 +4854,55 @@ async function getFestivals(args: {
   //   (a) name contains bare prefecture name → strong include
   //   (b) description contains bare prefecture AND no other prefecture
   //       in name (avoids "Saitama festival, similar to Hokkaido X")
-  const bareName = prefCode ? await bareNameForPref(prefCode) : null;
-  const otherPrefBareNames = prefCode ? await getOtherPrefBareNames(prefCode) : [];
+  // For region fan-out: collect bare names of every member prefecture
+  // and compute "other" pref names as the complement (so a Tohoku query
+  // excludes Kansai mentions but accepts ANY Tohoku member).
+  const targetCodes: string[] | null = prefCode
+    ? [prefCode]
+    : (prefCodeSet ? [...prefCodeSet] : null);
+  const targetBareNames: string[] = [];
+  const otherPrefBareNames: string[] = [];
+  if (targetCodes) {
+    const names = await Promise.all(targetCodes.map((c) => bareNameForPref(c)));
+    for (const n of names) if (n) targetBareNames.push(n);
+    // "other" = every prefecture not in our target set
+    const allOthers = await Promise.all(
+      targetCodes.map((c) => getOtherPrefBareNames(c)),
+    );
+    // Intersection across targets gives us the prefs that are "other"
+    // for every target — those are the ones we want to demote on
+    // boundary cases.
+    if (allOthers.length === 1) {
+      otherPrefBareNames.push(...allOthers[0]);
+    } else {
+      const inAll = new Set(allOthers[0]);
+      for (let i = 1; i < allOthers.length; i++) {
+        const s = new Set(allOthers[i]);
+        for (const n of [...inAll]) if (!s.has(n)) inAll.delete(n);
+      }
+      otherPrefBareNames.push(...inAll);
+    }
+  }
   const nameMatchesPref = (text: string | null | undefined): boolean => {
-    if (!prefCode || !bareName) return true;
-    return !!text && text.includes(bareName);
+    if (!targetCodes || targetBareNames.length === 0) return true;
+    if (!text) return false;
+    return targetBareNames.some((n) => text.includes(n));
   };
   const descMatchesPrefStrict = (text: string | null | undefined): boolean => {
-    if (!prefCode || !bareName) return true;
-    if (!text || !text.includes(bareName)) return false;
-    // Reject if the description also mentions another prefecture name,
-    // unless the target prefecture appears first (= primary subject).
-    const targetIdx = text.indexOf(bareName);
+    if (!targetCodes || targetBareNames.length === 0) return true;
+    if (!text) return false;
+    // Find earliest target-pref mention.
+    let earliestTarget = Infinity;
+    for (const n of targetBareNames) {
+      const idx = text.indexOf(n);
+      if (idx >= 0 && idx < earliestTarget) earliestTarget = idx;
+    }
+    if (earliestTarget === Infinity) return false;
+    // Reject if any non-target prefecture appears earlier than the
+    // earliest target mention (= primary subject is elsewhere).
     for (const other of otherPrefBareNames) {
       const otherIdx = text.indexOf(other);
-      if (otherIdx >= 0 && otherIdx < targetIdx) return false;
+      if (otherIdx >= 0 && otherIdx < earliestTarget) return false;
     }
     return true;
   };
@@ -4871,7 +4910,7 @@ async function getFestivals(args: {
   if (bunka) {
     for (const r of bunka.records) {
       if (!isFestivalText(r.name_ja) && !isFestivalText(r.name_en)) continue;
-      if (prefCode) {
+      if (targetCodes) {
         // Tightened: name match preferred. If neither name matches, allow
         // description match only when it passes the strict check above.
         const nameOk = nameMatchesPref(r.name_ja) || nameMatchesPref(r.name_en);
@@ -4949,7 +4988,7 @@ async function getFestivals(args: {
         translation_meta: meta,
         scope: "national_japan",
       };
-      if (prefCode) {
+      if (targetCodes) {
         nationalHeritage.push(entry);
       } else {
         scored.push({
@@ -4996,13 +5035,14 @@ async function getFestivals(args: {
         // Infer prefecture from title/extract
         const inferred = inferPrefCode(p.title) ?? inferPrefCode(p.extract);
         if (prefCode && inferred && inferred !== prefCode) continue;
-        if (prefCode && !inferred) continue;  // skip unmappable when filtering
+        if (prefCodeSet && inferred && !prefCodeSet.has(inferred)) continue;
+        if (targetCodes && !inferred) continue;  // skip unmappable when filtering
         if (!keywordRe(p.title, null, p.extract, null)) continue;
         const key = `wikipedia_${lst.kind_tag}:${p.qid ?? p.title}`;
         // Iter86: bump sourceBoost ONLY when prefecture isn't set (nationwide
         // festival query). For prefecture-scoped queries (e.g. Yamanashi
         // → 吉田の火祭 should be #1, not 神明の花火大会), keep bunka on top.
-        const wikiBoost = prefCode ? 3 : 6;
+        const wikiBoost = targetCodes ? 3 : 6;
         scored.push({
           rel: relScore(p.title, null, p.extract, null, wikiBoost),
           item: {
@@ -5033,6 +5073,7 @@ async function getFestivals(args: {
   const prefs = await loadAllPrefectures();
   for (const p of prefs) {
     if (prefCode && p.prefecture.code !== prefCode) continue;
+    if (prefCodeSet && !prefCodeSet.has(p.prefecture.code)) continue;
     for (const m of p.municipalities) {
       for (const s of m.spots) {
         if (isNavChromeSpotName(s.name)) continue;
@@ -5090,7 +5131,7 @@ async function getFestivals(args: {
   const festTruncated = allFestItems.length > FEST_CAP;
   // Iter 38: pref-stratified truncation for diversity.
   let items: unknown[];
-  if (!festTruncated || prefCode || kw) {
+  if (!festTruncated || prefCode || prefCodeSet || kw) {
     items = allFestItems.length > FEST_CAP ? allFestItems.slice(0, FEST_CAP) : allFestItems;
   } else {
     const byPref = new Map<string, unknown[]>();
@@ -5114,6 +5155,8 @@ async function getFestivals(args: {
 
   return {
     prefecture_code: prefCode,
+    prefecture_codes_expanded: prefCodeSet ? Array.from(prefCodeSet) : null,
+    region_fanout_applied: !!prefCodeSet,
     lang: lang ?? null,
     count: items.length,
     total_matching: allFestItems.length,
@@ -5123,7 +5166,7 @@ async function getFestivals(args: {
       : null,
     items,
     national_heritage: nationalHeritage,
-    national_heritage_note: prefCode && nationalHeritage.length
+    national_heritage_note: targetCodes && nationalHeritage.length
       ? "These are nationwide UNESCO Intangible Cultural Heritage inscriptions (e.g. 歌舞伎, 和食). They are NOT specific to the queried prefecture — listed separately so agents do not present them as prefecture-local festivals."
       : null,
     sources: [
