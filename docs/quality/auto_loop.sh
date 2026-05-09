@@ -59,8 +59,14 @@ if [ "$cmd" = "prepare" ]; then
 
   cp docs/quality/test_results.jsonl "docs/quality/test_results.${label}.jsonl"
 
-  echo "── [3/3] build v3 prompts (4 batches × 2 judges)"
+  echo "── [3/4] build v3 prompts (4 batches × 2 judges)"
   "$PY" docs/quality/build_v3_prompts.py --label "$label" --batches 4
+
+  echo "── [4/4] compute deterministic metrics (parse / token / field coverage)"
+  # These run on the test_results.jsonl directly and don't depend on
+  # judge output — useful for byte-for-byte regression checks across
+  # iterations even before the LLM judges have started.
+  "$PY" docs/quality/deterministic_metrics.py --label "$label" || true
 
   # Multi-judge default: copy batch dir to a sibling for the second judge.
   # Each judge scores the same prompts independently; the median is taken
