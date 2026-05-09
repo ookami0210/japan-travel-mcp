@@ -1082,8 +1082,13 @@ export function extractTravelIntent(q: string): IntentExtractionResult {
   // Same pattern can be extended (kani vs カニサボテン etc.) but we keep
   // the list short — only confirmed judge-flagged cases.
   const lexicalExclusions: string[] = [];
-  const HAS_HOTARU = /(蛍|firefly|hotaru)/i.test(q);
-  const HAS_SQUID = /(squid|イカ|烏賊)/i.test(q);
+  // Match kanji 蛍 + katakana ホタル + English firefly/hotaru. Earlier
+  // version missed katakana ホタル (test corpus L3-24 q=ホタル) which
+  // caused ホタルイカ群遊海面 to surface as top match — judges flagged
+  // it as hallucination_pass=false because firefly squid is a different
+  // organism from firefly insects.
+  const HAS_HOTARU = /(蛍|ホタル|firefly|hotaru)/i.test(q);
+  const HAS_SQUID = /(squid|イカ|ｲｶ|烏賊)/i.test(q);
   if (HAS_HOTARU && !HAS_SQUID) {
     lexicalExclusions.push("ホタルイカ", "蛍烏賊", "蛍イカ");
   }
