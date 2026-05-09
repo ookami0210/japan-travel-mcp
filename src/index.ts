@@ -1709,7 +1709,15 @@ async function populateFromHybrid(
   // Solves L1-13 直島 vs 直方 sub-token leak, L3-25 鶴 → 鶴林寺 etc.
   const queryLower = query.toLowerCase().trim();
   const isShortKanjiQuery = /^[一-龥]{1,3}$/u.test(query.trim());
-  const shouldGuardSubstring = isShortKanjiQuery && intentKinds.size === 0;
+  // Short katakana queries (e.g. クジラ, イルカ, オーロラ, ホタル) suffer
+  // the same false-positive substring leak: hybrid e5 surfaces scraped
+  // municipal entries where the q appears in description or page title
+  // even when the entity is unrelated (whale fountain monument, Monet
+  // garden mentioning クジラ in event copy, etc.). Apply the same
+  // demote-when-no-substring-match guard.
+  const isShortKatakanaQuery = /^[゠-ヿㇰ-ㇿー]{2,4}$/u.test(query.trim());
+  const shouldGuardSubstring =
+    (isShortKanjiQuery || isShortKatakanaQuery) && intentKinds.size === 0;
   const candidateRoots = [dataRoot()];
   const repoLocal = resolve(findPackageRoot(), "data");
   if (!candidateRoots.includes(repoLocal)) candidateRoots.push(repoLocal);
@@ -2682,8 +2690,21 @@ async function getHotels(args: {
   // every prefecture-less query with foreign noise. Filter at the tool
   // boundary so all callers see Japan-only results regardless of args.
   const VALID_PREF = /^(0[1-9]|[1-3][0-9]|4[0-7])$/;
+  // Non-tourist-accommodation filter (CLI-side Cat guard).
+  // OSM tags student dormitories / university residences as
+  // tourism=hostel, which leaks into get_hotels output. These are not
+  // travel accommodations and surfaced as hallucination_pass=false in
+  // judge runs (case L2-25 北陸 古民家). Hard-drop entries whose name
+  // matches dorm/student-housing patterns. Match permissively across
+  // ja/en name fields.
+  const NON_TOURIST_LODGING_RE =
+    /(student\s*housing|dormitor(y|ies)|学生寮|university\s*(dorm|residence|housing|hall)|international\s*house|大学\s*(寮|宿舎)|社員寮|company\s*dorm|monk\s*quarters)/iu;
   let hotels = file.hotels.filter(
-    (h) => h.prefecture_code && VALID_PREF.test(h.prefecture_code),
+    (h) =>
+      h.prefecture_code &&
+      VALID_PREF.test(h.prefecture_code) &&
+      !(h.name && NON_TOURIST_LODGING_RE.test(h.name)) &&
+      !(h.name_en && NON_TOURIST_LODGING_RE.test(h.name_en)),
   );
 
   // Resolve prefecture name/slug/code → 2-digit code
