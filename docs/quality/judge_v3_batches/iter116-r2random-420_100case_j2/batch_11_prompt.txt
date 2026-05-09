@@ -1,0 +1,3807 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case R-251 ===
+Topic / intent: tàu hỏa Kanazawa
+Query: Đi tham quan Kanazawa bằng tàu hỏa và xe buýt không cần thuê xe có được không?
+Tool: get_transport({"prefecture": "Ishikawa", "lang": "vi"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "石川県",
+  "prefecture_code": "17",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q511412",
+      "source": "wikidata",
+      "name": "金沢城",
+      "name_en": "Kanazawa Castle",
+      "coordinates": {
+        "lat": 36.564317,
+        "lng": 136.659228
+      },
+      "municipality": "石川県",
+      "url": "https://www.wikidata.org/wiki/Q511412",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "野町駅",
+        "name_en": "Nomachi Station",
+        "walk_minutes": 22,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q998239",
+      "source": "wikidata",
+      "name": "兼六園",
+      "name_en": "Kenroku-en",
+      "coordinates": {
+        "lat": 36.561944444,
+        "lng": 136.6625
+      },
+      "municipality": "石川県",
+      "url": "https://www.wikidata.org/wiki/Q998239",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "野町駅",
+        "name_en": "Nomachi Station",
+        "walk_minutes": 23,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q998709",
+      "source": "wikidata",
+      "name": "尾山神社",
+      "name_en": "Oyama Shrine",
+      "coordinates": {
+        "lat": 36.566388888,
+        "lng": 136.655277777
+      },
+      "municipality": "石川県",
+      "url": "https://www.wikidata.org/wiki/Q998709",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "金沢駅",
+        "name_en": "Kanazawa Station",
+        "walk_minutes": 19,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q101001030",
+      "source": "wikidata",
+      "name": "国立工芸館",
+      "name_en": "National Crafts Museum",
+      "coordinates": {
+        "lat": 36.559167,
+        "lng": 136.661806
+      },
+      "municipality": "石川県",
+      "url": "https://www.wikidata.org/wiki/Q101001030",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "野町駅",
+        "name_en": "Nomachi Station",
+        "walk_minutes": 21,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q11129340",
+      "source": "wikidata",
+      "name": "気多大社",
+      "name_en": "Keta Shrine",
+      "coordinates": {
+        "lat": 36.926,
+        "lng": 136.768
+      },
+      "municipality": "石川県",
+      "url": "https://www.wikidata.org/wiki/Q11129340",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "能登一ノ宮駅",
+        "name_en": null,
+        "walk_minutes": 7,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q11489258",
+      "source": "wikidata",
+      "name": "御経塚遺跡",
+      "name_en": "Okyōzuka Site",
+      "coordinates": {
+        "lat": 36.546333,
+        "lng": 136.599139
+      },
+      "municipality": "石川県",
+      "url": "https://www.wikidata.org/wiki/Q11489258",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "野々市駅",
+        "name_en": "Nonoichi Station",
+        "walk_minutes": 7,
+        "operator_name": "IRいしかわ鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11515248",
+      "source": "wikidata",
+      "name": "曽々木海岸",
+      "name_en": "Sosogi Coast",
+      "coordinates": {
+        "lat": 37.460875,
+        "lng": 137.077725
+      },
+      "municipality": "石川県",
+      "url": "https://www.wikidata.org/wiki/Q11515248",
+      "prominence_score": 0.9
+    },
+    {
+      "spot_id": "Q11580283",
+      "source": "wikidata",
+      "name": "白米千枚田",
+      "name_en": "Shiroyone Senmaida",
+      "coordinates": {
+        "lat": 37.42544444,
+        "lng": 136.99977778
+      },
+      "municipality": "石川県",
+
+```
+
+
+=== Case R-252 ===
+Topic / intent: ไม่มีรถ เที่ยวอิวาเตะ
+Query: เดินทางท่องเที่ยวในจังหวัดอิวาเตะโดยไม่มีรถเช่า ใช้ JR Pass ไปที่ไหนได้บ้าง?
+Tool: get_transport({"prefecture": "Iwate", "lang": "th"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "岩手県",
+  "prefecture_code": "03",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q10855488",
+      "source": "wikidata",
+      "name": "九戸城",
+      "name_en": "Kunohe Castle",
+      "coordinates": {
+        "lat": 40.26741404,
+        "lng": 141.30434366
+      },
+      "municipality": "二戸市",
+      "url": "https://www.wikidata.org/wiki/Q10855488",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "二戸駅",
+        "name_en": "Ninohe Station",
+        "walk_minutes": 22,
+        "operator_name": "IGRいわて銀河鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q251650",
+      "source": "wikidata",
+      "name": "盛岡城",
+      "name_en": "Morioka Castle",
+      "coordinates": {
+        "lat": 39.699947,
+        "lng": 141.150111
+      },
+      "municipality": "盛岡市",
+      "url": "https://www.wikidata.org/wiki/Q251650",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "盛岡駅",
+        "name_en": "Morioka Station",
+        "walk_minutes": 15,
+        "operator_name": "IGRいわて銀河鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q2660144",
+      "source": "wikidata",
+      "name": "中尊寺",
+      "name_en": "Chūson-ji Temple",
+      "coordinates": {
+        "lat": 39.001388888,
+        "lng": 141.099722222
+      },
+      "municipality": "平泉町",
+      "url": "https://www.wikidata.org/wiki/Q2660144",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "平泉駅",
+        "name_en": "Hiraizumi Station",
+        "walk_minutes": 27,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q713836",
+      "source": "wikidata",
+      "name": "岩手山",
+      "name_en": "Mount Iwate",
+      "coordinates": {
+        "lat": 39.8525,
+        "lng": 141.00111111
+      },
+      "municipality": "八幡平市",
+      "url": "https://www.wikidata.org/wiki/Q713836",
+      "prominence_score": 1
+    },
+    {
+      "spot_id": "Q11363889",
+      "source": "wikidata",
+      "name": "中尊寺金色堂",
+      "name_en": "Chūson-ji Konjikidō",
+      "coordinates": {
+        "lat": 39.001361,
+        "lng": 141.099889
+      },
+      "municipality": "平泉町",
+      "url": "https://www.wikidata.org/wiki/Q11363889",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "平泉駅",
+        "name_en": "Hiraizumi Station",
+        "walk_minutes": 27,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11489083",
+      "source": "wikidata",
+      "name": "御所野縄文公園",
+      "name_en": "Goshono Jōmon Park",
+      "coordinates": {
+        "lat": 40.197833,
+        "lng": 141.306139
+      },
+      "municipality": "一戸町",
+      "url": "https://www.wikidata.org/wiki/Q11489083",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "一戸駅",
+        "name_en": "Ichinohe Station",
+        "walk_minutes": 19,
+        "operator_name": "IGRいわて銀河鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11567538",
+      "source": "wikidata",
+      "name": "無量光院跡",
+      "name_en": "Muryōkō-in Ato",
+      "coordinates": {
+        "lat": 38.9931,
+        "lng": 141.116
+      },
+      "municipality": "平泉町",
+      "url": "https://www.wikidata.org/wiki/Q11567538",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "平泉駅",
+        "name_en": "Hiraizumi Station",
+        "walk_minutes": 7,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11567680",
+      "source": "wikidata",
+      "name": "焼走り熔岩流",
+      "name_en": "Yakehashiri lava flow",
+      "coordinates": {
+        "lat": 39.869444444,
+        "lng": 14
+```
+
+
+=== Case R-253 ===
+Topic / intent: 日帰り 東京 箱根 JR
+Query: JRパスで東京から箱根を日帰りできる？ロマンスカーとの違いも教えて。
+Tool: get_transport({"prefecture": "Kanagawa", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "神奈川県",
+  "prefecture_code": "14",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q11596647",
+      "source": "wikidata",
+      "name": "稲村ヶ崎",
+      "name_en": "Inamuragasaki",
+      "coordinates": {
+        "lat": 35.302222222,
+        "lng": 139.525555555
+      },
+      "municipality": "神奈川県",
+      "url": "https://www.wikidata.org/wiki/Q11596647",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "極楽寺駅",
+        "name_en": "Gokurakuji Station",
+        "walk_minutes": 10,
+        "operator_name": "江ノ島電鉄",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11603393",
+      "source": "wikidata",
+      "name": "箱根関",
+      "name_en": "Hakone Barrier",
+      "coordinates": {
+        "lat": 35.192361,
+        "lng": 139.026139
+      },
+      "municipality": "神奈川県",
+      "url": "https://www.wikidata.org/wiki/Q11603393",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "駒ヶ岳頂上駅",
+        "name_en": "Komagatake-Chojo Station",
+        "walk_minutes": 44,
+        "operator_name": "プリンスホテル",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q1186344",
+      "source": "wikidata",
+      "name": "氷川丸",
+      "name_en": "Hikawa Maru",
+      "coordinates": {
+        "lat": 35.446682,
+        "lng": 139.651252
+      },
+      "municipality": "神奈川県",
+      "url": "https://www.wikidata.org/wiki/Q1186344",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "元町・中華街駅",
+        "name_en": "Motomachi-Chūkagai Station",
+        "walk_minutes": 6,
+        "operator_name": "横浜高速鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q4249885",
+      "source": "wikidata",
+      "name": "三溪園",
+      "name_en": "Sankei-en",
+      "coordinates": {
+        "lat": 35.41695,
+        "lng": 139.660042
+      },
+      "municipality": "神奈川県",
+      "url": "https://www.wikidata.org/wiki/Q4249885",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "横浜本牧駅",
+        "name_en": "Yokohama Hommoku Station",
+        "walk_minutes": 14,
+        "operator_name": "神奈川臨海鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q5214583",
+      "source": "wikidata",
+      "name": "鎌倉文学館",
+      "name_en": "Kamakura Museum of Literature",
+      "coordinates": {
+        "lat": 35.3156,
+        "lng": 139.53894444
+      },
+      "municipality": "神奈川県",
+      "url": "https://www.wikidata.org/wiki/Q5214583",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "由比ヶ浜駅",
+        "name_en": "Yuigahama Station",
+        "walk_minutes": 5,
+        "operator_name": "江ノ島電鉄",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q701403",
+      "source": "wikidata",
+      "name": "鶴岡八幡宮",
+      "name_en": "Tsurugaoka Hachimangū",
+      "coordinates": {
+        "lat": 35.32608056,
+        "lng": 139.55641667
+      },
+      "municipality": "神奈川県",
+      "url": "https://www.wikidata.org/wiki/Q701403",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "鎌倉駅",
+        "name_en": "Kamakura Station",
+        "walk_minutes": 12,
+        "operator_name": "江ノ島電鉄",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q10856301",
+      "source": "wikidata",
+      "name": "日本丸メモリアルパーク",
+      "name_en": "Nippon Maru Memorial Park",
+      "coordinates": {
+        "lat": 35.453667,
+        "lng": 139.633
+      },
+      "municipality": "神奈川県",
+      "url": "https://www.wikidata.org/wiki/Q10856301",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "東横浜駅",
+        "name_en": "Higashi-Yokohama Station",
+        "walk_minutes": 3,
+        "
+```
+
+
+=== Case R-254 ===
+Topic / intent: last-mile Shirakawago bus
+Query: I'm arriving at Kanazawa by shinkansen. Is there a direct bus to Shirakawago or do I need to change?
+Tool: get_transport({"prefecture": "Gifu", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "岐阜県",
+  "prefecture_code": "21",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q1367052",
+      "source": "wikidata",
+      "name": "岐阜城",
+      "name_en": "Gifu Castle",
+      "coordinates": {
+        "lat": 35.43388889,
+        "lng": 136.78222222
+      },
+      "municipality": "岐阜県",
+      "url": "https://www.wikidata.org/wiki/Q1367052",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "伊奈波通駅",
+        "name_en": "Inaba-dōri Station",
+        "walk_minutes": 21,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q1002193",
+      "source": "wikidata",
+      "name": "白川郷",
+      "name_en": "Shirakawa-gō",
+      "coordinates": {
+        "lat": 36.2566607,
+        "lng": 136.9050385
+      },
+      "municipality": "岐阜県",
+      "url": "https://www.wikidata.org/wiki/Q1002193",
+      "prominence_score": 0.9
+    },
+    {
+      "spot_id": "Q11369462",
+      "source": "wikidata",
+      "name": "久津八幡宮",
+      "name_en": "Kuzu-hachimangū",
+      "coordinates": {
+        "lat": 35.8875,
+        "lng": 137.212361
+      },
+      "municipality": "岐阜県",
+      "url": "https://www.wikidata.org/wiki/Q11369462",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "飛驒萩原駅",
+        "name_en": "Hida-Hagiwara Station",
+        "walk_minutes": 18,
+        "operator_name": "東海旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11591182",
+      "source": "wikidata",
+      "name": "禅昌寺",
+      "name_en": "Zenshō-ji Temple",
+      "coordinates": {
+        "lat": 35.846111,
+        "lng": 137.229167
+      },
+      "municipality": "岐阜県",
+      "url": "https://www.wikidata.org/wiki/Q11591182",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "禅昌寺駅",
+        "name_en": "Zenshōji Station",
+        "walk_minutes": 6,
+        "operator_name": "東海旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11609236",
+      "source": "wikidata",
+      "name": "美濃市駅",
+      "name_en": "Minoshi Station",
+      "coordinates": {
+        "lat": 35.53953333,
+        "lng": 136.91508333
+      },
+      "municipality": "岐阜県",
+      "url": "https://www.wikidata.org/wiki/Q11609236",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "美濃市駅",
+        "name_en": "Minoshi Station",
+        "walk_minutes": 0,
+        "operator_name": "長良川鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11612441",
+      "source": "wikidata",
+      "name": "臥龍桜",
+      "name_en": "Garyū-zakura",
+      "coordinates": {
+        "lat": 36.089156,
+        "lng": 137.248008
+      },
+      "municipality": "岐阜県",
+      "url": "https://www.wikidata.org/wiki/Q11612441",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "飛驒一ノ宮駅",
+        "name_en": "Hida-Ichinomiya Station",
+        "walk_minutes": 2,
+        "operator_name": "東海旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11616119",
+      "source": "wikidata",
+      "name": "苗木城",
+      "name_en": "Naegi Castle",
+      "coordinates": {
+        "lat": 35.51308333,
+        "lng": 137.48526111
+      },
+      "municipality": "岐阜県",
+      "url": "https://www.wikidata.org/wiki/Q11616119",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "恵那峡口駅",
+        "name_en": "Enakyōguchi Station",
+        "walk_minutes": 11,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q11665889",
+      "source": "wikidata",
+      "name": "飛騨国分寺",
+      "name_en": "Hida Kokubun-ji Temple",
+      "coordinates": {
+        "lat": 36.14335,
+        "lng": 137.2
+```
+
+
+=== Case R-255 ===
+Topic / intent: sin coche Hiroshima Beppu
+Query: ¿Puedo viajar entre Hiroshima y Beppu solo en tren? ¿Cuánto tiempo tarda?
+Tool: get_transport({"prefecture": "Oita", "lang": "es"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "大分県",
+  "prefecture_code": "44",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q715632",
+      "source": "wikidata",
+      "name": "宇佐神宮",
+      "name_en": "Usa Jingū",
+      "coordinates": {
+        "lat": 33.526019,
+        "lng": 131.374627
+      },
+      "municipality": "宇佐市",
+      "url": "https://www.wikidata.org/wiki/Q715632",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "宇佐駅",
+        "name_en": "Usa Station",
+        "walk_minutes": 44,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q8010033",
+      "source": "wikidata",
+      "name": "岡城",
+      "name_en": "Oka Castle",
+      "coordinates": {
+        "lat": 32.96921667,
+        "lng": 131.40806944
+      },
+      "municipality": "大分県",
+      "url": "https://www.wikidata.org/wiki/Q8010033",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "豊後竹田駅",
+        "name_en": "Bungo-Taketa Station",
+        "walk_minutes": 21,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q818646",
+      "source": "wikidata",
+      "name": "別府タワー",
+      "name_en": "Beppu Tower",
+      "coordinates": {
+        "lat": 33.28210889,
+        "lng": 131.50581111
+      },
+      "municipality": "大分県",
+      "url": "https://www.wikidata.org/wiki/Q818646",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "別府駅",
+        "name_en": "Beppu Station",
+        "walk_minutes": 7,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11594012",
+      "source": "wikidata",
+      "name": "福澤諭吉旧居",
+      "name_en": "Former Residence of Yukichi Fukuzawa",
+      "coordinates": {
+        "lat": 33.607306,
+        "lng": 131.190972
+      },
+      "municipality": "中津市",
+      "url": "https://www.wikidata.org/wiki/Q11594012",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "中津駅",
+        "name_en": "Nakatsu Station",
+        "walk_minutes": 11,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11671972",
+      "source": "wikidata",
+      "name": "高瀬石仏",
+      "name_en": "Takase Stone Buddhas",
+      "coordinates": {
+        "lat": 33.179722,
+        "lng": 131.576194
+      },
+      "municipality": "大分市",
+      "url": "https://www.wikidata.org/wiki/Q11671972",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "豊後国分駅",
+        "name_en": "Bungo-Kokubu Station",
+        "walk_minutes": 36,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q195715",
+      "source": "wikidata",
+      "name": "柞原八幡宮",
+      "name_en": "Yusuhara Hachimangū",
+      "coordinates": {
+        "lat": 33.2384,
+        "lng": 131.551
+      },
+      "municipality": "大分県",
+      "url": "https://www.wikidata.org/wiki/Q195715",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "賀来駅",
+        "name_en": "Kaku Station",
+        "walk_minutes": 38,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q2921458",
+      "source": "wikidata",
+      "name": "臼杵磨崖仏",
+      "name_en": "Usuki Stone Buddhas",
+      "coordinates": {
+        "lat": 33.09011,
+        "lng": 131.76248
+      },
+      "municipality": "臼杵市",
+      "url": "https://www.wikidata.org/wiki/Q2921458",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "上臼杵駅",
+        "name_en": "Kami-Usuki Station",
+        "walk_minutes": 47,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+
+```
+
+
+=== Case R-256 ===
+Topic / intent: バスのみ 奥入瀬渓流
+Query: 奥入瀬渓流へ電車とバスだけでアクセスする方法は？レンタカーなし。
+Tool: get_transport({"prefecture": "Aomori", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "青森県",
+  "prefecture_code": "02",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q11558405",
+      "source": "wikidata",
+      "name": "浪岡城",
+      "name_en": "Namioka Castle",
+      "coordinates": {
+        "lat": 40.71694,
+        "lng": 140.60444
+      },
+      "municipality": "青森県",
+      "url": "https://www.wikidata.org/wiki/Q11558405",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "浪岡駅",
+        "name_en": "Namioka Station",
+        "walk_minutes": 26,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q8140388",
+      "source": "wikidata",
+      "name": "根城",
+      "name_en": "Ne Castle",
+      "coordinates": {
+        "lat": 40.50618889,
+        "lng": 141.45961111
+      },
+      "municipality": "青森県",
+      "url": "https://www.wikidata.org/wiki/Q8140388",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "長苗代駅",
+        "name_en": "Naganawashiro Station",
+        "walk_minutes": 23,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q911970",
+      "source": "wikidata",
+      "name": "三内丸山遺跡",
+      "name_en": "Sannai-Maruyama Site",
+      "coordinates": {
+        "lat": 40.81166667,
+        "lng": 140.69555556
+      },
+      "municipality": "青森市",
+      "url": "https://www.wikidata.org/wiki/Q911970",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "新青森駅",
+        "name_en": "Shin-Aomori Station",
+        "walk_minutes": 22,
+        "operator_name": "北海道旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11662266",
+      "source": "wikidata",
+      "name": "青森県立美術館",
+      "name_en": "Aomori Museum of Art",
+      "coordinates": {
+        "lat": 40.8073,
+        "lng": 140.701
+      },
+      "municipality": "青森県",
+      "url": "https://www.wikidata.org/wiki/Q11662266",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "新青森駅",
+        "name_en": "Shin-Aomori Station",
+        "walk_minutes": 29,
+        "operator_name": "北海道旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q1196132",
+      "source": "wikidata",
+      "name": "十和田湖",
+      "name_en": "Lake Towada",
+      "coordinates": {
+        "lat": 40.466666666,
+        "lng": 140.866666666
+      },
+      "municipality": "十和田市",
+      "url": "https://www.wikidata.org/wiki/Q1196132",
+      "prominence_score": 0.95
+    },
+    {
+      "spot_id": "Q328582",
+      "source": "wikidata",
+      "name": "弘前城",
+      "name_en": "Hirosaki Castle",
+      "coordinates": {
+        "lat": 40.608036111,
+        "lng": 140.463805555
+      },
+      "municipality": "青森県",
+      "url": "https://www.wikidata.org/wiki/Q328582",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "中央弘前駅",
+        "name_en": "Chūō-Hirosaki Station",
+        "walk_minutes": 15,
+        "operator_name": "弘南鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q501638",
+      "source": "wikidata",
+      "name": "白神山地",
+      "name_en": "Shirakami-Sanchi",
+      "coordinates": {
+        "lat": 40.47,
+        "lng": 140.13
+      },
+      "municipality": "青森県",
+      "url": "https://www.wikidata.org/wiki/Q501638",
+      "prominence_score": 0.95
+    },
+    {
+      "spot_id": "Q10866038",
+      "source": "wikidata",
+      "name": "三戸城",
+      "name_en": "Sannohe Castle",
+      "coordinates": {
+        "lat": 40.38119005,
+        "lng": 141.26418625
+      },
+      "municipality": "青森県",
+      "url": "https://www.wikidata.org/wiki/Q10866038",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "三戸駅",
+        "name_en": "Sannohe Station",
+        "walk_minute
+```
+
+
+=== Case R-257 ===
+Topic / intent: 搭火车游九州
+Query: 我有北九州铁路通票，想游览福冈、别府、长崎三地。电车能连起来吗？
+Tool: get_transport({"prefecture": "Fukuoka", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "福岡県",
+  "prefecture_code": "40",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q1143944",
+      "source": "wikidata",
+      "name": "福岡城",
+      "name_en": "Fukuoka Castle",
+      "coordinates": {
+        "lat": 33.584381,
+        "lng": 130.383103
+      },
+      "municipality": "福岡県",
+      "url": "https://www.wikidata.org/wiki/Q1143944",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "大濠公園駅",
+        "name_en": "Ōhorikōen Station",
+        "walk_minutes": 9,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q11549083",
+      "source": "wikidata",
+      "name": "水縄断層",
+      "name_en": "Minō Fault",
+      "coordinates": {
+        "lat": 33.310625,
+        "lng": 130.561286
+      },
+      "municipality": "福岡県",
+      "url": "https://www.wikidata.org/wiki/Q11549083",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "御井駅",
+        "name_en": "Mii Station",
+        "walk_minutes": 3,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q144845",
+      "source": "wikidata",
+      "name": "大宰府",
+      "name_en": "Dazaifu",
+      "coordinates": {
+        "lat": 33.51454167,
+        "lng": 130.51514444
+      },
+      "municipality": "福岡県",
+      "url": "https://www.wikidata.org/wiki/Q144845",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "都府楼前駅",
+        "name_en": "Tofurōmae Station",
+        "walk_minutes": 9,
+        "operator_name": "西日本鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q1051866",
+      "source": "wikidata",
+      "name": "門司港駅",
+      "name_en": "Mojikō Station",
+      "coordinates": {
+        "lat": 33.945,
+        "lng": 130.961388888
+      },
+      "municipality": "福岡県",
+      "url": "https://www.wikidata.org/wiki/Q1051866",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "門司港駅",
+        "name_en": "Mojikō Station",
+        "walk_minutes": 0,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11282543",
+      "source": "wikidata",
+      "name": "風浪宮",
+      "name_en": "Furogu Shrine",
+      "coordinates": {
+        "lat": 33.211222,
+        "lng": 130.386722
+      },
+      "municipality": "福岡県",
+      "url": "https://www.wikidata.org/wiki/Q11282543",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "筑後若津駅",
+        "name_en": "Chikugo-Wakatsu Station",
+        "walk_minutes": 26,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q11370354",
+      "source": "wikidata",
+      "name": "九州鉄道記念館",
+      "name_en": "Kyushu Railway History Museum",
+      "coordinates": {
+        "lat": 33.943139,
+        "lng": 130.961806
+      },
+      "municipality": "福岡県",
+      "url": "https://www.wikidata.org/wiki/Q11370354",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "九州鉄道記念館駅",
+        "name_en": "Kyushu Railway History Museum Station",
+        "walk_minutes": 2,
+        "operator_name": "平成筑豊鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11548410",
+      "source": "wikidata",
+      "name": "水城",
+      "name_en": "Mizuki",
+      "coordinates": {
+        "lat": 33.5181,
+        "lng": 130.4928
+      },
+      "municipality": "福岡県",
+      "url": "https://www.wikidata.org/wiki/Q11548410",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "水城駅",
+        "name_en": "Mizuki Station",
+        "walk_minutes": 3,
+        "operator_name": "九州旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_
+```
+
+
+=== Case R-258 ===
+Topic / intent: JR Rail Pass rural Shimane
+Query: I want to see the Adachi Museum in Shimane using only my JR Rail Pass. Is the station walkable?
+Tool: get_transport({"prefecture": "Shimane", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "島根県",
+  "prefecture_code": "32",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q151776",
+      "source": "wikidata",
+      "name": "松江城",
+      "name_en": "Matsue Castle",
+      "coordinates": {
+        "lat": 35.474977777,
+        "lng": 133.050555555
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q151776",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "松江しんじ湖温泉駅",
+        "name_en": "Matsue Shinjiko-Onsen Station",
+        "walk_minutes": 12,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q174139",
+      "source": "wikidata",
+      "name": "石見銀山",
+      "name_en": "Iwami Ginzan Silver Mine",
+      "coordinates": {
+        "lat": 35.107222,
+        "lng": 132.4375
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q174139",
+      "prominence_score": 1
+    },
+    {
+      "spot_id": "Q4179256",
+      "source": "wikidata",
+      "name": "三瓶山",
+      "name_en": "Mount Sanbe",
+      "coordinates": {
+        "lat": 35.13205,
+        "lng": 132.626611
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q4179256",
+      "prominence_score": 1
+    },
+    {
+      "spot_id": "Q1039004",
+      "source": "wikidata",
+      "name": "月山富田城",
+      "name_en": "Gassantoda Castle",
+      "coordinates": {
+        "lat": 35.360967,
+        "lng": 133.184875
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q1039004",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "出雲広瀬駅",
+        "name_en": null,
+        "walk_minutes": 0,
+        "operator_name": "一畑電気鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11284269",
+      "source": "wikidata",
+      "name": "浜田城",
+      "name_en": "Hamada Castle",
+      "coordinates": {
+        "lat": 34.902908333,
+        "lng": 132.073325
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q11284269",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "浜田駅",
+        "name_en": "Hamada Station",
+        "walk_minutes": 18,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11404583",
+      "source": "wikidata",
+      "name": "医光寺",
+      "name_en": "Ikō-ji Temple",
+      "coordinates": {
+        "lat": 34.68,
+        "lng": 131.865694
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q11404583",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "益田駅",
+        "name_en": "Masuda Station",
+        "walk_minutes": 31,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11462489",
+      "source": "wikidata",
+      "name": "小泉八雲旧居",
+      "name_en": "Lafcadio Hearn's Former Residence",
+      "coordinates": {
+        "lat": 35.479283,
+        "lng": 133.049428
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q11462489",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "松江しんじ湖温泉駅",
+        "name_en": "Matsue Shinjiko-Onsen Station",
+        "walk_minutes": 17,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q1151248",
+      "source": "wikidata",
+      "name": "宍道湖",
+      "name_en": "Lake Shinji",
+      "coordinates": {
+        "lat": 35.45,
+        "lng": 132.966666666
+      },
+      "municipality": "島根県",
+      "url": "https://www.wikidata.org/wiki/Q1151248",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "秋鹿町駅",
+        "name_en": "Aikamachi Station",
+        "
+```
+
+
+=== Case R-259 ===
+Topic / intent: 車なし 南紀 日帰り
+Query: 南紀白浜を大阪から電車日帰りで行けるか教えて。特急の所要時間は？
+Tool: get_transport({"prefecture": "Wakayama", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "和歌山県",
+  "prefecture_code": "30",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q1151269",
+      "source": "wikidata",
+      "name": "和歌山城",
+      "name_en": "Wakayama Castle",
+      "coordinates": {
+        "lat": 34.2276,
+        "lng": 135.172
+      },
+      "municipality": "和歌山県",
+      "url": "https://www.wikidata.org/wiki/Q1151269",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "久保町駅",
+        "name_en": "Kubocho Station",
+        "walk_minutes": 13,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q11666865",
+      "source": "wikidata",
+      "name": "養翠園",
+      "name_en": "Yōsui-en",
+      "coordinates": {
+        "lat": 34.193758,
+        "lng": 135.152092
+      },
+      "municipality": "和歌山県",
+      "url": "https://www.wikidata.org/wiki/Q11666865",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "水軒駅",
+        "name_en": "Suiken Station",
+        "walk_minutes": 3,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q1203429",
+      "source": "wikidata",
+      "name": "金剛峯寺",
+      "name_en": "Kongōbu-ji Temple",
+      "coordinates": {
+        "lat": 34.214081,
+        "lng": 135.584092
+      },
+      "municipality": "和歌山県",
+      "url": "https://www.wikidata.org/wiki/Q1203429",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "極楽橋駅",
+        "name_en": "Gokurakubashi Station",
+        "walk_minutes": 28,
+        "operator_name": "南海電気鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q5358314",
+      "source": "wikidata",
+      "name": "粉河寺",
+      "name_en": "Kokawa-dera Temple",
+      "coordinates": {
+        "lat": 34.280961,
+        "lng": 135.405908
+      },
+      "municipality": "和歌山県",
+      "url": "https://www.wikidata.org/wiki/Q5358314",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "粉河駅",
+        "name_en": "Kokawa Station",
+        "walk_minutes": 14,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q1365882",
+      "source": "wikidata",
+      "name": "那智滝",
+      "name_en": "Nachi Falls",
+      "coordinates": {
+        "lat": 33.672,
+        "lng": 135.891
+      },
+      "municipality": "那智勝浦町",
+      "url": "https://www.wikidata.org/wiki/Q1365882",
+      "prominence_score": 0.95
+    },
+    {
+      "spot_id": "Q1476235",
+      "source": "wikidata",
+      "name": "青岸渡寺",
+      "name_en": "Seiganto-ji Temple",
+      "coordinates": {
+        "lat": 33.6696398,
+        "lng": 135.8898926
+      },
+      "municipality": "和歌山県",
+      "url": "https://www.wikidata.org/wiki/Q1476235",
+      "prominence_score": 0.95
+    },
+    {
+      "spot_id": "Q1148078",
+      "source": "wikidata",
+      "name": "熊野古道",
+      "name_en": "Kumano Kodō",
+      "coordinates": {
+        "lat": 33.8401,
+        "lng": 135.7727
+      },
+      "municipality": "田辺市",
+      "url": "https://www.wikidata.org/wiki/Q1148078",
+      "prominence_score": 0.95
+    },
+    {
+      "spot_id": "Q1156100",
+      "source": "wikidata",
+      "name": "熊野三山",
+      "name_en": "Kumano Sanzan",
+      "coordinates": {
+        "lat": 33.8408,
+        "lng": 135.7727
+      },
+      "municipality": "田辺市",
+      "url": "https://www.wikidata.org/wiki/Q1156100",
+      "prominence_score": 0.95
+    },
+    {
+      "spot_id": "Q11121906",
+      "source": "wikidata",
+      "name": "橋杭岩",
+      "name_en": "Hashigui-iwa",
+      "coordinates": {
+        "lat": 33.484444444,
+        "lng": 135.796583333
+      },
+      "municipality": "和歌山県",
+      "url": "https://www.wikidata.org/wiki/Q11121906",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "紀伊姫駅",
+  
+```
+
+
+=== Case R-260 ===
+Topic / intent: Zug Kyoto Nara Osaka Rundreise
+Query: Kann ich Kyoto, Nara und Osaka in drei Tagen ausschließlich mit dem Zug und ohne Mietwagen bereisen?
+Tool: get_transport({"prefecture": "Kyoto", "lang": "de"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "京都府",
+  "prefecture_code": "26",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q1013399",
+      "source": "wikidata",
+      "name": "元離宮二条城",
+      "name_en": "Nijō Castle",
+      "coordinates": {
+        "lat": 35.014166666,
+        "lng": 135.7475
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1013399",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "二条城前駅",
+        "name_en": "Nijōjō-mae Station",
+        "walk_minutes": 4,
+        "operator_name": "京都市交通局",
+        "jr_pass_accessible": false,
+        "operator_class": "public"
+      }
+    },
+    {
+      "spot_id": "Q1046403",
+      "source": "wikidata",
+      "name": "東寺",
+      "name_en": "Tō-ji Temple",
+      "coordinates": {
+        "lat": 34.980555555,
+        "lng": 135.747777777
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1046403",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "東寺駅",
+        "name_en": "Tōji Station",
+        "walk_minutes": 6,
+        "operator_name": "近畿日本鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q1052803",
+      "source": "wikidata",
+      "name": "長岡京",
+      "name_en": "Nagaoka-kyō",
+      "coordinates": {
+        "lat": 34.943204,
+        "lng": 135.703232
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1052803",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "西向日駅",
+        "name_en": "Nishi-Mukō Station",
+        "walk_minutes": 5,
+        "operator_name": "阪急電鉄",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q1089767",
+      "source": "wikidata",
+      "name": "南禅寺",
+      "name_en": "Nanzen-ji Temple",
+      "coordinates": {
+        "lat": 35.011111111,
+        "lng": 135.794166666
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1089767",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "蹴上駅",
+        "name_en": "Keage Station",
+        "walk_minutes": 6,
+        "operator_name": "京都市交通局",
+        "jr_pass_accessible": false,
+        "operator_class": "public"
+      }
+    },
+    {
+      "spot_id": "Q1146038",
+      "source": "wikidata",
+      "name": "西本願寺",
+      "name_en": "Nishi Hongan-ji Temple",
+      "coordinates": {
+        "lat": 34.992047,
+        "lng": 135.751611
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1146038",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "緑化フェア梅小路駅",
+        "name_en": "Ryokka fair Umekoji Station",
+        "walk_minutes": 9,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q1202871",
+      "source": "wikidata",
+      "name": "仁和寺",
+      "name_en": "Ninna-ji Temple",
+      "coordinates": {
+        "lat": 35.03111111,
+        "lng": 135.71388889
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1202871",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "花園駅",
+        "name_en": "Hanazono Station",
+        "walk_minutes": 18,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q120730",
+      "source": "wikidata",
+      "name": "京都府",
+      "name_en": "Kyoto Prefecture",
+      "coordinates": {
+        "lat": 35.021027777,
+        "lng": 135.755583333
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q120730",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "丸太町駅",
+        "name_en": "Marutamachi Station",
+        "walk_minutes": 8,
+        "operator_name": "京都市交通局",
+        "jr_pass_accessible": false,
+        "op
+```
+
+
+=== Case R-261 ===
+Topic / intent: JR pass Tohoku scenic rail
+Query: Which scenic railways in Tohoku are covered by the JR Rail Pass? I don't want to pay extra.
+Tool: search_hybrid({"q": "ローカル線 東北 観光列車", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "ローカル線 東北 観光列車",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.02726,
+      "rank_bm": 1,
+      "rank_vec": 32,
+      "key": "spot:5992b8395e1606c4",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "ラッピング列車",
+      "description": "車窓から眺める景色、個性豊かな車両デザイン、そして車内外でのサービス・おもてなし。観光列車は移動時間を楽… 2024年08月01日 タグ： ＃ばたでん，しまねっこ，鉄道，観光列車，寝台列車，ラッピング列車，＃日常を忘れる，＃たびすたぐらむ，＃旅は人生を豊かにする 中国地方を縦断するように走るローカル線「JR木次線」。 松江市にある宍道駅から広島県庄原市の備後落合駅を… 2024年03月07日 タグ： 木次線，ローカル線，グルメ，女子旅，食，奥出雲，雲南，ラッピング列車",
+      "prefecture": "島根県",
+      "municipality": "奥出雲町",
+      "url": "https://www.kankou-shimane.com/tag/%e3%83%a9%e3%83%83%e3%83%94%e3%83%b3%e3%82%b0%e5%88%97%e8%bb%8a"
+    },
+    {
+      "score": 0.02574,
+      "rank_bm": 2,
+      "rank_vec": 44,
+      "key": "spot:e3a17e1477753bbb",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "【日帰り】広島北部ローカル線の旅！芸備線・福塩線で里山の原風景を車窓から",
+      "description": "Dive! Hiroshima公式ガイドローカル線の列車に乗って広島県北部を訪れてみませんか。緑あふれる山や清流を見ながらの列車旅。森や林を抜けて走る車窓はワクワク感いっぱい！列車好きなお子さまも、のんびり旅が好きな方も、誰もが楽しめる日帰りコースをご紹介します。 ローカル線の列車に乗って広島県北部を訪れてみませんか。緑あふれる山や清流を見ながらの列車旅。森や林を抜けて走る車窓はワクワク感いっぱい！列車好きなお子さまも、のんびり旅が好きな方も、誰もが楽しめる日帰りコースをご紹介します。 “【日帰り】広島北部ローカル線の旅！芸備線・福塩線で里山の原風景を車窓から”広島駅矢賀駅りょうま駅長記念館志和地駅三次駅三次観光案内所三次もののけミュージアムmugi mugi CAFE三次駅福塩線の車窓梶田駅付近上下駅天領上下 白壁の町並み翁座府中駅福山駅福山城 広島駅矢賀駅りょうま駅長記念館志和地駅三次駅三次観光案内所三次もののけミュージアムmugi mugi CAFE三次駅福塩線の車窓梶田駅付近上下駅天領上下 白壁の町並み翁座府中駅福山駅福山城 広島駅1/17広島駅から出発！中国地方で一番長いローカル線、芸備線広島駅INFORMATION〒732-0822 広島県広島市南区松原町2-37スポット詳細芸備線は広島駅から出発し、安芸高田市、三次市、庄原市と広島県を横断する、全44駅・全長159.1kmの中国地方で一番長いローカル線です。国鉄時代に製造された朱色のディーゼル列車に乗って、いざ出発！ ＜ローカル線の乗車ポイント＞芸備線は狩留家（かるが）駅から先はICOCAやSuica等のICカードが使えません。広島駅できっぷを買って乗車することをおすすめします。券売機のない無人駅から乗車するときは、乗車時に車内で整理券を取り、下車時に料金表で運賃を確認し、整理券と運賃を料金箱に入れましょう。 広島駅INFORMATION〒732-0822 広島県広島市南区松原町2-37スポット詳細芸備線 約5分",
+      "prefecture": "広島県",
+      "municipality": "広島市",
+      "url": "https://dive-hiroshima.com/course/course-57755"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "dmo_plan:dmo_0002_一社東北観光推進機構:15",
+      "kind": "r3",
+      "source": "dmo_plan",
+      "name": "（一社）東北観光推進機構 — 形成確立計画 (chunk 16)",
+      "description": "ゅ館、笹川流れ、弥彦公園もみじ谷、月岡温泉、長岡まつり、にいがた食の陣、高 \n田城百万人観桜会、佐渡島・たらい舟、村上の鮭文化、のどぐろ丼 \n●各種観光資源は東北観光推進機構のホームページ「旅東北」にて、東北の観光スポットとして多言 \n語（日・英・韓・簡・繁・泰）で情報発信するとともに、着地型コンテンツ造成にあたっての素材 \nとして活用。 \n \n【宿泊施設：域内分布、施設数、収容力、施設規模等】 \n2022 年度 \n旅館・ホテル営業 \n施 設 数 客 室 数 \n青森県 580 19,340 \n岩手県 774 21,665 \n宮城県 704 34,267 \n秋田県 507 15,117 \n山形県 757 19,570 \n福島県 1,438 41,820 \n新潟県 1,952 44,240 \n政府統計の総合窓口(e-Stat)(衛生行政報告例 2021 年度)より \n \n【利便性：区域までの交通、域内交通】 \n観光客の東北への入り口は、北海道・東北新幹線を中心に、東北自動車道によるマイカー・高速バ\nス、区域内の空港等が挙げられる。今後外国人観光客の拡大に向け、域内空港への国際定期便の拡 \n充が求められている。また、ターミナル駅、空港等からの接続交通の拡充も課題となっている。",
+      "prefecture": "青森県 / 岩手県 / 秋田県 / 宮城県 / 山形県 / 福島県 / 新潟県",
+      "municipality": null,
+      "url": "https://www.mlit.go.jp/kankocho/content/001764995.pdf"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": null,
+      "rank_vec": 2,
+      "key": "dmo_plan:dmo_0083_一社しずくいし観光協会:11",
+      "kind": "r3",
+      "source": "dmo_plan",
+      "name": "（一社）しずくいし観光協会 — 形成確立計画 (chunk 12)",
+      "description": "種別 経路 所要時間 \nＪＲ \n秋田新幹線 \n〃 \n盛岡駅～雫石駅 \n仙台駅～盛岡～雫石駅 \n東京駅～盛岡～雫石駅 \n20 分 \n60 分 \n2 時間30 分 \n自動車 \n東北自動車道 \n 〃 \n盛岡～R46～雫石 \n仙台宮城IC～盛岡IC～雫石 \n東京～盛岡IC～雫石 \n20 分 \n2 時間20 分 \n7 時間40 分 \n航空便 \n札幌～花巻空港 \n名古屋～花巻空港 \n大阪～花巻空港 \n福岡～花巻空港 \n花巻空港～【バス】～盛岡～\n【JR】～雫石 \n55 分 \n１時間10 分 \n1 時間20 分 \n2 時間5 分 \n \n1 時間10 分",
+      "prefecture": null,
+      "municipality": "雫石町",
+      "url": "https://www.mlit.go.jp/kankocho/content/001766857.pdf"
+    },
+    {
+      "score": 0.01587,
+      "rank_bm": 3,
+      "rank_vec": null,
+      "key": "spot:1dcba16d53cc22b0",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "観光列車",
+      "description": "車窓から眺める景色、個性豊かな車両デザイン、そして車内外でのサービス・おもてなし。観光列車は移動時間を楽… 2024年08月01日 タグ： 鉄道，観光列車，寝台列車，ラッピング列車，＃日常を忘れる，＃たびすたぐらむ，＃旅は人生を豊
+```
+
+
+=== Case R-262 ===
+Topic / intent: 열차로 오키나와 이동
+Query: 오키나와 본섬을 모노레일과 버스만으로 여행할 수 있나요? 렌터카 없이도 괜찮을까요?
+Tool: get_transport({"prefecture": "Okinawa", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "沖縄県",
+  "prefecture_code": "47",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q1013209",
+      "source": "wikidata",
+      "name": "中城城",
+      "name_en": "Nakagusuku Castle",
+      "coordinates": {
+        "lat": 26.28388889,
+        "lng": 127.80138889
+      },
+      "municipality": "沖縄県",
+      "url": "https://www.wikidata.org/wiki/Q1013209",
+      "prominence_score": 1
+    },
+    {
+      "spot_id": "Q1186324",
+      "source": "wikidata",
+      "name": "玉陵",
+      "name_en": "Tamaudun",
+      "coordinates": {
+        "lat": 26.21833333,
+        "lng": 127.71472222
+      },
+      "municipality": "那覇市",
+      "url": "https://www.wikidata.org/wiki/Q1186324",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "儀保駅",
+        "name_en": "Gibo Station",
+        "walk_minutes": 10,
+        "operator_name": null,
+        "jr_pass_accessible": false,
+        "operator_class": "unknown"
+      }
+    },
+    {
+      "spot_id": "Q1206086",
+      "source": "wikidata",
+      "name": "久米島町",
+      "name_en": "Kumejima",
+      "coordinates": {
+        "lat": 26.340694444,
+        "lng": 126.804944444
+      },
+      "municipality": "沖縄県",
+      "url": "https://www.wikidata.org/wiki/Q1206086",
+      "prominence_score": 1
+    },
+    {
+      "spot_id": "Q3087076",
+      "source": "wikidata",
+      "name": "斎場御嶽",
+      "name_en": "Sefa-utaki",
+      "coordinates": {
+        "lat": 26.173333,
+        "lng": 127.826667
+      },
+      "municipality": "沖縄県",
+      "url": "https://www.wikidata.org/wiki/Q3087076",
+      "prominence_score": 1
+    },
+    {
+      "spot_id": "Q907052",
+      "source": "wikidata",
+      "name": "首里城",
+      "name_en": "Shuri Castle",
+      "coordinates": {
+        "lat": 26.217030555,
+        "lng": 127.719475
+      },
+      "municipality": "沖縄県",
+      "url": "https://www.wikidata.org/wiki/Q907052",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "首里駅",
+        "name_en": "Shuri Station",
+        "walk_minutes": 8,
+        "operator_name": "沖縄都市モノレール",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q508866",
+      "source": "wikidata",
+      "name": "今帰仁城",
+      "name_en": "Nakijin Castle",
+      "coordinates": {
+        "lat": 26.690833333,
+        "lng": 127.930277777
+      },
+      "municipality": "沖縄県",
+      "url": "https://www.wikidata.org/wiki/Q508866",
+      "prominence_score": 0.95
+    },
+    {
+      "spot_id": "Q10927533",
+      "source": "wikidata",
+      "name": "円覚寺",
+      "name_en": "Enkaku-ji",
+      "coordinates": {
+        "lat": 26.21833333,
+        "lng": 127.71944444
+      },
+      "municipality": "沖縄県",
+      "url": "https://www.wikidata.org/wiki/Q10927533",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "首里駅",
+        "name_en": "Shuri Station",
+        "walk_minutes": 8,
+        "operator_name": "沖縄都市モノレール",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11428719",
+      "source": "wikidata",
+      "name": "塩川",
+      "name_en": "Shio River",
+      "coordinates": {
+        "lat": 26.61549444,
+        "lng": 127.89520833
+      },
+      "municipality": "沖縄県",
+      "url": "https://www.wikidata.org/wiki/Q11428719",
+      "prominence_score": 0.9
+    },
+    {
+      "spot_id": "Q11433407",
+      "source": "wikidata",
+      "name": "大和井",
+      "name_en": "Yamato Gā",
+      "coordinates": {
+        "lat": 24.810833,
+        "lng": 125.285639
+      },
+      "municipality": "宮古島市",
+      "url": "https://www.wikidata.org/wiki/Q11433407",
+      "prominence_score": 0.9
+    },
+    {
+      "spot_id": "Q11519653",
+      "source": "wikidata",
+      "name": "末吉宮",
+      "name_en": "Sueyoshi-gū",
+      "coordinates": {
+        "lat": 26.230167,
+        "lng": 127.714056
+      },
+      "municipality": "那覇市",
+      "url": "https://www.wikidata.org/wiki/Q11519653",
+   
+```
+
+
+=== Case R-263 ===
+Topic / intent: フリーきっぷ 山形 米沢
+Query: 山形・米沢エリアを鉄道フリーきっぷで効率よく回りたい。米沢から上杉神社へのアクセスは？
+Tool: get_transport({"prefecture": "Yamagata", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "山形県",
+  "prefecture_code": "06",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q15604669",
+      "source": "wikidata",
+      "name": "山形城",
+      "name_en": "Yamagata Castle",
+      "coordinates": {
+        "lat": 38.255555555,
+        "lng": 140.328055555
+      },
+      "municipality": "山形県",
+      "url": "https://www.wikidata.org/wiki/Q15604669",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "山形駅",
+        "name_en": "Yamagata Station",
+        "walk_minutes": 10,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11527377",
+      "source": "wikidata",
+      "name": "東根の大ケヤキ",
+      "name_en": "Higashine-no-Okeyaki",
+      "coordinates": {
+        "lat": 38.441972222,
+        "lng": 140.401813888
+      },
+      "municipality": "山形県",
+      "url": "https://www.wikidata.org/wiki/Q11527377",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "東根駅",
+        "name_en": "Higashine Station",
+        "walk_minutes": 23,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q1155726",
+      "source": "wikidata",
+      "name": "出羽三山",
+      "name_en": "Three Mountains of Dewa",
+      "coordinates": {
+        "lat": 38.700277777,
+        "lng": 140.000277777
+      },
+      "municipality": "山形県",
+      "url": "https://www.wikidata.org/wiki/Q1155726",
+      "prominence_score": 0.9
+    },
+    {
+      "spot_id": "Q1760419",
+      "source": "wikidata",
+      "name": "立石寺",
+      "name_en": "Yama-dera Temple",
+      "coordinates": {
+        "lat": 38.312555555,
+        "lng": 140.437388888
+      },
+      "municipality": "山形県",
+      "url": "https://www.wikidata.org/wiki/Q1760419",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "山寺駅",
+        "name_en": "Yamadera Station",
+        "walk_minutes": 4,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11173679",
+      "source": "wikidata",
+      "name": "鳥海山大物忌神社",
+      "name_en": "Chōkaisan Ōmonoimi Shrine",
+      "coordinates": {
+        "lat": 39.097694444,
+        "lng": 140.048694444
+      },
+      "municipality": "山形県",
+      "url": "https://www.wikidata.org/wiki/Q11173679",
+      "prominence_score": 0.8500000000000001
+    },
+    {
+      "spot_id": "Q11262656",
+      "source": "wikidata",
+      "name": "米沢城",
+      "name_en": "Yonezawa Castle",
+      "coordinates": {
+        "lat": 37.9096,
+        "lng": 140.105
+      },
+      "municipality": "米沢市",
+      "url": "https://www.wikidata.org/wiki/Q11262656",
+      "prominence_score": 0.8500000000000001,
+      "nearest_station": {
+        "name_ja": "南米沢駅",
+        "name_en": "Minami-Yonezawa Station",
+        "walk_minutes": 19,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11468661",
+      "source": "wikidata",
+      "name": "山形美術館",
+      "name_en": "Yamagata Museum of Art",
+      "coordinates": {
+        "lat": 38.255891,
+        "lng": 140.332402
+      },
+      "municipality": "山形県",
+      "url": "https://www.wikidata.org/wiki/Q11468661",
+      "prominence_score": 0.8500000000000001,
+      "nearest_station": {
+        "name_ja": "山形駅",
+        "name_en": "Yamagata Station",
+        "walk_minutes": 11,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q176187",
+      "source": "wikidata",
+      "name": "山形空港",
+      "name_en": "Yamagata Airport",
+      "coordinates": {
+        "lat": 38.411944444,
+        "lng": 140.371111111
+      },
+      "municipality": "山形県",
+      "url": "https://www.wikidata.org/wiki/Q176187",
+      "prominence_score": 0.8500000000000001,
+```
+
+
+=== Case R-264 ===
+Topic / intent: no-car Yamaguchi Hagi
+Query: Is Hagi in Yamaguchi accessible by train? I heard local buses are infrequent. Any tips for car-free travel?
+Tool: get_transport({"prefecture": "Yamaguchi", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "山口県",
+  "prefecture_code": "35",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q11595801",
+      "source": "wikidata",
+      "name": "秋芳洞",
+      "name_en": "Akiyoshidō",
+      "coordinates": {
+        "lat": 34.228111111,
+        "lng": 131.303472222
+      },
+      "municipality": "山口県",
+      "url": "https://www.wikidata.org/wiki/Q11595801",
+      "prominence_score": 1
+    },
+    {
+      "spot_id": "Q2326743",
+      "source": "wikidata",
+      "name": "松下村塾",
+      "name_en": "Shōkasonjuku Academy",
+      "coordinates": {
+        "lat": 34.412169,
+        "lng": 131.417344
+      },
+      "municipality": "山口県",
+      "url": "https://www.wikidata.org/wiki/Q2326743",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "東萩駅",
+        "name_en": "Higashi-Hagi Station",
+        "walk_minutes": 11,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q1064830",
+      "source": "wikidata",
+      "name": "萩城",
+      "name_en": "Hagi Castle",
+      "coordinates": {
+        "lat": 34.417592,
+        "lng": 131.382478
+      },
+      "municipality": "山口県",
+      "url": "https://www.wikidata.org/wiki/Q1064830",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "玉江駅",
+        "name_en": "Tamae Station",
+        "walk_minutes": 17,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q5638728",
+      "source": "wikidata",
+      "name": "萩駅",
+      "name_en": "Hagi Station",
+      "coordinates": {
+        "lat": 34.393883333,
+        "lng": 131.401091666
+      },
+      "municipality": "山口県",
+      "url": "https://www.wikidata.org/wiki/Q5638728",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "萩駅",
+        "name_en": "Hagi Station",
+        "walk_minutes": 0,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q105336677",
+      "source": "wikidata",
+      "name": "長州藩下関前田台場跡",
+      "name_en": "Chōshū Domain Shimonoseki Maeda Battery",
+      "coordinates": {
+        "lat": 33.973694444,
+        "lng": 130.970805555
+      },
+      "municipality": "山口県",
+      "url": "https://www.wikidata.org/wiki/Q105336677",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "新下関駅",
+        "name_en": "Shin-Shimonoseki Station",
+        "walk_minutes": 51,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q10921114",
+      "source": "wikidata",
+      "name": "周防国分寺",
+      "name_en": "Suō Kokubun-ji Temple",
+      "coordinates": {
+        "lat": 34.06205556,
+        "lng": 131.57936111
+      },
+      "municipality": "山口県",
+      "url": "https://www.wikidata.org/wiki/Q10921114",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "防府駅",
+        "name_en": "Hōfu Station",
+        "walk_minutes": 17,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11364247",
+      "source": "wikidata",
+      "name": "中山神社",
+      "name_en": "Nakayama Shrine",
+      "coordinates": {
+        "lat": 34.006694444,
+        "lng": 130.917527777
+      },
+      "municipality": "山口県",
+      "url": "https://www.wikidata.org/wiki/Q11364247",
+      "prominence_score": 0.9,
+      "nearest_station": {
+        "name_ja": "綾羅木駅",
+        "name_en": "Ayaragi Station",
+        "walk_minutes": 11,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q11422937",
+      "source": "wikidata",
+      "name": "土井ヶ浜遺跡",
+      "name_en": "Doigahama Site",
+      "coordinates": {
+        "lat": 34.2935
+```
+
+
+=== Case R-265 ===
+Topic / intent: JR Pass rute Kyoto
+Query: Saya punya JR Pass 7 hari. Rute mana dari Kyoto yang bisa saya jelajahi hanya dengan kereta?
+Tool: get_transport({"prefecture": "Kyoto", "lang": "id"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "京都府",
+  "prefecture_code": "26",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q1013399",
+      "source": "wikidata",
+      "name": "元離宮二条城",
+      "name_en": "Nijō Castle",
+      "coordinates": {
+        "lat": 35.014166666,
+        "lng": 135.7475
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1013399",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "二条城前駅",
+        "name_en": "Nijōjō-mae Station",
+        "walk_minutes": 4,
+        "operator_name": "京都市交通局",
+        "jr_pass_accessible": false,
+        "operator_class": "public"
+      }
+    },
+    {
+      "spot_id": "Q1046403",
+      "source": "wikidata",
+      "name": "東寺",
+      "name_en": "Tō-ji Temple",
+      "coordinates": {
+        "lat": 34.980555555,
+        "lng": 135.747777777
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1046403",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "東寺駅",
+        "name_en": "Tōji Station",
+        "walk_minutes": 6,
+        "operator_name": "近畿日本鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q1052803",
+      "source": "wikidata",
+      "name": "長岡京",
+      "name_en": "Nagaoka-kyō",
+      "coordinates": {
+        "lat": 34.943204,
+        "lng": 135.703232
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1052803",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "西向日駅",
+        "name_en": "Nishi-Mukō Station",
+        "walk_minutes": 5,
+        "operator_name": "阪急電鉄",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q1089767",
+      "source": "wikidata",
+      "name": "南禅寺",
+      "name_en": "Nanzen-ji Temple",
+      "coordinates": {
+        "lat": 35.011111111,
+        "lng": 135.794166666
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1089767",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "蹴上駅",
+        "name_en": "Keage Station",
+        "walk_minutes": 6,
+        "operator_name": "京都市交通局",
+        "jr_pass_accessible": false,
+        "operator_class": "public"
+      }
+    },
+    {
+      "spot_id": "Q1146038",
+      "source": "wikidata",
+      "name": "西本願寺",
+      "name_en": "Nishi Hongan-ji Temple",
+      "coordinates": {
+        "lat": 34.992047,
+        "lng": 135.751611
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1146038",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "緑化フェア梅小路駅",
+        "name_en": "Ryokka fair Umekoji Station",
+        "walk_minutes": 9,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q1202871",
+      "source": "wikidata",
+      "name": "仁和寺",
+      "name_en": "Ninna-ji Temple",
+      "coordinates": {
+        "lat": 35.03111111,
+        "lng": 135.71388889
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q1202871",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "花園駅",
+        "name_en": "Hanazono Station",
+        "walk_minutes": 18,
+        "operator_name": "西日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q120730",
+      "source": "wikidata",
+      "name": "京都府",
+      "name_en": "Kyoto Prefecture",
+      "coordinates": {
+        "lat": 35.021027777,
+        "lng": 135.755583333
+      },
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q120730",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "丸太町駅",
+        "name_en": "Marutamachi Station",
+        "walk_minutes": 8,
+        "operator_name": "京都市交通局",
+        "jr_pass_accessible": false,
+        "op
+```
+
+
+=== Case R-266 ===
+Topic / intent: 日帰り 東京 日光
+Query: 東京から日光へ日帰りで行きたい。東武とJRの比較、どちらが便利？
+Tool: get_transport({"prefecture": "Tochigi", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture": "栃木県",
+  "prefecture_code": "09",
+  "mode": "prefecture_overview",
+  "hubs": [
+    {
+      "spot_id": "Q11361399",
+      "source": "wikidata",
+      "name": "下野薬師寺跡",
+      "name_en": "Shimotsuke Yakushi-ji",
+      "coordinates": {
+        "lat": 36.401956,
+        "lng": 139.876094
+      },
+      "municipality": "下野市",
+      "url": "https://www.wikidata.org/wiki/Q11361399",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "自治医大駅",
+        "name_en": "Jichi Medical University Station",
+        "walk_minutes": 26,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q1348249",
+      "source": "wikidata",
+      "name": "輪王寺",
+      "name_en": "Rinnō-ji Temple",
+      "coordinates": {
+        "lat": 36.754161,
+        "lng": 139.602708
+      },
+      "municipality": "日光市",
+      "url": "https://www.wikidata.org/wiki/Q1348249",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "東武日光駅",
+        "name_en": "Tōbu Nikkō Station",
+        "walk_minutes": 21,
+        "operator_name": "東武鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q2882839",
+      "source": "wikidata",
+      "name": "鑁阿寺",
+      "name_en": "Banna-ji Temple",
+      "coordinates": {
+        "lat": 36.3375,
+        "lng": 139.452222
+      },
+      "municipality": "足利市",
+      "url": "https://www.wikidata.org/wiki/Q2882839",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "足利駅",
+        "name_en": "Ashikaga Station",
+        "walk_minutes": 9,
+        "operator_name": "東日本旅客鉄道",
+        "jr_pass_accessible": true,
+        "operator_class": "jr"
+      }
+    },
+    {
+      "spot_id": "Q696641",
+      "source": "wikidata",
+      "name": "日光東照宮",
+      "name_en": "Nikkō Tōshō-gū",
+      "coordinates": {
+        "lat": 36.759166666,
+        "lng": 139.598611111
+      },
+      "municipality": "日光市",
+      "url": "https://www.wikidata.org/wiki/Q696641",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "東武日光駅",
+        "name_en": "Tōbu Nikkō Station",
+        "walk_minutes": 28,
+        "operator_name": "東武鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q701927",
+      "source": "wikidata",
+      "name": "日光二荒山神社",
+      "name_en": "Futarasan Shrine",
+      "coordinates": {
+        "lat": 36.758949,
+        "lng": 139.596425
+      },
+      "municipality": "日光市",
+      "url": "https://www.wikidata.org/wiki/Q701927",
+      "prominence_score": 1,
+      "nearest_station": {
+        "name_ja": "東武日光駅",
+        "name_en": "Tōbu Nikkō Station",
+        "walk_minutes": 30,
+        "operator_name": "東武鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q1063133",
+      "source": "wikidata",
+      "name": "日光の社寺",
+      "name_en": "Shrines and Temples of Nikkō",
+      "coordinates": {
+        "lat": 36.7565,
+        "lng": 139.5994
+      },
+      "municipality": "日光市",
+      "url": "https://www.wikidata.org/wiki/Q1063133",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "東武日光駅",
+        "name_en": "Tōbu Nikkō Station",
+        "walk_minutes": 26,
+        "operator_name": "東武鉄道",
+        "jr_pass_accessible": false,
+        "operator_class": "private"
+      }
+    },
+    {
+      "spot_id": "Q11418602",
+      "source": "wikidata",
+      "name": "唐澤城",
+      "name_en": "Karasawa Castle",
+      "coordinates": {
+        "lat": 36.3538,
+        "lng": 139.6003
+      },
+      "municipality": "佐野市",
+      "url": "https://www.wikidata.org/wiki/Q11418602",
+      "prominence_score": 0.95,
+      "nearest_station": {
+        "name_ja": "吉水駅",
+        "name_en": "Yoshimizu Station",
+        "walk_minutes": 27,
+        "operator_name": "東武鉄道",
+        "jr_pass_accessib
+```
+
+
+=== Case R-267 ===
+Topic / intent: plan feasibility Tokyo to Kyoto to Nara
+Query: Can I do Tokyo → Kyoto → Nara in two days by train? Is the travel time realistic for sightseeing?
+Tool: plan_feasibility_check({"itinerary": [{"qid": "Q11509"}, {"qid": "Q34600"}, {"qid": "Q37643"}], "travel_mode": "transit"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "stop_count": 3,
+  "travel_mode": "transit",
+  "estimated_total_minutes": 0,
+  "estimated_total_hours": 0,
+  "stops": [
+    {
+      "qid": "Q11509",
+      "error": "qid_not_found"
+    },
+    {
+      "qid": "Q34600",
+      "error": "qid_not_found"
+    },
+    {
+      "qid": "Q37643",
+      "error": "qid_not_found"
+    }
+  ],
+  "segments": [
+    {
+      "from": "Q11509",
+      "to": "Q34600",
+      "error": "missing_coordinates"
+    },
+    {
+      "from": "Q34600",
+      "to": "Q37643",
+      "error": "missing_coordinates"
+    }
+  ],
+  "flags": [],
+  "note": "Rough feasibility check using haversine distance and average travel speed. Use a real routing API (Google Routes / OSRM) for production planning. opening_hours strings are emitted in OSM format — agent / Solver should parse for time-window constraints.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-268 ===
+Topic / intent: 1万円以下 京都 1日
+Query: 京都を1日1万円以下で楽しみたい。無料の神社仏閣や安い食事スポットを教えて。
+Tool: get_spots({"prefecture": "Kyoto", "limit": 30})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1013399",
+      "name": "元離宮二条城",
+      "name_en": "Nijō Castle",
+      "name_zh": "元離宮二条城",
+      "name_ko": "니조성",
+      "description_en": "castle in Kyoto, Japan",
+      "coordinates": {
+        "lat": 35.014166666,
+        "lng": 135.7475
+      },
+      "url": "https://www.wikidata.org/wiki/Q1013399",
+      "municipality": "京都府",
+      "municipality_code": "260002",
+      "prefecture": "京都府",
+      "quality_score": 0.65,
+      "kinds": [
+        "plains_castle",
+        "japanese_castle",
+        "nihon_100_meijo"
+      ],
+      "prominence_score": 1.05,
+      "crowd_band": "high",
+      "opening_hours": "Mo-Su 08:45-17:00",
+      "wheelchair": "limited",
+      "website": "https://nijo-jocastle.city.kyoto.lg.jp/",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q94987823",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "Special Place of Scenic Beauty",
+        "National Treasure of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1046403",
+      "name": "東寺",
+      "name_en": "Tō-ji Temple",
+      "name_zh": "東寺",
+      "name_ko": "도지",
+      "description_en": "building in Kyoto Prefecture, Japan",
+      "coordinates": {
+        "lat": 34.980555555,
+        "lng": 135.747777777
+      },
+      "url": "https://www.wikidata.org/wiki/Q1046403",
+      "municipality": "京都府",
+      "municipality_code": "260002",
+      "prefecture": "京都府",
+      "quality_score": 0.65,
+      "kinds": [
+        "religious_building",
+        "shinto_shrine",
+        "buddhist_temple"
+      ],
+      "prominence_score": 1,
+      "crowd_band": "high",
+      "opening_hours": "Mo-Su 05:00-17:00",
+      "wheelchair": "limited",
+      "phone": "+81 75-691-3325",
+      "website": "https://toji.or.jp/",
+      "fee": "yes",
+      "typical_visit_minutes": 30,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "osm_override",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795",
+        "Q11579194",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan",
+        "Registered Tangible Cultural Property of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1052803",
+      "name": "長岡京",
+      "name_en": "Nagaoka-kyō",
+      "name_zh": "長岡京",
+      "name_ko": "나가오카쿄",
+      "description_en": "human settlement in Japan",
+      "coordinates": {
+        "lat": 34.943204,
+        "lng": 135.703232
+      },
+      "url": "https://www.wikidata.org/wiki/Q1052803",
+      "municipality": "京都府",
+      "municipality_code": "260002",
+      "prefecture": "京都府",
+      "quality_score": 0.65,
+      "kinds": [
+        "archaeological_site",
+        "rekishi_park_100"
+      ],
+      "prominence_score": 1.05,
+      "crowd_band": "high",
+      "typical_visit_minutes": 60,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1060966",
+      "name": "泉涌寺",
+   
+```
+
+
+=== Case R-269 ===
+Topic / intent: free sightseeing Nara
+Query: What free things can I do in Nara besides feeding deer? Looking for zero-cost sightseeing.
+Tool: get_spots({"prefecture": "Nara", "limit": 30})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1036938",
+      "name": "吉野山",
+      "name_en": "Mount Yoshino",
+      "name_zh": "吉野山",
+      "name_ko": "요시노산",
+      "description_en": "mountain in Nara Prefecture, Japan",
+      "coordinates": {
+        "lat": 34.3504,
+        "lng": 135.8773
+      },
+      "url": "https://www.wikidata.org/wiki/Q1036938",
+      "municipality": "奈良県",
+      "municipality_code": "290009",
+      "prefecture": "奈良県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "sakura_meisho_100",
+        "walking_road_500"
+      ],
+      "prominence_score": 1.1,
+      "crowd_band": "high",
+      "typical_visit_minutes": 180,
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q30834580",
+        "Q43113623",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Natural Monument of Japan",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1039675",
+      "name": "高松塚古墳",
+      "name_en": "Takamatsuzuka Tomb",
+      "name_zh": "高松塚古墳",
+      "name_ko": "다카마쓰 고분",
+      "description_en": "kofun",
+      "coordinates": {
+        "lat": 34.46222222,
+        "lng": 135.80647222
+      },
+      "url": "https://www.wikidata.org/wiki/Q1039675",
+      "municipality": "奈良県",
+      "municipality_code": "290009",
+      "prefecture": "奈良県",
+      "quality_score": 0.65,
+      "kinds": [
+        "archaeological_site",
+        "monument",
+        "buddhist_monastery",
+        "kofun"
+      ],
+      "prominence_score": 1,
+      "crowd_band": "high",
+      "typical_visit_minutes": 60,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q26764449",
+        "Q30834580",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Special Historic Site of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1070863",
+      "name": "興福寺",
+      "name_en": "Kōfuku-ji Temple",
+      "name_zh": "興福寺",
+      "name_ko": "고후쿠지",
+      "description_en": "Kōfuku-ji (興福寺; Japanese pronunciation: [koꜜː.ɸɯ̥.kɯ.dʑi]) is a Buddhist temple in Japan that was once one of the powerful Nanto Shichi Daiji 'Seven Great Temples' in the city of Nara. The temple is the national headquarters of the East Asian Yogācāra school.",
+      "coordinates": {
+        "lat": 34.683207,
+        "lng": 135.831302
+      },
+      "url": "https://www.wikidata.org/wiki/Q1070863",
+      "municipality": "奈良県",
+      "municipality_code": "290009",
+      "prefecture": "奈良県",
+      "quality_score": 0.65,
+      "kinds": [
+        "religious_building",
+        "shinto_shrine",
+        "buddhist_temple",
+        "saigoku_33",
+        "saigoku_yakushi_49"
+      ],
+      "prominence_score": 1.1,
+      "crowd_band": "high",
+      "typical_visit_minutes": 30,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1073899",
+      "name": "郡山城",
+      "name_en": "Kōriyama Castle",
+      "name_zh": "郡山城",
+      "name_ko": "고리야마성",
+      "description_en": "building in Yamatokoriyama, Nara Prefecture, Jap
+```
+
+
+=== Case R-270 ===
+Topic / intent: 低预算住宿 北海道
+Query: 北海道背包旅行，想找一晚5000日元以下的住宿，有推荐的青年旅馆吗？
+Tool: get_hotels({"prefecture": "Hokkaido", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "hito_yu_kai:645",
+      "confidence": "confirmed",
+      "name": "知内温泉旅館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒049-1221 北海道上磯郡知内町湯ノ里284番地",
+      "prefecture_code": "01",
+      "municipality": null,
+      "description_ja": "800年の歴史をもつ北海道最古の湯、喧騒から離れたくつろぎの湯",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "645",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=645"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:642",
+      "confidence": "confirmed",
+      "name": "銀婚湯",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒049-2566 北海道二海郡八雲町上の湯199",
+      "prefecture_code": "01",
+      "municipality": null,
+      "description_ja": "豊富な湯ともてなしがうれしい",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "642",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=642"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:847",
+      "confidence": "confirmed",
+      "name": "湯元 凌雲閣",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒071-0500 北海道空知郡上富良野町十勝岳温泉",
+      "prefecture_code": "01",
+      "municipality": null,
+      "description_ja": "北海道で一番高所にある温泉宿",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "847",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=847"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:647",
+      "confidence": "confirmed",
+      "name": "湯元 湧駒荘",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒071-1472 北海道上川郡東川町勇駒別旭岳温泉",
+      "prefecture_code": "01",
+      "municipality": null,
+      "description_ja": "大雪山旭岳の麓に佇む湯宿",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "647",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=647"
+        }
+      ]
+    },
+    {
+      "id": "0af2b605a9e3",
+      "confidence": "confirmed",
+      "name": "ANA ホリデイ・イン 札幌すすきの",
+      "name_en": "ANA Holiday Inn Sapporo Susukino",
+      "name_zh": "全日空假日酒店札幌薄野",
+      "name_ko": "ANA 홀리데이 인 삿포로 스스키노",
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 43.054722222,
+        "lng": 141.354722222
+      },
+      "phone": "+81-11-512-5533",
+      "website": "http://www.anahisapporosusukino.com",
+      "postal_code": "064-0805",
+      "street": "064-0805 北海道札幌市中央区南5条西3丁目7",
+      "prefecture_code": "01",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q41723120",
+          "url": "https://www.wikidata.org/wiki/Q41723120"
+        },
+        {
+          "source": "osm",
+          "id": "node/3822095835",
+          "url":
+```
+
+
+=== Case R-271 ===
+Topic / intent: 저예산 규슈 여행
+Query: 규슈를 저예산으로 여행하고 싶어요. 하루 5000엔 이내로 식사와 관광이 가능한가요?
+Tool: get_spots({"prefecture": "Kagoshima", "limit": 30})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1066957",
+      "name": "鹿児島城",
+      "name_en": "Kagoshima Castle",
+      "name_zh": "鹿兒島城",
+      "name_ko": "가고시마성",
+      "description_en": "Kagoshima Castle (鹿児島城, Kagoshima-jō) was an Edo period flatland-style Japanese castle located in the city of Kagoshima, Kagoshima Prefecture, Japan. Its ruins have been protected as a National Historic Site since 2023.",
+      "coordinates": {
+        "lat": 31.598485,
+        "lng": 130.554611
+      },
+      "url": "https://www.wikidata.org/wiki/Q1066957",
+      "municipality": "鹿児島市",
+      "municipality_code": "462012",
+      "prefecture": "鹿児島県",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle",
+        "nihon_100_meijo"
+      ],
+      "prominence_score": 1.05,
+      "crowd_band": "high",
+      "phone": "+81 99-286-2534",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11579194",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Registered Tangible Cultural Property of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q128841",
+      "name": "桜島",
+      "name_en": "Sakurajima",
+      "name_zh": "櫻島",
+      "name_ko": "사쿠라지마섬",
+      "description_en": "volcano and island located in Kagoshima prefecture, Japan",
+      "coordinates": {
+        "lat": 31.580555555,
+        "lng": 130.658055555
+      },
+      "url": "https://www.wikidata.org/wiki/Q128841",
+      "municipality": "鹿児島市",
+      "municipality_code": "462012",
+      "prefecture": "鹿児島県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "active_volcano",
+        "volcano",
+        "walking_road_500",
+        "shin_ryoko_100",
+        "chishitsu_100",
+        "nihon_200_meizan"
+      ],
+      "prominence_score": 1.05,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q242176",
+      "name": "屋久島",
+      "name_en": "Yakushima",
+      "name_zh": "屋久島",
+      "name_ko": "야쿠섬",
+      "description_en": "island in Kagoshima, Japan",
+      "coordinates": {
+        "lat": 30.358611111,
+        "lng": 130.528611111
+      },
+      "url": "https://www.wikidata.org/wiki/Q242176",
+      "municipality": "屋久島町",
+      "municipality_code": "465054",
+      "prefecture": "鹿児島県",
+      "quality_score": 0.65,
+      "kinds": [
+        "island",
+        "walking_road_500",
+        "chishitsu_100",
+        "shin_nihon_100_meizan"
+      ],
+      "prominence_score": 1.15,
+      "crowd_band": "high",
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q137572758",
+        "Q19683138",
+        "Q9259",
+        "Q106611640"
+      ],
+      "heritage_designations_labels": [
+        "Wilderness Area (Japan, Nature Conservation Law)",
+        "Ramsar Wetland (Japan)",
+        "UNESCO World Heritage Site",
+        "Protected Forest (Japan, Forestry Agency)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1056108",
+      "name": "縄文杉",
+      "name_en": "Jōmon Sugi",
+      "name_zh": "绳文杉",
+      "name_ko": "조몬스기",
+      "description_en": "Ancient Japanese cedar tree on 屋久島 (Yakushima), Kagoshima Prefecture, estimated 2,000-7,200 years old. Designated as a Special Natural Monument and located within Yakushima World Heritage Site.",
+      "coordinates": {
+        "lat": 30.3556,
+        "lng": 130.5453
+      },
+      "url": "https://www.wikidata.org/wiki/Q1056108",
+ 
+```
+
+
+=== Case R-272 ===
+Topic / intent: cheap eats Osaka Dotonbori
+Query: Where can I eat well in Osaka's Dotonbori area for under ¥1,000 per meal?
+Tool: search_hybrid({"q": "大阪 安い 食事 道頓堀", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "大阪 安い 食事 道頓堀",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.03919,
+      "rank_bm": null,
+      "rank_vec": 49,
+      "key": "spot:c28d1f3b5a199f2d",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "大阪のおすすめグルメ",
+      "description": "大阪のおうどんは、軟らかい口当たりの麵と、それに優しく寄り添う昆布とカツオ節のだしとのハーモニーが魅力です。 屋台で買って、気軽に街角で食べられる、大阪のファストフードの代表格・たこ焼き。歴史は意外に浅く、昭和30年代から、町に店が増え始めたと言われます。 大阪すしの代表格は箱寿司です。具材を酢飯と共に型に入れて押し固める「押し寿司」の一つです。 胃の悪い常連客が毎日オムレツと白ご飯を食べているのを不憫に思った店主が、ケチャップライスを薄焼き卵で包んで出したところ、客は大喜び。 たこ焼きと並ぶ、大阪人のソウル･フードです。小麦粉をだしで溶くのも同じで、具はキャベツが必須、豚肉が人気、あとはお好み焼きの名の通り、好みのままに。鉄板の上で丸く平たく生地を広げて焼き上げます。",
+      "prefecture": "大阪府",
+      "municipality": "岬町",
+      "url": "https://osaka-info.jp/gourmet/osaka_cuisine"
+    },
+    {
+      "score": 0.0388,
+      "rank_bm": null,
+      "rank_vec": 50,
+      "key": "spot:2b03212aa0ea116e",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "大阪のおすすめグルメ",
+      "description": "大阪のおうどんは、軟らかい口当たりの麵と、それに優しく寄り添う昆布とカツオ節のだしとのハーモニーが魅力です。 屋台で買って、気軽に街角で食べられる、大阪のファストフードの代表格・たこ焼き。歴史は意外に浅く、昭和30年代から、町に店が増え始めたと言われます。 大阪すしの代表格は箱寿司です。具材を酢飯と共に型に入れて押し固める「押し寿司」の一つです。 胃の悪い常連客が毎日オムレツと白ご飯を食べているのを不憫に思った店主が、ケチャップライスを薄焼き卵で包んで出したところ、客は大喜び。 たこ焼きと並ぶ、大阪人のソウル･フードです。小麦粉をだしで溶くのも同じで、具はキャベツが必須、豚肉が人気、あとはお好み焼きの名の通り、好みのままに。鉄板の上で丸く平たく生地を広げて焼き上げます。",
+      "prefecture": "大阪府",
+      "municipality": "岬町",
+      "url": "https://osaka-info.jp/gourmet"
+    },
+    {
+      "score": 0.03048,
+      "rank_bm": 1,
+      "rank_vec": 11,
+      "key": "wd:Q18337476",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "道頓堀グリコサイン",
+      "description": "billboard",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q18337476"
+    },
+    {
+      "score": 0.02605,
+      "rank_bm": 10,
+      "rank_vec": 25,
+      "key": "dmo_page:dmo_0034_公財大阪観光局:https://osaka-info.jp/osaka/food/",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "大阪の食文化を深く知る｜天下の台所・大阪のグルメと歴史｜OSAKA-INFO (（公財）大阪観光局)",
+      "description": "商家には 倹約という合理的な考えが浸透し、質素で無駄のない食事が日常化しましたが、一方で、商談などに利用された料亭などで… 今や国際語となった「うま味」。その言葉の起源とも言える「だし」は、日本の食文化の根幹であり、日本固有のもの。この「だ… 火と鉄と水と匠の技が生み出す絶妙の切れ味は、他の追随を許しません。ユネスコ無形文化遺産となった和食の背景に、堺包丁の職… 大阪湾は、かつて魚庭と呼ばれるほどに、魚が豊富に獲れました。魚の庭と書いて、なにわと読みます。それは大阪の別名・浪速の… 大阪人は、食への情熱にあふれる。食材を大切に、無駄を出さず、極力捨てることをしない。上手に料理して、おいしく食べるため…",
+      "prefecture": "大阪府",
+      "municipality": null,
+      "url": "https://osaka-info.jp/osaka/food/"
+    },
+    {
+      "score": 0.02283,
+      "rank_bm": 22,
+      "rank_vec": 34,
+      "key": "wd:Q11427435",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "堀川戎神社",
+      "description": "building in Osaka Prefecture, Japan",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q11427435"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "wd:Q11499410",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "教育塔",
+      "description": "memorial tower in Japan",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q11499410"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "wd:Q118288612",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "道頓堀コナモンミュージアム",
+      "description": "大阪府大阪市中央区にあるテーマパーク",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q118288612"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": null,
+      "rank_vec": 2,
+      "key": "wd:Q60963353",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "寂光寺",
+      "description": "temple at Osaka",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q60963353"
+    },
+ 
+```
+
+
+=== Case R-273 ===
+Topic / intent: 格安旅 沖縄
+Query: 沖縄を格安で旅したい。1泊3000円台のゲストハウスや無料ビーチはある？
+Tool: get_hotels({"prefecture": "Okinawa", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "2c8491b65d6f",
+      "confidence": "confirmed",
+      "name": null,
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": "우루마숙소",
+      "type": "hostel",
+      "lodging_type": "hostel",
+      "coordinates": {
+        "lat": 26.4088023,
+        "lng": 127.8243184
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "47",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4491393194",
+          "url": "https://www.openstreetmap.org/node/4491393194"
+        },
+        {
+          "source": "osm",
+          "id": "node/4498083089",
+          "url": "https://www.openstreetmap.org/node/4498083089"
+        }
+      ]
+    },
+    {
+      "id": "a0a78857c10a",
+      "confidence": "confirmed",
+      "name": null,
+      "name_en": "Miyahira",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "guest_house",
+      "coordinates": {
+        "lat": 26.2270203,
+        "lng": 127.2937459
+      },
+      "phone": "0988518638",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "47",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/13673565302",
+          "url": "https://www.openstreetmap.org/node/13673565302"
+        },
+        {
+          "source": "osm",
+          "id": "node/13673567401",
+          "url": "https://www.openstreetmap.org/node/13673567401"
+        }
+      ]
+    },
+    {
+      "id": "67b13314ad5f",
+      "confidence": "confirmed",
+      "name": "DoubleTree by Hilton Okinawa Chatan Resort",
+      "name_en": "DoubleTree by Hilton Okinawa Chatan Resort",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 26.317807,
+        "lng": 127.753851
+      },
+      "phone": "+81 98-901-4600",
+      "website": "https://www.hilton.com/en/hotels/okadidi-doubletree-okinawa-chatan-resort/",
+      "postal_code": "904-0115",
+      "street": "中頭郡北谷町美浜43",
+      "prefecture_code": "47",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q111865764",
+          "url": "https://www.wikidata.org/wiki/Q111865764"
+        },
+        {
+          "source": "osm",
+          "id": "way/587568983",
+          "url": "https://www.openstreetmap.org/way/587568983"
+        }
+      ]
+    },
+    {
+      "id": "7b127a305d69",
+      "confidence": "confirmed",
+      "name": "Hilton Okinawa Chatan Resort",
+      "name_en": "Hilton Okinawa Chatan Resort",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 26.31893,
+        "lng": 127.75562
+      },
+      "phone": "+81 98 901 1111",
+      "website": "https://chatan.hiltonjapan.co.jp/",
+      "postal_code": "904-0115",
+      "street": "Mihama",
+      "prefecture_code": "47",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q73858596",
+          "url": "https://www.wikidata.org/wiki/Q73858596"
+        },
+        {
+          "source": "osm",
+          "id": "way/397973624",
+          "url": "https://www.openstreetmap.org/way/397973624"
+        }
+      ]
+    },
+    {
+      "id": "59d602bfb38a",
+      "confidence": "confirmed",
+      "name": "Kaeru-ya | 素泊まりの宿かえるやぁ",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 26.6969014,
+        "lng": 127.9449833
+      },
+      "phone": "+818077507421",
+      "website": "https://ucchifarm.wixsite.com/kaeruya-fuuran",
+      "postal_code": "905-0426",
+      "street": null,
+      "prefecture_code": "47",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/7244186054",
+          "url": "https://www.openstreetmap.org/node/7244186054"
+        },
+        {
+          "source"
+```
+
+
+=== Case R-274 ===
+Topic / intent: فنادق رخيصة في طوكيو
+Query: أبحث عن فنادق رخيصة في طوكيو بسعر أقل من 5000 ين في الليلة. ما التوصيات؟
+Tool: get_hotels({"prefecture": "Tokyo", "lang": "ar"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "hito_yu_kai:732",
+      "confidence": "confirmed",
+      "name": "たから荘",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒190-0221 東京都西多摩郡檜原村数馬2465",
+      "prefecture_code": "13",
+      "municipality": null,
+      "description_ja": "山里の手作り料理になごむ",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "732",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=732"
+        }
+      ]
+    },
+    {
+      "id": "c74f4fd9eb7f",
+      "confidence": "confirmed",
+      "name": null,
+      "name_en": "2-2-21 Lions Mansion Apartment",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "apartment",
+      "lodging_type": "apartment",
+      "coordinates": {
+        "lat": 35.6955139,
+        "lng": 139.7072871
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "13",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/7194606085",
+          "url": "https://www.openstreetmap.org/node/7194606085"
+        },
+        {
+          "source": "osm",
+          "id": "node/7194622985",
+          "url": "https://www.openstreetmap.org/node/7194622985"
+        }
+      ]
+    },
+    {
+      "id": "be8fec2df82c",
+      "confidence": "confirmed",
+      "name": null,
+      "name_en": "home",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "apartment",
+      "lodging_type": "apartment",
+      "coordinates": {
+        "lat": 35.7389091,
+        "lng": 139.7096319
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "13",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/13719991901",
+          "url": "https://www.openstreetmap.org/node/13719991901"
+        },
+        {
+          "source": "osm",
+          "id": "node/13719991902",
+          "url": "https://www.openstreetmap.org/node/13719991902"
+        },
+        {
+          "source": "osm",
+          "id": "node/13719992001",
+          "url": "https://www.openstreetmap.org/node/13719992001"
+        },
+        {
+          "source": "osm",
+          "id": "node/13719992101",
+          "url": "https://www.openstreetmap.org/node/13719992101"
+        }
+      ]
+    },
+    {
+      "id": "dc24cf44a7e0",
+      "confidence": "confirmed",
+      "name": "Century Southern Tower Hotel",
+      "name_en": "Odakyu Southern Tower",
+      "name_zh": "小田急Southern Tower",
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.6864,
+        "lng": 139.7
+      },
+      "phone": "+81-3-5354-0111",
+      "website": "http://www.southerntower.co.jp/",
+      "postal_code": "151-8583",
+      "street": "東京都渋谷区代々木2-2-1",
+      "prefecture_code": "13",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q3349080",
+          "url": "https://www.wikidata.org/wiki/Q3349080"
+        },
+        {
+          "source": "osm",
+          "id": "node/475090903",
+          "url": "https://www.openstreetmap.org/node/475090903"
+        }
+      ]
+    },
+    {
+      "id": "293df953403c",
+      "confidence": "confirmed",
+      "name": "CENTUTION HOTEL Vintage",
+      "name_en": "Centurion Hotel Vintage",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.675671,
+        "lng": 139.7367976
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "13",
+      "sources": [
+        {
+          "so
+```
+
+
+=== Case R-275 ===
+Topic / intent: budget hostel Kyushu backpacker
+Query: I'm backpacking Kyushu on ¥5,000/day total. Any hostels in Fukuoka under ¥3,000 a night?
+Tool: get_hotels({"prefecture": "Fukuoka", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "23e3132e5233",
+      "confidence": "confirmed",
+      "name": "ANAクラウンプラザホテル福岡",
+      "name_en": "ANA Crowne Plaza Hotel Fukuoka",
+      "name_zh": "ANA 皇冠假日酒店 福岡",
+      "name_ko": "ANA 크라운 플라자 호텔 후쿠오카",
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.58721,
+        "lng": 130.41763
+      },
+      "phone": null,
+      "website": "https://www.anacrowneplaza-fukuoka.jp/",
+      "postal_code": "812-0011",
+      "street": "812-0011 福岡県福岡市博多区博多駅前3丁目3-3",
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q111406557",
+          "url": "https://www.wikidata.org/wiki/Q111406557"
+        },
+        {
+          "source": "osm",
+          "id": "way/312866955",
+          "url": "https://www.openstreetmap.org/way/312866955"
+        }
+      ]
+    },
+    {
+      "id": "cdbb2886a74e",
+      "confidence": "confirmed",
+      "name": "Hokorobi Guest House",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hostel",
+      "lodging_type": "hostel",
+      "coordinates": {
+        "lat": 33.577645,
+        "lng": 130.3385905
+      },
+      "phone": "092-407-6836",
+      "website": "http://house.cocosys.co.jp/",
+      "postal_code": null,
+      "street": "福岡高速都市高環状線内回り",
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4226181646",
+          "url": "https://www.openstreetmap.org/node/4226181646"
+        },
+        {
+          "source": "osm",
+          "id": "node/4237168689",
+          "url": "https://www.openstreetmap.org/node/4237168689"
+        },
+        {
+          "source": "osm",
+          "id": "node/4315037389",
+          "url": "https://www.openstreetmap.org/node/4315037389"
+        }
+      ]
+    },
+    {
+      "id": "ee26a0caeec1",
+      "confidence": "confirmed",
+      "name": "アークホテルロイヤル福岡天神",
+      "name_en": "Ark Hotel Royal Fukuoka Tenjin",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.594305555,
+        "lng": 130.396166666
+      },
+      "phone": null,
+      "website": "https://www.ark-hotel.co.jp/fukuoka/",
+      "postal_code": "810-0001",
+      "street": "810-0001福岡市中央区天神三丁目13番20号",
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q134822725",
+          "url": "https://www.wikidata.org/wiki/Q134822725"
+        },
+        {
+          "source": "osm",
+          "id": "way/329586781",
+          "url": "https://www.openstreetmap.org/way/329586781"
+        }
+      ]
+    },
+    {
+      "id": "c6074edac75e",
+      "confidence": "confirmed",
+      "name": "アパホテル〈小倉駅前〉",
+      "name_en": "APA Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.887242,
+        "lng": 130.885518
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/1665553251",
+          "url": "https://www.openstreetmap.org/node/1665553251"
+        },
+        {
+          "source": "osm",
+          "id": "way/153941957",
+          "url": "https://www.openstreetmap.org/way/153941957"
+        }
+      ]
+    },
+    {
+      "id": "9aaf6730255e",
+      "confidence": "confirmed",
+      "name": "ザ・ルイガンズ. スパ & リゾート",
+      "name_en": "The Luigans Spa & Resort",
+      "name_zh": "The Luigans Spa度假村",
+      "name_ko": "더 루이간스 스파 & 리조트",
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.662500764,
+        "lng": 130.364955067
+      },
+      "phone": null,
+      "website": "https://www.luigans.com/",
+      "postal_code": null,
+      "street": "811-0321 福岡県福岡市東区大字西戸崎18-25",
+      "prefecture_code": "40",
+     
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.

@@ -1,0 +1,2078 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case R-101 ===
+Topic / intent: 子連れ 東京 公園
+Query: 도쿄에서 유아를 데리고 갈 수 있는 공원과 놀이 공간
+Tool: get_spots({"prefecture": "Tokyo", "q": "公園 遊び", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-102 ===
+Topic / intent: 子連れ 京都 体験
+Query: 京都で幼児と一緒に楽しめる体験スポットを教えて
+Tool: get_spots({"prefecture": "Kyoto", "q": "体験 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-103 ===
+Topic / intent: 子連れ 大阪 食
+Query: 大阪で子供が喜ぶご当地グルメと飲食スポット
+Tool: get_local_food({"prefecture": "Osaka", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "27",
+  "lang": "ja",
+  "count": 460,
+  "total_matching": 460,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:137",
+      "registration_number": 137,
+      "name_ja": "富田林の海老芋",
+      "name": "富田林の海老芋",
+      "description_ja": "その名の由来とされる海老のような湾曲した形状と縞模様が特徴である。食味としてのほくほく感の指標である乾物率が他産のものより高く、滑らかな舌触りから高級食材として、通常の里芋より高値で取引され、京都や東京の料亭などから重宝されている。",
+      "description": "その名の由来とされる海老のような湾曲した形状と縞模様が特徴である。食味としてのほくほく感の指標である乾物率が他産のものより高く、滑らかな舌触りから高級食材として、通常の里芋より高値で取引され、京都や東京の料亭などから重宝されている。",
+      "registration_date": "令和5年7月20日",
+      "production_area_text": "大阪府富田林市（彼方、西板持、東板持、南大伴、北大伴、錦織)",
+      "prefecture_codes": [
+        "27"
+      ],
+      "producer_group": "大阪府富田林市彼方1043富田林市海老芋振興協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0137/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:57:16.511Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:161",
+      "registration_number": 161,
+      "name_ja": "泉州水なす",
+      "name": "泉州水なす",
+      "description_ja": "絞ると水がしたたり落ちるほど多くの水分を含み、昔は田畑の片隅に植え、炎天下の農作業時にのどの渇きを癒したと言われる。果皮と果肉が柔らかで、ほのかな甘みがあり、あくが少ないのが特徴。 泉州地域を代表するブランド野菜であり、漬物や郷土料理に使用されるなど地域の食文化に定着しており、大阪を代表する土産物・贈答品としても人気。",
+      "description": "絞ると水がしたたり落ちるほど多くの水分を含み、昔は田畑の片隅に植え、炎天下の農作業時にのどの渇きを癒したと言われる。果皮と果肉が柔らかで、ほのかな甘みがあり、あくが少ないのが特徴。 泉州地域を代表するブランド野菜であり、漬物や郷土料理に使用されるなど地域の食文化に定着しており、大阪を代表する土産物・贈答品としても人気。",
+      "registration_date": "令和7年1月30日",
+      "production_area_text": "大阪府岸和田市、泉大津市、貝塚市、泉佐野市、和泉市、高石市、泉南市、阪南市、泉北郡忠岡町、泉南郡熊取町、田尻町及び岬町",
+      "prefecture_codes": [
+        "27"
+      ],
+      "producer_group": "東京都千代田区大手町1-3-1全国農業協同組合連合会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0161/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "観光スポット・体験",
+      "name": "観光スポット・体験",
+      "description_ja": "大阪の観光スポットや体験を網羅。グルメ、歴史、ショッピング、最新レジャーなど、カテゴリーやエリア、利用シーンからあなたにぴったりのスポットを検索できます。大阪観光局が運営する公式サイトで、最新の観光情報をチェックしましょう。",
+      "description": "大阪の観光スポットや体験を網羅。グルメ、歴史、ショッピング、最新レジャーなど、カテゴリーやエリア、利用シーンからあなたにぴったりのスポットを検索できます。大阪観光局が運営する公式サイトで、最新の観光情報をチェックしましょう。",
+      "body_paragraphs": [],
+      "spot_url": "https://osaka-info.jp/spot",
+      "spot_id": "82eb16054a329810",
+      "municipality": "大阪市",
+      "prefecture": "大阪府",
+      "prefecture_code": "27"
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "大阪のおすすめグルメ",
+      "name": "大阪のおすすめグルメ",
+      "description_ja": "「天下の台所」大阪で味わいたい、たこ焼きやお好み焼き、串カツなどの定番ローカル料理を徹底解説。伝統の食文化から話題のラーメン、デパ地下グルメまで、大阪観光で外せないおすすめ情報を満載。食い倒れの街の魅力を堪能しましょう！",
+      "description": "「天下の台所」大阪で味わいたい、たこ焼きやお好み焼き、串カツなどの定番ローカル料理を徹底解説。伝統の食文化から話題のラーメン、デパ地下グルメまで、大阪観光で外せないおすすめ情報を満載。食い倒れの街の魅力を堪能しましょう！",
+      "body_paragraphs": [
+        "大阪のおうどんは、軟らかい口当たりの麵と、それに優しく寄り添う昆布とカツオ節のだしとのハーモニーが魅力です。",
+        "屋台で買って、気軽に街角で食べられる、大阪のファストフードの代表格・たこ焼き。歴史は意外に浅く、昭和30年代から、町に店が増え始めたと言われます。",
+        "大阪すしの代表格は箱寿司です。具材を酢飯と共に型に入れて押し固める「押し寿司」の一つです。",
+        "胃の悪い常連客が毎日オムレツと白ご飯を食べているのを不憫に思った店主が、ケチャップライスを薄焼き卵で包んで出したところ、客は大喜び。",
+        "たこ焼きと並ぶ、大阪人のソウル･フードです。小麦粉をだしで溶くのも同じで、具はキャベツが必須、豚肉が人気、あとはお好み焼きの名の通り、好みのままに。鉄板の上で丸く平たく生地を広げて焼き上げます。",
+        "「二度漬け禁止」で有名な大阪の串カツ。肉や野菜を串に刺し、水溶き小麦粉の衣にパン粉を付けて油で揚げます。",
+        "江戸時代に栄えた料亭が廃れ始め、もっと気軽に楽しめる和食店を時代が求める中、生まれたのが割烹スタイルです。",
+        "摩訶不思議な紙なべも大阪発祥です。紙を火に掛けるなんてと誰もが驚くことでしょう。",
+        "コンベヤーの上を、寿司を載せた小皿が流れていき、客は好みのものを皿ごと取って食べます。半セルフサービス型の安価で明朗会計の気軽なスタイルは、家族連れや観光客にも利用しやすく大人気を得ています。",
+        "明治維新後、中華街に伝えられた中華饅頭を日本人好みの味にアレンジしたものが始まりとされています。",
+        "繊細で力強いジャパニーズウイスキーは、国内外で数々の賞を受賞し、今や世界でも認められる存在になっています。「サントリー山
+```
+
+
+=== Case R-104 ===
+Topic / intent: 子連れ 那覇 アクティビティ
+Query: 那覇で小さな子供が楽しめるアクティビティ
+Tool: get_spots({"prefecture": "Okinawa", "city": "那覇", "q": "子供 アクティビティ", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-105 ===
+Topic / intent: 子連れ 福岡 テーマパーク
+Query: 福岡の子供向けテーマパークやアミューズメント施設
+Tool: get_spots({"prefecture": "Fukuoka", "q": "テーマパーク 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-106 ===
+Topic / intent: 子連れ 仙台 体験
+Query: 仙台で子供連れが楽しめる自然体験スポット
+Tool: get_spots({"prefecture": "Miyagi", "city": "仙台", "q": "自然体験 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-107 ===
+Topic / intent: 子連れ 長野 高原
+Query: 長野の高原で乳幼児連れでも安心して楽しめる場所
+Tool: get_spots({"prefecture": "Nagano", "q": "高原 家族 ベビーカー", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-108 ===
+Topic / intent: 子連れ 神奈川 海
+Query: Kanagawa beaches and seaside activities for families with young children.
+Tool: get_spots({"prefecture": "Kanagawa", "q": "海水浴 子供", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q200267",
+      "name": "鎌倉市",
+      "name_en": "Kamakura",
+      "name_zh": "镰仓市",
+      "name_ko": "가마쿠라시",
+      "description_en": "city in Kanagawa prefecture, Japan",
+      "coordinates": {
+        "lat": 35.319166666,
+        "lng": 139.547222222
+      },
+      "url": "https://www.wikidata.org/wiki/Q200267",
+      "municipality": "神奈川県",
+      "municipality_code": "140007",
+      "prefecture": "神奈川県",
+      "quality_score": 0.65,
+      "kinds": [
+        "archaeological_site",
+        "hanabi",
+        "michi_100",
+        "walking_road_500",
+        "nagisa_100",
+        "bando_33",
+        "rekishi_park_100",
+        "shin_kanko_100",
+        "kanto_eki_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 1.1,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 60,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Q11633166"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q7496115",
+      "name": "七里ヶ浜",
+      "name_en": "Shichirigahama",
+      "name_zh": "七里濱",
+      "name_ko": "시치리가하마",
+      "description_en": "sandy beach in Kamakura, Kanagawa prefecture, Japan",
+      "coordinates": {
+        "lat": 35.306363888,
+        "lng": 139.509455555
+      },
+      "url": "https://www.wikidata.org/wiki/Q7496115",
+      "municipality": "鎌倉市",
+      "municipality_code": "142042",
+      "prefecture": "神奈川県",
+      "quality_score": 0.65,
+      "kinds": [
+        "beach",
+        "nagisa_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.95,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 120,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11563340",
+      "name": "湘南海岸",
+      "name_en": "Shōnan Beach",
+      "name_zh": "湘南海岸",
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q11563340",
+      "municipality": "神奈川県",
+      "municipality_code": "140007",
+      "prefecture": "神奈川県",
+      "quality_score": 0.65,
+      "kinds": [
+        "beach",
+        "hakusha_seishou_100",
+        "shin_kanko_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.9,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 120,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11356489",
+      "name": "三浦海岸",
+      "name_en": "Miura Coast",
+      "name_zh": "三浦海岸",
+      "name_ko": null,
+      "description_en": "Coastline in Kanagawa Prefecture, Japan",
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q11356489",
+      "municipality": "神奈川県",
+      "municipality_code": "140007",
+      "prefecture": "神奈川県",
+      "quality_score": 0.65,
+      "kinds": [
+        "beach"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.8,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 120,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q8060490",
+      "n
+```
+
+
+=== Case R-109 ===
+Topic / intent: 子連れ 栃木 日光 自然
+Query: 栃木県日光で幼児連れでも楽しめる自然スポット
+Tool: get_spots({"prefecture": "Tochigi", "city": "日光", "q": "自然 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-110 ===
+Topic / intent: 子連れ 奈良 動物
+Query: 奈良で子供が楽しめる動物や自然との触れ合い体験
+Tool: get_spots({"prefecture": "Nara", "q": "動物 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-111 ===
+Topic / intent: 子連れ 富士山麓 アトラクション
+Query: 富士山麓の子供向けアトラクションとアウトドア体験
+Tool: get_spots({"prefecture": "Yamanashi", "q": "アトラクション 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-112 ===
+Topic / intent: 子連れ 石川 のとじま水族館
+Query: 石川県ののとじま水族館など子供が喜ぶ観光スポット
+Tool: get_spots({"prefecture": "Ishikawa", "q": "水族館 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-113 ===
+Topic / intent: 子連れ 宮崎 テーマパーク
+Query: Miyazaki Prefecture theme parks and kid-friendly spots for families with small children.
+Tool: get_spots({"prefecture": "Miyazaki", "q": "テーマパーク 子供", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-114 ===
+Topic / intent: 子連れ 広島 アクティビティ
+Query: 広島で子供連れが楽しめる体験型の観光スポット
+Tool: get_spots({"prefecture": "Hiroshima", "q": "体験 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-115 ===
+Topic / intent: 子連れ 長崎 ハウステンボス
+Query: 長崎のハウステンボスで子供と楽しめるアトラクション
+Tool: get_spots({"prefecture": "Nagasaki", "city": "佐世保", "q": "ハウステンボス 子供", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-116 ===
+Topic / intent: 箱根 記念日旅行
+Query: 記念日に箱根で過ごしたい。露天風呂付き客室がある旅館と、ふたりで楽しめるスポットを教えて。
+Tool: get_hotels({"prefecture": "Kanagawa", "hotel_type": "onsen_ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "a7f6be2671da",
+      "confidence": "singleton",
+      "name": null,
+      "name_en": "gora onsen kinkaku",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2478765,
+        "lng": 139.0376194
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/11669076770",
+          "url": "https://www.openstreetmap.org/node/11669076770"
+        }
+      ]
+    },
+    {
+      "id": "26a575c49325",
+      "confidence": "singleton",
+      "name": "Forest Gora Onsen",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2473738,
+        "lng": 139.0433813
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/6220418208",
+          "url": "https://www.openstreetmap.org/node/6220418208"
+        }
+      ]
+    },
+    {
+      "id": "28ad36bbc997",
+      "confidence": "singleton",
+      "name": "Hakone Gora Onsen Lalaca",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2514632,
+        "lng": 139.0451816
+      },
+      "phone": "+810460860777",
+      "website": "https://lalaca.com/",
+      "postal_code": "250-0408",
+      "street": "Gora",
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5982107523",
+          "url": "https://www.openstreetmap.org/node/5982107523"
+        }
+      ]
+    },
+    {
+      "id": "326013488f93",
+      "confidence": "singleton",
+      "name": "Onsen hostel K's House Hakone",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hostel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2283843,
+        "lng": 139.0978393
+      },
+      "phone": "+81460859111",
+      "website": "https://kshouse.jp/hakone-j/index.html",
+      "postal_code": "Ashigarashimo District, Kanagawa Prefecture 250-0312, Japon",
+      "street": "箱根町湯本茶屋",
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/931868525",
+          "url": "https://www.openstreetmap.org/way/931868525"
+        }
+      ]
+    },
+    {
+      "id": "553980f78913",
+      "confidence": "singleton",
+      "name": "奥湯河原温泉　加満田",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.161185,
+        "lng": 139.0587048
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4164265867",
+          "url": "https://www.openstreetmap.org/node/4164265867"
+        }
+      ]
+    },
+    {
+      "id": "2016ed212418",
+      "confidence": "singleton",
+      "name": "湯河原温泉 ゆがわら水の香里",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.1478334,
+        "lng": 139.0714211
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/1451007256",
+          "url": "https://www.openstreetmap.org/way/1451007256"
+        }
+      ]
+    },
+    {
+      "id": "5dc24fa784b8",
+      "confidence": "singleton",
+      "name": "箱根強羅温泉 紬 -TSUM
+```
+
+
+=== Case R-117 ===
+Topic / intent: Kyoto romantic ryokan
+Query: Planning a honeymoon in Kyoto. Which ryokan near Higashiyama have private outdoor baths?
+Tool: get_hotels({"prefecture": "Kyoto", "hotel_type": "ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "3245b857edaa",
+      "confidence": "singleton",
+      "name": "Capsule Ryokan Kyoto",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 34.9890237,
+        "lng": 135.7536603
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": "600-8226",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/292409976",
+          "url": "https://www.openstreetmap.org/way/292409976"
+        }
+      ]
+    },
+    {
+      "id": "4920229ca4d2",
+      "confidence": "singleton",
+      "name": "Hifumi ryokan",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 34.9884124,
+        "lng": 135.7604712
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5393194057",
+          "url": "https://www.openstreetmap.org/node/5393194057"
+        }
+      ]
+    },
+    {
+      "id": "7a3be4f88b6d",
+      "confidence": "singleton",
+      "name": "Nishiyama Ryokan",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 35.0130903,
+        "lng": 135.7662572
+      },
+      "phone": "075-222-1166",
+      "website": "https://www.ryokan-kyoto.com/",
+      "postal_code": "604-0933",
+      "street": "御幸町通 (Gokomachi-dori)",
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/177456128",
+          "url": "https://www.openstreetmap.org/way/177456128"
+        }
+      ]
+    },
+    {
+      "id": "6529cd724614",
+      "confidence": "singleton",
+      "name": "OYO旅館 晴輝京都ステーション",
+      "name_en": "Hotel Seiki Kyoto Station",
+      "name_zh": null,
+      "name_ko": null,
+      "type": null,
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 34.981330731,
+        "lng": 135.759943742
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q111458731",
+          "url": "https://www.wikidata.org/wiki/Q111458731"
+        }
+      ]
+    },
+    {
+      "id": "47cc0a63b289",
+      "confidence": "singleton",
+      "name": "Rakucho Ryokan",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 35.0448205,
+        "lng": 135.7673107
+      },
+      "phone": "+81 75 721 2174",
+      "website": null,
+      "postal_code": "606-0824",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/10808890371",
+          "url": "https://www.openstreetmap.org/node/10808890371"
+        }
+      ]
+    },
+    {
+      "id": "c5581518e6d1",
+      "confidence": "singleton",
+      "name": "Ryokan",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 35.0251218,
+        "lng": 135.74574
+      },
+      "phone": "+814415671",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/562754836",
+          "url": "https://www.openstreetmap.org/way/562754836"
+        }
+      ]
+    },
+    {
+      "id": "395b88823b37",
+      "confidence": "singleton",
+      "name": "Ryokan Izuyasu",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "gu
+```
+
+
+=== Case R-118 ===
+Topic / intent: 長崎 ロマンチック夜景
+Query: カップルで長崎の夜景を楽しみたい。稲佐山展望台以外にもロマンチックなスポットはある？
+Tool: get_spots({"prefecture": "Nagasaki", "q": "夜景"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "b809a243f3988cf6",
+      "name": "いなさやま\n                                                稲佐山",
+      "description": "長崎市のランドマーク的存在で、夜景鑑賞で賑わう人気のフォトジェニックスポットです。\n鶴の港と称される長崎港を中心に山々に囲まれたすり鉢状の地形が独自の立体的な夜景を作り出し「1,000万ドルの夜景」として知られています。その美しさが認められ、2024年6年12月17日に開催された「夜景サミット2024 in 北九州」において、北九州市・横浜市とともに、日本新三大夜景に認定されました。長崎市は平成27（2015）年に認定されて以来、4連続、4度目の認定になります。\n展望台は照明を散りばめたフロアが幻想的な空間を演出しています。夜景だけでなく、晴れた日の昼間には長崎市街地はもちろんのこと、雲仙・天草・五島列島まで眺めることができます。\n\nツツジの名所として知られる稲佐山公園は、憩いの空間やレクリエーションの場として年間を通じて人々に親しまれています。中腹にはイベント広場や野外音楽堂があり、国内を代表するアーティストのコンサートやさまざまなイベントも催されます。\n\n山麓から山頂を結ぶロープウェイ、ガラス張りのゴンドラから360度ワイドビューの空中散歩を楽しめます。また、2020年には稲佐山中腹駐車場と山頂を約8分で結ぶスロープカーが運行を開始しました。自然との調和を重視したデザインでゆっくり進むスロープカーはロープウェイとは異なる景色が楽しめ今注目の乗り物です。\n&nbsp;\n\n【スロープカー運休のお知らせ】\nスロープカーの安全運行のため、工事を実施することに伴い、当面の間運休です。\n※運行再開については、決まり次第お知らせします。\n\nまた、稲佐山公園では、スロープカー運休中の対応として、多くの方に展望台からの眺望を楽しんでいただくため、来場者が多いゴールデンウィーク期間中に無料シャトルバスを運行します。\n詳細は下記リンク先のお知らせよりご確認ください。",
+      "coordinates": {
+        "lat": 32.756077,
+        "lng": 129.855255
+      },
+      "address": "長崎県長崎市稲佐町",
+      "url": "https://www.at-nagasaki.jp/spot/115",
+      "municipality": "長崎市",
+      "municipality_code": "422011",
+      "prefecture": "長崎県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9f36d64c6ad069d1",
+      "name": "ながさきろーぷうぇい\n                                                長崎ロープウェイ",
+      "description": "全面ガラス張りのゴンドラからは、360度のパノラマで長崎の美しい街並みを一望でき、2021年に「世界新三大夜景」に再認定された1,000万ドルの夜景のビュースポットとしても有名です。\n\n稲佐山の麓「淵神社駅」から約5分で標高333ｍの稲佐山山頂へとつなぎ、晴れた日には雲仙・天草・五島列島までも見渡すことができます。「淵神社駅」には無料駐車場がありアクセスも良好！\n\n2011年にリニューアルしたゴンドラは、フェラーリのデザインを手がけたとして有名な、世界的工業デザイナー・奥山清行氏率いる「KEN OKUYAMA DESIGN」によるものです。これまでのゴンドラとは全く異なる、斬新なフォルムが特徴です。乗車中は360度のクリアーな視界が拡がり、迫力のあるパノラマビューをお楽しみいただけます。\n生まれ変わった２機のゴンドラには愛称もついていて、その名は&ldquo;星のしずく&rdquo;と&ldquo;月のしずく&rdquo;。\nデザイン、眺望、乗り心地にこだわった「星のしずく」と「月のしずく」と共にいざ空の旅へ！",
+      "coordinates": {
+        "lat": 32.754417,
+        "lng": 129.848602
+      },
+      "address": "〒852-8011 長崎県長崎市稲佐町364-1",
+      "url": "https://www.at-nagasaki.jp/spot/168",
+      "municipality": "長崎市",
+      "municipality_code": "422011",
+      "prefecture": "長崎県",
+      "language": "ja",
+      "quality_score": 0.72,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "06768fce3fb290ad",
+      "name": "長崎ロープウェイ\n                                            （ながさきろーぷうぇい）",
+      "description": "「長崎ロープウェイ」の情報はながさき旅ネットで。全面ガラス張りのゴンドラからは、360度のパノラマで長崎の美しい街並みを一望でき、2021年に「世界新三大夜景」に再認定された1,000万ドルの夜景のビュースポットとしても有名です。\n\n稲佐山の麓「淵神社駅」から約5分で標高333ｍの稲佐山山頂へとつなぎ、晴れた日には雲仙・天草・五島列島までも見渡すことができます。「淵神社駅」には無料駐車場がありアクセスも良好！\n\n2011年にリニューアルしたゴンドラは、フェラーリのデザインを手がけたとして有名な、世界的工業デザイナー・奥山清行氏率いる「KEN OKUYAMA DESIGN」によるものです。これまでのゴンドラとは全く異なる、斬新なフォルムが特徴です。乗車中は360度のクリアーな視界が拡がり、迫力のあるパノラマビューをお楽しみいただけます。\n生まれ変わった２機のゴンドラには愛称もついていて、その名は&ldquo;星のしずく&rdquo;と&ldquo;月のしずく&rdquo;。\nデザイン、眺望、乗り心地にこだわった「星のしずく」と「月のしずく」と共にいざ空の旅へ！",
+      "coordinates": {
+        "lat": 32.754417,
+        "lng": 129.848602
+      },
+      "address": "〒852-8011 長崎県長崎市稲佐町364-1",
+      "url": "https://www.nagasaki-tabinet.com/guide/168",
+      "municipality": "平戸市",
+      "municipality_code": "422070",
+      "prefecture": "長崎県",
+      "language": "ja",
+      "quality_score": 0.72,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7aa865ca53967b3c",
+      "name": "癒やしも美味しいも全部！！ママが喜ぶワンランク上のFAMILY TRIP",
+      "description": "家族のことを最優先に考え、日々に追われるママさまに捧ぐ！\nママがリラックスして楽しめる、ちょっぴり贅沢な旅プランはいかがですか？癒しと美味しいをこれでもか！と詰め込んで、自分をたっぷりと甘やかしてあげましょう♡",
+      "coordinates": {
+        "lat": 33.051132,
+        "lng": 129.766006
+      },
+      "address": "〒859-3451 長崎県佐世保市針尾東町2523-1",
+      "url": "https://www.sasebo99.com/feature/familytrip-2022",
+      "municipality": "佐世保市",
+      "municipality_code": "422029",
+      "prefect
+```
+
+
+=== Case R-119 ===
+Topic / intent: 교토 벚꽃 커플
+Query: 교토에서 벚꽃 시즌에 커플로 즐길 수 있는 로맨틱한 장소를 알려주세요.
+Tool: search_hybrid({"q": "京都 桜 ロマンチック", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "京都 桜 ロマンチック",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.02821,
+      "rank_bm": 5,
+      "rank_vec": 18,
+      "key": "spot:8eeeeaee041863a9",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "函館山から見るロマンチック「冬夜景」",
+      "description": "このサイトでは、ユーザーエクスペリエンスを向上させるためにCookieを使用しています。引き続き閲覧される場合は、当サイトでのCookie使用に同意いただいたことになります。 承諾する",
+      "prefecture": "北海道",
+      "municipality": "函館市",
+      "url": "https://www.hakobura.jp/features/13"
+    },
+    {
+      "score": 0.02814,
+      "rank_bm": 6,
+      "rank_vec": 17,
+      "key": "spot:6fea186fd4d445eb",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "冬のロマンチック函館、見どころガイド",
+      "description": "このサイトでは、ユーザーエクスペリエンスを向上させるためにCookieを使用しています。引き続き閲覧される場合は、当サイトでのCookie使用に同意いただいたことになります。 承諾する",
+      "prefecture": "北海道",
+      "municipality": "函館市",
+      "url": "https://www.hakobura.jp/features/252"
+    },
+    {
+      "score": 0.02587,
+      "rank_bm": 3,
+      "rank_vec": 40,
+      "key": "wd:Q11507056",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "日本ロマンチック街道",
+      "description": "road in Japan",
+      "prefecture": "栃木県",
+      "municipality": "栃木県",
+      "url": "https://www.wikidata.org/wiki/Q11507056"
+    },
+    {
+      "score": 0.02453,
+      "rank_bm": 12,
+      "rank_vec": 34,
+      "key": "spot:15b839b562fe8d0e",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "四季の蔵もてなしロマン館",
+      "description": "もてなしロマン館 猿賀公園、猿賀神社、盛美園と清藤氏書院庭園、と徒歩圏内で並びにある、四季の蔵もてなしロマン館 親水庭園 ピクニックを楽しむことができます。 ロマン館内では平川市産の旬の野菜やお土産を販売 ランチはロマン館内のレストラン けやき 営業時間 午前9時~午後5時（11月~3月は午後4時半まで） 休日 年末年始花懐石御膳（日替わりランチ 写真は土日限定）数量限定 レストランけやきの野菜カレー（白米と玄米が選べます） 石山勇人氏監修のラーメンが人気です。 四季の蔵 もてなしロマン館 住所〒036-0242 平川市猿賀石林10-1 電話番号0172-43-5610 FAX番号0172-43-5615 メールアドレス ホームページhttps://hirakawa-gurume.com/shop/keyaki アクセス情報アクセス 弘南鉄道津軽尾上駅で下車、駅から徒歩10分 東北自動車道黒石I.C.から10分 無料駐車場あり インスタグラムハッシュタグ 四季の蔵もてなしロマン館#四季の蔵もてなしロマン館 もてなしロマン館#もてなしロマン館 こちらもおすすめ！道の駅 いかりがせき 「津軽関の庄」味助御食事処 もてなし白金珈琲（プラチナコーヒー） ▼この記事をシェアする 猿賀公園、猿賀神社、盛美園と清藤氏書院庭園、と徒歩圏内で並びにある、四季の蔵もてなしロマン館 営業時間 午前9時~午後5時（11月~3月は午後4時半まで） 休日 年末年始花懐石御膳（日替わりランチ 写真は土日限定）数量限定 四季の蔵 もてなしロマン館 住所〒036-0242 平川市猿賀石林10-1 電話番号0172-43-5610 FAX番号0172-43-5615 メールアドレス ホームページhttps://hirakawa-gurume.com/shop/keyaki アクセス情報アクセス 弘南鉄道津軽尾上駅で下車、駅から徒歩10分 東北自動車道黒石I.C.から10分 無料駐車場あり",
+      "prefecture": "青森県",
+      "municipality": "平川市",
+      "url": "https://hirakawa-kankou.com/2019/02/23/motenasi-roman"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "spot:f6be38fb3c9ecbfe",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "特集：ロマンチック交野",
+      "description": "春は桜の季節です。交野市内でおすすめのお花見スポットをご紹介します。",
+      "prefecture": "大阪府",
+      "municipality": "交野市",
+      "url": "https://katano-kanko.com/%e7%89%b9%e9%9b%86%ef%bc%9a%e3%83%ad%e3%83%9e%e3%83%b3%e3%83%81%e3%83%83%e3%82%af%e4%ba%a4%e9%87%8e"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "dmo_page:dmo_0033_公社京都府観光連盟:https://www.kyoto-kankou.or.jp/areas/sea",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "エリア詳細 | 京都府観光連盟公式サイト (（公社）京都府観光連盟)",
+      "description": "百商一気「桜プロジェクト」 ～与謝野の食べる桜～ 投稿日: 2026年04月30日(木) 与謝野町 海の京都 写真展『大江の物語―変化(へんげ)する鬼たち―』を開催します 投稿日: 2025年10月17日(金) 福知山市 森の京都 海の京都 Music Fusion in Kyoto音楽祭 開催のお知らせ 投稿日: 2025年09月04日(木) 宮津市 京丹後市 与謝野町 綾部市 森の京都 海の京都 お茶の京都 宮津市 京丹後市 与謝野町 綾部市 森の京都 海の京都 お茶の京都 【丹後】機（はた）道具の音で、自分だけの表現を探そう！「『音 気 楽 団 』―機の妖精にきく―」 投稿日: 2025年08月08日(金) 与謝野町 伊根町 京丹後市 宮津市 海の京都",
+      "prefecture": "京都府",
+      "municipality": null,
+      "url": "https://www.kyoto-kankou.or.jp/areas/sea"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "spot:038ef7e8cd43d5dd",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "日本ロマンチック街道",
+      "description": "現在の位置： ト
+```
+
+
+=== Case R-120 ===
+Topic / intent: Noto Peninsula anniversary
+Query: Looking for a secluded ryokan on the Noto Peninsula for our anniversary. Preferably with ocean views.
+Tool: get_hotels({"prefecture": "Ishikawa", "hotel_type": "ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "89f3f2c58ead",
+      "confidence": "singleton",
+      "name": "Asadaya Ryokan Inn",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.570473,
+        "lng": 136.6564615
+      },
+      "phone": null,
+      "website": "http://www.asadaya.co.jp/",
+      "postal_code": "920-0906",
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4628907071",
+          "url": "https://www.openstreetmap.org/node/4628907071"
+        }
+      ]
+    },
+    {
+      "id": "b8ff5420d3ff",
+      "confidence": "singleton",
+      "name": "Nakayasu Ryokan",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.5708634,
+        "lng": 136.6609051
+      },
+      "phone": null,
+      "website": "http://ryokan.ne.jp/nakayasu/?lang=en",
+      "postal_code": "920-0902",
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4628932779",
+          "url": "https://www.openstreetmap.org/node/4628932779"
+        }
+      ]
+    },
+    {
+      "id": "a9494d881822",
+      "confidence": "singleton",
+      "name": "Ryokan Yamamuro",
+      "name_en": "Ryokan Yamamuro",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.5706338,
+        "lng": 136.6610918
+      },
+      "phone": null,
+      "website": "http://eng.ryokan-yamamuro.com/",
+      "postal_code": "920-0902",
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4628932780",
+          "url": "https://www.openstreetmap.org/node/4628932780"
+        }
+      ]
+    },
+    {
+      "id": "82f62cf75ca6",
+      "confidence": "singleton",
+      "name": "のと旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 37.3099491,
+        "lng": 137.1470159
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/1126075793",
+          "url": "https://www.openstreetmap.org/way/1126075793"
+        }
+      ]
+    },
+    {
+      "id": "400bc57098d7",
+      "confidence": "singleton",
+      "name": "やまもと旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.3620044,
+        "lng": 136.6100782
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5856953808",
+          "url": "https://www.openstreetmap.org/node/5856953808"
+        }
+      ]
+    },
+    {
+      "id": "477ef3299f4e",
+      "confidence": "singleton",
+      "name": "一本木旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 37.2187474,
+        "lng": 137.066786
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "17",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5501180332",
+          "url": "https://www.openstreetmap.org/node/5501180332"
+        }
+      ]
+    },
+    {
+      "id": "3d661353cdfd",
+      "confidence": "singleton",
+      "name": "中山旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type"
+```
+
+
+=== Case R-121 ===
+Topic / intent: 伊豆 温泉 カップル
+Query: ふたりで伊豆の温泉旅行を計画中。海が見える露天風呂のある旅館と周辺の観光地を教えて。
+Tool: get_hotels({"prefecture": "Shizuoka", "hotel_type": "onsen_ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "hito_yu_kai:716",
+      "confidence": "confirmed",
+      "name": "かわいいお宿 雲見園",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒410-3615 静岡県賀茂郡松崎町雲見401",
+      "prefecture_code": "22",
+      "municipality": null,
+      "description_ja": "４代目の新鮮な魚料理",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "716",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=716"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:714",
+      "confidence": "confirmed",
+      "name": "伊豆の踊子の宿　福田家",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒413-0507 静岡県賀茂郡河津町湯ヶ野236",
+      "prefecture_code": "22",
+      "municipality": null,
+      "description_ja": "川端康成ゆかりの宿",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "714",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=714"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:720",
+      "confidence": "confirmed",
+      "name": "湯本館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒410-3206 静岡県伊豆市湯ヶ島1656-1",
+      "prefecture_code": "22",
+      "municipality": null,
+      "description_ja": "文豪川端康成「伊豆の踊子」執筆の宿",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "720",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=720"
+        }
+      ]
+    },
+    {
+      "id": "ca80bcf8d432",
+      "confidence": "confirmed",
+      "name": "ホテルカターラリゾート＆スパ",
+      "name_en": "Izu Atagawa Onsen Hotel Katara Resort&Spa",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 34.817439,
+        "lng": 139.072204
+      },
+      "phone": null,
+      "website": "https://www.katara.co.jp/,https://www.katara.co.jp/en/",
+      "postal_code": "413-0302",
+      "street": null,
+      "prefecture_code": "22",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/2779720990",
+          "url": "https://www.openstreetmap.org/node/2779720990"
+        },
+        {
+          "source": "osm",
+          "id": "way/560263399",
+          "url": "https://www.openstreetmap.org/way/560263399"
+        }
+      ]
+    },
+    {
+      "id": "555f01968d64",
+      "confidence": "singleton",
+      "name": "K's House Ito Onsen",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hostel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 34.9717852,
+        "lng": 139.0974223
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "22",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/1131014120",
+          "url": "https://www.openstreetmap.org/node/1131014120"
+        }
+      ]
+    },
+    {
+      "id": "61e6bf41c6c3",
+      "confidence": "singleton",
+      "name": "オーシャンビュー博海温泉ホテル",
+      "name_en": "Ocean View Hiromi SPA
+```
+
+
+=== Case R-122 ===
+Topic / intent: 京都 蜜月旅行
+Query: 想和伴侣在京都度蜜月，有哪些浪漫的旅馆和景点推荐？
+Tool: get_hotels({"prefecture": "Kyoto", "hotel_type": "traditional"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "3ff299057d81",
+      "confidence": "singleton",
+      "name": null,
+      "name_en": "Retro Authentic Machiya",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "kominka",
+      "coordinates": {
+        "lat": 34.999842,
+        "lng": 135.7464008
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "高辻通",
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5103375121",
+          "url": "https://www.openstreetmap.org/node/5103375121"
+        }
+      ]
+    },
+    {
+      "id": "3245b857edaa",
+      "confidence": "singleton",
+      "name": "Capsule Ryokan Kyoto",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 34.9890237,
+        "lng": 135.7536603
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": "600-8226",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/292409976",
+          "url": "https://www.openstreetmap.org/way/292409976"
+        }
+      ]
+    },
+    {
+      "id": "4920229ca4d2",
+      "confidence": "singleton",
+      "name": "Hifumi ryokan",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 34.9884124,
+        "lng": 135.7604712
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5393194057",
+          "url": "https://www.openstreetmap.org/node/5393194057"
+        }
+      ]
+    },
+    {
+      "id": "c6ece5122c2a",
+      "confidence": "singleton",
+      "name": "Kokonoe machiya",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "kominka",
+      "coordinates": {
+        "lat": 35.0214132,
+        "lng": 135.7460225
+      },
+      "phone": "+81 70-8314-5855",
+      "website": "https://www.kokonoemachiya.com/hotel",
+      "postal_code": "602-8177",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/13681527602",
+          "url": "https://www.openstreetmap.org/node/13681527602"
+        }
+      ]
+    },
+    {
+      "id": "7c62b1c65295",
+      "confidence": "singleton",
+      "name": "Kyomachiya Hachijo Kyomachiya Condominium",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "kominka",
+      "coordinates": {
+        "lat": 34.9822125,
+        "lng": 135.7595976
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5280818606",
+          "url": "https://www.openstreetmap.org/node/5280818606"
+        }
+      ]
+    },
+    {
+      "id": "d480e86ff54b",
+      "confidence": "singleton",
+      "name": "Kyoto Machiya 銭屋町",
+      "name_en": "Kyoto Machiya Zeniyacho",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "kominka",
+      "coordinates": {
+        "lat": 34.9943674,
+        "lng": 135.757653
+      },
+      "phone": null,
+      "website": "https://kyotomachiyas.com/zeniyacho",
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/570019749",
+          "url": "https://www.openstreetmap.org/way/570019749"
+        }
+      ]
+    },
+    {
+      "id": "7a3be4f88b6d",
+      "confidence": "singleton",
+      "name": "Nishiyama Ryokan",
+      "name_en": nu
+```
+
+
+=== Case R-123 ===
+Topic / intent: Nikko romantic ryokan
+Query: Looking for a romantic ryokan in Nikko for our wedding anniversary. Preferably near Chuzenji Lake.
+Tool: get_hotels({"prefecture": "Tochigi", "hotel_type": "ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "379cd3634b2d",
+      "confidence": "confirmed",
+      "name": "和泉屋旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.9643048,
+        "lng": 139.8375809
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "09",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/380033524",
+          "url": "https://www.openstreetmap.org/way/380033524"
+        },
+        {
+          "source": "osm",
+          "id": "way/380033531",
+          "url": "https://www.openstreetmap.org/way/380033531"
+        }
+      ]
+    },
+    {
+      "id": "34013857c563",
+      "confidence": "singleton",
+      "name": "いせや旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.5704446,
+        "lng": 139.762649
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "09",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/643079801",
+          "url": "https://www.openstreetmap.org/way/643079801"
+        }
+      ]
+    },
+    {
+      "id": "219ab8563e90",
+      "confidence": "singleton",
+      "name": "きかく旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.5424157,
+        "lng": 139.8783909
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "09",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/1321601953",
+          "url": "https://www.openstreetmap.org/way/1321601953"
+        }
+      ]
+    },
+    {
+      "id": "4430b66b84ad",
+      "confidence": "singleton",
+      "name": "ほりこし旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "guest_house",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 37.0977795,
+        "lng": 140.001171
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "09",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/5905777763",
+          "url": "https://www.openstreetmap.org/node/5905777763"
+        }
+      ]
+    },
+    {
+      "id": "ba80a6a435ef",
+      "confidence": "singleton",
+      "name": "中藤屋旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 37.0954635,
+        "lng": 140.0017562
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "09",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/414932107",
+          "url": "https://www.openstreetmap.org/way/414932107"
+        }
+      ]
+    },
+    {
+      "id": "6ca3cb338064",
+      "confidence": "singleton",
+      "name": "丸屋旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coordinates": {
+        "lat": 36.9648865,
+        "lng": 139.8377502
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "09",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/380033533",
+          "url": "https://www.openstreetmap.org/way/380033533"
+        }
+      ]
+    },
+    {
+      "id": "22e5277bdc13",
+      "confidence": "singleton",
+      "name": "亀田屋旅館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "ryokan",
+      "coo
+```
+
+
+=== Case R-124 ===
+Topic / intent: 草津温泉 旅館
+Query: 草津温泉でふたりきりでゆっくりできる旅館を探している。記念日プランがあるところがいい。
+Tool: get_hotels({"prefecture": "Gunma", "hotel_type": "onsen_ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "hito_yu_kai:632",
+      "confidence": "confirmed",
+      "name": "神水館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒370-1406 群馬県藤岡市浄法寺６番地",
+      "prefecture_code": "10",
+      "municipality": null,
+      "description_ja": "昭和28年のほんもの建築",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "632",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=632"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:633",
+      "confidence": "confirmed",
+      "name": "清流荘",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒370-2604 群馬県甘楽郡下仁田町吉崎769",
+      "prefecture_code": "10",
+      "municipality": null,
+      "description_ja": "7000坪の自然の庭",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "633",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=633"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:636",
+      "confidence": "confirmed",
+      "name": "滝沢館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒371-0202 群馬県前橋市粕川町室沢字滝沢241",
+      "prefecture_code": "10",
+      "municipality": null,
+      "description_ja": "赤城南面の渓流に染まる",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "636",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=636"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:627",
+      "confidence": "confirmed",
+      "name": "かど半旅館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒377-0814 群馬県吾妻郡東吾妻町大字松谷2432",
+      "prefecture_code": "10",
+      "municipality": null,
+      "description_ja": "女性好みのスベスベした湯",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "627",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=627"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:630",
+      "confidence": "confirmed",
+      "name": "美郷館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒377-0541 群馬県吾妻郡中之条町大字上沢渡1521-2",
+      "prefecture_code": "10",
+      "municipality": null,
+      "description_ja": "滝を眺めながらの入浴",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "630",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=630"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:626",
+      "confidence": "confirmed",
+```
+
+
+=== Case R-125 ===
+Topic / intent: Hiroshima Miyajima romantic
+Query: Romantic spots in Hiroshima and Miyajima for a couple. Any ryokan on the island?
+Tool: search_hybrid({"q": "宮島 ロマンチック カップル", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "宮島 ロマンチック カップル",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.02988,
+      "rank_bm": 9,
+      "rank_vec": 5,
+      "key": "spot:c8c167ecf511290d",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "TOPICS",
+      "description": "2月11日 14日 15日の3日間、18時よりバレンタイン特別便を 運航いたします。幻想的な夜の海で大切な人と思い出を作りませんか？ 期間中は、たけの花による竹あかり展示も予定しております。 ロマンチックな夜をご家族で、カップルで、皆様のご来館をお待ちしております！ 第1便 集合17:30 出航18:00 下船18:30 第2便 集合18:30 出航19:00 下船19:30（第2便の運航は2月14日（土）のみ） 【料金】 大人 3,000円(中学生以上) 小学生 1,500円 未就学児 無料 【おことわり】 ・行程は海の状況により、変更となる可能性がございます。 ・天候によりツアー自体が中止となる場合は返金いたします。 ・小学生、未就学のお客様のみの乗船はできません。 ・大変恐れ入りますが、妊娠中の方の本ツアーへの参加はご遠慮下さい。 ・防寒対策のうえ、ご乗船下さい。 ご予約・詳細はこちら↓ https://www.asoview.com/channel/activities/ja/marine-kaiyo-kankou/offices/2214/courses?language_type=ja",
+      "prefecture": "徳島県",
+      "municipality": "海陽町",
+      "url": "https://www.kaiyo-kankou.jp/topics/topics-4810"
+    },
+    {
+      "score": 0.02489,
+      "rank_bm": null,
+      "rank_vec": 24,
+      "key": "spot:b90219d3d133ab15",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "カキコミ情報について",
+      "description": "「耳より情報」や「旅の思い出」等のカキコミ情報や 観光スポットについて、季節別、地域別、カテゴリ別で ご覧いただけます。 また、皆様からの情報提供をお待ちしております。 「みやぎ観光ＰＲ応援隊」は、宮城の観光の素晴らしさを全国に発信するサポーターです。 魅力ある観光に関するさまざまな公益情報を、インターネットを通じ全国に伝えることにより、多くの観光客がそれぞれの地域に訪れていただくことを望んでいるものです。 「みやぎ観光ＰＲ応援隊カキコミ情報」は、みやぎ観光ＰＲ応援隊に情報提供者として登録した団体・企業・個人または宮城県観光連盟会員からの投稿情報を、一般に公開しているものです。 利用者は、みやぎ観光ＰＲ応援隊カキコミ情報より入手したいかなる情報も、自己責任の範囲でご利用ください。 掲示された情報の利用に伴うトラブルが発生した場合、当連盟では一切の責任を負いません。 ※詳しくは、利用規約をご覧ください。なお、カキコミ情報を「見る」または「投稿する」ことにより、利用規約の内容にご承諾いただいたものとみなします。",
+      "prefecture": "宮城県",
+      "municipality": "大衡村",
+      "url": "https://www.miyagi-kankou.or.jp/page/kutikomi_about"
+    },
+    {
+      "score": 0.0224,
+      "rank_bm": 20,
+      "rank_vec": 41,
+      "key": "spot:15b839b562fe8d0e",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "四季の蔵もてなしロマン館",
+      "description": "もてなしロマン館 猿賀公園、猿賀神社、盛美園と清藤氏書院庭園、と徒歩圏内で並びにある、四季の蔵もてなしロマン館 親水庭園 ピクニックを楽しむことができます。 ロマン館内では平川市産の旬の野菜やお土産を販売 ランチはロマン館内のレストラン けやき 営業時間 午前9時~午後5時（11月~3月は午後4時半まで） 休日 年末年始花懐石御膳（日替わりランチ 写真は土日限定）数量限定 レストランけやきの野菜カレー（白米と玄米が選べます） 石山勇人氏監修のラーメンが人気です。 四季の蔵 もてなしロマン館 住所〒036-0242 平川市猿賀石林10-1 電話番号0172-43-5610 FAX番号0172-43-5615 メールアドレス ホームページhttps://hirakawa-gurume.com/shop/keyaki アクセス情報アクセス 弘南鉄道津軽尾上駅で下車、駅から徒歩10分 東北自動車道黒石I.C.から10分 無料駐車場あり インスタグラムハッシュタグ 四季の蔵もてなしロマン館#四季の蔵もてなしロマン館 もてなしロマン館#もてなしロマン館 こちらもおすすめ！道の駅 いかりがせき 「津軽関の庄」味助御食事処 もてなし白金珈琲（プラチナコーヒー） ▼この記事をシェアする 猿賀公園、猿賀神社、盛美園と清藤氏書院庭園、と徒歩圏内で並びにある、四季の蔵もてなしロマン館 営業時間 午前9時~午後5時（11月~3月は午後4時半まで） 休日 年末年始花懐石御膳（日替わりランチ 写真は土日限定）数量限定 四季の蔵 もてなしロマン館 住所〒036-0242 平川市猿賀石林10-1 電話番号0172-43-5610 FAX番号0172-43-5615 メールアドレス ホームページhttps://hirakawa-gurume.com/shop/keyaki アクセス情報アクセス 弘南鉄道津軽尾上駅で下車、駅から徒歩10分 東北自動車道黒石I.C.から10分 無料駐車場あり",
+      "prefecture": "青森県",
+      "municipality": "平川市",
+      "url": "https://hirakawa-kankou.com/2019/02/23/motenasi-roman"
+    },
+    {
+      "score": 0.02007,
+      "rank_bm": null,
+      "rank_vec": 46,
+      "key": "spot:5ca9e63d33242422",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "女子旅におすすめ！松山観光と砥部焼陶芸体験で充実の日帰り旅",
+      "description": "城下町・松山から、道後温泉本館へ。ハイカラ通りには老舗店舗が建ち並び、ランチやおみやげ探しなどお楽しみが満載です。砥部焼の里では、陶工気分で陶芸体験を楽しんで！窯元巡りもおすすめです。 JR松山駅 ↓市内電車「道後温泉行き」で約12分、県庁前下車徒歩約2分 1 萬翠荘 上流社会の談笑が今も聞こえる華麗なサロン 旧松山藩主の子孫にあたる久松定謨伯爵の別邸として建てられた、フランス・ルネッサンス様式の洋館。皇族の立ち寄り所や、各界の名士が集まる社交の場として利用されてきた。現在では建築当時の華麗な姿を今に活かし、イベントや展示会場として利用されている。市街中心部に位置しながらも、喧騒から隔絶させられる特別な場所で、当時の大正ロマンを感じることができる。 基本情報を見る 詳細ページへ 住所 愛媛県松山市一番町3-3-7 電話番号 089-921-3711 営業時間 9:00～18:00 休業日 月曜日（祝日は開館） JR松山駅 ↓市内電車「道後温泉行き」で約12分、県庁前下車徒歩約2分 1 萬翠荘 上流社会の談笑が今も聞こえる華麗なサロン 旧松山藩主の子孫にあたる久松定謨伯爵の別邸として建てられた、フランス・ルネッサンス様式の洋館。皇族の立ち寄り所や、各界の名士が集まる社交の場として利用されてきた。現在では建築当時の華麗な姿を今に活かし、イベントや展示会場として利用されている。市街中心部に位置しながらも、喧騒から隔絶させられる特別な場所で、当時の大正ロマンを感じることができる。 基本情報を見る 詳細ページへ 住所 愛媛県松山市一番町3-3-7 電話番号 089-921-3711 営業時間 9:00～18:00 休業日 月曜日（祝日は開館） 旧松山藩主の子孫にあたる久松定謨伯
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.

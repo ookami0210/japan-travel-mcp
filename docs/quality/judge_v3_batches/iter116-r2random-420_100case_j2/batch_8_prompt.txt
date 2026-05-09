@@ -1,0 +1,2455 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case R-176 ===
+Topic / intent: 沖縄 泡盛
+Query: 沖縄の泡盛について教えて。地理的表示が保護された泡盛の特徴と主な産地は？
+Tool: get_local_food({"prefecture": "Okinawa", "keyword": "泡盛", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "47",
+  "lang": "ja",
+  "count": 12,
+  "total_matching": 12,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:44",
+      "registration_number": 44,
+      "name_ja": "琉球もろみ酢",
+      "name": "琉球もろみ酢",
+      "description_ja": "琉球泡盛のもろみ粕を原料とする非発泡性飲料。琥珀色で酸味があるが、主な酸味成分がクエン酸であるため、鼻にツンとくる刺激や酢酸臭がなく飲みやすい。",
+      "description": "琉球泡盛のもろみ粕を原料とする非発泡性飲料。琥珀色で酸味があるが、主な酸味成分がクエン酸であるため、鼻にツンとくる刺激や酢酸臭がなく飲みやすい。",
+      "registration_date": "平成29年11月10日",
+      "production_area_text": "沖縄県",
+      "prefecture_codes": [
+        "47"
+      ],
+      "producer_group": "沖縄県那覇市辻二丁目4番17号琉球もろみ酢事業協同組合",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0044/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "いざという時に",
+      "name": "いざという時に",
+      "description_ja": "那覇市公式ホームページ",
+      "description": "那覇市公式ホームページ",
+      "body_paragraphs": [
+        "那覇の菜・食 ページ番号1003488 更新日 令和7年12月24日 印刷大きな文字で印刷 那覇市の地場産業をご紹介します。那覇には、おいしいものがたくさん。心もからだも元気になれそう！泡盛 泡盛は、15世紀初めに、現在のタイ王国（当時はシャム）と、琉球王朝の交流を通じて伝わったと言われています。泡盛は、焼酎の仲間で、タイ米（インディカ米）に黒麹菌（泡盛菌）や水を加え発酵させて作ります。3年以上熟成させたものは古酒（くーす）と呼ばれます。那覇市内には、現在7つの酒造所（津波古酒造・宮里酒造・久米仙酒造・咲元酒造・瑞泉酒造・識名酒造・瑞穂酒造）と酒造協働組合があります。「泡盛（あわもり）」という名前の由来には、いろいろな説がありますが、泡盛がアルコール度数が高いことから、注いだ際にたくさん泡が立つので、泡盛と呼ばれるようになったと、一般的に言われています。ハーブ栽培 小禄地域の農家を中心としたバジル、ローズマリー、レモングラス、ミント等のハーブ類が生産されており、全国各地に出荷されています。都市型農業のモデルとなることが期待されています。マグロ 県内でも屈指のマグロ水揚げ量をほこり、本市の水産業を支えています。市内市場へはもちろん、県外へも出荷を行っています。2010年度に新しく「市の魚」として制定されました。漁獲物は、ピンナガ、キハダ、メバチマグロ等他にも、パヤオ漁によりカツオ等の水揚げも盛んです。牧志公設市場 マチグヮーの名で親しまれている活気あふれる沖縄の台所。豚肉や色鮮やかな魚、亜熱帯の野菜や薬草など、あらゆる食材が並んでいます。（まきしこうせついちば）沖縄料理 代表的なうちなー料理をご紹介します。 ぐるくんのから揚げ沖縄の県魚でもあるぐるくん。から揚げにすると、かりっとした表面にふんわりした白身が、たまらないおいしさです。 沖縄そば沖縄料理と言えば、沖縄そば！といってもいいくらい。市内にも美味しいと評判の沖縄そば屋さんがたくさんあります。お気に入りの一杯を探してみえはいかがでしょうか？ フーチャンプルー沖縄の麩には、からだにいいと言われているグルテンが豊富に含まれているそうです。ふわふわのふーちゃんぷるーは、沖縄の家庭になくてはならない味です。 テビチ豚足をやわらかく煮込んだテビチは、足テビチと呼ばれています。お肌に良いというコラーゲンがたっぷり入っているそうです。 このページに関するお問い合わせ 経済観光部 なはまち振興課 地域商店街活性化グループ〒900-8585 沖縄県那覇市泉崎1丁目1番1号（市庁舎6階）電話：098-867-5260ファクス：098-863-1752",
+        "ページ番号1003488 更新日 令和7年12月24日 印刷大きな文字で印刷",
+        "那覇市の地場産業をご紹介します。那覇には、おいしいものがたくさん。心もからだも元気になれそう！",
+        "泡盛は、15世紀初めに、現在のタイ王国（当時はシャム）と、琉球王朝の交流を通じて伝わったと言われています。泡盛は、焼酎の仲間で、タイ米（インディカ米）に黒麹菌（泡盛菌）や水を加え発酵させて作ります。3年以上熟成させたものは古酒（くーす）と呼ばれます。那覇市内には、現在7つの酒造所（津波古酒造・宮里酒造・久米仙酒造・咲元酒造・瑞泉酒造・識名酒造・瑞穂酒造）と酒造協働組合があります。「泡盛（あわもり）」という名前の由来には、いろいろな説がありますが、泡盛がアルコール度数が高いことから、注いだ際にたくさん泡が立つので、泡盛と呼ばれるようになったと、一般的に言われています。",
+        "小禄地域の農家を中心としたバジル、ローズマリー、レモングラス、ミント等のハーブ類が生産されており、全国各地に出荷されています。都市型農業のモデルとなることが期待されています。",
+        "県内でも屈指のマグロ水揚げ量をほこり、本市の水産業を支えています。市内市場へはもちろん、県外へも出荷を行っています。",
+        "2010年度に新しく「市の魚」として制定されました。漁獲物は、ピンナガ、キハダ、メバチマグロ等他にも、パヤオ漁によりカツオ等の水揚げも盛んです。",
+        "マチグヮーの名で親しまれている活気あふれる沖縄の台所。豚肉や色鮮やかな魚、亜熱帯の野菜や薬草など、あらゆる食材が並んでいます。（まきしこうせついちば）",
+        "沖縄の県魚でもあるぐるくん。から揚げにすると、かりっとした表面にふんわりした白身が、たまらないおいしさです。",
+        "沖縄料理と言えば、沖縄そば！といってもいいくらい。市内にも美味しいと評判の沖縄そば屋さんがたくさんあります。お気に入りの一杯を探してみえはいかがでしょうか？",
+        "沖縄の麩には、からだにいいと言われているグルテンが豊富に含まれているそうです。ふわふわのふーちゃんぷるーは、沖縄の家庭になくてはならない味です。",
+        "豚足をやわらかく煮込んだテビチは、足テビチと呼ばれています。お肌に良いというコラーゲンがたっぷり入っているそうです。",
+        "このページに関するお問い合わせ 経済観光部 なはまち振興課 地域商店街活性化グループ〒900-8585 沖縄県那覇市泉崎1丁目1番1号（市庁舎6階）電話：098-867-5260ファクス：098-863-1752",
+        "経済観光部 なはまち振興課 地域商店街活性化グループ〒900-8585 沖縄県那覇市泉崎1丁目1番1号（市庁舎6階）電話：098-867-5260ファクス：098-863-1752"
+      ],
+      "spot_url": "https://www.city.naha.okinawa.jp/kankou-bunka/kankou/1003485/1003488.html",
+      "spot_id": "ec8f6d06bba2b906",
+      "municipality": "那覇市",
+      "prefecture": "沖縄県",
+      "prefecture_code": "47"
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "浦添城跡散策マップ（Urasoe Castle Site Map）",
+      "name": "浦添城跡散策マップ（Urasoe Castle
+```
+
+
+=== Case R-177 ===
+Topic / intent: Tofu Kyoto vegetarian
+Query: What vegetarian food experiences are available in Kyoto? Interested in traditional tofu and shojin ryori.
+Tool: get_local_food({"prefecture": "Kyoto", "keyword": "豆腐", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "26",
+  "lang": "en",
+  "count": 2,
+  "total_matching": 2,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "京都定期観光バス(おこしバス)大原三千院と世界遺産比叡山延暦寺",
+      "name": "京都定期観光バス(おこしバス)大原三千院と世界遺産比叡山延暦寺",
+      "description_ja": "京都定期観光バス（おこしバス）に乗って「大原三千院と比叡山延暦寺」に行ってきました。今回のメインは、何といっても「大原三千院」。定期観光バスなら、バスに乗っているだけで、目的の観光地に連れて行ってもらえます。また、バス車内ではガイドさんのお話に耳を傾けながら、車窓の景色も楽しむことができました。",
+      "description": "京都定期観光バス（おこしバス）に乗って「大原三千院と比叡山延暦寺」に行ってきました。今回のメインは、何といっても「大原三千院」。定期観光バスなら、バスに乗っているだけで、目的の観光地に連れて行ってもらえます。また、バス車内ではガイドさんのお話に耳を傾けながら、車窓の景色も楽しむことができました。",
+      "body_paragraphs": [
+        "「おこしバス」の愛称で親しまれ、京都の観光名所を巡る、京都定期観光バスの定番人気コース「大原三千院と比叡山延暦寺」の体験レポート（4月に取材）と乗車方法のご案内。集合場所は京都駅の烏丸口（からすまぐち）にあります。JR京都駅の中央口を出て左側、京都中央郵便局方面に歩いていくと「京都定期観光バス」の大きな看板が見えます。まずは受付を済ませて、チケット（座席指定乗車券）を受け取ります。発車時刻10分前までにのりば窓口で、手続きをします。バスの座席は指定制になっています。座席番号はチケット（座席指定乗車券）お渡し時に決定します。あいにくですが、お客さまから座席番号のご要望はお受けしていません。お手洗いは乗車場所にはありません。JR京都駅構内や京都駅直結の商業施設「京都ポルタ」にありますので事前に済ませておきましょう。旅行バックやスーツケースの大きな荷物はバスのトランクルームで預けることができますが、貴重品は各自にて保管管理になります。",
+        "バス乗り場には、様々なコースのバスがズラリと並びます。約20～30ものコースがあり、バスの色やデザインは殆ど一緒です。乗り間違いのないようにチケットに記載されている「のりば番号」を再度チェックください。",
+        "京都駅を出発後、バスは最初の観光地である比叡山を目指して走ります。現在、根本中堂は60年に一度の大改修中（2030年まで）ですが、本堂の中に入ることはできます。本堂の中は護摩の香りに包まれていて厳かな空間でした。秘仏薬師如来を照らす「不滅の法灯」は、1200年もの間、毎日絶えることなく油を注いできた灯火で「油断」の語源となったことでも有名です。【比叡山延暦寺】比叡山延暦寺は、延暦7年（788年）に最澄が開創した、天台宗の総本山。標高848mの比叡山全域を境内とし、寺域は1700ヘクタールにも及び、その寺域は、京都市と滋賀県にまたがり広大。延暦寺とは、比叡山の山内に点在する約100ほどの堂宇の総称で、延暦寺という一棟の建造物があるわけではありません。山内を地域別に、東を「東塔(とうどう)」、西を「西塔(さいとう)」、北を「横川(よかわ)」の三つに区分しています。これを三塔と言い、それぞれに本堂があります。日本仏教の各宗の祖師（親鸞聖人、栄西禅師、日蓮聖人、道元禅師）などがここで学び、あるいはここで出家得度している事から「日本仏教の母」として仰がれています。",
+        "大改修工事は2030年9月に完了する予定です。工事期間中に設けられた「特設ステージ」からは、期間限定で屋根の修復工事の様子を見学することができました。工事期間ならではの貴重な光景ですね。根本中堂の中は撮影禁止ですが、特設ステージ（修学ステージ）からは、写真撮影OKでした。※特設ステージ（修学ステージ）の見学は2026年12月頃までとなります。※延暦寺根本中堂は改修工事中のためご参拝いただけません。比叡山延暦寺の大講堂・萬拝堂をご拝観ください。",
+        "比叡山の広大な境内を歩き、ちょうどお腹が空いてきたお昼頃、大原に到着します。昼食は、三千院の門前にある料理旅館・芹生（せりょう）で、「三千草弁当」をいただきます。芹生は、天然温泉の露天風呂を完備した、料理と美しい庭園が自慢の旅館です。【芹生】京都大原の料理旅館「芹生」は、自然美溢れる里山の中にあり、賑わいある京都市内で観光を楽しんだ後は、この大原で、ゆったりと流れる時間が旅の疲れを癒すとともに、京都市内では決して味わえない「とっておきの京都」をご堪能いただけます。夕食は、京野菜・自家菜園野菜・山菜など、旬の素材を調進した、季節を彩る芹生自慢の「草菜味懐石」に舌鼓を打ち、厳選された京の地酒で至福のひとときを過ごせます。大原温泉は1175mの深さから約120（リットル／分）の豊富な湯量が沸き出す湯温27.9℃の温泉です。泉質は美肌効果のあるナトリウムイオンと炭酸水素イオンが多く「美人の湯」に近い効果があります。内風呂と露天風呂があり、旅の疲れを癒しゆったりお寛ぎいただけます。個人や小グループで訪れる場合の昼食は「三千草弁当」の他にも、京ゆば膳、湯豆腐膳、草菜味懐石（要予約）も用意しています。",
+        "かわいい三段重の中に、見た目も愉しい山菜料理が、綺麗に盛り付けられていました。季節の京野菜や、大原の山菜をふんだんに使ったお弁当で、京都らしい上品な味付けでした。旅で出逢ったのも何かのご縁、定期観光バスに参加の他のお客さんとワイワイお話しながら、楽しくいただきました。",
+        "昼食後は、三千院拝観と大原の里の自由散策時間となります。大原に来たのからには、まずは大原三千院へ。訪れた4月上旬は、三千院の玄関口・御殿門の前の枝垂桜がちょうと満開で、桜の花が春の風になびき、大原の風景を薄紅色に彩る風景を楽しめました。初夏はアジサイと青もみじ、秋は紅葉、冬は雪景色と四季折々の風景が楽しめます。三千院の拝観料は料金に含まれていますので、拝観受付で「京都定期観光バスワッペン」を見せると受付完了です。客殿と聚碧園（しゅうへきえん）、宸殿と有清園（ゆうせいえん）、往生極楽院やわらべ地蔵、金色不動堂と観音堂など、見どころがたくさんある寺院なので、参拝には30～40分ほど必要です。【大原三千院】山号は魚山（ぎょざん）といい、天台宗五箇室門跡のひとつ。門跡（もんぜき）とは皇室一門や公家の方が出家して住職を務める寺院で、皇室と関わりのある格式高い寺院とされています。三千院の由緒は、伝教大師・最澄が比叡山東塔南谷（とうとうみなみだに）の山梨の大木の下に一宇を構えたことに始まり、慈覚大師円仁に引き継がれ、最雲法親王入室により、平安後期以降、皇子皇族が住持する宮門跡となりました。三千院の代表的な風景と言えば宸殿前の池泉回遊式庭園「有清園（ゆうせいえん）」。青々とした苔と杉木立の庭に往生極楽院（重要文化財）が建ち、内陣には阿弥陀如来、観世音菩薩、勢至菩薩の阿弥陀三尊像（国宝）が安置されています。春は桜と石楠花（シャクナゲ）、夏は青もみじ、秋は紅葉、冬は雪景色に彩られそれぞれに美しい風景をみせてくれます。デューク・エイセスの1966年（昭和41年）のヒット曲「女ひとり」で、日本全国に広く知られるようになりました。",
+        "客殿と庭園の聚碧園（しゅうへきえん）、から宸殿を拝観し、有清園の苔と杉の林を歩いくと、国宝「阿弥陀三尊像」が安置されている往生極楽院が現れます。本堂よりも大きな阿弥陀様を納めるために、天井を舟底型に折り上げているそうです。肉眼ではわかりにくいかもしれませんが、極楽浄土に舞う天女や菩薩様のお姿が描かれた天井絵にも注目です。往生極楽院の南側にあるかつての正門である、朱雀門から後ろを振り返ると、ポスターやパンフレットでよく見かける景色が目の前に広がります。",
+        "丁寧に手入れされた庭園の苔の上を見ると、かわいい「わらべ地蔵」を見つけることができます。5体しか見つけることができませんでしたが、全部で6体あるそうです。どこかに隠れていたんでしょうか。この「わらべ地蔵」は、現代の石彫家・杉村孝氏の作品です。幼少の頃、右目を失明しながらも独学で彫刻を学び、たったひとりで巨石を割り断崖を穿ってきた「隻眼の鬼才」とも呼ばれた、孤高の彫刻家として知られています。",
+        "金色不動堂でも桜が満開で、本堂よりも先に、枝垂桜とソメイヨシノの競艶に目を奪われました。あまりの美しさに、しばらくその場に立ち尽くしてしまいました。大原は、京都市内よりも気温が3～5℃低いと言われています。そのため、桜の開花や満開の時期も、市内中心部より約7～10日ほど遅く訪れます。京都市内中心部の桜は終わってしまっても、大原ではまだまだ見頃が続きます。桜と同じタ
+```
+
+
+=== Case R-178 ===
+Topic / intent: 富山 白エビ
+Query: 富山湾の白エビや富山ブラックラーメンなど、富山の食文化について知りたい。
+Tool: get_local_food({"prefecture": "Toyama", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "16",
+  "lang": "ja",
+  "count": 135,
+  "total_matching": 135,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:53",
+      "registration_number": 53,
+      "name_ja": "入善ジャンボ西瓜",
+      "name": "入善ジャンボ西瓜",
+      "description_ja": "ラグビーボールのような長楕円形のユニークな外見であり、果皮の色は濃く縞がはっきりとしている。平均重量が17～19kgと大きい。サッパリとした甘みが口の中で広がる。",
+      "description": "ラグビーボールのような長楕円形のユニークな外見であり、果皮の色は濃く縞がはっきりとしている。平均重量が17～19kgと大きい。サッパリとした甘みが口の中で広がる。",
+      "registration_date": "平成29年12月15日",
+      "production_area_text": "富山県下新川郡入善町",
+      "prefecture_codes": [
+        "16"
+      ],
+      "producer_group": "富山県下新川郡入善町入膳3489-1みな穂農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0053/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:98",
+      "registration_number": 98,
+      "name_ja": "富山干柿",
+      "name": "富山干柿",
+      "description_ja": "旧福光町及び旧城端町で約300年以上前から栽培している産地固有品種の柿である「三社」を原料とした干柿である。飴色で砲弾型のずしりとする大きさといった外観上のほか、強い甘みと歯ごたえをもった味と食感が特徴である。",
+      "description": "旧福光町及び旧城端町で約300年以上前から栽培している産地固有品種の柿である「三社」を原料とした干柿である。飴色で砲弾型のずしりとする大きさといった外観上のほか、強い甘みと歯ごたえをもった味と食感が特徴である。",
+      "registration_date": "令和2年8月19日",
+      "production_area_text": "平成16年10月31日時点における行政区画名としての富山県西砺波郡福光町及び東砺波郡城端町（現在の富山県南砺市内の一部）",
+      "prefecture_codes": [
+        "16"
+      ],
+      "producer_group": "富山県南砺市高宮1248農事組合法人富山干柿出荷組合連合会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0098/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:45.824Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:112",
+      "registration_number": 112,
+      "name_ja": "氷見稲積梅",
+      "name": "氷見稲積梅",
+      "description_ja": "短楕円の球状で果頂部は少し尖り、大きさは中玉で18～25gが全体の約半分を占め、果皮色は淡緑色で毛茸（もうじ）が多い。種子が小さく、果肉が厚いため、梅干しに加工する際も裂皮しにくく、着色良く仕上がり、ほどよい酸味となると評価されている。",
+      "description": "短楕円の球状で果頂部は少し尖り、大きさは中玉で18～25gが全体の約半分を占め、果皮色は淡緑色で毛茸（もうじ）が多い。種子が小さく、果肉が厚いため、梅干しに加工する際も裂皮しにくく、着色良く仕上がり、ほどよい酸味となると評価されている。",
+      "registration_date": "令和4年2月3日",
+      "production_area_text": "富山県氷見市",
+      "prefecture_codes": [
+        "16"
+      ],
+      "producer_group": "富山県氷見市稲積355-2特産氷見稲積梅生産組合富山県氷見市間島1-3稲積梅の里振興会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0112/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "Explore by Area",
+      "name": "Explore by Area",
+      "description_ja": "This is the official tourism information website operated by the Toyama City Tourism Association. It introduces recommended tourist spots, model courses, events, gourmet food, souvenirs, accommodations, and access information for Toyama, a city where \"everyday life becomes the purpose of travel.\"",
+      "description": "This is the official tourism information website operated by the Toyama City Tourism Association. It introduces recommended tourist spots, model courses, events, gourmet food, souvenirs, accommodations, and access information for Toyama, a city where \"everyday life becomes the purpose of travel.\"",
+      "body_paragraphs": [
+        "Toyama; where our “daily life” is your reason to visit.",
+        "Gaze out at the Tateyama Mountain Range as the local trams pass by.",
+        "Savor the bounties of Toyama Bay, or Toyama's delicacy “Masuzushi”, a favorite which has continued for generations.",
+        "Toyama; where the everyday liv
+```
+
+
+=== Case R-179 ===
+Topic / intent: الأطباق المحلية في نارا
+Query: ما هي الأطعمة الخاصة بمحافظة نارا؟ هل هناك منتجات زراعية معترف بها رسمياً؟
+Tool: get_local_specialty({"prefecture": "Nara", "category": "food", "lang": "ar"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "29",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "category_filter": "food",
+  "q": null,
+  "lang": "ar",
+  "count": 1,
+  "items": [
+    {
+      "key": "maff_gi:12",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 12,
+      "name_ja": "三輪素麺",
+      "name": "ميوا سومن",
+      "description_ja": "約1300年前の奈良時代に生産が始まり、三輪地方が手延べ素麺発祥の地と伝えられている。しっかりとしたコシの強さから、伸縮性に優れており、非常に細い製麺が可能であることと、茹で上げ後の茹で伸びが抑制される。",
+      "description": "يُقال إن الإنتاج بدأ منذ نحو 1300 عام خلال حقبة نارا، وتُعدّ منطقة ميوا تقليدياً مهدَ نودلز السومن المشدودة باليد. تتميز هذه النودلز بمرونة متينة وقدرة تمطط ممتازة، مما يتيح سحبها إلى خيوط رفيعة للغاية، كما تحافظ على قوامها دون أن تنتفخ بعد السلق.",
+      "registration_date": "平成28年3月29日",
+      "production_area_text": "奈良県全域",
+      "prefecture_codes": [
+        "29"
+      ],
+      "producer_group": "奈良県桜井市大字三輪334-6奈良県三輪素麺工業協同組合公式ページ奈良県桜井市大字芝322-2奈良県三輪素麺販売協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0012/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "see_also_wikidata_venues": [
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q147312",
+      "name_ja": "奈良国立博物館",
+      "name_en": "Nara National Museum",
+      "description_en": "art museum in Nara, Japan",
+      "coordinates": {
+        "lat": 34.6837,
+        "lng": 135.8364
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q1188622",
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan",
+        "Registered Tangible Cultural Property of Japan"
+      ],
+      "kinds": [
+        "museum",
+        "saigoku_33"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q147312",
+      "opening_hours": "Mo off; Tu-Su 09:30-17:00; Dec 28-Jan 01 off",
+      "wheelchair": "yes",
+      "phone": "+81 50-5542-8600",
+      "website": "https://www.narahaku.go.jp",
+      "fee": "yes"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11445231",
+      "name_ja": "奈良県立美術館",
+      "name_en": "Nara Prefectural Museum of Art",
+      "description_en": "museum in Japan",
+      "coordinates": {
+        "lat": 34.685861,
+        "lng": 135.832583
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q11579194",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11445231"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q123150030",
+      "name_ja": "高松塚古墳壁画館",
+      "name_en": "Takamatsuzuka Mural Museum",
+      "description_en": "museum in Asuka, Nara, Japan",
+      "coordinates": {
+        "lat": 34.46214,
+        "lng": 135.80633
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q123150030"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q123554850",
+      "name_ja": "平城宮いざない館",
+      "name_en": "Heijō-kyū Izanai-kan",
+      "description_en": "facility in Nara, Nara, Japan",
+      "coordinates": {
+        "lat": 34.685929,
+        "lng": 135.795099
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q30834580",
+        "Q
+```
+
+
+=== Case R-180 ===
+Topic / intent: 宮崎 地鶏
+Query: 宮崎の地鶏や宮崎牛について教えて。地理的表示で保護された農畜産物の特徴は？
+Tool: get_local_specialty({"prefecture": "Miyazaki", "category": "food", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "45",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "category_filter": "food",
+  "q": null,
+  "lang": "ja",
+  "count": 3,
+  "items": [
+    {
+      "key": "maff_gi:55",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 55,
+      "name_ja": "宮崎牛",
+      "name": "宮崎牛",
+      "description_ja": "きめ細やかなサシを持ち、口に含むと広がるほのかな甘みと芳醇な香りが特徴。地域を挙げた高品質な肉牛作りが高く評価され、第9回（H19）及び第10回（H24）全国和牛能力共進会において総合優勝。第11回大会（H29）でも肉牛の部で内閣総理大臣賞を受賞。",
+      "description": "きめ細やかなサシを持ち、口に含むと広がるほのかな甘みと芳醇な香りが特徴。地域を挙げた高品質な肉牛作りが高く評価され、第9回（H19）及び第10回（H24）全国和牛能力共進会において総合優勝。第11回大会（H29）でも肉牛の部で内閣総理大臣賞を受賞。",
+      "registration_date": "平成29年12月15日",
+      "production_area_text": "宮崎県内",
+      "prefecture_codes": [
+        "45"
+      ],
+      "producer_group": "宮崎県宮崎市霧島1丁目1番地1より良き宮崎牛づくり対策協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0055/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:64",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 64,
+      "name_ja": "ヤマダイかんしょ",
+      "name": "ヤマダイかんしょ",
+      "description_ja": "加熱すると快いもろさのあるホクホクとした食感と上品な甘さ。鮮やかな紅色。丁寧なひげ根の処理による美しい外観。",
+      "description": "加熱すると快いもろさのあるホクホクとした食感と上品な甘さ。鮮やかな紅色。丁寧なひげ根の処理による美しい外観。",
+      "registration_date": "平成30年8月6日",
+      "production_area_text": "宮崎県串間市",
+      "prefecture_codes": [
+        "45"
+      ],
+      "producer_group": "宮崎県串間市大字奈留5237-1宮崎県農業協同組合 串間市大束地区本部公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0064/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:173",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 173,
+      "name_ja": "米良糸巻大根",
+      "name": "米良糸巻大根",
+      "description_ja": "宮崎県児湯郡西米良村で古くから作り継がれてきた在来種の大根であり、紡錘形のずんぐりとした形と、白と赤の地色の根の表皮に赤紫色の糸を巻きつけたような複数の横条線が入る特徴的な外観を有する。肉質が緻密で、調理しても煮崩れしにくく、食感もカブのように柔らかい。糖度は6度前後と一般的に流通している青首大根と比べて2度程度高く、甘味が強い。",
+      "description": "宮崎県児湯郡西米良村で古くから作り継がれてきた在来種の大根であり、紡錘形のずんぐりとした形と、白と赤の地色の根の表皮に赤紫色の糸を巻きつけたような複数の横条線が入る特徴的な外観を有する。肉質が緻密で、調理しても煮崩れしにくく、食感もカブのように柔らかい。糖度は6度前後と一般的に流通している青首大根と比べて2度程度高く、甘味が強い。",
+      "registration_date": "令和8年3月25日",
+      "production_area_text": "宮崎県児湯郡西米良村",
+      "prefecture_codes": [
+        "45"
+      ],
+      "producer_group": "宮崎県児湯郡西米良村大字村所1番地1米良糸巻大根の会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0173/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:57:16.511Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "see_also_wikidata_venues": [
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11673179",
+      "name_ja": "高鍋町歴史総合資料館",
+      "name_en": "Takanabe-cho Historical Museum",
+      "description_en": null,
+      "coordinates": {
+        "lat": 32.122305555,
+        "lng": 131.502444444
+      },
+      "prefecture": "宮崎県",
+      "municipality": "宮崎県",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11673179"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q85879543",
+      "name_ja": "宮崎神宮徴古館",
+      "name_en": "Miyazaki Jingū Chōkokan",
+      "description_en": "building in Japan",
+      "coordi
+```
+
+
+=== Case R-181 ===
+Topic / intent: Natto Ibaraki fermented
+Query: Tell me about natto and other fermented foods from Ibaraki. Any officially designated products?
+Tool: get_local_food({"prefecture": "Ibaraki", "keyword": "発酵", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "08",
+  "lang": "en",
+  "count": 2,
+  "total_matching": 2,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "ぶらり龍・るみちゃんさんぽ8",
+      "name": "ぶらり龍・るみちゃんさんぽ8",
+      "description_ja": null,
+      "description": null,
+      "body_paragraphs": [
+        "住み慣れたわがまち龍ケ崎。いつもの風景。いつもの光景。でも、それって立ち止まってみると、意外と新鮮で、意外と素敵？！「これ、いいんじゃない？」って思うこと、いっぱいあるはず。そんな「これ！」を、龍ケ崎大好き♪の、まつど観光大使・龍ケ崎ふるさと大使の石上さんが随時レポート（紹介）します。※広報龍ケ崎『りゅうほー』後半号にも掲載しているものもあります。",
+        "数年前に、JR成田線の下総神崎(しもうさこうざき)駅近くの会場で開催されている、「発酵の里こうざき酒蔵まつり」に行ったときのこと。河川敷から土手を越えて会場へと向かう道すがら、一番先に目に入ったのが、「龍ケ崎」と書いてある幟(のぼり)！ええ～、利根川越えてどこの店が出店しているのだろう？と思って近づいたら、砂町にある「名古屋食品」さん。皆さんは、くず餅やトコロテンで、よーくご存じですよね。その翌年、今度は銚子の軽トラ市（※）でバッタリ！ずいぶん遠くまで出店して頑張ってるな～と感心。そして先月、龍ケ崎で開催された「全国コロッケフェスティバル」でまたまたお会いしました（地元だから出店していて当たり前か）。「お久しぶりです」とのぞいたら、若者にいま人気の「タピオカ」と、しらたきやトコロテンを使った担々麺という新製品が並んでいました。「ここでしか食べられませんよ～」の声に釣られて、辛党の私は坦々コンニャクをいっただきまーす！ん…ツルッとしたトコロテンがピリ辛スープに絡まって、これはいける！「名古屋食品」さんの創業は明治末。二代目の養子さんが大男で怪力、浅瀬の利根川を、馬車を担いで渡ったという伝説の名物男！その人の出身地だった当時の千葉県香取郡名古屋村（名古屋は現・成田市の大字名）にちなんで、店名を「名古屋」にしたとのこと。「古くは農家が冬の時期にコンニャクを作っていて、うちはもともとコンニャク屋なんですよ。でも時代に合わせていろいろ作らなくちゃね」とおっしゃる五代目さん。新商品掲げて今度はどこへ出店でしょうか？また会えるといいな～。",
+        "※軽トラ市：軽トラックの荷台を店舗に見立てた朝市のこと。産地直送、生産者の対面販売が特徴ですね。",
+        "今月は、6月に行われた「るみちゃんの文学散歩」のお話です。馴馬台コミュニティセンターの副センター長さんが、松戸市役所の元職員さんだったというご縁で、「るみちゃん、うちのコミュニティセンターの、ひなっこクラブで何かやってよ」と言われ、龍ケ崎で初の講座なんてうれしい！やるやる！と即決定。「激しい生き方をした人の、心を揺さぶられるような話がいいな～。色っぽい話だとなおいい！（おいおい）」。で、歌人や作家のみんなの知らないエピソードを、それも二人一緒に紹介するということに。初回の樋口一葉と与謝野晶子では、「江戸と大阪、武士の娘と商人の娘」という対比で、共通点や相違点をさぐってみました。映像を映した方が良いな～、「プロジェクターあります？」と聞いたら「買います！」だって、これは頑張らなくちゃ。対象の方々は、平成30年に発足した「馴馬台地域ひなっこ協議会」の皆さんで、平台の「ひ」、馴馬の「な」、小柴の「こ」を使ってのネーミングだそうです。少子高齢化の時代に、地域の子どもを大事に育て、高齢者にも優しい、安全で暮らしやすい「まち」作りを目指しています。どんな方たちかな～とチョット心配で迎えた初日、お～男性もいる！しかも、最前列。普通こういった講座は女性が多いのに？",
+        "さて、2時間の4回の講座を楽しく進めたつもりですが、終了後に「学生時代に戻ったみたいで楽しかった」「二人を比べるというのが良かった」などの言葉をいただき、ホッとしました。改めて勉強する機会をくださった関係者の皆様に感謝です。それから、毎回お昼は、ほっかほかの釜飯と手作りのお新香にデザート付き！食べ物に釣られたわけではないですけれど、私も楽しかった～。またこのようなチャンスをくださいね、龍ケ崎の皆さん！",
+        "先月、るみちゃんが主宰している劇団「松戸市民劇団」の合宿を龍ケ崎で行いました。メンバーは皆、別に仕事を持っているし、職業や集まる時間もさまざま。稽古場に夜8時頃に来る人や、夜10時に帰ってしまう人がいるなど、なかなかじっくり稽古ができない。",
+        "そこでたまに合宿をして長時間の稽古をするのですが、どこか近場で和風の旅館（これが大事！車座になって話し合うので）があればな～と思っていたら、先日取材でお世話になった人形屋さんから紹介されて、決めたのが「き仙」さん。昔は結婚式の披露宴や、各種祝い事の宴会などもやられていたそうですが、今は主にビジネス関係や合宿などに使われているそうです。",
+        "外見からは和風の内装が想像つかないのですが、部屋の造りが大変凝っていて、天井に田舟まで造り込んであったのにはビックリ！広い和室もあり、岩風呂もあるし、これは良い作家なんかが泊まり込みして原稿書くのに向いてそう。",
+        "当初は、食事は外で済まそうと思っていたのですが、劇団員が揃う午後8時からでもいいですよ、との温かいお言葉に甘えて、急きょ宴会に突入！（なんだ、これが目的か？）同じ釜の飯を食うというのは、仲良くなれるものです。その後は順調に稽古が進み、来年3月の「松戸市民劇団創立40周年記念公演」のスタートが無事切れました。",
+        "翌朝はおいしい朝食をいただきき、お土産は近くの酒屋さんで珍しいお酒を買い、芝居の衣装と小道具はショッピングセンターのリサイクルショップで調達。成果に満足したらお腹がすいて…早速、駅前の喫茶店で、好物の卵サンドイッチを食べて、満足満足。ああ収穫の多い合宿だったね～近場でいいね、またここで合宿やろうよ。と皆が口々に言うのを聞いて「しめしめ」とほくそ笑む、るみちゃんでした。",
+        "私が敬愛する人は、小原庄助さんと若山牧水。ですから、佐貫駅前の店で「幻の日本酒を飲む会」があると聞いて、喜び勇んで出掛けました。会場は既に満席で30人はゆうに超え、年代は30から70代か、女性もちらほら。メニューによると、今日の酒は14種類！500ccのグラスでも全部飲んだら4合！これは記事を書くどころじゃない。慎重に水を飲みながら楽しもうと、悲しい誓い。まず一升瓶のふたがポンと開けられ、ガラスの杯に並々と注がれる（ああ…飲みすぎる）。",
+        "参加者は親子や兄弟、夫婦、友達とさまざまで、住んでいる場所も、県内外さまざま。その人たちが一堂に会して肝胆相照らす、これは酒の力に負うところ多し。だって、我ら関東人は人見知りで照れ屋だもん。「お酒は酒屋さんの持ち込みだから、店はもうからないのでは？」と会場のイタリアン「グラーノ」の店主にお聞きしたら、「当初、開店したばかりで、店のことを知ってもらいたいと思い、お酒の勉強もできるので、お受けしました」とのこと。その心意気が良いですね。るみちゃんもまた、ここでお友達ができ、早速、会にも入会しました！",
+        "会の三原則がいいのよ。（1）ただ酒は飲まない。（2）利き酒能力を問わない。（3）「あの酒はうまかった」と決めつけない。酒席が和む三原則ですね。それからお約束があり、例えば拍手が起きたら、歓談を止めていただく、ですって！",
+        "この会の主催は市内の酒屋さんですが、月1回の開催で、もう39年も続いているそうです。今まで会場探しが大変で、いろいろ探して今はこのお店に落ち着いているそうです。こうして店同士がコラボしてイベントを開催してくると、街も盛り上がりますよね。ああ～いい会だった、楽しかった、また来ようと、ほろ酔い機嫌で電車に乗りました。次は泊まりで来よう…。",
+        "記念すべき令和元年5月1日。なにか記念になることをと考え、松戸の早乙女たち（昔の）、一行6人が、天候の具合を気にしながら、龍ケ崎でお田植えにチャレンジしました！「昔やったわよ～」という、実家が農家だった経験ありメンバーは「楽しみ！」とワクワク顔。一方、田んぼに入ったことないという都会育ちメンバーは「出来るかしら…」と不安顔。佐貫駅から迎えの車に乗り、いざ！田植えツアー開始！「転んでも良いように」と言われ着替えは持ったのですが、この意味が田んぼに入ってよく分かりました。経験者がスイスイと植えていくなか、初心者は…長靴がズボッと泥田にはまり動けません。あっという間に1人が尻もち！「アハハ！」笑っているるみちゃんもキャー、危ない危ない。でも、手を入れた土の感触がなんとも心地よく
+```
+
+
+=== Case R-182 ===
+Topic / intent: 愛知 みそかつ
+Query: 愛知の八丁味噌を使った郷土料理を教えて。みそかつやみそ煮込みうどんの文化的背景は？
+Tool: get_local_food({"prefecture": "Aichi", "keyword": "味噌", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "23",
+  "lang": "ja",
+  "count": 39,
+  "total_matching": 39,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:49",
+      "registration_number": 49,
+      "name_ja": "八丁味噌",
+      "name": "八丁味噌",
+      "description_ja": "赤褐色で色が濃く、適度な酸味、うまみと苦渋味といった他の味噌にない独特な風味を有する。愛知県民の濃い味を好む嗜好と相まって「名古屋めし」の代表的な調味料として定着。",
+      "description": "赤褐色で色が濃く、適度な酸味、うまみと苦渋味といった他の味噌にない独特な風味を有する。愛知県民の濃い味を好む嗜好と相まって「名古屋めし」の代表的な調味料として定着。",
+      "registration_date": "平成29年12月15日",
+      "production_area_text": "愛知県",
+      "prefecture_codes": [
+        "23"
+      ],
+      "producer_group": "愛知県名古屋市中区栄1丁目16番7号愛知県味噌溜醤油工業協同組合公式ページ愛知県岡崎市八丁町69番地八丁味噌協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0049/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.488Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "八丁味噌を徹底解説！",
+      "name": "八丁味噌を徹底解説！",
+      "description_ja": "岡崎市で何百年も受け継がれてきた伝統の八丁味噌。\n体にいい効果もあり、家康公の長寿の秘訣、とも伝えられています。\n味噌活で、おいしく元気になろう！",
+      "description": "岡崎市で何百年も受け継がれてきた伝統の八丁味噌。\n体にいい効果もあり、家康公の長寿の秘訣、とも伝えられています。\n味噌活で、おいしく元気になろう！",
+      "body_paragraphs": [
+        "石積み 八丁味噌を徹底解説！ 岡崎市で何百年も受け継がれてきた伝統の八丁味噌。 体にいい効果もあり、家康公の長寿の秘訣、とも伝えられています。 味噌活で、おいしく元気になろう！",
+        "八丁味噌を徹底解説！ 岡崎市で何百年も受け継がれてきた伝統の八丁味噌。 体にいい効果もあり、家康公の長寿の秘訣、とも伝えられています。 味噌活で、おいしく元気になろう！",
+        "岡崎市で何百年も受け継がれてきた伝統の八丁味噌。 体にいい効果もあり、家康公の長寿の秘訣、とも伝えられています。 味噌活で、おいしく元気になろう！",
+        "矢作川の水と温暖な気候に恵まれた岡崎は、古くから豆味噌の産地として知られていました。矢作地域の大豆や三河湾の塩でつくられる味噌は、保存食として優れ、戦国時代には三河武士の兵糧としても重宝されました。この豆味噌で育った家康公も、江戸までわざわざ味噌を運ばせたほど好み、江戸時代になると、岡崎城から西へ八丁（約870メートル）の距離にある岡崎市八丁町（旧・八丁村）でつくられていたことから、「八丁味噌」と呼ばれるようになったと言われています。 八丁味噌は大豆麹をつくり、塩と水だけを加え、仕込みます。一般的な味噌の場合、長くても１年程度しか寝かせませんが、八丁味噌は２年以上、二夏二冬寝かせて熟成させるのが伝統。水分が少なく、大豆のうまみが濃縮され、深い味わいが特徴です。添加物を一切使っておらず、健康食としても注目されています。",
+        "まるやの売店 まるや カクキュー本社屋 カクキューの味噌蔵 特大の味噌桶 史料館内観（カクキュー） 史料館内観（カクキュー） 味噌キャラメル 八丁味噌（まるや） 八丁味噌（カクキュー）",
+        "岡崎市八丁町には、今も変わらない製法で八丁味噌を作る２軒の蔵元が旧東海道を挟んで建っています。創業1337年の「まるや八丁味噌」と、創業1645年の「カクキュー八丁味噌」は、切磋琢磨しながら、伝統を守ってきました。どちらの蔵元も見学ができるので、実際に訪れてみるのがオススメ。江戸時代から使われている蔵や、使いこまれた味噌桶、熟練の職人が積み重ねた何トンもの重石から、伝統の味噌づくりが肌で感じられます。 つくる場所や製法は変わりませんが、もっとたくさんの人に愛されるようにと、うどんやラーメン、ごはんのおかずや菓子にするなどの商品開発を続け、時代に合わせて積極的に変化してきました。こうした努力で、八丁味噌は日本全国で知られるだけでなく、世界各国でも愛される商品になっているのです。",
+        "醸造業からはじめ、江戸時代に始めた味噌作りの伝統製法を守り抜き、八丁味噌を製造しています。大豆麹を巨大な木桶に仕込み、重石を積み上げて作ります。石積みは熟年の職人技。製造所内に流れるゆったりとした時間や香りの中で、歳月を重ねた味噌桶の存在感や天に向って積み上げられた重石の力強さなど、八丁味噌の味噌蔵ならではの風景を楽しめます。店内では、八丁味噌を使用したお土産品の販売もしています。 「まるや八丁味噌」･･･岡崎市八丁町字往還通52番地 見学時間／9時～16時30分（年末年始は休館） 詳しくはこちら",
+        "醸造業からはじめ、江戸時代に始めた味噌作りの伝統製法を守り抜き、八丁味噌を製造しています。大豆麹を巨大な木桶に仕込み、重石を積み上げて作ります。石積みは熟年の職人技。製造所内に流れるゆったりとした時間や香りの中で、歳月を重ねた味噌桶の存在感や天に向って積み上げられた重石の力強さなど、八丁味噌の味噌蔵ならではの風景を楽しめます。店内では、八丁味噌を使用したお土産品の販売もしています。 「まるや八丁味噌」･･･岡崎市八丁町字往還通52番地 見学時間／9時～16時30分（年末年始は休館）",
+        "味噌料理が楽しめるお食事処「岡崎カクキュー八丁村」や品揃え豊富な売店を併設した、八丁味噌の蔵元です。工場見学では、味噌蔵や史料館などを見学することができます。 カクキューの初代当主・早川新六郎勝久は元々今川の家臣でしたが、桶狭間の戦いで今川が敗れた後岡崎の寺へと逃れ、武士をやめて、名を「久右衛門」と改めました。久右衛門は寺で味噌造りを学び、数代の後、現在の場所である岡崎市八丁町（旧八丁村）へと移り、1645年に業として八丁味噌を造り始めました。当主は代々「早川久右衛門」の名を襲名しており、現当主で19代目となります。現在でも、木桶に仕込み、職人が円錐状に石を積み上げ重石とし、二夏二冬（2年以上）天然醸造で熟成させる江戸時代初期から続く伝統製法で八丁味噌を造り続けております。 カクキュー八丁味噌（八丁味噌の郷）… 岡崎市八丁町69番地 ■見学時間 当日受付（※事前予約を御希望の方は店舗にお問合せください） ＜平日＞10:00～16:00（毎時00分開始） ＜土日祝日＞10:00～16:00（毎時00分、30分開始。ただし、12:30は当日受付で要確認） ■定休 年中無休（年末年始を除く） 詳細はこちら",
+        "味噌料理が楽しめるお食事処「岡崎カクキュー八丁村」や品揃え豊富な売店を併設した、八丁味噌の蔵元です。工場見学では、味噌蔵や史料館などを見学することができます。 カクキューの初代当主・早川新六郎勝久は元々今川の家臣でしたが、桶狭間の戦いで今川が敗れた後岡崎の寺へと逃れ、武士をやめて、名を「久右衛門」と改めました。久右衛門は寺で味噌造りを学び、数代の後、現在の場所である岡崎市八丁町（旧八丁村）へと移り、1645年に業として八丁味噌を造り始めました。当主は代々「早川久右衛門」の名を襲名しており、現当主で19代目となります。現在でも、木桶に仕込み、職人が円錐状に石を積み上げ重石とし、二夏二冬（2年以上）天然醸造で熟成させる江戸時代初期から続く伝統製法で八丁味噌を造り続けております。 カクキュー八丁味噌（八丁味噌の郷）… 岡崎市八丁町69番地 ■見学時間 当日受付（※事前予約を御希望の方は店舗にお問合せください） ＜平日＞10:00～16:00（毎時00分開始） ＜土日祝日＞10:00～16:00（毎時00分、3
+```
+
+
+=== Case R-183 ===
+Topic / intent: Wagashi Jepang
+Query: Saya ingin mengetahui tentang kue tradisional Jepang (wagashi) yang resmi dilindungi. Dari daerah mana saja?
+Tool: get_local_specialty({"category": "food", "q": "和菓子", "lang": "id"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "category_filter": "food",
+  "q": "和菓子",
+  "lang": "id",
+  "count": 0,
+  "items": [],
+  "see_also_wikidata_venues": [
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q7818931",
+      "name_ja": "富岡製糸場",
+      "name_en": "Tomioka Silk Mill",
+      "description_en": "silk reeling factory in Tomioka, Gunma prefecture, Japan",
+      "coordinates": {
+        "lat": 36.255333,
+        "lng": 138.887667
+      },
+      "prefecture": "群馬県",
+      "municipality": "群馬県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q7818931",
+      "website": "https://www.tomioka-silk.jp/tomioka-silk-mill/"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q8194022",
+      "name_ja": "鞆の浦",
+      "name_en": "Tomonoura",
+      "description_en": "Japanese port located in Fukuyama",
+      "coordinates": {
+        "lat": 34.3808,
+        "lng": 133.38
+      },
+      "prefecture": "広島県",
+      "municipality": "広島県",
+      "heritage_designations": [
+        "Q11414752",
+        "Q18382798",
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Place of Scenic Beauty (Japan)",
+        "Japan Heritage (Bunka-cho program)",
+        "Important Preservation District for Groups of Traditional Buildings"
+      ],
+      "kinds": [
+        "fishing_village",
+        "port_town",
+        "preservation_district",
+        "walking_road_500"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q8194022"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q875301",
+      "name_ja": "厳島",
+      "name_en": "Itsukushima",
+      "description_en": "island in Hiroshima, Japan",
+      "coordinates": {
+        "lat": 34.275555555,
+        "lng": 132.307777777
+      },
+      "prefecture": "広島県",
+      "municipality": "広島県",
+      "heritage_designations": [
+        "Q26764449",
+        "Q30834580",
+        "Q94987823",
+        "Q19683138",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Special Historic Site of Japan",
+        "Historic Site of Japan",
+        "Special Place of Scenic Beauty",
+        "Ramsar Wetland (Japan)",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "kinds": [
+        "island",
+        "preservation_district",
+        "hanabi",
+        "nihon_sankei",
+        "nihon_sanmeien",
+        "walking_road_500",
+        "shin_ryoko_100",
+        "shin_kanko_100",
+        "chugoku_kannon_33",
+        "shin_nihon_100_meizan"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q875301"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q5214583",
+      "name_ja": "鎌倉文学館",
+      "name_en": "Kamakura Museum of Literature",
+      "description_en": "literature museum in Kamakura, Kanagawa",
+      "coordinates": {
+        "lat": 35.3156,
+        "lng": 139.53894444
+      },
+      "prefecture": "神奈川県",
+      "municipality": "神奈川県",
+      "heritage_designations": [
+        "Q11650902",
+        "Q11579194",
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Q11650902",
+        "Registered Tangible Cultural Property of Japan",
+        "Q11633166"
+      ],
+      "kinds": [
+        "museum",
+        "memorial"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q5214583"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q120730",
+      "name_ja": "京都府",
+      "name_en": "Kyoto Prefecture",
+      "description_en": "Kyoto Prefecture (京都府, Kyōto-fu; Japanese pronunciation: [kʲoꜜː.to, kʲoː.toꜜ.ɸɯ]) is a prefecture of Japan located in the Kansai region of Honshu. It has a population of 2.58 million and has a geographic area of 4,612 squ
+```
+
+
+=== Case R-184 ===
+Topic / intent: 北海道 ジンギスカン
+Query: 北海道のジンギスカンの文化について教えて。使われる羊肉の産地や本場の食べ方は？
+Tool: get_local_food({"prefecture": "Hokkaido", "keyword": "ジンギスカン", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "01",
+  "lang": "ja",
+  "count": 44,
+  "total_matching": 44,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "ジンギスカンの歴史",
+      "name": "ジンギスカンの歴史",
+      "description_ja": "滝川市の公式サイト。市民の方向けの暮らしの情報や、事業者の方向けのビジネス支援の情報、イベントや観光の情報、市の仕組みや政策に関する情報などを提供しています。",
+      "description": "滝川市の公式サイト。市民の方向けの暮らしの情報や、事業者の方向けのビジネス支援の情報、イベントや観光の情報、市の仕組みや政策に関する情報などを提供しています。",
+      "body_paragraphs": [
+        "北海道を代表する郷土料理のひとつ「ジンギスカン」はルーツに諸説ありますが、タレ漬けの味付けジンギスカンについては「ルーツは滝川種羊場、普及は松尾ジンギスカン」といった認識は誰もが否定できない事実であるとされています。",
+        "羊毛が軍服の大切な素材となっていた頃、第一次世界大戦時に輸入が途絶え、大正7年に政府が羊毛の国内自給をめざした「綿羊百万頭計画」を打ち出し、滝川や札幌の月寒など全国5カ所に種羊場が開設されました。その際、羊毛だけでなく、羊肉の様々な活用方策が研究されるようになり、試行錯誤の末、現代のジンギスカンが誕生しました。 もっとも、庶民の料理として広まったのは戦後のことで、値段が安いわりに美味しかったことが理由とされています。 「羊肉料理・成吉思汗」のレシピは、山田喜平(元滝川種羊場長)が昭和6年に発行した「緬羊と其飼ひ方」に記載されているものが最初といわれています。また、「ジンギスカン」の名付け親は、当時、南満州鉄道株式会社の調査部長であった「駒井徳三」であるという説が一番有力とされています。",
+        "ジンギスカンの食べ方は、焼いた肉にタレを付けて食べる「札幌式」と、タレに漬け込んだ肉を焼いて食べる「滝川式」があり、北海道内でも地域によって食べ方が異なります。 滝川市ではじめてジンギスカンが市民に提供されたのは昭和30年、滝川会館とされていますが、そのジンギスカンは札幌式（タレが別皿で用意される）だったそうです。 滝川式（タレ漬け）のジンギスカンは種羊場による各種講習会や綿羊実習生などによって、各地に広められて行き、次第に食味として定着していったとされております。その流れの中で昭和31年、松尾羊肉店はジンギスカンによる企業化をしたことをきっかけに滝川式のジンギスカンが普及しはじめたとされております。 現在ジンギスカンは、北海道をはじめ多くの国民に親しまれる料理となり、平成16年3月には『4月29日を「羊肉(ヨーニク)の日」』として日本記念日協会に認められたほか、同年10月には「北海道遺産」に選定されています。",
+        "自然美溢れる滝川市。伝統文化と鮮やかな祭り。美食と温かな人々。心躍る街で、豊かな体験が待っています。",
+        "Copyright © City of Takikawa，All right reserved．"
+      ],
+      "spot_url": "https://www.city.takikawa.lg.jp/site/kanko/2219.html",
+      "spot_id": "8b644b7883113292",
+      "municipality": "滝川市",
+      "prefecture": "北海道",
+      "prefecture_code": "01"
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "五稜郭のお花見プラン（ジンギスカンセット）",
+      "name": "五稜郭のお花見プラン（ジンギスカンセット）",
+      "description_ja": "北海道では「花見」と言えばジンギスカン。五稜郭公園（屋外）で、桜を眺めながらジンギスカンを楽しめる。（要予約）",
+      "description": "北海道では「花見」と言えばジンギスカン。五稜郭公園（屋外）で、桜を眺めながらジンギスカンを楽しめる。（要予約）",
+      "body_paragraphs": [
+        "北海道では「花見」と言えばジンギスカン。五稜郭公園（屋外）で、桜を眺めながらジンギスカンを楽しめる。（要予約）",
+        "五稜郭公園に隣接して建ち、展望フロアから五稜郭跡の星形を俯瞰できるタワー。展望2階の高さは地上90メートル。五稜郭や箱館戦争の歴史を語る展示物も興味深い。",
+        "新選組副長から旧幕府軍陸軍奉行並に転じ、箱館戦争で戦死した土方歳三の像。五稜郭タワー創業40周年を記念して制作。五稜郭タワー内アトリウム内にある。",
+        "特別史跡五稜郭近く、五稜郭タワー展望台2階にある展示スペース。五稜郭や箱館戦争などの歴史を詳しく学べるグラフィック展示や、16の情景模型が設置されている。",
+        "特別史跡・五稜郭そばにある展望施設「五稜郭タワー」の売店。オリジナルスイーツをはじめ、五稜郭、箱館戦争、新選組、土方歳三にちなんだグッズが取り揃えられている。",
+        "函館と近郊産の牛乳をふんだんに使ったイタリアンジェラート専門店。地元の食材や季節の果物などを使ったさまざまなフレーバーがショーケースに色とりどりに並ぶ。",
+        "五稜郭タワーアトリウムのエレベーターに乗って、高さ約90ｍの展望台に着くと、目の前には五稜郭のパノラマが広がっています。日本では珍しい「星型城郭」の姿は美しいもの。先ほど歩いたところを確かめながら眺めると、五稜郭の雄大さがより感じられます。",
+        "五稜郭タワーの2階にあり、視線を遮られたシックなテーブル席や落ち着いた座敷で、ゆっくりと会席料理を楽しめる。",
+        "市場仕入れの新鮮な魚介をネタに使う回転寿司。2022年4月オープン。手軽に楽しめる会席料理「四季海鮮 旬花」の姉妹店。五稜郭タワー向かいの好立地で、立ち寄りやすさ抜群。",
+        "特別史跡五稜郭跡の近くにある老舗ラーメン店。地元の住民や観光客のかたが多く訪れている。シンプルであっさりとした「味彩塩拉麺」が人気。",
+        "特別史跡五稜郭跡の近くにある函館ご当地ハンバーガーのレストラン。自家製カレーやオムライス、スパゲッティなどもあり、店内は多くの観光客でにぎわっている。",
+        "このサイトでは、ユーザーエクスペリエンスを向上させるためにCookieを使用しています。引き続き閲覧される場合は、当サイトでのCookie使用に同意いただいたことになります。 承諾する"
+      ],
+      "spot_url": "https://www.hakobura.jp/spots/68",
+      "spot_id": "36a5fdca67d498f7",
+      "municipality": "函館市",
+      "prefecture": "北海道",
+      "prefecture_code": "01"
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "GOURMET\n          グルメ",
+      "name": "GOURMET\n          グルメ",
+      "description_ja": "食材の宝庫である北海道。中でも札幌は、毎朝北海道各地からとれたての食材が集まる「食の街」。ご当地グルメとしてラーメン、スープカレー、ジンギスカンが全国的に有名です。その他にも、北海道産食材を活かした料理を楽しめるレストランがたくさんあります。",
+      "description": "食材の宝庫である北海道。中でも札幌は、毎朝北海道各地からとれたての食材が集まる「食の街」。ご当地グルメとしてラーメン、スープカレー、ジンギスカンが全国的に有名です。その他にも、北海道産食材を活かした料理を楽しめるレストランがたくさんあります。",
+      "body_paragraphs": [
+        "グルメすすきの周辺通年 朝食を楽しむ札幌観光、早起きして行きたい街中おすすめ店",
+        "グルメすすきの周辺通年 札幌でラーメンを食べるなら！ 観光協会のおすすめ店",
+        "グルメすすきの周辺通年 札幌でおすすめのソフトクリームを厳選！人気のお店厳
+```
+
+
+=== Case R-185 ===
+Topic / intent: Culinária de Tottori
+Query: Quais são as especialidades gastronômicas de Tottori? Ouvi falar do caranguejo Matsuba.
+Tool: get_local_food({"prefecture": "Tottori", "lang": "pt"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "31",
+  "lang": "pt",
+  "count": 500,
+  "total_matching": 658,
+  "truncated": true,
+  "truncation_note": "Response capped at 500 of 658 matches. Pass a prefecture or keyword to narrow.",
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:11",
+      "registration_number": 11,
+      "name_ja": "鳥取砂丘らっきょう",
+      "name": "Rakkyo das dunas de Tottori",
+      "description_ja": "身が締まっているうえ、各鱗片の厚みもほぼ同一で、食感の「シャキシャキ感」が良く、らっきょうの外観が白い。",
+      "description": "Os bulbos são firmes, as escamas têm espessura quase uniforme, a textura é crocante e o exterior do rakkyo é branco.",
+      "registration_date": "平成28年3月10日",
+      "production_area_text": "鳥取県鳥取市福部町内の鳥取砂丘に隣接した砂丘畑",
+      "prefecture_codes": [
+        "31"
+      ],
+      "producer_group": "鳥取県鳥取市湖山町東5 丁目261 番地鳥取いなば農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0011/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:70",
+      "registration_number": 70,
+      "name_ja": "大山ブロッコリー",
+      "name": "Brócolo de Daisen",
+      "description_ja": "徹底した品質管理、食味の良さ、市場への安定供給によって、市場において高く評価されている。全国有数のブロッコリー産地。最も売上げのある名古屋市場における占有率は約2割、平均価格は約1割高。",
+      "description": "Muito bem avaliado no mercado graças ao rigoroso controlo de qualidade, bom sabor e fornecimento estável. Uma das principais zonas produtoras de brócolos do Japão. A sua quota de mercado no mercado de Nagoya, onde as vendas são mais elevadas, é de cerca de 20%, e o preço médio é cerca de 10% superior à média do mercado.",
+      "registration_date": "平成30年12月27日",
+      "production_area_text": "鳥取県西伯郡（大山町、日吉津村、南部町、伯耆町）、日野郡（日南町、日野町、江府町）、米子市",
+      "prefecture_codes": [
+        "31"
+      ],
+      "producer_group": "鳥取県米子市東福原1-5-16鳥取西部農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0070/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:72",
+      "registration_number": 72,
+      "name_ja": "こおげ花御所柿",
+      "name": "Koge Hanagosho Kaki",
+      "description_ja": "旧郡家（こおげ）町の在来品種で200年以上前から栽培されている「花御所柿」を用いる。一般的な柿と比べて甘く、果肉が緻密でジューシー。昭和22年には戦後初の全国果実展示品評会において、花御所柿が柿の部1等賞となるなど、高く評価されている。",
+      "description": "Este produto utiliza o 'Hanagosho Kaki', uma variedade local da antiga cidade de Koge cultivada há mais de 200 anos. Em comparação com os caquis comuns, é mais doce, com uma polpa densa e suculenta. Em 1947, o Hanagosho Kaki conquistou o primeiro prémio na categoria de caqui na primeira Exposição e Concurso Nacional de Frutas do pós-guerra, sendo desde então altamente valorizado.",
+      "registration_date": "平成30年12月27日",
+      "production_area_text": "鳥取県八頭郡八頭町",
+      "prefecture_codes": [
+        "31"
+      ],
+      "producer_group": "鳥取県鳥取市湖山町東5丁目261番地鳥取いなば農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0072/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.502Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:80",
+      "registration_number": 80,
+      "name_ja": "⼤栄⻄⽠",
+      "name": "Melancia Daiei",
+      "description_ja": "交配後、約48日頃まで完熟させたスイカ。形状、品質にバラツキが少なく、果実中心部と皮ぎわの糖度差が少ない、安定した品質・供給が確保できるスイカとして、市場から高い評価を得ている。",
+      "description": "Uma melancia maturada por aproximadamente 48 dias após a polinização. Tem recebido alto reconhecimento no mercado como uma melancia com qualidade e fornecimento estáveis, apresentando pouca variação em forma e qualid
+```
+
+
+=== Case R-186 ===
+Topic / intent: 鹿児島 黒豚
+Query: 鹿児島黒豚の特徴とブランド化の歴史を教えて。何が通常の豚と違うの？
+Tool: get_local_specialty({"prefecture": "Kagoshima", "category": "food", "q": "黒豚", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "46",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "category_filter": "food",
+  "q": "黒豚",
+  "lang": "ja",
+  "count": 0,
+  "items": [],
+  "see_also_wikidata_venues": [
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11676739",
+      "name_ja": "鹿児島県歴史・美術センター黎明館",
+      "name_en": "Reimeikan, Kagoshima Prefectural Center for Historical Material",
+      "description_en": "Kagoshima Prefectural Museum of Culture Reimeikan (鹿児島県歴史資料センター黎明館, Kagoshima-ken Rekishi Shiryō Sentā Reimeikan) opened in Kagoshima, Japan, in 1983. The museum, located in the grounds of Tsurumaru Castle, exhibits materials relating to the history and culture of Kagoshima Prefecture.",
+      "coordinates": {
+        "lat": 31.5986,
+        "lng": 130.555
+      },
+      "prefecture": "鹿児島県",
+      "municipality": "鹿児島市",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11676739",
+      "opening_hours": "9:00-18:00",
+      "wheelchair": "yes",
+      "phone": "+81 99-222-5100",
+      "website": "http://www.pref.kagoshima.jp/reimeikan/",
+      "fee": "yes"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11545903",
+      "name_ja": "知覧武家屋敷",
+      "name_en": "Chiran Samurai Residences",
+      "description_en": null,
+      "coordinates": {
+        "lat": 31.3775,
+        "lng": 130.443305555
+      },
+      "prefecture": "鹿児島県",
+      "municipality": "鹿児島県",
+      "heritage_designations": [
+        "Q850649",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "kinds": [
+        "buke_yashiki",
+        "kominka",
+        "preservation_district",
+        "michi_100"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11545903"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11676762",
+      "name_ja": "鹿児島県立博物館",
+      "name_en": "Kagoshima Prefectural Museum",
+      "description_en": "museum in Kagoshima, Japan",
+      "coordinates": {
+        "lat": 31.594056,
+        "lng": 130.552694
+      },
+      "prefecture": "鹿児島県",
+      "municipality": "鹿児島市",
+      "heritage_designations": [
+        "Q11579194",
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Q11633166"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11676762",
+      "fee": "no"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q10854956",
+      "name_ja": "鹿児島市立美術館",
+      "name_en": "Kagoshima City Museum of Art",
+      "description_en": "Kagoshima City Museum of Art (鹿児島市立美術館, Kagoshima shiritsu bijutsukan) opened within the Ninomaru (secondary enclosure) of Tsurumaru Castle in Kagoshima, Kagoshima Prefecture, Japan, in 1985. The collection includes works by local artists Kuroda Seiki, Fujishima Takeji, and Wada Eisaku, as well as Western painters Claude Monet and Paul Cézanne.",
+      "coordinates": {
+        "lat": 31.595806,
+        "lng": 130.553361
+      },
+      "prefecture": "鹿児島県",
+      "municipality": "鹿児島市",
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q10854956",
+      "fee": "yes"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q113296969",
+      "name_ja": "鹿児島県上野原縄文の森",
+      "name_en": "Uenohara Jōmon no Mori",
+      "description_en": null,
+      "coordinates": {
+        "lat": 31.712472222,
+        "lng": 130.801138888
+      },
+      "prefecture": "鹿児島県",
+      "municipality": "霧島市",
+      "heritage_designations": [
+        "Q11579194
+```
+
+
+=== Case R-187 ===
+Topic / intent: Sake brewing Fushimi
+Query: What is special about sake brewing in Fushimi, Kyoto? Are there designated sake varieties from this area?
+Tool: get_local_food({"prefecture": "Kyoto", "keyword": "日本酒", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "26",
+  "lang": "en",
+  "count": 6,
+  "total_matching": 6,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "京都 知る人ぞ知る♪とっておき桜の穴場スポットでゆったりお花見",
+      "name": "京都 知る人ぞ知る♪とっておき桜の穴場スポットでゆったりお花見",
+      "description_ja": "京都駅から乗換え無し電車やバス１本、嵐山から徒歩圏内、伏見稲荷大社から数駅先に、またまだ知られていない桜の隠れた名所がたくさんあります。また、市内中心部で桜を見逃した方もしないから少し足を延ばせば、遅咲き桜の名所があります。地元の方だけが知っている、ゆったりお花見が楽しめる桜のお花見“穴場”スポットをご紹介。",
+      "description": "京都駅から乗換え無し電車やバス１本、嵐山から徒歩圏内、伏見稲荷大社から数駅先に、またまだ知られていない桜の隠れた名所がたくさんあります。また、市内中心部で桜を見逃した方もしないから少し足を延ばせば、遅咲き桜の名所があります。地元の方だけが知っている、ゆったりお花見が楽しめる桜のお花見“穴場”スポットをご紹介。",
+      "body_paragraphs": [
+        "京都には、世界的にも有名な桜の名所や名刹が数多くありますが、国内外の観光客で大混雑して、お花見どころでないですよね。実は、京都市内にありながらも、ガイドブックにも載っておらず、SNSにも紹介されていない、観光客が殆ど訪れない、地元民だけが知っている「桜の穴場スポット」があります。しかも、京都駅から電車やバスで乗換え無しで行けたり、嵐山から徒歩圏内の隠れ寺、伏見稲荷大社から電車でほんの数駅先など、交通アクセスにも恵まれた、桜の隠れた名所が多く存在しています。今年の春は、人混みを避けて、穴場のお花見スポットで桜ゆったりを愛でるのがおすすめ。京都市内からひと足の延ばした、西京、山科、伏見、高雄、大原、京北の6つのエリアには、観光客があまり訪れない、桜の穴場スポットがたくさんあります。ゆったりお花見をしたり、「映え写真」を撮影したい方は必見。知る人ぞ知る「京の桜の隠れた名所」で春の１日を満喫ください。地元の方だけや京都ツウだけが知っている、桜のお花見スポットをご紹介します。",
+        "★西京編①嵐山・松尾・上桂 エリアはこちら嵐山のスグ近く♪渡月橋が一望の桜の絶景や桜の隠れ寺は混雑知らず★西京編②京都西山・大原野エリアはこちら京都西山 桜の平安絵巻♪紫式部・在原業平・西行がこよなく愛した桜★山科編はこちら京都駅からひと駅5分、直行バスで15分♪意外と近いお花見スポット★伏見編はこちら伏見稲荷大社からも近い！伏見桜の名所と日本酒「利き酒」スポット",
+        "★京北編はこちら歴代天皇もこよなく愛した皇室ゆかりの枝垂れ桜や里桜★大原編はこちら平安時代から都人に愛された癒しの里・大原★高雄編はこちら桜とミツバツツジ・椿の競演＆絶景と桜のトンネル",
+        "京都を代表する景勝地「嵐山」。春は京都有数の桜の名所として知られており、桜の開花時期には国内のみならず海外の観光客で大混雑。特に渡月橋や天龍寺周辺は春休みと重なるピーク時の週末や休日には、桜の花を見に来たのか？人を見に来たのか？分からなくなってしまいそうなほど。そんな大混雑した渡月橋を渡って南に徒歩3分、嵐山の西京エリアには、知る人ぞ知る「絶景の桜スポット」があるのをご存じですか。また、嵐山から路線バスで数分、阪急嵐山駅から電車でひと駅2分だけ移動した松尾大社には、ピンク色の桜の花と山吹色の由来にもなった、色あざやかな黄色い山吹（ヤマブキ）が競演して咲く絶景が。嵐山からほんのひと足だけ延ばすだけで、京都ツウしか知らない絶景の桜スポットがそこにはあります。★西京編 ①の詳しいお花見情報はこちらをクリック",
+        "京都は、東・北・西の三方を山に囲まれ、都の人々は眺める山の方角で、東を「東山」、北を「北山」、西を「西山」と呼んでいます。東山、北山は観光地として有名ですが、西山は、西山三山（善峯寺・光明寺・楊谷寺）とよばれる名刹をはじめ、由緒ある寺院や神社が点在する、京都ツウの間では最もホットなエリアです。京都西山には、花をこよなく愛した西行法師が出家し手植えした桜、源氏物語の作者・紫式部ゆかりの神社に咲く満開日が僅か3日の幻の枝垂れ桜、伊勢物語の主人公で超絶イケメン美男子・在原業平ゆかりの桜、「玉の輿」の由来ともなった徳川家光の側室・桂昌院お手植え桜など、平安時代から桜を中心とした文化が花開き、歴史を紡いできたエリアです。京都西山・大原野にゆかりが深い紫式部が主人公の大河ドラマ「光る君へ」が放映され全国的に注目度が一気にアップ。紫式部や在原業平、西行法師もこよなく愛した京都西山・大原野に思いを馳せ、風雅な「お花見」を楽しむのはいかがですか。京都西山の桜PRの動画（YouTube）もありますので、是非ともご覧ください。★西京編 ②の詳しいお花見情報はこちらをクリック",
+        "山科（やましな）は、三方を美しい緑の山に囲まれた盆地で、平安遷都以前のはるか昔、縄文・弥生時代から人が住み、文化の足跡を残してきた歴史浪漫あふれる地。アクセスも良く、京都駅からＪＲ京都線わずかひと駅（約５分）、三条京阪駅から地下鉄東西線で４駅（約９分）、京都駅から直行バス（京都醍醐寺ライン）で15分と、市内中心部からアクセスが良く意外と近いお花見スポットが点在しています。飛鳥時代「大化の改新（乙巳の変）」の主役として知られる藤原鎌足(中臣鎌足)が邸宅を建てた以降、山科は皇室や藤原氏をはじめとした貴族と深い関わりを持ち、室町時代には本願寺第８世法主蓮如により山科本願寺が建立され寺内町を形成、焼き打ちにあうまで本願寺派の本寺でもありました。江戸時代には、赤穂事件の赤穂浪士四十七士の指導者であった赤穂藩筆頭家老の大石内蔵助（大石良雄）が、討入り前の約１年あまり隠棲していた「忠臣蔵」ゆかりの地としても知られています。格式高い門跡寺院の堂宇を彩る桜、山科疏水沿いの桜並木、大石内蔵助ゆかりの社寺の桜など、山科には、まだまだ広く知られていない桜の絶景スポットがたくさんあります。今年の春は、京都市内中心部からすぐ行ける山科でお花見を楽しみませんか。山科観光ＰＲ動画「おこしやす京都山科へ～春の桜編～」(YouTube)もありますので、是非ともご覧ください。★山科編の詳しいお花見情報はこちらをクリック",
+        "伏見は豊臣秀吉が伏見城を築き城下町として発展。江戸時代は幕府直轄地となり、京都から伏見を結ぶ高瀬川を開削、さらに宇治川と淀川へ経て大阪を水路で結び、日本最大の河川港となり京都における淀川水運の玄関口かつ宿場町として栄えた交通の要衝。日本で最初に「銀座」が置かれ、商業・運輸業の一大拠点としても発展しました。幕末には新選組や坂本龍馬、西郷隆盛、大久保利通をはじめとした志士たちが駆け抜け、明治維新以後の歴史を生んだ町です。伏見と言えば、日本有数の酒どころ。日本の「伝統的酒造り」が、ユネスコ無形文化遺産に2024年12月に登録され、より一層注目を集めています。伏見はかつて「伏水」とも記され、伏見七名水と称される日本酒醸造に適した湧水があり、兵庫の灘、広島の西条とならび日本三大酒どころとしても全国的に知られています。世界文化遺産登録の真言宗醍醐派の総本山醍醐寺は平安時代から「花の醍醐」と称される桜の名所。豊臣秀吉が息子の秀頼、正室の北政所、側室の淀君をはじめ、約1,300人が参加した「醍醐の花見」の会場となり日本一の花見が開催された地です。そんな歴史あふれる伏見でのお花見の後は、伏見の銘酒に盃をかたむけながら、ゆったり余韻に浸るのもいいですね。★伏見編の詳しいお花見情報はこちらをクリック",
+        "京北（けいほく）は京都市右京区の北西部、桂川の源流域に位置し、総面積は約217k㎡で大阪市とほぼ同じくらいの大きさ。その広大なエリアの約93％が森林で、上桂川の清流と緑あふれた自然豊か地です。周山（しゅうざん）、弓削（ゆげ）、山国（やまぐに）、黒田（くろだ）、宇津（うつ）、細野（ほその）の６つの地域で構成されています。山国、黒田は天皇の直轄御料「禁裏御料」であり、長岡京や平安京の造営や京都御所の改修時には、大量の木材が「筏流し」により上桂川、保津川、桂川を経て運ばれた後、嵐山周辺で陸揚げされ、都へと木材を供給していました。現在でも、木材の名産地としてその名を知られています。上桂川で獲れた鮎は「献上鮎」と称され、平安遷都から幕末まで、夏には生きたまま京都御所へ献上され朝廷の人々の舌を唸らせていました。また、日本の食卓には欠かせない「納豆」発祥の地で、古くから各家庭で納豆が手づくりされてきました。京都府で桜として唯一、国の天然記念物に指定されている、樹齢約650年の銘桜「九重桜」で名高い、皇室ゆかりの寺院「常照皇寺」をはじめ、世界文化遺産登録の仁和寺の「御室桜」から株分けされた
+```
+
+
+=== Case R-188 ===
+Topic / intent: 山梨 ほうとう
+Query: 山梨のほうとうについて教えて。甲府盆地の食文化として公式に認められているのか知りたい。
+Tool: get_local_food({"prefecture": "Yamanashi", "keyword": "ほうとう", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "19",
+  "lang": "ja",
+  "count": 64,
+  "total_matching": 64,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "山梨の郷土料理「ほうとう」を味わえる名店をご紹介。注目のヘルシーフードを食べ比べたい！",
+      "name": "山梨の郷土料理「ほうとう」を味わえる名店をご紹介。注目のヘルシーフードを食べ比べたい！",
+      "description_ja": "山梨の郷土料理、ほうとうは栄養満点で体がぽかぽか温まるので、寒い冬はとくに美味しく感じられます。今回は、甲府、勝沼、富士五胡、富士川、身延の各地域でほうとうを楽しめるお店をご紹介。ほうとうの他にも、甲州名物であるおざら、みみについても紹介します。",
+      "description": "山梨の郷土料理、ほうとうは栄養満点で体がぽかぽか温まるので、寒い冬はとくに美味しく感じられます。今回は、甲府、勝沼、富士五胡、富士川、身延の各地域でほうとうを楽しめるお店をご紹介。ほうとうの他にも、甲州名物であるおざら、みみについても紹介します。",
+      "body_paragraphs": [
+        "山梨県の郷土料理といえば、「ほうとう」。山梨県民のソウルフードであり、観光で訪れた際にも、ぜひ味わいたいグルメです。太めの平打ち麺を、味噌味の汁で煮込んだもので、定番のかぼちゃをはじめ、野菜をたっぷり入れるので、栄養満点で体が温まること間違いなし。とても体に優しい鍋料理です。県内では各家庭で食べられるので、その家によって味が異なります。今回は、甲府、勝沼、富士五湖、富士川の各地で味わえるほうとうのお店をご紹介。そのお店ごとにこだわりの味があり、食べ比べが楽しめます。",
+        "「ほうとう」は山梨を代表する郷土料理。小麦粉を練った平打ち麺に、かぼちゃや芋類、きのこ、季節の野菜、肉などの具材を加えて、味噌仕立ての汁で煮込む素朴な料理です。古くは戦国武将、武田信玄が陣中食にしていたとも伝えられてきました。",
+        "家庭では大鍋で作ることが多いですが、お店では1人分ずつ鉄鍋で提供されるのが一般的です。打ち粉がついたまま煮込むので、汁にとろみがつき、麺とよくからむのが特徴。麺のモチモチ食感や風味豊かな汁は一度味わうとやみつきになります。",
+        "八ヶ岳の湧水と、山梨産のシルクパウダーを麺に練り込んだ「甲斐絹宝刀（かいきぼうとう）」。山梨の地場産業である絹織物を郷土料理に活かしたほうとうです。麺につやつやとした上品な光沢があり、なめらかな食感が特徴。シルクは、必須アミノ酸を含む18種類のアミノ酸を含み、美容や健康面でも注目されています。甲州地鶏とたっぷりの野菜、甲州味噌で味付けされたほうとうを、ホテル内の落ち着いた雰囲気のレストランで味わえます。",
+        "甲斐絹ほうとう膳2,200円は、馬刺し付きの贅沢なランチメニュー",
+        "（営業時間）レストラン錦11:30～14:00(13:30L.O.)",
+        "（アクセス）JR中央線甲府駅から徒歩8分／中央自動車道甲府昭和ICより30分",
+        "（HPアドレス）https://danrokan.chateraisehotel.jp（外部リンク）",
+        "甲府駅南口からすぐのところにある1941年創業の老舗。昭和の風情が残る店内は、落ち着いた雰囲気で、地元はもちろん、出張ビジネスマンや観光客にも親しまれています。名物のほうとうは、注文を受けてから作るため、出来上がるまで約30分はかかります。数種類の野菜の旨みが溶け込むまで、じっくりと煮込んだ汁は素朴なおいしさ。麺は地粉を使った特注麺で、もちもちで汁がよく絡みます。また、山梨で「おざら」を始めた店としても有名。ほうとうをつけ麺で食べるもので、この店では醤油味のつけ汁でさっぱりといただけます。",
+        "（営業時間）水・木曜11:30～13:15L.O.、18:00～21:00、金曜11:30～13:15L.O.、18:00～22:00、土・日曜水～木曜11:30～14:00L.O.、18:00～20:00（閉店時間変更あり）",
+        "（アクセス）JR中央線甲府駅から徒歩3分／中央自動車道甲府昭和ICより20分",
+        "（HPアドレス）http://marumaru115.blog.fc2.com（外部リンク）",
+        "昇仙峡の絶景を楽しんだあとに立ち寄りたい食事処では、甲州の郷土料理伝統のほうとうが味わえます。たっぷりの野菜を煮込んで、特製味噌で仕上げる「田舎ほうとう」は、濃厚な旨み。ほかに、やはり郷土料理の鳥もつ煮、甲州秘伝のタレで焼き上げたうな重、昇仙峡の名水でしめた蕎麦などもおすすめ。ペットのわんちゃん連れが利用できる屋根付きテーブル席が庭園内に備えられています。",
+        "田舎ほうとうセット 1,870円は、ミニ鳥もつ煮とサラダ付き",
+        "しょうせんきょう こうしゅうきょうどりょうり ほうとう うなぎ わらじ",
+        "（アクセス）JR中央本線甲府駅からバスで約50分／中央自動車道甲府昭和ICより車で約40分",
+        "（HPアドレス）https://koshu-waraji.com/（外部リンク）",
+        "創業約二百年の歴史をもつ日本料理店がルーツというほうとう処。店内で手打ちする麺と、厳選したアゴ、カツオなど数種のだしで作るほうとうは、下ごしらえの状態で提供され、テーブルで仕上げる仕組み。自分でたっぷりの野菜やほうとうを鍋に入れて仕上げる体験ができます（閑散期はスタッフが目の前で仕上げてくれる場合もあり）。まずはそのままの汁でだしの旨みを味わい、次に甲州味噌を加えて自分好みの味を作りましょう。ごまの風味が生きたごまどうふ、地元で受け継がれた製法で芋から作る手作りさしみこんにゃくが付いたセットメニューがおすすめ。",
+        "手打ちほうとうはこの状態で提供され、テーブルで煮込みを仕上げる",
+        "ごまどうふは、おみやげに購入可能。白ごま、黒ごま、抹茶、いちごなど",
+        "（アクセス）JR中央線石和温泉駅から車で15分／中央自動車道笛吹八代スマートICより車で8分",
+        "（HPアドレス）https://www.e-edoya.com（外部リンク）",
+        "武田信玄公の菩提寺である恵林寺の隣にある食事処。一番人気は、小林牧場で育てられた甲州ワインビーフの牛すじを使ったほうとう。白味噌とカツオだしを練り込み熟成させた自家製麺に、甲州ワインビーフの牛すじの甘さが溶けた白だしスープがじっかりと絡む、この店にしかない味です。クセになる味とリピーターが続出。生麺を使うため、注文してから20分程かかります。ほかに富士桜ポーク入りや、カニ入りのほうとうもあり。",
+        "創業当初から人気の甲斐福餅。季節によりこし・梅しそ・栗のあんが登場",
+        "（アクセス）JR中央線塩山駅から車で10分／中央自動車道勝沼ICより25分",
+        "（HPアドレス）https://www.shingenyakata.com（外部リンク）",
+        "自家製の味噌とだしにこだわった、風味豊かなほうとうを味わえる店。自家製味噌は、山梨県産の「あけぼの大豆」を使用、麦・米・麹をふんだんに使った香り高いコクのある甲州合わせ味噌に仕上げています。だしは天然だし。また、野菜も山梨県産をできる限り使っています。ほうとうのメニューは、野菜、きのこ、鶏肉、豚肉、特製の5種類で、どれも上品なやさしい味わい。注文後30分はかかるのでご注意を。ほかに馬刺しや鶏もつ煮などの郷土料理や、勝沼ワインも楽しめます。",
+        "大きめに切った野菜がごろごろ入った、野菜ほうとう 1,595円",
+        "明治10年築の古民家は、登録有名文化財。待ち時間に庭を散策できる",
+        "（営業時間）10:00～17:00L.O.（品切れ次第終了）"
+      ],
+      "spot_url": "https://www.yamanashi-kankou.jp/special/gourmet_hoto.html",
+      "spot_id": "dd9ff67bf1aed7bb",
+      "municipality": "富士吉田市",
+      "prefecture": "山梨県",
+      "prefecture_code": "19"
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "山梨の郷土料理「ほうとう」を味わえる名店をご紹介。注目
+```
+
+
+=== Case R-189 ===
+Topic / intent: Японская кухня Осака
+Query: Расскажите о традиционных блюдах Осаки с официальным признанием. Такояки, окономияки — что ещё?
+Tool: get_local_food({"prefecture": "Osaka", "lang": "ru"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "27",
+  "lang": "ru",
+  "count": 460,
+  "total_matching": 460,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:137",
+      "registration_number": 137,
+      "name_ja": "富田林の海老芋",
+      "name": "Эби-имо из Тондабаяси",
+      "description_ja": "その名の由来とされる海老のような湾曲した形状と縞模様が特徴である。食味としてのほくほく感の指標である乾物率が他産のものより高く、滑らかな舌触りから高級食材として、通常の里芋より高値で取引され、京都や東京の料亭などから重宝されている。",
+      "description": "Этот сорт таро отличается изогнутой формой, напоминающей креветку, и полосатым рисунком, которые считаются происхождением его названия. Содержание сухого вещества — показатель рассыпчатой, мучнистой текстуры, ценимой потребителями, — у него выше, чем у таро из других регионов, а нежная текстура во рту закрепила за ним статус премиального ингредиента. Он продаётся по более высокой цене, чем обычное таро, и высоко ценится в дорогих ресторанах Киото, Токио и других городов.",
+      "registration_date": "令和5年7月20日",
+      "production_area_text": "大阪府富田林市（彼方、西板持、東板持、南大伴、北大伴、錦織)",
+      "prefecture_codes": [
+        "27"
+      ],
+      "producer_group": "大阪府富田林市彼方1043富田林市海老芋振興協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0137/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:57:16.511Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:161",
+      "registration_number": 161,
+      "name_ja": "泉州水なす",
+      "name": "Сэнсю Мидзунасу",
+      "description_ja": "絞ると水がしたたり落ちるほど多くの水分を含み、昔は田畑の片隅に植え、炎天下の農作業時にのどの渇きを癒したと言われる。果皮と果肉が柔らかで、ほのかな甘みがあり、あくが少ないのが特徴。 泉州地域を代表するブランド野菜であり、漬物や郷土料理に使用されるなど地域の食文化に定着しており、大阪を代表する土産物・贈答品としても人気。",
+      "description": "Этот баклажан содержит настолько много влаги, что при отжимании из него капает вода. По преданию, в прошлом его сажали по углам рисовых полей и огородов, чтобы утолять жажду во время полевых работ под палящим солнцем. Отличительные черты — мягкая кожица и мякоть, лёгкая сладость и низкое содержание горечи. Это ведущий брендовый овощ региона Сэнсю, прочно вошедший в местную пищевую культуру благодаря использованию в маринадах и региональных блюдах, а также популярный в качестве сувенира и подарка, символизирующего Осаку.",
+      "registration_date": "令和7年1月30日",
+      "production_area_text": "大阪府岸和田市、泉大津市、貝塚市、泉佐野市、和泉市、高石市、泉南市、阪南市、泉北郡忠岡町、泉南郡熊取町、田尻町及び岬町",
+      "prefecture_codes": [
+        "27"
+      ],
+      "producer_group": "東京都千代田区大手町1-3-1全国農業協同組合連合会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0161/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "観光スポット・体験",
+      "name": "観光スポット・体験",
+      "description_ja": "大阪の観光スポットや体験を網羅。グルメ、歴史、ショッピング、最新レジャーなど、カテゴリーやエリア、利用シーンからあなたにぴったりのスポットを検索できます。大阪観光局が運営する公式サイトで、最新の観光情報をチェックしましょう。",
+      "description": "大阪の観光スポットや体験を網羅。グルメ、歴史、ショッピング、最新レジャーなど、カテゴリーやエリア、利用シーンからあなたにぴったりのスポットを検索できます。大阪観光局が運営する公式サイトで、最新の観光情報をチェックしましょう。",
+      "body_paragraphs": [],
+      "spot_url": "https://osaka-info.jp/spot",
+      "spot_id": "82eb16054a329810",
+      "municipality": "大阪市",
+      "prefecture": "大阪府",
+      "prefecture_code": "27"
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "大阪のおすすめグルメ",
+      "name": "大阪のおすすめグルメ",
+      "description_ja": "「天下の台所」大阪で味わいたい、たこ焼きやお好み焼き、串カツなどの定番ローカル料理を徹底解説。伝統の食文化から話題のラーメン、デパ地下グルメまで、大阪観光で外せないおすすめ情報を満載。食い倒れの街の魅力を堪能しましょう！",
+      "description": "「天下の台所」大阪で味わいたい、たこ焼きやお好み焼き、串カツなどの定番ローカル料理を徹底解説。伝統の食文化から話題のラーメン、デパ地下グルメまで、大阪観光で外せないおすすめ情報を満載。食い倒れの街の魅力を堪能しましょう！",
+      "body_paragraphs": [
+        "大阪のおうどんは、軟らかい口当たりの麵と、それに優しく寄り添う昆布とカツオ節のだしとのハーモニーが魅力です。",
+```
+
+
+=== Case R-190 ===
+Topic / intent: 福井 越前ガニ
+Query: 越前ガニのブランドと漁期について教えて。地理的表示保護制度でどう認定されているか知りたい。
+Tool: get_local_specialty({"prefecture": "Fukui", "category": "food", "q": "越前", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "18",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "category_filter": "food",
+  "q": "越前",
+  "lang": "ja",
+  "count": 1,
+  "items": [
+    {
+      "key": "maff_gi:69",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 69,
+      "name_ja": "越前がに",
+      "name": "越前がに",
+      "description_ja": "漁獲獲後水揚げまでの間、冷温で保管されるため、鮮度が良く、身質が良く、鮮度低下の早いカニミソや内子（卵巣）も濃厚な旨味を持ち、品質が高いずわいがに。福井県により90年以上にわたり皇室に特産品として献上され、同県を代表する水産物として全国的に高い知名度を有し、重量当たりの単価は全国平均を上回っている。",
+      "description": "漁獲獲後水揚げまでの間、冷温で保管されるため、鮮度が良く、身質が良く、鮮度低下の早いカニミソや内子（卵巣）も濃厚な旨味を持ち、品質が高いずわいがに。福井県により90年以上にわたり皇室に特産品として献上され、同県を代表する水産物として全国的に高い知名度を有し、重量当たりの単価は全国平均を上回っている。",
+      "registration_date": "平成30年9月27日",
+      "production_area_text": "福井県",
+      "prefecture_codes": [
+        "18"
+      ],
+      "producer_group": "福井県福井市大手2丁目8番10号福井県漁業協同組合連合会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0069/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "see_also_wikidata_venues": [
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11591310",
+      "name_ja": "福井市水道記念館",
+      "name_en": "Fukui City Waterworks Memorial Hall",
+      "description_en": null,
+      "coordinates": {
+        "lat": 36.058664,
+        "lng": 136.211325
+      },
+      "prefecture": "福井県",
+      "municipality": "福井県",
+      "heritage_designations": [
+        "Q11579194",
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Q11633166"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11591310"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q17230044",
+      "name_ja": "福井県立若狭歴史博物館",
+      "name_en": "Wakasa History Museum",
+      "description_en": "archive organization in Obama, Japan",
+      "coordinates": {
+        "lat": 35.48415,
+        "lng": 135.78490833
+      },
+      "prefecture": "福井県",
+      "municipality": "福井県",
+      "heritage_designations": [
+        "Q11579194",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "kinds": [
+        "museum"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q17230044"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q1072530",
+      "name_ja": "大野城",
+      "name_en": "Ōno Castle",
+      "description_en": "Japanese castle in Ōno, Fukui prefecture",
+      "coordinates": {
+        "lat": 35.986588,
+        "lng": 136.483042
+      },
+      "prefecture": "福井県",
+      "municipality": "福井県",
+      "kinds": [
+        "castle",
+        "museum",
+        "japanese_castle",
+        "mountain_castle",
+        "zoku_nihon_100_meijo",
+        "rekishi_park_100"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q1072530"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11462628",
+      "name_ja": "小浜西組",
+      "name_en": "Obama Nishigumi",
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.492119,
+        "lng": 135.735478
+      },
+      "prefecture": "福井県",
+      "municipality": "福井県",
+      "heritage_designations": [
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings"
+      ],
+      "kinds": [
+        "jokamachi",
+        "preservation_district"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11462628"
+    },
+    {
+      "type": "wikidata_kinds_match",
+      "qid": "Q11468309",
+      "name_ja": "山川登美子記念館",
+      "name_en": "Yamakawa Tomiko Memorial Museum",
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.498508,
+```
+
+
+=== Case R-191 ===
+Topic / intent: Wagashi seasonal sweets
+Query: I want to learn about regional Japanese confectionery traditions. Where can I find officially designated wagashi across Japan?
+Tool: get_local_specialty({"category": "food", "q": "菓子", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "category_filter": "food",
+  "q": "菓子",
+  "lang": "en",
+  "count": 3,
+  "items": [
+    {
+      "key": "maff_gi:151",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 151,
+      "name_ja": "やまえ栗",
+      "name": "Yamae Kuri",
+      "description_ja": "甘みの強さや栗本来の風味や香り等がパティシエや料理人から高く評価されており、やまえ栗を使った菓子等が高級クルーズトレインや国際線ファーストクラスのデザートとして使われている。山江村と言えばやまえ栗との認識が需要者に定着しており、村の観光・経済を支える特産品となっている。",
+      "description": "Yamae Kuri chestnuts are highly regarded by pastry chefs and cooks for their strong sweetness and the authentic flavor and aroma characteristic of chestnuts. Confections and other products made with Yamae Kuri have been used as desserts in luxury cruise trains and in international first-class cabin service. Consumers have come to associate Yamae Village with Yamae Kuri, making it a specialty product that supports the village's tourism and economy.",
+      "registration_date": "令和6年3月27日",
+      "production_area_text": "熊本県球磨郡山江村",
+      "prefecture_codes": [
+        "43"
+      ],
+      "producer_group": "熊本県球磨郡山江村大字山田甲1356番地の1やまえ栗振興協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0151/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:155",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 155,
+      "name_ja": "ちんすこう",
+      "name": "Chinsuko",
+      "description_ja": "「ちんすこう」は、サクサクとした食感と口溶けの良さを併せもち、濃厚で独特の風味をもつ沖縄の伝統的な焼き菓子である。そのルーツは琉球王朝時代までさかのぼり、現在は沖縄らしい土産品として人気が高く、全国的な知名度を有している。",
+      "description": "Chinsuko is a traditional baked confection from Okinawa that combines a crispy texture with a melt-in-the-mouth quality, and has a rich, distinctive flavor. Its roots trace back to the era of the Ryukyu Kingdom, and today it is widely popular as a souvenir representative of Okinawa and is well known throughout Japan.",
+      "registration_date": "令和6年8月27日",
+      "production_area_text": "沖縄県",
+      "prefecture_codes": [
+        "47"
+      ],
+      "producer_group": "沖縄県那覇市久米2丁目2番10号 中小企業振興会館3階 那覇商工会議所内沖縄県観光おみやげ品公正取引協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0155/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "maff_gi:172",
+      "category": "food",
+      "authority": "農林水産省 (MAFF)",
+      "designation": "GI (Geographical Indication)",
+      "registration_number": 172,
+      "name_ja": "沖縄黒糖",
+      "name": "Okinawa Kokuto",
+      "description_ja": "ポリフェノール、うま味、ミネラル等の成分を有していることで、ほのかな苦味のある独特の深い味わいを持つ。約400年の歴史を持ち、沖縄の伝統料理「ラフテー」や伝統菓子「ちんびん」、「サーターアンダギー」等に欠かせない調味料として広く浸透しているほか、お茶菓子として日常的に食されるなど、沖縄の食文化を形作っている。",
+      "description": "Characterized by a uniquely deep flavor with a subtle bitterness, owing to its content of polyphenols, umami compounds, and minerals. With a history of approximately 400 years, it is widely used as an indispensable seasoning in traditional Okinawan dishes such as 'Rafute' and traditional confections such as 'Chinbin' and 'Sata Andagi,' and is also consumed daily as a tea accompaniment, forming an integral part of Okinawan food culture.",
+      "registration_date": "令和7年11月17日",
+      "production_area_text": "沖縄県",
+      "prefecture_codes": [
+        "47"
+      ],
+      "producer_group": "沖縄県那覇市古波蔵1-24-27 沖縄畜産振興支援センター1F沖縄県黒砂糖協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0172/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.783Z",
+        "confi
+```
+
+
+=== Case R-192 ===
+Topic / intent: 弘前公園 桜
+Query: 弘前公園の桜の見頃と、お堀に花びらが浮かぶ「花筏」が見られる時期を教えて。
+Tool: get_spots({"prefecture": "Aomori", "municipality": "弘前", "q": "桜"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11288816",
+      "name": "弘前公園",
+      "name_en": "Hirosaki Park",
+      "name_zh": "弘前公園",
+      "name_ko": "히로사키 공원",
+      "description_en": "park in Hirosaki, Aomori prefecture, Japan",
+      "coordinates": {
+        "lat": 40.608036,
+        "lng": 140.463806
+      },
+      "url": "https://www.wikidata.org/wiki/Q11288816",
+      "municipality": "青森県",
+      "municipality_code": "020001",
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "garden",
+        "sakura_meisho_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.9,
+      "crowd_band": "medium",
+      "phone": "+81 172-33-8733",
+      "website": "https://www.hirosakipark.jp/",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q194087",
+      "name": "弘前市",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 40.60311,
+        "lng": 140.46383
+      },
+      "url": "https://www.wikidata.org/wiki/Q194087",
+      "municipality": null,
+      "municipality_code": null,
+      "prefecture": "青森県",
+      "quality_score": 0.65,
+      "kinds": [
+        "nihon_100_meijo",
+        "sakura_meisho_100",
+        "preservation_district",
+        "soundscape_100",
+        "meisui_100",
+        "rekishi_park_100",
+        "gairoju_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.8,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Q11633166"
+      ],
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ef4995201cf12ceb",
+      "name": "特集　弘前桜物語 ～七にまつわる桜の物語～｜弘前市観光情報サイト　きてみて、ひろさき。ここみて、弘前",
+      "description": null,
+      "coordinates": {
+        "lat": 40.603111111,
+        "lng": 140.463833333
+      },
+      "address": null,
+      "url": "https://www.hirosaki-kanko.or.jp/special/0004.html",
+      "municipality": "弘前市",
+      "municipality_code": "022021",
+      "prefecture": "青森県",
+      "language": "ja",
+      "quality_score": 0.34,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9d1a0c10a6e8fb90",
+      "name": "桜ミク古町名まんじ札～弘前菓子めぐり",
+      "description": null,
+      "coordinates": {
+        "lat": 40.603111111,
+        "lng": 140.463833333
+      },
+      "address": null,
+      "url": "https://www.hirosaki-kanko.or.jp/details.html?id=CNT00411141129494306",
+      "municipality": "弘前市",
+      "municipality_code": "022021",
+      "prefecture": "青森県",
+      "language": "ja",
+      "quality_score": 0.14,
+      "q_relevance": 50,
+      "tier": "broader"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "669c8a094a05527e",
+      "name": "りんごも桜も欲張り旅！弘前・春のダブル開花キャンペーン",
+      "description": null,
+      "coordinates": {
+        "lat": 40.603111111,
+        "lng": 140.463833333
+      },
+      "address": null,
+      "url": "https://www.hirosaki-kanko.or.jp/details.html?id=CNT00404111540447839",
+      "municipality": "弘前市",
+      "municipality_code": "022021",
+      "prefecture": "青森県",
+      "language": "ja",
+      "quality_score": 0.14,
+      "q_relevance": 20,
+      "tier": "broader"
+    }
+  ],
+  "spot_tier_counts": {
+    "must_see": 1,
+    "notable": 2,
+    "broader": 2
+  },
+  "count": 5,
+  "total_before_limit": 5,
+  "truncated": false,
+  "min_
+```
+
+
+=== Case R-193 ===
+Topic / intent: Tokyo cherry blossom
+Query: What are the best cherry blossom viewing spots in Tokyo? Looking for places beyond Ueno Park.
+Tool: search_hybrid({"q": "桜 花見 東京", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "桜 花見 東京",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.07843,
+      "rank_bm": 1,
+      "rank_vec": 6,
+      "key": "spot:d9c95da0e03533a1",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "春の東京",
+      "description": "What's On & Coming Up in Tokyo 心地良い風が吹き始める春は、東京観光にぴったりの季節です。桜の花を愛でる花見をはじめ、色あざやかに咲き誇る花の名所を訪れたり、祭りを見に出かけたり、旬を迎えた食材を味わったりと、この時期ならではの楽しみがいっぱいです。 3月下旬から4月上旬にかけ随所で桜が咲き誇る東京。多くの公園や庭園で、ライトアップされた幻想的な夜桜を楽しむこともできます。「千鳥ヶ淵」の桜並木を散策したり、「代々木公園」「井の頭恩賜公園」でピクニックをしたりと、街を美しく染める桜を愛でながら花見を楽しみましょう。 詳しくは「2026年に東京で桜が見られる時期と場所」ページをご覧ください。 桜の花見はもちろん、東京には春に美しい花を愛でることができる名所が数多くあります。3月下旬から4月にかけて「昭和記念公園」では色とりどりのチューリップが咲き誇ります。4月には「根津神社」のツツジ、5月には「亀戸天神」の藤、6月には「小石川後楽園」の花菖蒲や「隅田公園」のアジサイなど、東京で春の花の移ろいを楽しみましょう。 旬を大切にする日本食。和食のお店では柔らかなタケノコ、採れたての山菜、春キャベツ、味わい深いハマグリやサヨリなど、春の到来を感じさせる旬の食材を使った料理が揃います。桜風味のラテやスイーツなどを楽しむことができるカフェなどもあります。桜の名所として知られる中目黒川沿いや隅田川沿いにあるカフェ&レストランで、桜並木を眺めながら優雅なひと時を過ごすのもおすすめ。また、百貨店の食料品売場をはじめ、多くの飲食店で春の食材を取り入れたお弁当などを提供しているので、テイクアウトグルメを持ち寄って公園で味わうのもいいでしょう。",
+      "prefecture": "東京都",
+      "municipality": "西東京市",
+      "url": "https://www.gotokyo.org/jp/story/guide/spring"
+    },
+    {
+      "score": 0.03226,
+      "rank_bm": null,
+      "rank_vec": 39,
+      "key": "spot:943805f534498c61",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "栃木県のお花見特集",
+      "description": "栃木県指定文化財の虚空蔵堂の境内に咲く桜。大きく枝分かれした幹に咲き誇る様は見応え充分です。 春限定のスイーツを楽しみながら、桜を眺めて街歩きはいかがでしょう。 個人邸宅「岸野家」にある趣のあるしだれ桜。樹齢を感じさせる趣のある枝振りの桜です。近くには栃木県天然記念物のヒメコマツもあります。 まち歩きの途中で是非訪れてみて欲しい桜スポットです。 ※個人宅ですので、観覧の際には御配慮ください。 個人邸宅「高田家」にあるしだれ桜。樹齢370年、古くから地域に愛される桜です。満開時にはライトアップも行われます。 ※個人宅ですので、観覧の際には御配慮ください。 明治期に造営された国の重要文化財であるこの御用邸には、邸の前身である小林年保氏所有庭園時、既に植栽され当時の面影を今に伝える記念のシダレザクラがあります。樹齢は300～350年と推定され、優美な御用邸建築の美しさに、自然観を添え、花時には際立った彩りを与えています。 樹齢は推定500年、山桜の突然変異種で、ピンクのつぼみが大輪の白い花を咲かせる姿が愛らしい、国の天然記念物に指定された桜の銘木です。100年程前に枯れそうになった際、当時の門跡が毎日木の前でお経を唱えたところ、しばらくして新たな幹が根本より生えてきたという逸話もあります。",
+      "prefecture": "栃木県",
+      "municipality": "那須町",
+      "url": "https://www.tochigiji.or.jp/features/ohanami"
+    },
+    {
+      "score": 0.02901,
+      "rank_bm": 7,
+      "rank_vec": 11,
+      "key": "spot:b52230ca04f56d41",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "桜並木",
+      "description": "現在の位置： トップページ > 観光・イベント > 観光スポット > Musabura花さんぽ > 桜並木 第4回桜まつりぶら～りウォーキングin武蔵村山のお花見イベントを、4月6（土曜日）・7日（日曜日）に開催します。ステージイベントや屋台村の出店など様々なイベントを行う予定ですので、是非お越しください。イベントの詳細等については、下記リンク先をご参照ください。 野山北公園の桜並木が見ごろを迎えています。午後5時30分以降には、桜のライトアップを桜並木の一部で行っています。ぜひお越しください。 また、4月6（土曜日）・7日（日曜日）にはお花見イベントを開催いたします。多くの方のご来場をお待ちしております。 ちなみに、桜は分類上バラ科に属する植物とのことです。同じバラ科の植物は、イチゴやナシも含まれるようです。バラ科の大きな特徴として、5枚の花弁を持つという共通項があるようです。桜、イチゴ、ナシが同じ仲間というのはとても不思議ですね。 花のつぼみが少し大きくなったように見えます。21日には、気象庁から東京の桜開花宣言が発表されました。暖かくなり、桜のつぼみがどんどん花開くのが今から楽しみです。",
+      "prefecture": "東京都",
+      "municipality": "武蔵村山市",
+      "url": "https://www.city.musashimurayama.lg.jp/kankou/spots/1010209/1010314.html"
+    },
+    {
+      "score": 0.02753,
+      "rank_bm": 8,
+      "rank_vec": 18,
+      "key": "spot:a503270a8b457594",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "桜だより（平成31年度版）",
+      "description": "現在の位置： トップページ > 観光・イベント > 観光スポット > 野山北公園自転車道の桜並木 > 桜だより（平成31年度版） 第4回桜まつりぶら～りウォーキングin武蔵村山のお花見イベントを、4月6（土曜日）・7日（日曜日）に開催します。ステージイベントや屋台村の出店など様々なイベントを行う予定ですので、是非お越しください。イベントの詳細等については、下記リンク先をご参照ください。 野山北公園の桜並木が見ごろを迎えています。午後5時30分以降には、桜のライトアップを桜並木の一部で行っています。ぜひお越しください。 また、4月6（土曜日）・7日（日曜日）にはお花見イベントを開催いたします。多くの方のご来場をお待ちしております。 ちなみに、桜は分類上バラ科に属する植物とのことです。同じバラ科の植物は、イチゴやナシも含まれるようです。バラ科の大きな特徴として、5枚の花弁を持つという共通項があるようです。桜、イチゴ、ナシが同じ仲間というのはとても不思議ですね。 花のつぼみが少し大きくなったように見えます。21日には、気象庁から東京の桜開花宣言が発表されました。暖かくなり、桜のつぼみがどんどん花開くのが今から楽しみです。",
+      "prefecture": "東京都",
+      "municipality": "武蔵村山市",
+      "url": "https://www.city.musashimurayama.lg.jp/kankou/spots/1010216/1010221.html"
+    },
+    {
+      "score": 0.02534,
+      "rank_bm": 36,
+      "rank_vec": 7,
+      "key": "spot:79faae6a1be23f14",
+      "
+```
+
+
+=== Case R-194 ===
+Topic / intent: 京都 紅葉 穴場
+Query: 京都の紅葉シーズンに混雑を避けたい。有名な嵐山や清水寺以外の紅葉スポットを教えて。
+Tool: search_hybrid({"q": "京都 紅葉 穴場", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "京都 紅葉 穴場",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.021,
+      "rank_bm": 50,
+      "rank_vec": 24,
+      "key": "spot:380aeff1948fcb41",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "京都 知る人ぞ知る♪とっておき桜の穴場スポットでゆったりお花見",
+      "description": "京都には、世界的にも有名な桜の名所や名刹が数多くありますが、国内外の観光客で大混雑して、お花見どころでないですよね。実は、京都市内にありながらも、ガイドブックにも載っておらず、SNSにも紹介されていない、観光客が殆ど訪れない、地元民だけが知っている「桜の穴場スポット」があります。しかも、京都駅から電車やバスで乗換え無しで行けたり、嵐山から徒歩圏内の隠れ寺、伏見稲荷大社から電車でほんの数駅先など、交通アクセスにも恵まれた、桜の隠れた名所が多く存在しています。今年の春は、人混みを避けて、穴場のお花見スポットで桜ゆったりを愛でるのがおすすめ。京都市内からひと足の延ばした、西京、山科、伏見、高雄、大原、京北の6つのエリアには、観光客があまり訪れない、桜の穴場スポットがたくさんあります。ゆったりお花見をしたり、「映え写真」を撮影したい方は必見。知る人ぞ知る「京の桜の隠れた名所」で春の１日を満喫ください。地元の方だけや京都ツウだけが知っている、桜のお花見スポットをご紹介します。 ★西京編①嵐山・松尾・上桂 エリアはこちら嵐山のスグ近く♪渡月橋が一望の桜の絶景や桜の隠れ寺は混雑知らず★西京編②京都西山・大原野エリアはこちら京都西山 桜の平安絵巻♪紫式部・在原業平・西行がこよなく愛した桜★山科編はこちら京都駅からひと駅5分、直行バスで15分♪意外と近いお花見スポット★伏見編はこちら伏見稲荷大社からも近い！伏見桜の名所と日本酒「利き酒」スポット ★京北編はこちら歴代天皇もこよなく愛した皇室ゆかりの枝垂れ桜や里桜★大原編はこちら平安時代から都人に愛された癒しの里・大原★高雄編はこちら桜とミツバツツジ・椿の競演＆絶景と桜のトンネル 京都を代表する景勝地「嵐山」。春は京都有数の桜の名所として知られており、桜の開花時期には国内のみならず海外の観光客で大混雑。特に渡月橋や天龍寺周辺は春休みと重なるピーク時の週末や休日には、桜の花を見に来たのか？人を見に来たのか？分からなくなってしまいそうなほど。そんな大混雑した渡月橋を渡って南に徒歩3分、嵐山の西京エリアには、知る人ぞ知る「絶景の桜スポット」があるのをご存じですか。また、嵐山から路線バスで数分、阪急嵐山駅から電車でひと駅2分だけ移動した松尾大社には、ピンク色の桜の花と山吹色の由来にもなった、色あざやかな黄色い山吹（ヤマブキ）が競演して咲く絶景が。嵐山からほんのひと足だけ延ばすだけで、京都ツウしか知らない絶景の桜スポットがそこにはあります。★西京編 ①の詳しいお花見情報はこちらをクリック 京都は、東・北・西の三方を山に囲まれ、都の人々は眺める山の方角で、東を「東山」、北を「北山」、西を「西山」と呼んでいます。東山、北山は観光地として有名ですが、西山は、西山三山（善峯寺・光明寺・楊谷寺）とよばれる名刹をはじめ、由緒ある寺院や神社が点在する、京都ツウの間では最もホットなエリアです。京都西山には、花をこよなく愛した西行法師が出家し手植えした桜、源氏物語の作者・紫式部ゆかりの神社に咲く満開日が僅か3日の幻の枝垂れ桜、伊勢物語の主人公で超絶イケメン美男子・在原業平ゆかりの桜、「玉の輿」の由来ともなった徳川家光の側室・桂昌院お手植え桜など、平安時代から桜を中心とした文化が花開き、歴史を紡いできたエリアです。京都西山・大原野にゆかりが深い紫式部が主人公の大河ドラマ「光る君へ」が放映され全国的に注目度が一気にアップ。紫式部や在原業平、西行法師もこよなく愛した京都西山・大原野に思いを馳せ、風雅な「お花見」を楽しむのはいかがですか。京都西山の桜PRの動画（YouTube）もありますので、是非ともご覧ください。★西京編 ②の詳しいお花見情報はこちらをクリック",
+      "prefecture": "京都府",
+      "municipality": "京都市山科区",
+      "url": "https://totteoki.kyoto.travel/48019"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "dmo_page:dmo_0033_公社京都府観光連盟:https://www.kyoto-kankou.or.jp/calendar?id=3",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "見頃カレンダー（桜・紅葉等） | 京都府観光連盟公式サイト (（公社）京都府観光連盟)",
+      "description": "盛り過ぎ 【向日神社】紅葉 向日市 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 続きを見る 盛り過ぎ 【向日神社】紅葉 向日市 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 盛り過ぎ 【向日神社】紅葉 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 向日市 詳細ページを見る 盛り過ぎ 【向日神社】紅葉 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 向日市",
+      "prefecture": "京都府",
+      "municipality": null,
+      "url": "https://www.kyoto-kankou.or.jp/calendar?id=3"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "wd:Q11410117",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "厭離庵",
+      "description": "building in Kyoto",
+      "prefecture": "京都府",
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q11410117"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "wd:Q17219634",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "紅葉谷",
+      "description": "京都市北区にある谷",
+      "prefecture": "京都府",
+      "municipality": "京都府",
+      "url": "https://www.wikidata.org/wiki/Q17219634"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": null,
+      "rank_vec": 2,
+      "key": "wd:Q11605271",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "紅葉山公園",
+      "description": "park in Japan",
+      "prefecture": "福島県",
+      "municipality": "福島県",
+      "url": "https://www.wikidata.org/wiki/Q11605271"
+    },
+    {
+      "score": 0.01587,
+      "rank_bm": null,
+      "rank_vec": 3,
+      "key": "wd:Q11635911",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "赤穴
+```
+
+
+=== Case R-195 ===
+Topic / intent: 홋카이도 눈 축제
+Query: 홋카이도의 겨울 눈 축제에 대해 알려주세요. 삿포로 설국 이외에도 있나요?
+Tool: get_festivals({"prefecture": "Hokkaido", "keyword": "雪", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "01",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "lang": "ko",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "query_intent": {
+    "detected_concepts": [
+      {
+        "id": "kaido",
+        "matched_text": "kaido",
+        "rationale_en": "Kaido — ancient highway / road, often a heritage cultural landscape.",
+        "polarity": "boost",
+        "target_kinds": [
+          "pilgrimage_site",
+          "historic_site"
+        ]
+      }
+    ]
+  }
+}
+```
+
+
+=== Case R-196 ===
+Topic / intent: Nikko autumn foliage
+Query: When is the best time for autumn foliage in Nikko? What spots are most dramatic during koyo season?
+Tool: get_spots({"prefecture": "Tochigi", "municipality": "日光", "q": "紅葉"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11504890",
+      "name": "日光田母沢御用邸記念公園",
+      "name_en": "Nikkō Tamozawa Imperial Villa Memorial Park",
+      "name_zh": "日光田母澤御用邸紀念公園",
+      "name_ko": null,
+      "description_en": "garden in Nikkō, Japan",
+      "coordinates": {
+        "lat": 36.7525,
+        "lng": 139.59138889
+      },
+      "url": "https://www.wikidata.org/wiki/Q11504890",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "rekishi_park_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.85,
+      "crowd_band": "medium",
+      "opening_hours": "Tu off; Apr-Oct We-Mo 09:00-17:00, \"Last entry: 16:30\"; Nov-Mar We-Mo 09:00-16:30, \"Last entry: 16:00\"; Dec 29-Jan 01 off",
+      "phone": "+81 288-53-6767",
+      "website": "https://www.park-tochigi.com/tamozawa/",
+      "fee": "yes",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "osm_override",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1188532",
+      "name": "東武ワールドスクウェア",
+      "name_en": "Tobu World Square",
+      "name_zh": "東武世界廣場",
+      "name_ko": "도부 월드스퀘어",
+      "description_en": "theme park in Tochigi Prefecture, Japan",
+      "coordinates": {
+        "lat": 36.8078,
+        "lng": 139.712
+      },
+      "url": "https://www.wikidata.org/wiki/Q1188532",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.85,
+      "crowd_band": "medium",
+      "phone": "+81 288 77 1055",
+      "website": "https://www.tobuws.co.jp/",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11286710",
+      "name": "イタリア大使館別荘記念公園",
+      "name_en": "Italian Embassy Villa Memorial Park",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "park in Nikkō, Japan",
+      "coordinates": {
+        "lat": 36.725389,
+        "lng": 139.485194
+      },
+      "url": "https://www.wikidata.org/wiki/Q11286710",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.75,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q11579194",
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Q11633166"
+      ],
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11504885",
+      "name": "日光江戸村",
+      "name_en": "Edo Wonderland Nikko Edomura",
+      "name_zh": "日光江戶村",
+      "name_ko": null,
+      "description_en": "Edo Wonderland Nikko Edomura (江戸ワンダーランド 日光江戸村, Edo Wandārando Nikkō Edomura) is a Japanese cultural theme park  in the Kinugawa Onsen area of Nikkō, Tochigi. The park resurrects and showcases the life and culture of the Edo period.",
+      "coordinates": {
+        "lat": 36.791,
+        "lng": 139.698
+      },
+ 
+```
+
+
+=== Case R-197 ===
+Topic / intent: 長瀞 桜と川
+Query: 長瀞の桜と荒川ライン下り、両方楽しめる季節はいつ？春の長瀞の楽しみ方を教えて。
+Tool: get_spots({"prefecture": "Saitama", "municipality": "長瀞"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11653371",
+      "name": "長瀞渓谷",
+      "name_en": "Nagatoro Valley",
+      "name_zh": "長瀞溪谷",
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 36.091783,
+        "lng": 139.116997
+      },
+      "url": "https://www.wikidata.org/wiki/Q11653371",
+      "municipality": "皆野町",
+      "municipality_code": "113620",
+      "prefecture": "埼玉県",
+      "quality_score": 0.65,
+      "kinds": [
+        "valley",
+        "sakura_meisho_100",
+        "chishitsu_100"
+      ],
+      "prominence_score": 0.95,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 90,
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q122904442",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "8c421275e987de24",
+      "name": "長瀞町「暮らしの便利帳」",
+      "description": "長瀞町「暮らしの便利帳」2025 くらしの便利帳は、住民の皆様の暮らしにかかわる情報を分かりやすく1冊にまとめたものです。長瀞町と株式会社サイネックスとの官民協働事業で制作し、制作や配布にかかる費用などはすべて広告販売収入でまかなっています",
+      "coordinates": {
+        "lat": 36.114805555,
+        "lng": 139.109722222
+      },
+      "address": null,
+      "url": "https://www.town.nagatoro.saitama.jp/lifeguidebook2025",
+      "municipality": "長瀞町",
+      "municipality_code": "113638",
+      "prefecture": "埼玉県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "23b501e2cbee4400",
+      "name": "大宮駅の推しみやげ",
+      "description": "埼玉県の豊かな自然と文化が育んだ特産品が、ここ大宮駅に集結しています。地元の生産者が丹精込めて作った美味しさを、手軽に楽しむチャンスです。埼玉の魅力をぜひ体験してください。",
+      "coordinates": {
+        "lat": 35.904289,
+        "lng": 139.624069
+      },
+      "address": "〒330-0853 埼玉県さいたま市大宮区錦町６３０",
+      "url": "https://chocotabi-saitama.jp/special/oshimiyage",
+      "municipality": "長瀞町",
+      "municipality_code": "113638",
+      "prefecture": "埼玉県",
+      "language": "ja",
+      "quality_score": 0.78,
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11443226",
+      "name": "天神山城",
+      "name_en": "Tenjin'yama Castle",
+      "name_zh": null,
+      "name_ko": "덴진 산성 (사이타마 현)",
+      "description_en": "Japanese castle in Nagatoro, Saitama prefecture",
+      "coordinates": {
+        "lat": 36.12026111,
+        "lng": 139.11704444
+      },
+      "url": "https://www.wikidata.org/wiki/Q11443226",
+      "municipality": "長瀞町",
+      "municipality_code": "113638",
+      "prefecture": "埼玉県",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle"
+      ],
+      "prominence_score": 0.75,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11452648",
+      "name": "宝登山",
+      "name_en": "Mount Hodo",
+      "name_zh": "寶登山",
+      "name_ko": null,
+      "description_en": "mountain in Saitama prefecture, Japan",
+      "coordinates": {
+        "lat": 36.093056,
+        "lng": 139.091667
+      },
+      "url": "https://www.wikidata.org/wiki/Q11452648",
+      "municipality": "長瀞町",
+      "municipality_code": "113638",
+      "prefecture": "埼玉県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain"
+      ],
+      "prominence_score": 0.75,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11452649",
+      "name": "宝登山神社",
+      "name_en": "Hodosan Shrine",
+      "name_zh": "寶登山神社",
+      "name_ko": null,
+      "description_en": "Shinto shrine in Saitama Prefecture, Japan",
+      "coordinates": {
+        "la
+```
+
+
+=== Case R-198 ===
+Topic / intent: 富士山 雪景色
+Query: 什么时候能看到富士山最美的雪景？富士五湖哪个角度拍摄最好？
+Tool: search_hybrid({"q": "富士山 雪景", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "富士山 雪景",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.13742,
+      "rank_bm": null,
+      "rank_vec": 11,
+      "key": "spot:da70f6e732640248",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "STAY YAMAGATA",
+      "description": "四季精彩景點 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 從旅遊主題搜尋 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 點閱率排行榜 山寺（寶珠山立石寺） more 山形城遺址、霞城公園 more 藏王樹冰 ／ Juhyo ／ Snow Monster （Zao’s Juhyo ／ Zao’s Rime ／ Frost Covered Trees of Zao） more 置賜公園香草園（置賜公園香草園展） more 天童温泉♨（Tendo Onsen） more 最上川堤防千本櫻 more Nakano Kanko Kajuen more Benihana Musuem more Michi-no-Eki Sagae Cherry Land more 月山 more Zao Bodaira Highlands more 更多景點 更多活動",
+      "prefecture": "山形県",
+      "municipality": "白鷹町",
+      "url": "https://yamagatakanko.com/zh_TW"
+    },
+    {
+      "score": 0.04136,
+      "rank_bm": 38,
+      "rank_vec": 47,
+      "key": "spot:9353c6c87d193d90",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "山梨縣 富士山之鄉",
+      "description": "山梨縣是富士山的故鄉，從東京就可以輕鬆前往，與首都不同感覺像是一個遠離都市喧囂的世界。除了日本最神聖的山峰之外，這片自然資源豐富的地區還擁有如詩如畫 的富士五湖，群山環繞的避暑勝地清里高原 ，以及惠林寺，久遠寺等歷史悠久的莊嚴景點，種類繁多 的溫泉及果樹，另外也有多間國內數一數二的葡萄酒廠 。總而言之， 山梨擁有可以讓遊客盡情探索日本的另一面，發現日本真正之美，並在大自然中療癒心情，獲得濃濃地幸福感。 除了仍然非常受大眾遊客關注的富士山周圍景色外，山梨縣還有很多驚喜發現。該地區的一些真正的瑰寶仍鮮為人知，使它們成為私人旅行的理想勝地。本節將向您介紹整個地區的重要發現，從風景如畫的山谷和瀑布到隱藏的藝術博物館和史前遺跡。 在山梨，不用深入探索即隨處可見真正的日本之美，這裡有以冰雪覆蓋的富士山為背景的櫻花經典美景，還有紅黃相間的大片楓葉在山腰閃閃發光。在這裡，你將從新的視角來欣賞山梨最著名的景點，並找到提示來探索它們的奧秘。 山梨擁有一望無際的天空、絢麗多姿的綠色植物、溫泉以及世界級美食，疲憊的都市人有機會在這裡讓身心煥發活力，同時開啟新的靈感之窗。本節聚焦放鬆身心的最佳勝地，為你介紹該地區的療癒特質。 山梨的六個主要地區均有獨特的景觀和傳統。從下面的地圖中選擇一個地區，瞭解更多資訊，開始規劃您的山梨之旅吧。",
+      "prefecture": "山梨県",
+      "municipality": "小菅村",
+      "url": "https://www.yamanashi-kankou.jp/chinese_t"
+    },
+    {
+      "score": 0.02582,
+      "rank_bm": null,
+      "rank_vec": 19,
+      "key": "spot:7e27da7dffe929bf",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Discover Toyama",
+      "description": "以殘雪的北阿爾卑斯山為背景，櫻花、鬱金香、油菜花百花爭艷的景色 沿著舟川粉嫩的櫻花盛開，搭配一整片繽紛花海勾勒春色，延伸至後方壯闊的北阿爾卑斯連峰上靄靄殘雪遠景，可得到難得一見的「四重奏」繽紛景色，一整面遼闊的鮮麗色彩刺激著視覺，絕對是隱藏版的限定美景。 每當春暖之際櫻花開始盛開時，舟川堤岸約２８０顆染井吉野櫻兢相綻放，形成一條長達１２００公尺的美麗櫻花隧道。滿開時期，燃起篝火照亮的夜櫻更具有宛如夢幻似的氣氛。 立山連峰覆滿皚皚白雪，在這般壯麗美景的映襯下，富山灣的知名景觀更令人難以忘懷。據說雨晴海岸是欣賞這片美景的絕佳位置，自 8 世紀以來，無數詩人和作家都被其吸引，稱頌景色之美。此景如畫，可見到前景是一片蔚藍的大海，而女岩這座迷人的小島冒出海面，島上還矗立著一棵松樹，遠處則是高 3,000 公尺，高聳入雲的連綿山峰。 攝影師經常會在日落時分前來此地，在落日餘暉的燦爛金光中捕捉女岩與群山的動人剪影。雨晴海岸的沙灘松樹林立，屬於淺灘，十分適合全家同樂，再加上美景如畫，讓此處成為廣受歡迎的夏日游泳勝地。 跨越富山縣和長野縣的3,000m頂級的山峰連接着北阿爾卑斯山貫穿山脈遊覽路線。換乘纜車，索道車，無軌電車等交通工具能橫斷雄偉的山脈景象。還有，從輕鬆慢步遊覽路線到真正登山路線等多種路線，能欣賞到從初級登山者到高級登山者的有趣路線。在阿爾卑斯線路內有日本第一高的水庫，日本最古老的山上小屋，日本最高地方的車站等各種各樣的日本第一。一定會被接二連三的絕佳景色所感動。來吧！請盡情地體驗四季應時的大自然的活力吧！",
+      "prefecture": "富山県",
+      "municipality": "高岡市",
+      "url": "https://visit-toyama-japan.com/zh-TW"
+    },
+    {
+      "score": 0.02568,
+      "rank_bm": 3,
+      "rank_vec": 42,
+      "key": "spot:8bea32b7231312cc",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "富士山絶景ポイント",
+      "description": "海岸に出れば広大な駿河湾と富士山との調和した景色を、港に行けば漁船と富士山という港町ならではの絶景を楽しむことができます。 街中でも、焼津市のシンボル高草山越しに富士山の姿を見ることができます。秋から春先にかけてが特におすすめのシーズンですが、夏の青々とした富士山もまた趣があります。 サバの水揚地で焼津の３大漁港の１つ。漁港越しの富士山が見られます。 静岡市との境に位置する山で、山頂からは富士山や360度の大パノラマが楽しめます。 かつて東海の親不知と呼ばれた難所。ホテルアンビア松風閣、焼津グランドホテルなどから、大崩海岸越しの富士山が見られます。",
+      "prefecture": "静岡県",
+      "municipality": "焼津市",
+      "url": "https://www.yaizu.gr.jp/mtfuji"
+    },
+    {
+      "score": 0.02187,
+      "rank_bm": 39,
+      "rank_vec": 25,
+      "key": "spot:13f3a155e23164ff",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "富士登山",
+      "description":
+```
+
+
+=== Case R-199 ===
+Topic / intent: 夏の花火大会 東北
+Query: 東北の夏の花火大会を特集してほしい。秋田竿燈まつりと花火が同時に楽しめるイベントはある？
+Tool: get_festivals({"prefecture": "Akita", "keyword": "花火", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "05",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "lang": "ja",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "query_intent": {
+    "detected_concepts": [
+      {
+        "id": "hanabi",
+        "matched_text": "花火",
+        "rationale_en": "Hanabi — fireworks festival, typically summer.",
+        "polarity": "boost",
+        "routing_tool": "get_events"
+      }
+    ],
+    "suggested_tool": "get_events"
+  },
+  "routing_hint": {
+    "suggested_tool": "get_events",
+    "reason_en": "Hanabi — fireworks festival, typically summer.",
+    "reason_ja": "花火大会。夏季が中心。",
+    "matched_concept": "hanabi",
+    "matched_text": "花火",
+    "arg_template": {
+      "prefecture": "<pref>",
+      "q": "花火"
+    }
+  }
+}
+```
+
+
+=== Case R-200 ===
+Topic / intent: Fleurs de cerisier Tohoku
+Query: Je voudrais voir les cerisiers au printemps dans le Tohoku. Quels sont les meilleurs endroits?
+Tool: get_spots({"prefecture": "Iwate", "q": "桜"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "8ba91fa74a8890f7",
+      "name": "桜情報2023ー県南エリア",
+      "description": "岩手県の観光地を探すならここ、新たな岩手の魅力を見つけよう",
+      "coordinates": {
+        "lat": 39.701218,
+        "lng": 141.134308
+      },
+      "address": "〒020-0045 盛岡市盛岡駅西通二丁目9番1号（マリオス3F）",
+      "url": "https://iwatetabi.jp/feature/18662",
+      "municipality": "大船渡市",
+      "municipality_code": "032034",
+      "prefecture": "岩手県",
+      "language": "ja",
+      "quality_score": 0.71,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "8ba91fa74a8890f7",
+      "name": "桜情報2023ー県南エリア",
+      "description": "岩手県の観光地を探すならここ、新たな岩手の魅力を見つけよう",
+      "coordinates": {
+        "lat": 39.701218,
+        "lng": 141.134308
+      },
+      "address": "〒020-0045 盛岡市盛岡駅西通二丁目9番1号（マリオス3F）",
+      "url": "https://iwatetabi.jp/feature/18662",
+      "municipality": "陸前高田市",
+      "municipality_code": "032107",
+      "prefecture": "岩手県",
+      "language": "ja",
+      "quality_score": 0.71,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "8ba91fa74a8890f7",
+      "name": "桜情報2023ー県南エリア",
+      "description": "岩手県の観光地を探すならここ、新たな岩手の魅力を見つけよう",
+      "coordinates": {
+        "lat": 39.701218,
+        "lng": 141.134308
+      },
+      "address": "〒020-0045 盛岡市盛岡駅西通二丁目9番1号（マリオス3F）",
+      "url": "https://iwatetabi.jp/feature/18662",
+      "municipality": "西和賀町",
+      "municipality_code": "033669",
+      "prefecture": "岩手県",
+      "language": "ja",
+      "quality_score": 0.71,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f3bee68d997b866b",
+      "name": "一般社団法人 洋野町観光協会",
+      "description": "一般社団法人 洋野町観光協会ホームページの4/19（日）・5/2（土）『ひろの歩き おおのキャンパス夜桜＆星空ツアー』参加者募集！！ページです。令和８年４月19日（日）、５月２日（土）の両日、『ひろの歩き おおのキャンパス夜桜＆星空ツアー』を開催します。 詳細は、下記のとおりです。 …",
+      "coordinates": {
+        "lat": 40.408444444,
+        "lng": 141.718722222
+      },
+      "address": null,
+      "url": "https://hirono-kankou.jp/post-2705",
+      "municipality": "洋野町",
+      "municipality_code": "035076",
+      "prefecture": "岩手県",
+      "language": "unknown",
+      "quality_score": 0.69,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "e05c805f55a8ab7b",
+      "name": "スポット・体験(一覧)",
+      "description": "岩手県は八幡平のスキー、奥入瀬渓流でのトレッキング、三陸海岸でのサーフィンや海水浴、そして豊かな自然の中でのキャンプなど多彩なアウトドアアクティビティが楽しめます。",
+      "coordinates": {
+        "lat": 39.701218,
+        "lng": 141.134308
+      },
+      "address": "〒020-0045 盛岡市盛岡駅西通二丁目9番1号（マリオス3F）",
+      "url": "https://iwatetabi.jp/spots",
+      "municipality": "盛岡市",
+      "municipality_code": "032018",
+      "prefecture": "岩手県",
+      "language": "ja",
+      "quality_score": 0.77,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c0e8ae23a6c22ab6",
+      "name": "レジャー・体験",
+      "description": "岩手県は八幡平のスキー、奥入瀬渓流でのトレッキング、三陸海岸でのサーフィンや海水浴、そして豊かな自然の中でのキャンプなど多彩なアウトドアアクティビティが楽しめます。",
+      "coordinates": {
+        "lat": 39.701218,
+        "lng": 141.134308
+      },
+      "address": "〒020-0045 盛岡市盛岡駅西通二丁目9番1号（マリオス3F）",
+      "url": "https://iwatetabi.jp/spots/spots_category/leisure",
+      "municipality": "盛岡市",
+      "municipality_code": "032018",
+      "prefecture": "岩手県",
+      "language": "ja",
+      "quality_score": 0.77,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "e05c805f55a8ab7b",
+      "name": "スポット・体験(一覧)",
+      "description": "岩手県は八幡平のスキー、奥入瀬渓流でのトレッキング、三陸海岸でのサーフィンや海水浴、そして豊かな自然の中でのキャンプなど多彩なアウトドアアクティビティが楽しめます。",
+      "coordinates": {
+        "lat": 39.701218,
+        "lng": 141.134308
+      },
+      "address": "〒020-0045 盛岡市盛岡駅西通二丁目9番1号（マリオス3F）",
+      "url": "https://iwatetabi.jp/spots",
+      "municipality": "宮古市",
+      "municipality_code": "032026",
+      "prefecture": "
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.
