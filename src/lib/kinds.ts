@@ -219,6 +219,12 @@ export const NAME_KIND_RE: { kinds: string[]; re: RegExp }[] = [
   // ── Anime / pop-culture tourism (公式認定 only, per data principle) ─
   { kinds: ["anime_pilgrimage"],
     re: /(アニメツーリズム|聖地巡礼|アニメ聖地|.+ロケ地)/u },
+  // ── Farm-stay / agritourism (judges L2-03 / L3-04 flagged) ──────────
+  { kinds: ["farm_experience", "agritourism"],
+    re: /(農家民泊|農業体験|農業民宿|農泊|農業公園|.+ファーム$|.+牧場(?!通り)|.+果樹園|観光農園|もぎ取り|フルーツパーク|搾乳体験)/u },
+  // ── Wildlife observation in the wild (vs zoo / aquarium captive) ───
+  { kinds: ["wildlife_observation"],
+    re: /(.+サンクチュアリ|野鳥(の森|公園|保護)|.+渡り鳥|.+越冬地|タンチョウ.+観察|ホエールウォッチング|.+クジラウォッチング|.+ドルフィンスイム|.+イルカ.+観察)/u },
 ];
 
 /** Append name-regex-derived kind tags to `dst`, deduplicating. */
@@ -366,6 +372,10 @@ export const KINDS_KEYWORD_RE: { kinds: string[]; re: RegExp }[] = [
     re: /(\bferment(ed)?\b|\bsake\s*brewery\b|\bmiso\b|\bsoy\s*sauce\b|\bnatto\b|発酵|酒蔵|味噌蔵|醤油蔵|納豆)/iu },
   { kinds: ["anime_pilgrimage"],
     re: /(\banime\s*(tour|pilgrimage|location)\b|聖地巡礼|アニメ聖地|ロケ地)/iu },
+  { kinds: ["farm_experience", "agritourism"],
+    re: /(\bfarm\s*(stay|experience|visit)\b|\bagritourism\b|\bfruit\s*picking\b|\bdairy\s*tour\b|\bcountryside\s*stay\b|農業体験|農家民泊|農泊|フルーツ狩り|観光農園|もぎ取り|搾乳体験|田舎暮らし|農村.+体験)/iu },
+  { kinds: ["wildlife_observation"],
+    re: /(\bwild(life)?\s*(watching|viewing|observation)?\b|\bwhale\s*watch(ing)?\b|\bdolphin\s*swim\b|\bbird\s*watching\b|野生|野鳥|サンクチュアリ|越冬地|渡り鳥|ホエール|ホエルウォッチ|ドルフィンスイム|イルカと泳ぐ)/iu },
 ];
 
 /** Detect the kind tags implied by a user query string. */
