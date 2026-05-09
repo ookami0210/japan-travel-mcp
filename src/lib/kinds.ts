@@ -198,6 +198,27 @@ export const NAME_KIND_RE: { kinds: string[]; re: RegExp }[] = [
   { kinds: ["bridge"], re: /(大橋$|橋$|つり橋|吊り橋|跨線橋)/u },
   { kinds: ["lighthouse"], re: /(灯台)/u },
   { kinds: ["dam"], re: /(ダム)/u },
+  // ── Themed kind tags surfaced by multi-judge feedback (Tier 5+6
+  //    follow-up). Each one fires when the entity's name encodes the
+  //    concept; the tag downstream lets intent → kind routing surface
+  //    the right entities for "lavender field" / "dark sky" / "kabuki
+  //    venue" / "tea ceremony" / "pilgrimage route" queries.
+  { kinds: ["lavender_field", "flower_garden"], re: /(ラベンダー|薫衣草)/u },
+  { kinds: ["flower_garden"], re: /(花畑|花の名所|花壇|フラワーパーク|植物園)/u },
+  { kinds: ["dark_sky"], re: /(星空保護区|星空保全|国際ダークスカイ|プラネタリウム|天文台)/u },
+  { kinds: ["kabuki_theater", "theater"], re: /(歌舞伎座|国立劇場|国立文楽劇場|金丸座|永楽館|内子座|八千代座|嘉穂劇場|康楽館|ヤマカ大歌舞伎)/u },
+  { kinds: ["chashitsu", "tea_ceremony"], re: /(茶室|待庵|如庵|裏千家|表千家|武者小路|大徳寺.*塔頭)/u },
+  { kinds: ["pilgrimage_route", "pilgrimage_site"],
+    re: /(熊野古道|四国八十八ヶ所|西国三十三所|坂東三十三観音|秩父三十四観音|出羽三山|大峰奥駈道|本州.+遍路|.+巡礼.+道)/u },
+  { kinds: ["pilgrimage_route", "buddhist_temple"],
+    re: /(.+第[一二三四五六七八九十百0-9]+番$|.+番札所$)/u },
+  { kinds: ["fishing_village", "port_town"], re: /(漁師町|漁港|.+漁村|.+浦$|.+泊$|.+磯$)/u },
+  { kinds: ["cycling_route"], re: /(しまなみ海道|とびしま海道|つくば霞ヶ浦りんりんロード|ビワイチ|.+サイクリングロード)/u },
+  { kinds: ["fermented_food_site"],
+    re: /(.+酒蔵|.+味噌蔵|.+醤油蔵|.+酢蔵|.+発酵|納豆.{0,4}(製造|工場|本舗))/u },
+  // ── Anime / pop-culture tourism (公式認定 only, per data principle) ─
+  { kinds: ["anime_pilgrimage"],
+    re: /(アニメツーリズム|聖地巡礼|アニメ聖地|.+ロケ地)/u },
 ];
 
 /** Append name-regex-derived kind tags to `dst`, deduplicating. */
@@ -332,6 +353,19 @@ export const KINDS_KEYWORD_RE: { kinds: string[]; re: RegExp }[] = [
   { kinds: ["beach"], re: /(\bbeach\b|海岸|海浜|浜辺)/iu },
   { kinds: ["volcano"], re: /(\bvolcano\b|火山|噴火口)/iu },
   { kinds: ["pilgrimage_site"], re: /(\bpilgrimage\b|巡礼|遍路|参詣)/iu },
+  { kinds: ["lavender_field", "flower_garden"], re: /(\blavender\b|ラベンダー)/iu },
+  { kinds: ["flower_garden"], re: /(\bflower\s*field\b|\bflower\s*park\b|花畑|花の名所|フラワーパーク)/iu },
+  { kinds: ["dark_sky"], re: /(\bdark\s*sky\b|\bstargazing\b|\bplanetarium\b|星空|天体観測|プラネタリウム)/iu },
+  { kinds: ["kabuki_theater", "theater"], re: /(\bkabuki\s*(theater|theatre|venue|stage)?\b|歌舞伎(劇場|座)?)/iu },
+  { kinds: ["chashitsu", "tea_ceremony"], re: /(\btea\s*(ceremony|house|room)\b|\bsado\b|\bchashitsu\b|茶道|茶室|茶会)/iu },
+  { kinds: ["pilgrimage_route", "pilgrimage_site"],
+    re: /(\bhenro\b|\b88\s*temples?\b|\b(west|saigoku)\s*33\b|四国八十八|西国三十三|坂東三十三|秩父三十四|出羽三山|奥駈道)/iu },
+  { kinds: ["fishing_village", "port_town"], re: /(\bfishing\s*village\b|\bport\s*town\b|漁村|漁師町)/iu },
+  { kinds: ["cycling_route"], re: /(\bcycling\s*(route|road|path)\b|サイクリング)/iu },
+  { kinds: ["fermented_food_site"],
+    re: /(\bferment(ed)?\b|\bsake\s*brewery\b|\bmiso\b|\bsoy\s*sauce\b|\bnatto\b|発酵|酒蔵|味噌蔵|醤油蔵|納豆)/iu },
+  { kinds: ["anime_pilgrimage"],
+    re: /(\banime\s*(tour|pilgrimage|location)\b|聖地巡礼|アニメ聖地|ロケ地)/iu },
 ];
 
 /** Detect the kind tags implied by a user query string. */

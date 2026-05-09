@@ -95,6 +95,19 @@ const KIND_MINUTES: Record<string, number> = {
   // Architectural
   palace: 60,
   religious_building: 30,
+  // Themed kinds added 2026-05-09 from multi-judge feedback
+  lavender_field: 90,
+  flower_garden: 90,
+  dark_sky: 60,
+  kabuki_theater: 180,
+  chashitsu: 60,
+  tea_ceremony: 60,
+  pilgrimage_route: 480,  // multi-day route, top end
+  fishing_village: 60,
+  port_town: 60,
+  cycling_route: 240,
+  fermented_food_site: 45,
+  anime_pilgrimage: 30,
 };
 
 // Price bands by kind. Most temples/shrines are free, but famous ones
@@ -155,6 +168,18 @@ const KIND_PRICE: Record<string, KindsDefaultEnrichment["price_band"]> = {
   palace: "low",
   religious_building: "free",
   airport: "free",
+  lavender_field: "low",
+  flower_garden: "low",
+  dark_sky: "free",
+  kabuki_theater: "high",
+  chashitsu: "mid",
+  tea_ceremony: "mid",
+  pilgrimage_route: "free",
+  fishing_village: "free",
+  port_town: "free",
+  cycling_route: "free",
+  fermented_food_site: "low",
+  anime_pilgrimage: "free",
 };
 
 // Suitable-for tags. "all" is shorthand for ["family", "couple", "solo", "group"].
@@ -201,6 +226,17 @@ const KIND_SUITABLE: Record<string, string[]> = {
   aquarium: ["family", "couple"],
   zoo: ["family"],
   preservation_district: ["family", "couple"],
+  lavender_field: ["all"],
+  flower_garden: ["all"],
+  dark_sky: ["couple", "solo", "group"],
+  kabuki_theater: ["couple", "solo", "group"],
+  chashitsu: ["couple", "solo"],
+  tea_ceremony: ["couple", "solo", "group"],
+  pilgrimage_route: ["solo", "couple", "group"],
+  fishing_village: ["family", "couple", "solo"],
+  cycling_route: ["solo", "couple", "group"],
+  fermented_food_site: ["couple", "solo", "group"],
+  anime_pilgrimage: ["solo", "couple"],
 };
 
 const ALL_PARTY = ["family", "couple", "solo", "group"];
@@ -313,6 +349,19 @@ const KIND_INDOOR: Record<string, "indoor" | "outdoor" | "mixed"> = {
   lighthouse: "mixed",
   railway_station: "mixed",
   unmanned_station: "mixed",
+  // Themed kinds (2026-05-09)
+  lavender_field: "outdoor",
+  flower_garden: "outdoor",
+  dark_sky: "outdoor",
+  kabuki_theater: "indoor",
+  chashitsu: "indoor",
+  tea_ceremony: "mixed",
+  pilgrimage_route: "outdoor",
+  fishing_village: "mixed",
+  port_town: "mixed",
+  cycling_route: "outdoor",
+  fermented_food_site: "indoor",
+  anime_pilgrimage: "mixed",
 };
 
 /**
