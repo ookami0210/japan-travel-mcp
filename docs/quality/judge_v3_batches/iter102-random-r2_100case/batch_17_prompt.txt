@@ -1,0 +1,1713 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case ADV-001 ===
+Topic / intent: day trip impossibility Tokyo→Yakushima
+Query: Can I do a day trip from Tokyo to Yakushima, visit Jomon Sugi, and be back in Tokyo for dinner?
+Tool: plan_feasibility_check({"stops": ["Tokyo", "Yakushima", "Tokyo"], "nights": 0, "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "error": "itinerary_required",
+  "hint": "itinerary must be a non-empty array of { qid, arrive_iso?, minutes? } stops.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case ADV-002 ===
+Topic / intent: 日帰り不可 札幌昼食→沖縄ディナー
+Query: 札幌でランチを食べてから沖縄で夕食を食べることは、同じ日に可能ですか？
+Tool: plan_feasibility_check({"stops": ["Sapporo", "Okinawa"], "nights": 0, "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "error": "itinerary_required",
+  "hint": "itinerary must be a non-empty array of { qid, arrive_iso?, minutes? } stops.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case ADV-003 ===
+Topic / intent: climate impossibility snow Okinawa summer
+Query: I want to see snow in Okinawa in July. Which mountains in Okinawa still have snow in summer?
+Tool: search_hybrid({"q": "沖縄 雪 夏", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "沖縄 雪 夏",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [],
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "safety_keywords_detected": [
+    "seasonal_impossibility"
+  ],
+  "safety_advisory_note": "Server detected query semantics that may warrant a safety reminder. The data layer does not compose warnings; the consuming agent should advise the user appropriately based on the listed categories."
+}
+```
+
+
+=== Case ADV-004 ===
+Topic / intent: 気候不可 本州でオーロラ
+Query: 本州（東京や大阪）でオーロラ（北極光）を見ることはできますか？
+Tool: search_area({"q": "オーロラ 本州", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "オーロラ 本州",
+  "match_count": 103,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "via": "kinds_class_match",
+      "qid": "Q4416112",
+      "name_ja": "仙台市天文台",
+      "name_en": "Sendai Astronomical Observatory",
+      "description_en": "observatory in Miyagi, Japan",
+      "coordinates": {
+        "lat": 38.25823889,
+        "lng": 140.7549667
+      },
+      "prefecture_code": "04",
+      "prefecture": "宮城県",
+      "municipality": "青葉区",
+      "kinds": [
+        "museum",
+        "observatory"
+      ],
+      "heritage_designations": [
+        "Q11579194",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "via": "kinds_class_match",
+      "qid": "Q1156690",
+      "name_ja": "釧路湿原国立公園",
+      "name_en": "Kushiro-shitsugen National Park",
+      "description_en": "national park of Japan",
+      "coordinates": {
+        "lat": 43.108,
+        "lng": 144.401
+      },
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "municipality": "釧路市",
+      "kinds": [
+        "park",
+        "national_park"
+      ],
+      "heritage_designations": [
+        "Q19683138"
+      ],
+      "heritage_designations_labels": [
+        "Ramsar Wetland (Japan)"
+      ],
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "via": "kinds_class_match",
+      "qid": "Q27134534",
+      "name_ja": "やんばる国立公園",
+      "name_en": "Yanbaru National Park",
+      "description_en": "national park of Japan",
+      "coordinates": {
+        "lat": 26.75,
+        "lng": 128.25
+      },
+      "prefecture_code": "47",
+      "prefecture": "沖縄県",
+      "municipality": "沖縄県",
+      "kinds": [
+        "park",
+        "national_park"
+      ],
+      "heritage_designations": [
+        "Q9259"
+      ],
+      "heritage_designations_labels": [
+        "UNESCO World Heritage Site"
+      ],
+      "website": "https://www.env.go.jp/park/yambaru/intro/index.html",
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "via": "kinds_class_match",
+      "qid": "Q703967",
+      "name_ja": "西表石垣国立公園",
+      "name_en": "Iriomote-Ishigaki National Park",
+      "description_en": "national park of Okinawa, Japan",
+      "coordinates": {
+        "lat": 24.31666667,
+        "lng": 123.88333333
+      },
+      "prefecture_code": "47",
+      "prefecture": "沖縄県",
+      "municipality": "竹富町",
+      "kinds": [
+        "park",
+        "national_park"
+      ],
+      "heritage_designations": [
+        "Q52216504"
+      ],
+      "heritage_designations_labels": [
+        "Q52216504"
+      ],
+      "website": "http://www.env.go.jp/park/iriomote/",
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "via": "kinds_class_match",
+      "qid": "Q11512514",
+      "name_ja": "明石市立天文科学館",
+      "name_en": "Akashi Municipal Planetarium",
+      "description_en": "museum with a planetarium in Akashi, Hyogo, Japan",
+      "coordinates": {
+        "lat": 34.649394,
+        "lng": 135.001478
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "municipality": "兵庫県",
+      "kinds": [
+        "museum",
+        "observatory"
+      ],
+      "heritage_designations": [
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Q11633166"
+      ],
+      "website": "https://www.am12.jp/",
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "via": "kinds_class_match",
+      "qid": "Q8056195",
+      "name_ja": "吉野ロープウェイ",
+      "name_en": "Yoshino Ropeway",
+      "description_en": "aerial tramway in Nara, Japan",
+      "coordinates": {
+        "lat": 34.3738,
+        "lng": 135.855
+      },
+      "prefecture_code": "29",
+      "pr
+```
+
+
+=== Case ADV-005 ===
+Topic / intent: climate impossibility palm beach Hokkaido January
+Query: I want to swim at a tropical palm beach in Hokkaido this January. Where should I go?
+Tool: get_spots({"prefecture": "Hokkaido", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1138090",
+      "name": "昭和新山",
+      "name_en": "Shōwa-shinzan",
+      "name_zh": "昭和新山",
+      "name_ko": "쇼와신산",
+      "description_en": "volcano in Sobetsu, Hokkaido, Japan",
+      "coordinates": {
+        "lat": 42.5425,
+        "lng": 140.864444444
+      },
+      "url": "https://www.wikidata.org/wiki/Q1138090",
+      "municipality": "壮瞥町",
+      "municipality_code": "015750",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "chishitsu_100"
+      ],
+      "prominence_score": 1,
+      "typical_visit_minutes": 180,
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q122904442",
+        "Q96207459"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument",
+        "Special Natural Monument of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1140619",
+      "name": "札幌市時計台",
+      "name_en": "Sapporo Clock Tower",
+      "name_zh": "札幌市鐘樓",
+      "name_ko": "삿포로 시계탑",
+      "description_en": "building in Chuo-ku, Hokkaido Prefecture, Japan",
+      "coordinates": {
+        "lat": 43.062602,
+        "lng": 141.353681
+      },
+      "url": "https://www.wikidata.org/wiki/Q1140619",
+      "municipality": "中央区",
+      "municipality_code": "011011",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "museum",
+        "soundscape_100"
+      ],
+      "prominence_score": 1,
+      "opening_hours": "Mo-Su 08:45-17:00; Jan 01-3 off",
+      "wheelchair": "yes",
+      "phone": "+81-11-231-0838",
+      "website": "http://sapporoshi-tokeidai.jp/",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q6804492",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Q6804492",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1143974",
+      "name": "松前城",
+      "name_en": "Matsumae Castle",
+      "name_zh": "松前城",
+      "name_ko": "마쓰마에성",
+      "description_en": "Matsumae Castle (松前城, Matsumae-jō) is a castle located in Matsumae, Hokkaido, Japan, and is the northernmost castle in Japan. The only traditional style Edo period castle in Hokkaidō, it was the chief residence of the han (estate) of the Matsumae clan.",
+      "coordinates": {
+        "lat": 41.429833,
+        "lng": 140.108389
+      },
+      "url": "https://www.wikidata.org/wiki/Q1143974",
+      "municipality": "北海道",
+      "municipality_code": "010006",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle",
+        "nihon_100_meijo",
+        "sakura_meisho_100",
+        "rekishi_park_100"
+      ],
+      "prominence_score": 1.15,
+      "website": "https://www.town.matsumae.hokkaido.jp/bunkazai/detail/00001681.html",
+      "fee": "yes",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "defaults_source": "osm_override",
+      "heritage_designations": [
+        "Q123130241",
+        "Q11403686",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Component of Nationally-designated Historic Site",
+        "Hokkaido Heritage",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1157658",
+      "name": "大雪山",
+      "name_en": "Daisetsuzan Volcanic Group",
+      "name_zh": "大雪山 (北海道)",
+      "name_ko": "다이세쓰산",
+      "description_en": "The Daisetsuzan Volcanic Group (大雪山系, Daisetsu-sankei; also called Taisetsu-zan) is a volcanic group of peaks arranged around the 2 kilometres (1.2 mi) wide Ohachi-Daira (御鉢平, Ohachi-daira) caldera in Hokkaidō, Japan. In the Ainu la
+```
+
+
+=== Case ADV-006 ===
+Topic / intent: 存在しない地名 幻ヶ浦村
+Query: 岩手県幻ヶ浦村の観光スポットを教えてください。
+Tool: search_area({"q": "幻ヶ浦村 岩手", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "幻ヶ浦村 岩手",
+  "match_count": 81,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "9278a7f122d1ab7e",
+      "name": "森藩別邸 観光公式ページ | SARABiO 温泉微生物研究所",
+      "description": "自然の中で、のんびりお食事 大切なご家族・ご友人・ご同僚と。 忘れられないひとときを。 別府湾が見渡せる展望デッキで潮風をほおに感じながらゆったりとお過ごしください。 鶴見七湯廼記で描かれている鶴海図と現在の別府湾の姿を見比べてみるのもおもしろいですよ！ 別府のシンボル「扇山」の麓に位置する森藩別邸。 4,000坪の敷地は森や川などの自然にあふれています。 敷地内のあちらこちらにある自然農園では、温泉微生物による土壌改良をして野菜や果物などを育てています。 季節ごとに様々な表情を見せてくれる温泉茶屋でのお食事は基本お外席。 自然の風を感じながら、美味しい地獄蒸しや炭火焼きを食べてパワーチャージ！ のんびりとくつろげるプライベート空間やペットと一緒にお食事できるスペースも完備しております。 大人数での集まりや、大切な方とのお食事など、お気軽にお問い合わせください。 (駐車場無料30台有) 知る人ぞ知る「時空を超えた神々の出会いの聖地」と呼ばれる場所がここ！！伊勢神宮奉納塩「琉球之御塩」と天孫降臨の地である高千穂に生息する神の草「日本山人参」を混ぜると奇跡のヒスイ色に変わったのがこの場所なんです。 恋愛成就やビジネスマッチングの祈願に集まります。不思議なヒスイ色のものがたりの探索にいらっしゃいませんか。",
+      "url": "https://www.saravio.jp/tourism",
+      "municipality": "由布市",
+      "prefecture": "大分県",
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q5004737",
+      "name_ja": "屏風ヶ浦",
+      "description_en": "cliffs along the coastline of Chiba prefecture [Nationally-designated Natural Monument / Place of Scenic Beauty]",
+      "prefecture_code": "12",
+      "prefecture": "千葉県",
+      "municipality": "千葉県",
+      "heritage_designations": [
+        "Q122904442",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11271084",
+      "name_ja": "浄土ヶ浜",
+      "description_en": "Jōdogahama (浄土ヶ浜) (lit. 'Pure Land Beach') is a series of rock formations along the coast of Miyako Bay in the city of Miyako, Iwate Prefecture, in the Tōhoku region of northern Japan. [Place of Scenic Beauty] [nagisa_100 / shin_ryoko_100 / hakusha_seishou_100]",
+      "prefecture_code": "03",
+      "prefecture": "岩手県",
+      "municipality": "岩手県",
+      "heritage_designations": [
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11587189",
+      "name_ja": "石見畳ヶ浦",
+      "description_en": "sea shore with nodules in Japan",
+      "prefecture_code": "32",
+      "prefecture": "島根県",
+      "municipality": "島根県",
+      "heritage_designations": [
+        "Q11263568"
+      ],
+      "heritage_designations_labels": [
+        "Q11263568"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_plan",
+      "key": "dmo_plan:dmo_0075_公財さんりく基金:3",
+      "name": "（公財）さんりく基金 — 形成確立計画 (chunk 4)",
+      "description": "光文化交流協会 \n・ （一社）大船渡市観光物産協会 ・ （一社）久慈市観光物産協会 \n・ （一社）陸前高田市観光物産協会 ・(一社) 釜石観光物産協会 \n・㈱かまいしＤＭＣ ・住田町観光協会 \n・ （一社）大槌町観光物産協会 ・ （一社）山田町観光協会 \n・ （一社）岩泉町観光協会 ・普代村観光協会 \n・野田村観光協会 ・洋野町観光協会 \n〔物産・土産品開発〕 \n・宮古商工会議所 ・大船渡市商工会議所 \n・久慈商工会議所 ・陸前高田商工会 \n・釜石商工会議所 ・住田町商工会 \n・大槌町商工会 ・山田町商工会 \n・岩泉商工会 ・田野畑村商工会 \n・普代商工会 ・野田村商工会 \n・洋野町商工会 ・岩泉ホールディングス㈱ \n・岩手県産株式会社 \n〔農林水産物、体験サービス〕 \n・岩手県グリーンツーリズム推進協議会 \n・岩手県漁業協同組合連合会 ・広田湾漁業協同組合 \n・大船渡市漁業協同組会 ・綾里漁業協同組合 \n・越喜来漁業協同組合 ・吉浜漁業協同組会 \n・唐丹漁業協同組合 ・釜石湾漁業協同組合 \n・釜石東部漁業協同組合 ・新おおつち漁業協同組合 \n・船越湾漁業協同組合 ・三陸やまだ漁業協同組合 \n様式１ \n2 \n \n・重茂漁業協同組合 ・宮古漁業協同組合 \n・田老町漁業協同組合 ・小本浜漁業協同組合 \n・田野畑村漁業協同組合 ・普代村漁業協同組合 \n・野田村漁業協同組合 ・久慈市漁業協働組合 \n・洋野町漁業協同組合 ・小子内浜漁業協同組合 \n・種市漁業協同組合 ・新岩手農業協同組合 \n・花巻農業協同組合 ・大船渡市農業協同組合 \n・気仙地方森林組合 ・陸前高田市森林組合 \n・釜石地方森林組合 ・宮古地方森林組合 \n・岩泉町森林組合 ・田野畑村森林組合 \n・久慈地方森林組合 ・野田村森林組合 \n〔人材育成〕 \n・国立大学法人岩手大学 ・公立大学法人岩手県立大学 \n〔事業支援〕",
+      "url": "https://www.mlit.go.jp/kankocho/content/001742647.pdf",
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1077984",
+      "name_ja": "霞ヶ浦",
+      "description_en": "lake in Ibaraki Prefecture, Kantō region, Japan",
+      "prefecture_code": "08",
+      "prefecture": "茨城県",
+      "municipality": "茨城県"
+```
+
+
+=== Case ADV-007 ===
+Topic / intent: non-existent place Shinkai-machi Aomori
+Query: Tell me about Shinkai-machi in Aomori Prefecture. I heard there's a famous waterfall there.
+Tool: get_spots({"prefecture": "Aomori", "municipality": "神海町", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-04T03:57:35.824Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case ADV-008 ===
+Topic / intent: conflicting constraints budget luxury
+Query: I want a budget-friendly luxury ryokan in Kyoto, something like a 5-star experience for under ¥5,000 per night.
+Tool: get_hotels({"prefecture": "Kyoto", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "28eb978d7078",
+      "confidence": "confirmed",
+      "name": "ABホテル 京都四条堀川",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.0040454,
+        "lng": 135.7524972
+      },
+      "phone": "+81 75 252 0413",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/6407821262",
+          "url": "https://www.openstreetmap.org/node/6407821262"
+        },
+        {
+          "source": "osm",
+          "id": "way/1318120702",
+          "url": "https://www.openstreetmap.org/way/1318120702"
+        }
+      ]
+    },
+    {
+      "id": "8ffc8900d470",
+      "confidence": "confirmed",
+      "name": "APA GARDEN COURT 烏丸錦",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.0047461,
+        "lng": 135.7544195
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/12094830234",
+          "url": "https://www.openstreetmap.org/node/12094830234"
+        },
+        {
+          "source": "osm",
+          "id": "way/581240627",
+          "url": "https://www.openstreetmap.org/way/581240627"
+        }
+      ]
+    },
+    {
+      "id": "c7042530483b",
+      "confidence": "confirmed",
+      "name": "Comfort INN",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.0048019,
+        "lng": 135.7575098
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/12094830253",
+          "url": "https://www.openstreetmap.org/node/12094830253"
+        },
+        {
+          "source": "osm",
+          "id": "way/205749090",
+          "url": "https://www.openstreetmap.org/way/205749090"
+        }
+      ]
+    },
+    {
+      "id": "fef04d883596",
+      "confidence": "confirmed",
+      "name": "DoubleTree by Hilton Kyoto Higashiyama",
+      "name_en": "DoubleTree by Hilton Kyoto Higashiyama",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 34.995199,
+        "lng": 135.769569
+      },
+      "phone": "+81 75-533-7070",
+      "website": "https://www.hilton.com/en/hotels/itmhadi-doubletree-kyoto-higashiyama/",
+      "postal_code": "605-0981",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q131064874",
+          "url": "https://www.wikidata.org/wiki/Q131064874"
+        },
+        {
+          "source": "osm",
+          "id": "node/11133798739",
+          "url": "https://www.openstreetmap.org/node/11133798739"
+        }
+      ]
+    },
+    {
+      "id": "164dc5adc5a8",
+      "confidence": "confirmed",
+      "name": "DoubleTree by Hilton Kyoto Station",
+      "name_en": "DoubleTree by Hilton Kyoto Station",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 34.984047018,
+        "lng": 135.762784733
+      },
+      "phone": "+81 75-606-1320",
+      "website": "https://www.hilton.com/en/hotels/itmksdi-doubletree-kyoto-station/",
+      "postal_code": "601-8005",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q130610485",
+          "url": "https://www.wikidata.org/wiki/Q130610485"
+        },
+        {
+          "source": "osm",
+          "id": "way
+```
+
+
+=== Case ADV-009 ===
+Topic / intent: 矛盾する条件 秘境なのに混んでる温泉
+Query: 人里離れた秘境なのに週末は必ず混雑していて、でも静かな貸切風呂がある温泉宿を教えて。
+Tool: get_hotels({"prefecture": "Nagano", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "hito_yu_kai:675",
+      "confidence": "confirmed",
+      "name": "奥天竜 不動温泉佐和屋",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒399-2222 長野県飯田市千代2303-1",
+      "prefecture_code": "20",
+      "municipality": null,
+      "description_ja": "天竜峡下りも楽しい",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "675",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=675"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:707",
+      "confidence": "confirmed",
+      "name": "湯元 山塩館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒399-3501 長野県下伊那郡大鹿村鹿塩631",
+      "prefecture_code": "20",
+      "municipality": null,
+      "description_ja": "南アルプスの山ふところに近い",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "707",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=707"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:846",
+      "confidence": "confirmed",
+      "name": "大喜泉",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒397-0101 長野県木曽郡木曽町三岳10869",
+      "prefecture_code": "20",
+      "municipality": null,
+      "description_ja": "木曽、御嶽山周辺の周遊に",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "846",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=846"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:685",
+      "confidence": "confirmed",
+      "name": "八ヶ岳名湯 唐沢鉱泉",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒391-0213 長野県茅野市豊平4733-1",
+      "prefecture_code": "20",
+      "municipality": null,
+      "description_ja": "炭酸泉（二酸化炭素冷鉱泉）で山と日々の疲れをほぐす旅",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "685",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=685"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:684",
+      "confidence": "confirmed",
+      "name": "神の湯",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒393-0000 長野県諏訪郡下諏訪町社7083",
+      "prefecture_code": "20",
+      "municipality": null,
+      "description_ja": "御柱の木落し坂近くの仙郷",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "684",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=684"
+        }
+      ]
+    },
+    {
+      "id": "hito_yu_kai:690",
+      "
+```
+
+
+=== Case ADV-010 ===
+Topic / intent: 野生パンダ 観たい
+Query: 日本の野生のパンダを見たい。どこに行けば野生のパンダに会えますか？
+Tool: search_area({"q": "野生パンダ 日本", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "野生パンダ 日本",
+  "match_count": 84,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q5367406",
+      "name_ja": "春日山原始林",
+      "description_en": "Primeval forest in Nara, Japan [Natural Monument of Japan / Nationally-designated Natural Monument]",
+      "prefecture_code": "29",
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q96207459",
+        "Q122904442"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Special Natural Monument of Japan",
+        "Nationally-designated Natural Monument"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1156690",
+      "name_ja": "釧路湿原国立公園",
+      "description_en": "national park of Japan [Ramsar Wetland]",
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "municipality": "釧路市",
+      "heritage_designations": [
+        "Q19683138"
+      ],
+      "heritage_designations_labels": [
+        "Ramsar Wetland (Japan)"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q29051264",
+      "name_ja": "蕪島",
+      "description_en": "island in Japan [Natural Monument]",
+      "prefecture_code": "02",
+      "prefecture": "青森県",
+      "municipality": "青森県",
+      "heritage_designations": [
+        "Q23790"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642740",
+      "name_ja": "那智原始林",
+      "description_en": "forest in Japan [Natural Monument of Japan / Nationally-designated Natural Monument]",
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "municipality": "和歌山県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q122904442"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Nationally-designated Natural Monument"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1204729",
+      "name_ja": "尾瀬国立公園",
+      "description_en": "national park of Japan",
+      "prefecture_code": "07",
+      "prefecture": "福島県",
+      "municipality": "福島県",
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11673482",
+      "name_ja": "鬼押出し園",
+      "description_en": "park in Japan",
+      "prefecture_code": "10",
+      "prefecture": "群馬県",
+      "municipality": "群馬県",
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q739391",
+      "name_ja": "知床国立公園",
+      "description_en": "national park in Hokkaidō, Japan",
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "municipality": "北海道",
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q20095570",
+      "name_ja": "妙高戸隠連山国立公園",
+      "description_en": "national park of Japan",
+      "prefecture_code": "15",
+      "prefecture": "新潟県",
+      "municipality": "新潟県",
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1206817",
+      "name_ja": "支笏洞爺国立公園",
+      "description_en": "national park of Japan",
+      "prefecture_code": "01",
+      "prefecture": "北海道",
+      "municipality": "北海道",
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+   
+```
+
+
+=== Case ADV-011 ===
+Topic / intent: out of scope medical tourism surgery
+Query: I need knee replacement surgery while in Japan. Which hospitals in Tokyo perform medical tourism operations and how do I book?
+Tool: search_hybrid({"q": "医療ツーリズム 外科手術", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "医療ツーリズム 外科手術",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.02167,
+      "rank_bm": null,
+      "rank_vec": 49,
+      "key": "spot:9eb27a47a884fe58",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "旅のプランニング",
+      "description": "当サイトでは利便性の向上のため、Cookieを使用しています。 サイトの閲覧を続行した場合、Cookieの使用に同意したことになります。 詳細はクッキーポリシーをご確認ください。",
+      "prefecture": "神奈川県",
+      "municipality": "真鶴町",
+      "url": "https://www.kanagawa-kankou.or.jp/favorite"
+    },
+    {
+      "score": 0.02144,
+      "rank_bm": null,
+      "rank_vec": 50,
+      "key": "spot:71eb949284aacd58",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "旅のプランニング",
+      "description": "当サイトでは利便性の向上のため、Cookieを使用しています。 サイトの閲覧を続行した場合、Cookieの使用に同意したことになります。 詳細はクッキーポリシーをご確認ください。",
+      "prefecture": "神奈川県",
+      "municipality": "真鶴町",
+      "url": "https://www.kanagawa-kankou.or.jp/"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "spot:39e3239db1f18a40",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "救急医療情報",
+      "description": "救急医療情報 ページ番号1002710 印刷 海老名市医療センターについて 休日昼間・夜間・深夜の救急医療機関【外科】（当番医療機関をご案内します） （県）「上手な医療のかかり方」 みんなで支える\"神奈川\"の医療～医師の働き方改革～（外部リンク） （国）「医師の働き方改革」.jp（外部リンク） 救急医療機関にかかるか迷った場合 休日昼間・夜間・深夜の救急医療機関【小児科（外科系を除く）】 休日昼間・夜間・深夜の救急医療機関【内科】 休日昼間の救急医療機関【歯科】 休日昼間の救急医療機関【耳鼻咽喉科・眼科】（当番医療機関を御案内します） ページ番号1002710 印刷 海老名市医療センターについて 休日昼間・夜間・深夜の救急医療機関【外科】（当番医療機関をご案内します） （県）「上手な医療のかかり方」 みんなで支える\"神奈川\"の医療～医師の働き方改革～（外部リンク） （国）「医師の働き方改革」.jp（外部リンク） 救急医療機関にかかるか迷った場合 休日昼間・夜間・深夜の救急医療機関【小児科（外科系を除く）】 休日昼間・夜間・深夜の救急医療機関【内科】 休日昼間の救急医療機関【歯科】 休日昼間の救急医療機関【耳鼻咽喉科・眼科】（当番医療機関を御案内します）",
+      "prefecture": "神奈川県",
+      "municipality": "海老名市",
+      "url": "https://www.city.ebina.kanagawa.jp/guide/kyukyu/iryo"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "spot:c4643edeac14c3d5",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "療養費の支給",
+      "description": "次の場合、審査によって払い戻しを受けることができます。 ・やむをえない理由で保険証を持たずに医療を受けたとき ・コルセットなどの補装具の支給を受け、全額支払ったとき （申請には医師の診断書が必要） ・はり・きゅう・マッサージなどの施術を受けたとき （申請には医師の同意書が必要） ・海外渡航中にお医者さんにかかったとき （療養目的の渡航は除く。診療内容の明細書と領収明細書（日本語翻訳文）が必要。） ・手術などで輸血に用いた生血代（申請には医師の診断書、輸血用生血液受領証明書、血液提供者の領収書） ・国保を扱っていない柔道整復師の施術を受けたとき（明細書が必要） 【申請に必要な書類】 ・各種申請書（申請用紙は、健康福祉課 福祉保険係又は各支所（福賀、宇田郷）にあります。 療養費の種類によって、必要な書類が違います。） ・国民健康保険証 ・印鑑 【支払方法】 支払方法は、窓口払いと口座振込の方法があります。口座振込の場合は、世帯主名義の預金通帳の口座番号が必要です。 【お問合せ先】 阿武町役場 健康福祉課 福祉保険係 電話 ０８３８８－２－３１１５ 福賀支所 電話 ０８３８８－５－０２１１ 宇田郷支所 電話 ０８３８８－４－０２１１ ・やむをえない理由で保険証を持たずに医療を受けたとき ・コルセットなどの補装具の支給を受け、全額支払ったとき （申請には医師の診断書が必要） ・はり・きゅう・マッサージなどの施術を受けたとき （申請には医師の同意書が必要） ・海外渡航中にお医者さんにかかったとき （療養目的の渡航は除く。診療内容の明細書と領収明細書（日本語翻訳文）が必要。） ・手術などで輸血に用いた生血代（申請には医師の診断書、輸血用生血液受領証明書、血液提供者の領収書） ・国保を扱っていない柔道整復師の施術を受けたとき（明細書が必要） ・各種申請書（申請用紙は、健康福祉課 福祉保険係又は各支所（福賀、宇田郷）にあります。 療養費の種類によって、必要な書類が違います。） ・国民健康保険証 ・印鑑 支払方法は、窓口払いと口座振込の方法があります。口座振込の場合は、世帯主名義の預金通帳の口座番号が必要です。 出産・子育て 教育・生涯学習 働く 結婚・離婚 引越し 高齢・介護 おくやみ 防災 国保・年金 税 証明書 健康 生活・環境 施設行事 障害者の方へ",
+      "prefecture": "山口県",
+      "municipality": "阿武町",
+      "url": "https://www.town.abu.lg.jp/guide/ryouyouhinosikyuu"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "spot:6f4511e674eccc09",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "観光情報・イベント",
+      "description": "外国人旅行者向け災害時情報提供アプリSafety tips Safety Tips App for Providing Disaster Information to Foreign Visitors 医療機関情報 Medical institution information 社内イベント（福利厚生事業の一環）として宮城オルレ奥松島コースを歩きませんか？ 日本版ベスト・ツーリズム・ビレッジ連携協議会 デジタルパンフレット公開 「サステナブルツーリズム」先進自治体ベスト30で全国第2位を獲得しました",
+      "prefecture": "宮城県",
+      "municipality": "東松島市",
+      "url": "https://www.city.higashimatsushima.miyagi.jp/jikan"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": null,
+      "rank_vec": 2,
+      "key": "dmo_page:dmo_0131_一社ツーリズムいすみ:https://isumi-tourism.jp/news/%e5%85%ac%
+```
+
+
+=== Case ADV-012 ===
+Topic / intent: 時期外れ 桜 10月
+Query: 10月に見頃の桜の花見ができる場所を日本全国で教えてください。
+Tool: get_festivals({"lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": null,
+  "lang": "ja",
+  "count": 386,
+  "total_matching": 386,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11274711",
+      "qid": "Q11274711",
+      "name_ja": "にいはま納涼花火大会",
+      "name": "にいはま納涼花火大会",
+      "description_ja": null,
+      "description": null,
+      "prefecture_code": null,
+      "prefecture": null,
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11274711",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    },
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11277005",
+      "qid": "Q11277005",
+      "name_ja": "ふくろい遠州の花火",
+      "name": "ふくろい遠州の花火",
+      "description_ja": null,
+      "description": null,
+      "prefecture_code": null,
+      "prefecture": null,
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11277005",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    },
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11274443",
+      "qid": "Q11274443",
+      "name_ja": "なにわ淀川花火大会",
+      "name": "なにわ淀川花火大会",
+      "description_ja": null,
+      "description": null,
+      "prefecture_code": null,
+      "prefecture": null,
+      "coordinates": {
+        "lat": 34.709939,
+        "lng": 135.478978
+      },
+      "source_url": "https://www.wikidata.org/wiki/Q11274443",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    },
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11272927",
+      "qid": "Q11272927",
+      "name_ja": "とうろう流しと大花火大会",
+      "name": "とうろう流しと大花火大会",
+      "description_ja": null,
+      "description": null,
+      "prefecture_code": null,
+      "prefecture": null,
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11272927",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    },
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11276865",
+      "qid": "Q11276865",
+      "name_ja": "びわ湖大花火大会",
+      "name": "びわ湖大花火大会",
+      "description_ja": null,
+      "description": null,
+      "prefecture_code": null,
+      "prefecture": null,
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11276865",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    },
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11234423",
+      "qid": "Q11234423",
+      "name_ja": "NARITA花火大会in印旛沼",
+      "name": "NARITA花火大会in印旛沼",
+      "description_ja": "NARITA花火大会in印旛沼（ナリタはなびたいかいインいんばぬま）とは、千葉県成田市西部の印旛沼湖畔北部で開催されている花火大会である。\n毎年10月中旬に開催されている。",
+      "description": "NARITA花火大会in印旛沼（ナリタはなびたいかいインいんばぬま）とは、千葉県成田市西部の印旛沼湖畔北部で開催されている花火大会である。\n毎年10月中旬に開催されている。",
+      "prefecture_code": "12",
+      "prefecture": "千葉県",
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11234423",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    },
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11259476",
+      "qid": "Q11259476",
+      "name_ja": "いたばし花火大会",
+      "name": "いたばし花火大会",
+      "description_ja": "いたばし花火大会（いたばしはなびたいかい）は、毎年8月に東京都板橋区舟渡の荒川の戸田橋（国道17号、通称中山道の橋）上流の河川敷において行われる花火大会である。",
+      "description": "いたばし花火大会（いたばしはなびたいかい）は、毎年8月に東京都板橋区舟渡の荒川の戸田橋（国道17号、通称中山道の橋）上流の河川敷において行われる花火大会である。",
+      "prefecture_code": "13",
+      "prefecture": "東京都",
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11259476",
+  
+```
+
+
+=== Case ADV-013 ===
+Topic / intent: time impossibility snow festival August
+Query: I want to attend the Sapporo Snow Festival in August. Is there a summer edition?
+Tool: get_festivals({"prefecture": "Hokkaido", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "01",
+  "lang": "en",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "Dainichido Bugaku",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "A folk performing art passed down at Dainichireiki Shrine in Kazuno City, Akita Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00275",
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11511418",
+      "name_ja": "早池峰神楽",
+      "name_en": "Hayachine Kagura",
+      "name": "Hayachine Kagura",
+      "description_ja": null,
+      "description_en": "type of dance",
+      "description": "A type of dance.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00272",
+      "source_url": "https://www.wikidata.org/wiki/Q11511418",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "low"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Kawagoe Hikawa Festival",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "Festival of Kawagoe Hikawa Shrine in Kawagoe City, Saitama Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11271139",
+      "name_ja": "たてもん祭り",
+      "name_en": "Uozu Tatemon Festival",
+      "name": "Tatemon Festival",
+      "description_ja": "富山県魚津市の諏訪神社の夏季祭礼",
+      "description_en": null,
+      "description": "A summer festival held at Suwa Shrine in Uozu City, Toyama Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11271139",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11360316",
+      "name_ja": "上野天神祭",
+      "name_en": "Ueno Tenjin Festival",
+      "name": "Ueno Tenjin Festival",
+      "description_ja": "三重県伊賀市の菅原神社で行なわれる秋祭り",
+      "description_en": null,
+      "description": "An autumn festival held at Sugawara Shrine in Iga City, Mie Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11360316",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11370941",
+      "name_ja": "亀崎潮干祭",
+      "name_en": 
+```
+
+
+=== Case ADV-014 ===
+Topic / intent: 日帰り不可 大阪朝→東京→京都→広島
+Query: 大阪を朝出発して東京観光してから京都でランチして広島で夕食を食べる1日旅行の計画を立てて。
+Tool: plan_feasibility_check({"stops": ["Osaka", "Tokyo", "Kyoto", "Hiroshima"], "nights": 0, "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "error": "itinerary_required",
+  "hint": "itinerary must be a non-empty array of { qid, arrive_iso?, minutes? } stops.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case ADV-015 ===
+Topic / intent: conflicting secluded popular onsen
+Query: Recommend a completely secluded, off-the-beaten-path onsen that is also the most famous crowded hot spring in Japan.
+Tool: search_hybrid({"q": "秘境 人気 混雑 温泉", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "秘境 人気 混雑 温泉",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.05597,
+      "rank_bm": null,
+      "rank_vec": 17,
+      "key": "spot:9f4317641b88f90e",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "特集・ベールを脱いだ『信飛トレイル』と乗鞍高原の夏を遊ぶ。　Vol.3 知れば知るほどおもしろい、“乗鞍麓時間”",
+      "description": "特集・ベールを脱いだ『信飛トレイル』と乗鞍高原の夏を遊ぶ。 Vol.3 知れば知るほどおもしろい、“乗鞍麓時間” 地域：松本エリア , トレッキング・登山 乗鞍岳だけでなく、多彩な魅力を備える乗鞍エリア。その魅力に惹かれ、麓でカフェや宿を営む人々がいます。彼らが思いを込めてつくりあげた場は、新たなファンを呼び込み、地域の魅力をさらに広げています。今、乗鞍はとてもおもしろい。山の頂だけではなく、麓にも豊かな物語が息づいています。今回は、そこで活躍するスタッフたちに、乗鞍の楽しみ方や奥深い魅力をうかがいました。 更新日：2025年08月12日 乗鞍岳だけでなく、多彩な魅力を備える乗鞍エリア。その魅力に惹かれ、麓でカフェや宿を営む人々がいます。彼らが思いを込めてつくりあげた場は、新たなファンを呼び込み、地域の魅力をさらに広げています。今、乗鞍はとてもおもしろい。山の頂だけではなく、麓にも豊かな物語が息づいています。今回は、そこで活躍するスタッフたちに、乗鞍の楽しみ方や奥深い魅力をうかがいました。 まず訪れたのは、標高1500mの乗鞍高原に立つ『温泉の宿 Raicho』。オーナーは『Raicho Inc.』代表であり、乗鞍で自然ガイドも務める藤江佑馬さんだ。千葉県出身の藤江さんは大学で気象学を専攻し、気候変動や環境問題への関心を深めた。気象会社で10年間勤務したのち、温泉と北アルプスへの愛着から移住を決意。宿を営みたいと考えていた矢先、前身である『温泉旅館雷鳥』の元オーナーが後継者を探していると知り、事業を引き継いだ。外観はそのままに、館内はワークスペースやゲストキッチンを備えるなど現代的にリノベーション。その中で藤江さんがひと目惚れしたというのが、単純硫黄泉の露天風呂だ。加水も加温もせず、源泉かけ流しで天然の乳白色の湯を湛える。四季折々の森の景色と澄んだ空気を背景に、訪れる人の疲れを優しく癒やしてくれる。内湯もまた風情があり、「温泉をゆっくり味わうなら、内湯もお勧めです。どこか瞑想状態に入れるような感覚になる」と藤江さんは語る。どちらも部屋ごとの時間貸し切り制で利用できる。 環境省により国内第1号のゼロカーボンパークに指定された乗鞍高原で、Co2削減のためさまざまな工夫に取り組む藤江さん 夕食の提供はなく、乗鞍高原の飲食店で食事するか、食材を持ち込みゲストキッチンで料理するスタイル。自炊を楽しみながら、共有スペースでゲスト同士が交流する場面も多い。「どの年代の方も大歓迎ですが、とりわけ自然との接点が少ない20〜30代の若い世代の方たちに、乗鞍高原を楽しんでもらえたらうれしい。『温泉の宿 Raicho』でも3泊以上の連泊をお勧めしています。集中して仕事ができるワークスペースもありますし、天気がよければ整備された3つのコースで散策を。疲れたら100%源泉掛け流しの温泉に漬かり、リラックスしたり考え事をしたりするのも、いい時間です」宿で働くスタッフにも話を聞いた。小林菜月さんは2021年から毎シーズン当施設を訪れ、ワーケーションをしていた元ゲスト。「乗鞍の大自然の中で、本来の自分に還る、というコンセプトに惹かれました。一の瀬草原の、心がゆるむような風景がたまらなく好き」。また、地方創生の仕事に携わる金子翼さんは登山が趣味で、東京から短期アルバイトとして参加。ふたりは共に、ゴミを出さない工夫や、CO2ゼロの自然エネルギーによる電力のみを使用するなど、乗鞍高原をサステイナブルな地域にしようとする『Raicho Inc.』の取り組みに深く共感している。彼らは、「乗鞍高原で、自然とじっくり向き合う時間を楽しんでほしい」と語ってくれた。",
+      "prefecture": "長野県",
+      "municipality": "辰野町",
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn25-8-3"
+    },
+    {
+      "score": 0.04649,
+      "rank_bm": null,
+      "rank_vec": 41,
+      "key": "spot:3f859df1f1cd9c41",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "大观峰 | 观光地                 |                         【官方】熊本县旅游网站 更多、更多！更多熊本信息",
+      "description": "是位于内牧温泉北东方的北外轮山的山峰之一。 这是阿苏山最好的观景地，享有360度的全景。阿苏的街道，阿苏五岳，久住连峰一览无遗。 从这里看到的阿苏五岳，像一尊卧躺的释迦，因此被称为「涅槃像」。在秋天至冬天期间，运气好的话还可以碰上云海。大观峰上还有纪念品商店和餐饮场所，也是天文观测的热门场所。 在阿苏的自然乐园可以体验到很多种户外运动。其中包括了滑翔伞、越野山地车、热气球、独木舟等项目，不管是大人还是小孩，也不管是第一次体验还是爱好者，都可… 拥有100多年历史的内牧温泉。据说，许多文豪，包括夏目漱石、与謝野鉄干・晶子夫妇也到访过。 步行游览区有130多个泉源，有6个公共浴场、约20家旅馆、酒店。每… 它位于南小国町的MAZENO溪谷附近，是古人祭祀的地方。 如图所示，有许多如金字塔形状的\"巨石\"、并刻有苏美尔字母的\"镜石\"和据称具有日钟作用的\"剪刀石\"等人工放… 位于阿苏市内牧温泉海拔653米的\"田子山\"的展望所。 在眼前，可以看到大观峰和涅槃像等阿苏的全景，可以一目了然的欣赏到内牧温泉街的街景。 此外，还有在山上建…",
+      "prefecture": "熊本県",
+      "municipality": "芦北町",
+      "url": "https://kumamoto.guide/zh/spots/detail/211"
+    },
+    {
+      "score": 0.0355,
+      "rank_bm": null,
+      "rank_vec": 43,
+      "key": "spot:19e8b9ea104c478a",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "【道の駅巡り＆秘湯】特産品やご当地ラーメンも満喫できる秘境・奥伊予の日帰りドライブ旅",
+      "description": "愛媛県の中でも特に山奥である「奥伊予」を、特色のある道の駅を拠点にしながら巡る旅。それぞれの道の駅では、オリジナリティあふれる特産品が販売されている。建物そのものが趣たっぷりの「小薮温泉」で日常の疲れを癒してゆったりリラックス。帰路の途中で人気の「肱川らーめん」をぜひ味わってもらいたい。 JR松山駅 ↓車で約1時間40分 1 成川渓谷 渓谷美が紡ぎだす大自然の芸術 鬼ヶ城山系の清流沿い3ｋｍにわたって続く渓谷。春は山桜、夏は新緑、秋は紅葉、冬は雪化粧と四季折々の移り行く景観が観られる。渓谷内には、落葉樹や針葉樹の他に苔やシダ類が緑豊かな渓谷美を彩っており、永い歳月をかけた大自然の芸術とも言うべき光景がいたるところに点在している。散策路も整備されており、子供連れや年配者でも気軽に立ち寄ることもできる魅力あふれる和みの景勝地となっている。 基本情報を見る 詳細ページへ 住所 〒798-1351 愛媛県北宇和郡鬼北町奈良 電話番号 0895-45-1111 鬼北町 企画振興課 1 成川渓谷 渓谷美が紡ぎだす大自然の芸術 鬼ヶ城山系の清流沿い3ｋｍにわたって続く渓谷。春は山桜、夏は新緑、秋は紅葉、冬は雪化粧と四季折々の移り行く景観が観られる。渓谷内には、落葉樹や針葉樹の他に苔やシダ類が緑豊かな渓谷美を彩っており、永い歳月をかけた大自然の芸術とも言うべき光景がいたるところに点在している。散策路も整備されており、子供連れや年配者でも気軽に立ち寄ることもできる魅力あふれる和みの景勝地となっている。 基本情報を見る 詳細ページへ 住所 〒798-1351 愛媛県北宇和郡鬼北町奈良 電話番号 0895-45-1111 鬼北町 企画振興課 鬼ヶ城山系の清流沿い3ｋｍにわたって続く渓谷。春は山桜、夏は新緑、秋は紅葉、冬は雪化粧と四
+```
+
+
+=== Case ADV-016 ===
+Topic / intent: 気候不可 夏の北海道でパームビーチ
+Query: 7月に北海道でヤシの木が並ぶ南国ビーチリゾートを楽しみたい。どこがおすすめですか？
+Tool: get_spots({"prefecture": "Hokkaido", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1138090",
+      "name": "昭和新山",
+      "name_en": "Shōwa-shinzan",
+      "name_zh": "昭和新山",
+      "name_ko": "쇼와신산",
+      "description_en": "volcano in Sobetsu, Hokkaido, Japan",
+      "coordinates": {
+        "lat": 42.5425,
+        "lng": 140.864444444
+      },
+      "url": "https://www.wikidata.org/wiki/Q1138090",
+      "municipality": "壮瞥町",
+      "municipality_code": "015750",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "chishitsu_100"
+      ],
+      "prominence_score": 1,
+      "typical_visit_minutes": 180,
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q122904442",
+        "Q96207459"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument",
+        "Special Natural Monument of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1140619",
+      "name": "札幌市時計台",
+      "name_en": "Sapporo Clock Tower",
+      "name_zh": "札幌市鐘樓",
+      "name_ko": "삿포로 시계탑",
+      "description_en": "building in Chuo-ku, Hokkaido Prefecture, Japan",
+      "coordinates": {
+        "lat": 43.062602,
+        "lng": 141.353681
+      },
+      "url": "https://www.wikidata.org/wiki/Q1140619",
+      "municipality": "中央区",
+      "municipality_code": "011011",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "museum",
+        "soundscape_100"
+      ],
+      "prominence_score": 1,
+      "opening_hours": "Mo-Su 08:45-17:00; Jan 01-3 off",
+      "wheelchair": "yes",
+      "phone": "+81-11-231-0838",
+      "website": "http://sapporoshi-tokeidai.jp/",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q6804492",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Q6804492",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1143974",
+      "name": "松前城",
+      "name_en": "Matsumae Castle",
+      "name_zh": "松前城",
+      "name_ko": "마쓰마에성",
+      "description_en": "Matsumae Castle (松前城, Matsumae-jō) is a castle located in Matsumae, Hokkaido, Japan, and is the northernmost castle in Japan. The only traditional style Edo period castle in Hokkaidō, it was the chief residence of the han (estate) of the Matsumae clan.",
+      "coordinates": {
+        "lat": 41.429833,
+        "lng": 140.108389
+      },
+      "url": "https://www.wikidata.org/wiki/Q1143974",
+      "municipality": "北海道",
+      "municipality_code": "010006",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle",
+        "nihon_100_meijo",
+        "sakura_meisho_100",
+        "rekishi_park_100"
+      ],
+      "prominence_score": 1.15,
+      "website": "https://www.town.matsumae.hokkaido.jp/bunkazai/detail/00001681.html",
+      "fee": "yes",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "defaults_source": "osm_override",
+      "heritage_designations": [
+        "Q123130241",
+        "Q11403686",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Component of Nationally-designated Historic Site",
+        "Hokkaido Heritage",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1157658",
+      "name": "大雪山",
+      "name_en": "Daisetsuzan Volcanic Group",
+      "name_zh": "大雪山 (北海道)",
+      "name_ko": "다이세쓰산",
+      "description_en": "The Daisetsuzan Volcanic Group (大雪山系, Daisetsu-sankei; also called Taisetsu-zan) is a volcanic group of peaks arranged around the 2 kilometres (1.2 mi) wide Ohachi-Daira (御鉢平, Ohachi-daira) caldera in Hokkaidō, Japan. In the Ainu la
+```
+
+
+=== Case ADV-017 ===
+Topic / intent: 不存在地名 梦幻县
+Query: 请介绍日本梦幻县的旅游景点，我想去那里的名山大川观光。
+Tool: search_area({"q": "夢幻県 観光", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "夢幻県 観光",
+  "match_count": 64,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "ec7219ff9de8190b",
+      "name": "エリアガイド特色ある都市・地域",
+      "description": "歩いて、観て、味わう、芸術と食文化 北斎も愛した栗の町、小布施 “日本の原風景”が広がる長野県最北端の地 大自然の中でさまざまなアクティビティが楽しめます 江戸から明治の面影が色濃く残る「蔵の町・須坂」 子どもから大人まで楽しめるスポットが満載です 万人を受け入れてきた善光寺と 魅力ある門前のまち歩きを楽しもう 四季折々に変化する自然景観と極上の温泉 「星とワインとゆ」の村で贅沢な旅を",
+      "url": "https://db.go-nagano.net/area-guide/cities",
+      "municipality": "山ノ内町",
+      "prefecture": "長野県",
+      "tier": "notable"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "835f37077b920fba",
+      "name": "介紹佐賀",
+      "description": "佐賀縣位於日本南方九州地區，可以從主要都市搭乘飛機或新幹線等輕鬆前往。有很多歷史、文化、自然等任何人都能享受的旅遊景點。 有拉姆薩公約溼地(東與賀干潟、肥前鹿島干潟)和玄海國定公園(虹之松原等)等豐富的自然環境。 秋天還有很多遊客會來參加聯合國教科文組織無形文化遺產-唐津宮日祭和亞洲最大的熱氣球大賽。 伊萬里燒和有田燒等自古聞名的陶瓷產地。 也可以在日本三大美肌溫泉之一的嬉野溫泉和武雄溫泉、古湯溫泉中緩解旅行的疲勞。 從武雄神社本殿沿著被竹林包圍的小路繼續前行，就會看到一棵樹齡3000年的大楠木。紮根於地面充滿生命力的樣子，帶給觀賞的人滿滿的力量。 深受領主喜愛的器皿之鄉，風景宛如山水畫般、有著卓越陶瓷文化的秘窯之里。1660年左右(江戶時代)作為佐賀藩鍋島家的御用官窯，以技術不外洩、不考慮利潤，生產最高品質的瓷器「鍋島」。 現在仍有30個窯場保留著傳統的燒製方法，並傳承給下一代。 唐津灣海濱綿延不斷的虹之松原為國家特別名勝，是日本三大松原之一的風景勝地。 在長約4.5km，寬約0.5km的平原，種植了約100萬棵黑松。 伊呂波島是漂浮在伊萬里灣的48個大小島嶼的總稱。 據說是空海(弘法大師)以伊呂波48文字來命名的，連弘法大師都對蔚藍大海和漂浮在其中的綠色島嶼所形成的美麗景色驚艷不已。",
+      "url": "https://www.asobo-saga.jp/tw",
+      "municipality": "白石町",
+      "prefecture": "佐賀県",
+      "tier": "notable"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "5499a7866b4460e8",
+      "name": "トリップアイデア",
+      "description": "トリップアイデア 広く、高く、多様な風土がモザイクのように重なり合う長野県。バラエティに富んだ自然、歴史、風土、アクションフィールドで、あなたにピッタリの旅を見つけてください。 自然とアウトドア # トレッキング-登山 # サイクリング-mtb # 自然景色 # 花 # 桜 # 紅葉 # スキー-スノーボード # アウトドア冬 # アウトドアグリーン期 # キャンピング-グランピング 伝統と文化 # 芸術 # イベント-祭り # 神社仏閣 # 歴史的建造物 # 都市と町 # 工芸 # 中山道 食 # 信州そば # ローカルグルメ # 日本酒-酒蔵 # ワイン-ワイナリー # 食体験 リラクゼーション # 温泉 # 森林浴 # サウナ 宿泊 # 温泉旅館 # 旅館 # ホテル # ゲストハウス-ペンション トリップアイデア 広く、高く、多様な風土がモザイクのように重なり合う長野県。バラエティに富んだ自然、歴史、風土、アクションフィールドで、あなたにピッタリの旅を見つけてください。 広く、高く、多様な風土がモザイクのように重なり合う長野県。バラエティに富んだ自然、歴史、風土、アクションフィールドで、あなたにピッタリの旅を見つけてください。 自然とアウトドア # トレッキング-登山 # サイクリング-mtb # 自然景色 # 花 # 桜 # 紅葉 # スキー-スノーボード # アウトドア冬 # アウトドアグリーン期 # キャンピング-グランピング 伝統と文化 # 芸術 # イベント-祭り # 神社仏閣 # 歴史的建造物 # 都市と町 # 工芸 # 中山道 食 # 信州そば # ローカルグルメ # 日本酒-酒蔵 # ワイン-ワイナリー # 食体験 リラクゼーション # 温泉 # 森林浴 # サウナ 宿泊 # 温泉旅館 # 旅館 # ホテル # ゲストハウス-ペンション 自然とアウトドア # トレッキング-登山 # サイクリング-mtb # 自然景色 # 花 # 桜 # 紅葉 # スキー-スノーボード # アウトドア冬 # アウトドアグリーン期 # キャンピング-グランピング",
+      "url": "https://www.go-nagano.net/trip-idea",
+      "municipality": "辰野町",
+      "prefecture": "長野県",
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q4924573",
+      "name_ja": "如庵",
+      "description_en": "teahouse in Japan [Important Cultural Property of Japan / National Treasure of Japan]",
+      "prefecture_code": "23",
+      "prefecture": "愛知県",
+      "municipality": "犬山市",
+      "heritage_designations": [
+        "Q1188622",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan",
+        "National Treasure of Japan"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q107046083",
+      "name_ja": "唐招提寺金堂薬師如来立像",
+      "description_en": "奈良県にある国宝（美術品） [National Treasure of Japan / Important Cultural Property of Japan]",
+      "prefecture_code": "29",
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11566281",
+      "name_ja": "瀞八丁",
+      "description_en": "[Place of Scenic Beauty / Nationally-designated Natural Monument / Special Place of Scenic Beauty]",
+      "prefecture_code": "24",
+      "prefecture": "三重県",
+      "municipality
+```
+
+
+=== Case ADV-018 ===
+Topic / intent: wild giant panda Japan
+Query: I want to see wild giant pandas in the forests of Shikoku. Are they native to the region?
+Tool: search_area({"q": "野生パンダ 四国 ジャイアントパンダ", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "野生パンダ 四国 ジャイアントパンダ",
+  "match_count": 79,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "a08a8f0c3ce51aee",
+      "name": "大野亀／トビシマカンゾウ群生地",
+      "description": "標高167mの一枚岩が海に突き出している姿は圧巻。『ミシュラン・グリーンガイド・ジャポン』二つ星として掲載された巨岩です。あたりは50万株100万本ものトビシマカンゾウの群生地で、黄色い花が一面に広がる季節は多くの人が訪れます。花の見頃は5月下旬～6月上旬です。 エリア 佐渡エリア カテゴリー 花・木 絶景・景勝地・天然記念物 タグ 綺麗な海 お花いっぱい 自然散策 お花畑 標高167mの一枚岩が海に突き出している姿は圧巻。『ミシュラン・グリーンガイド・ジャポン』二つ星として掲載された巨岩です。あたりは50万株100万本ものトビシマカンゾウの群生地で、黄色い花が一面に広がる季節は多くの人が訪れます。花の見頃は5月下旬～6月上旬です。 エリア 佐渡エリア カテゴリー 花・木 絶景・景勝地・天然記念物 タグ 綺麗な海 お花いっぱい 自然散策 お花畑 基本情報 住所新潟県佐渡市願 交通アクセス両津港から車で約55分 駐車場乗用車：20台、大型バス：3台 問い合わせ先 問い合わせ先佐渡観光交流機構 佐渡観光情報案内所 電話番号0259-27-5000 関連サイト 国内で見られるのは2か所だけ！？トビシマカンゾウ大群落を見に行こう／佐渡市・大野亀 基本情報 住所新潟県佐渡市願 交通アクセス両津港から車で約55分 駐車場乗用車：20台、大型バス：3台",
+      "url": "https://niigata-kankou.or.jp/spot/9969",
+      "municipality": "粟島浦村",
+      "prefecture": "新潟県",
+      "tier": "notable"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "6a0c3c95c25463fb",
+      "name": "ジオパーク～須崎海岸から四国カルストへ～　地球の鼓動を感じる絶景ドライブ旅",
+      "description": "日本ジオパークに認定された四国西予ジオパークの海抜0mの須崎海岸から、標高1400mの四国カルストまで、自然の力強さと雄大さを体感する旅。約4億年前の地層が大規模に広がる須崎海岸では、地球のパワーを間近に見ることができる。巨大な渓谷で大自然の生命力に触れたあとは四国カルストへ。草原に真っ白な岩肌の石灰岩が点在するカルスト特有の開放的な風景は、日々のあわただしさを忘れさせてくれる。 START JR松山駅 ↓車で約1時間40分 1 須崎海岸 約4億年前の縦じまの美しい地層と、共に宇和海の風景と自然を感じる景勝地 三瓶町内から海岸沿いを西へ向かった先にある、断崖絶壁に囲まれた標高約90mの小さな岬。須崎海岸には、約4億年前の縦じまの地層が大規模に広がっており、四季折々の美しい景観が楽しめる。三方を海に囲まれた絶好の展望スポットであり、宇和海の島々や佐田岬半島が見渡せ、天気が良ければ遠く九州まで一望できる。 基本情報を見る 詳細ページへ 住所 愛媛県西予市三瓶町周木 電話番号 0894-33-1114 西予市役所 三瓶支所 産業建設課 車で約40分 2 道の駅 どんぶり館（昼食） 選りすぐりの商品が集まる西予市の特産市 西予市の選りすぐりの特産品、加工品を一同に集め販売しており、ここでしか買うことができない地元産商品が目白押しで、ついつい時間の経過を忘れてしまうほど。地元の人が作った商品は、午前中に売り切れてしまう商品も多いので早めに訪れたい。また、行列ができるほどのじゃこ天や、手作りで仕込んだ自家製ジェラートも大人気。平成26年4月に、道の駅に登録された。 基本情報を見る 詳細ページへ 住所 愛媛県西予市宇和町稲生118 電話番号 0894-62-5778 営業時間 8:00～18:00 休業日 年始（1/1～1/2） 車で約25分 3 桂川渓谷 緑と朱色が織り成す雄大な渓谷美 見上げるほど巨大な山間部谷間の渓谷。豊かな木々の繊細な緑や両側に迫る巨大岩の絶壁など、優美と豪壮とが見事に調和した大自然の生命力を感じさせられる景観が見どころで、渓谷内のいたるところに架けられた朱色の橋が差し色となり情緒ある景観を形成している。また、渓流に沿って遊歩道も整備されており、雄大な渓谷美に包まれて散策を満喫することができ、年間を通して姿を変える渓谷美は一見の価値あり。 基本情報を見る 詳細ページへ 住所 愛媛県西予市野村町深山 電話番号 0894-72-1115 西予市役所 野村支所 産業建設課 車で約1時間40分 4 四国カルスト大野ヶ原 天空の道、雲の上のツーリングコース カルストとは雨による浸食などで石灰岩が地表に現れている地形のこと。姫鶴平・大野ヶ原など約25kmに渡って、標高1,000mから1,485mの高地にカルスト高原が連なり、景観抜群のドライブコースとなっている。積雪が多い冬は通行止めになるが、春夏秋はドライブ・ツーリング・キャンプを楽しめる。牛が草をはむ牧草地や満点の星空は心洗われる風景。 基本情報を見る 詳細ページへ 住所 愛媛県上浮穴郡久万高原町西谷ほか GOAL JR松山駅 ↓車で約1時間40分 1 須崎海岸 約4億年前の縦じまの美しい地層と、共に宇和海の風景と自然を感じる景勝地 三瓶町内から海岸沿いを西へ向かった先にある、断崖絶壁に囲まれた標高約90mの小さな岬。須崎海岸には、約4億年前の縦じまの地層が大規模に広がっており、四季折々の美しい景観が楽しめる。三方を海に囲まれた絶好の展望スポットであり、宇和海の島々や佐田岬半島が見渡せ、天気が良ければ遠く九州まで一望できる。 基本情報を見る 詳細ページへ 住所 愛媛県西予市三瓶町周木 電話番号 0894-33-1114 西予市役所 三瓶支所 産業建設課 車で約40分 2 道の駅 どんぶり館（昼食） 選りすぐりの商品が集まる西予市の特産市 西予市の選りすぐりの特産品、加工品を一同に集め販売しており、ここでしか買うことができない地元産商品が目白押しで、ついつい時間の経過を忘れてしまうほど。地元の人が作った商品は、午前中に売り切れてしまう商品も多いので早めに訪れたい。また、行列ができるほどのじゃこ天や、手作りで仕込んだ自家製ジェラートも大人気。平成26年4月に、道の駅に登録された。 基本情報を見る 詳細ページへ 住所 愛媛県西予市宇和町稲生118 電話番号 0894-62-5778 営業時間 8:00～18:00 休業日 年始（1/1～1/2） 車で約25分 3 桂川渓谷 緑と朱色が織り成す雄大な渓谷美 見上げるほど巨大な山間部谷間の渓谷。豊かな木々の繊細な緑や両側に迫る巨大岩の絶壁など、優美と豪壮とが見事に調和した大自然の生命力を感じさせられる景観が見どころで、渓谷内のいたるところに架けられた朱色の橋が差し色となり情緒ある景観を形成している。また、渓流に沿って遊歩道も整備されており、雄大な渓谷美に包まれて散策を満喫することができ、年間を通して姿を変える渓谷美は一見の価値あり。 基本情報を見る 詳細ページへ 住所 愛媛県西予市野村町深山 電話番号 0894-72-1115 西予市役所 野村支所 産業建設課 車で約1時間40分 4 四国カルスト大野ヶ原 天空の道、雲の上のツーリングコース カルストとは雨による浸食などで石灰岩が地表に現れている地形のこと。姫鶴平・大野ヶ原など約25kmに渡って、標高1,000mから1,485mの高地にカルスト高原が連なり、景観抜群のドライブコースとなっている。積雪が多い冬は通行止めになるが、春夏秋はドライブ・ツーリング・キャンプを楽しめる。牛が草をはむ牧草地や満点の星空は心洗われる風景。 基本情報を見る 詳細ページへ 住所 愛媛県上浮穴郡久万高原町西谷ほか JR松山駅 ↓車で約1時間40分 1 須崎海岸 約4億年前の縦じまの美しい地層と、共に宇和海の風景と自然を感じる景勝地 三瓶町内から海岸沿いを西へ向かった先にある、断崖絶壁に囲まれた標高約90mの小さな岬。須崎海岸には、約4億年前の縦じまの地層が大規模に広がっており、四季折々の美しい景観が楽しめる。三方を海に囲まれた絶好の展望スポットであり、宇和海の島々や佐田岬半島が見渡せ、天気が良ければ遠く九州まで一望できる。 基本情報を見る 詳細ページへ 住所 愛媛県西予市三瓶町周木 電話番号 0894-33-1114 西予市役所 三瓶支所 産業建設課 1 須崎海岸 約4億年前の縦じまの美しい地層と、共に宇和海の風景と自然を感じる景勝地 三瓶町内から海岸沿いを西へ向かった先にある、断崖絶壁に囲まれた標高約90mの小さな岬。須崎海岸には、約4億年前の縦じまの地層が大規模に広がっており、四季折々の美しい景観が楽しめる。三方を海に囲まれた絶好の展望スポットであり、宇和海の島々や佐田岬半島が見渡せ、天気が良ければ遠く九州まで一望できる。 基本情報
+```
+
+
+=== Case ADV-019 ===
+Topic / intent: 時期外れ 紅葉 5月
+Query: 5月に紅葉が最も美しい場所を教えてください。真っ赤に染まる山を見たい。
+Tool: get_spots({"prefecture": "Nikko", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-04T03:57:35.824Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case ADV-020 ===
+Topic / intent: day trip impossibility Tokyo→Okinawa→Kyoto
+Query: I'm planning to have breakfast in Tokyo, spend the afternoon snorkeling in Okinawa, then catch a traditional Noh performance in Kyoto in the evening — all on the same day. Is that feasible?
+Tool: plan_feasibility_check({"stops": ["Tokyo", "Okinawa", "Kyoto"], "nights": 0, "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "error": "itinerary_required",
+  "hint": "itinerary must be a non-empty array of { qid, arrive_iso?, minutes? } stops.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.

@@ -1,0 +1,2292 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case R-301 ===
+Topic / intent: 学生旅 低予算 北陸
+Query: 大学生で予算が厳しい。北陸を1日5000円以内で観光できるプランはある？
+Tool: get_spots({"prefecture": "Toyama", "limit": 30})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11179607",
+      "name": "黒部峡谷",
+      "name_en": "Kurobe Gorge",
+      "name_zh": "黑部峽谷",
+      "name_ko": null,
+      "description_en": "Kurobe Gorge (黒部峡谷, Kurobe-kyokoku) is a V-shaped canyon located at Kurobe, Toyama Prefecture, Japan.\nThe Kurobe Dam in Kurobe Gorge is one of highlights of the Tateyama Kurobe Alpine Route.",
+      "coordinates": {
+        "lat": 36.644444444,
+        "lng": 137.683333333
+      },
+      "url": "https://www.wikidata.org/wiki/Q11179607",
+      "municipality": "富山県",
+      "municipality_code": "160008",
+      "prefecture": "富山県",
+      "quality_score": 0.65,
+      "kinds": [
+        "valley",
+        "shin_ryoko_100",
+        "shin_kanko_100"
+      ],
+      "prominence_score": 1,
+      "typical_visit_minutes": 90,
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q122904442",
+        "Q11414752",
+        "Q94987823",
+        "Q96207459"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument",
+        "Place of Scenic Beauty (Japan)",
+        "Special Place of Scenic Beauty",
+        "Special Natural Monument of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q2977103",
+      "name": "立山",
+      "name_en": "Mount Tate",
+      "name_zh": "立山",
+      "name_ko": "다테 산",
+      "description_en": "mountain in Toyama Prefecture, Japan",
+      "coordinates": {
+        "lat": 36.575833333,
+        "lng": 137.619722222
+      },
+      "url": "https://www.wikidata.org/wiki/Q2977103",
+      "municipality": "富山県",
+      "municipality_code": "160008",
+      "prefecture": "富山県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "religious_building",
+        "walking_road_500",
+        "shin_kanko_100",
+        "shin_nihon_100_meizan"
+      ],
+      "prominence_score": 1,
+      "typical_visit_minutes": 180,
+      "price_band": "free",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q8011764",
+      "name": "高岡城",
+      "name_en": "Takaoka Castle",
+      "name_zh": "高岡城",
+      "name_ko": "다카오카성",
+      "description_en": "castle in Japan",
+      "coordinates": {
+        "lat": 36.74916667,
+        "lng": 137.02055556
+      },
+      "url": "https://www.wikidata.org/wiki/Q8011764",
+      "municipality": "富山県",
+      "municipality_code": "160008",
+      "prefecture": "富山県",
+      "quality_score": 0.65,
+      "kinds": [
+        "plains_castle",
+        "japanese_castle",
+        "nihon_100_meijo",
+        "sakura_meisho_100",
+        "rekishi_park_100"
+      ],
+      "prominence_score": 1.05,
+      "website": "http://www.kojyo.sakura.ne.jp/",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q30834580"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "2802e5afaa3624fd",
+      "name": "海王丸パーク",
+      "description": "帆船海王丸は、商船学校の練習船として誕生した帆船です。昭和5年2月14日に進水して以来、59年余の間に106万海里（地球約50周）を航海し、11,190名もの海の若人を育てました。海王丸パークでは、この帆船海王丸をシンボルとして、現役当時の姿のままで、公開しています。また、全部で29枚ある帆をすべて広げる総帆展帆が年10回行われています。",
+      "coordinates": {
+        "lat": 36.782032,
+        "lng": 137.079254
+      },
+      "address": "〒934-0011富山県射水市本町二丁目13番1号（新湊消防署1階）",
+      "url": "https://www.imizu-kanko.jp/spots/kaiwomaru-park",
+      "municipality": "射水市",
+      "municipality_code": "162116",
+      "prefecture": "富山県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "83615cb691ac49e4",
+      "name": "道の駅まるごと射水 GWフェスタ",
+      "description": "いよいよ待ちに待ったゴールデンウィーク！ 4月29日、および5月2日から6日にかけて「GWフェスタ」を開催いたします。 ハンドメイドマーケットやキッチンカーの集結、よさこい演舞など、盛りだくさんです！ ご家族・ご友人と一緒に、まるごと射水で素敵な連休の思い出を作りま
+```
+
+
+=== Case R-302 ===
+Topic / intent: 허니문 고급 료칸 교토
+Query: 신혼여행으로 교토의 최고급 료칸을 찾고 있어요. 가이세키 요리와 노천탕이 딸린 방 원해요.
+Tool: get_hotels({"prefecture": "Kyoto", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "28eb978d7078",
+      "confidence": "confirmed",
+      "name": "ABホテル 京都四条堀川",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.0040454,
+        "lng": 135.7524972
+      },
+      "phone": "+81 75 252 0413",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/6407821262",
+          "url": "https://www.openstreetmap.org/node/6407821262"
+        },
+        {
+          "source": "osm",
+          "id": "way/1318120702",
+          "url": "https://www.openstreetmap.org/way/1318120702"
+        }
+      ]
+    },
+    {
+      "id": "8ffc8900d470",
+      "confidence": "confirmed",
+      "name": "APA GARDEN COURT 烏丸錦",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.0047461,
+        "lng": 135.7544195
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/12094830234",
+          "url": "https://www.openstreetmap.org/node/12094830234"
+        },
+        {
+          "source": "osm",
+          "id": "way/581240627",
+          "url": "https://www.openstreetmap.org/way/581240627"
+        }
+      ]
+    },
+    {
+      "id": "c7042530483b",
+      "confidence": "confirmed",
+      "name": "Comfort INN",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 35.0048019,
+        "lng": 135.7575098
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/12094830253",
+          "url": "https://www.openstreetmap.org/node/12094830253"
+        },
+        {
+          "source": "osm",
+          "id": "way/205749090",
+          "url": "https://www.openstreetmap.org/way/205749090"
+        }
+      ]
+    },
+    {
+      "id": "fef04d883596",
+      "confidence": "confirmed",
+      "name": "DoubleTree by Hilton Kyoto Higashiyama",
+      "name_en": "DoubleTree by Hilton Kyoto Higashiyama",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 34.995199,
+        "lng": 135.769569
+      },
+      "phone": "+81 75-533-7070",
+      "website": "https://www.hilton.com/en/hotels/itmhadi-doubletree-kyoto-higashiyama/",
+      "postal_code": "605-0981",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q131064874",
+          "url": "https://www.wikidata.org/wiki/Q131064874"
+        },
+        {
+          "source": "osm",
+          "id": "node/11133798739",
+          "url": "https://www.openstreetmap.org/node/11133798739"
+        }
+      ]
+    },
+    {
+      "id": "164dc5adc5a8",
+      "confidence": "confirmed",
+      "name": "DoubleTree by Hilton Kyoto Station",
+      "name_en": "DoubleTree by Hilton Kyoto Station",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 34.984047018,
+        "lng": 135.762784733
+      },
+      "phone": "+81 75-606-1320",
+      "website": "https://www.hilton.com/en/hotels/itmksdi-doubletree-kyoto-station/",
+      "postal_code": "601-8005",
+      "street": null,
+      "prefecture_code": "26",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q130610485",
+          "url": "https://www.wikidata.org/wiki/Q130610485"
+        },
+        {
+          "source": "osm",
+          "id": "way
+```
+
+
+=== Case R-303 ===
+Topic / intent: cheap temples Hiroshima
+Query: What are the free or cheap temples and shrines in Hiroshima? I'm on a shoestring budget.
+Tool: get_spots({"prefecture": "Hiroshima", "limit": 30})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "d12f20bbd2fd176a",
+      "name": "Arataniyama",
+      "description": "Mount Aratani, located in Asakita Ward, Hiroshima City, is a hidden gem for its stunning sea of clouds. From its 620-meter-high summit, a deep fog completely envelops the town below, creating a scene resembling a vast white ocean. The sight of the mountaintop floating amidst the sea of clouds is like islands scattered across a vast ocean, so mystical it makes you forget your everyday worries.\n\nThis natural phenomenon is more likely to occur on clear, humid mornings when radiative cooling creates a large temperature difference from the previous day. September to November is considered the ideal time, and the transformation of the sky as the sea of clouds turns orange and golden as the sunrise penetrates is truly exceptional. While this special view can only be seen when the weather conditions are just right, on foggy days, it can linger until around 9 AM, allowing you to leisurely appreciate the changing scenery as time passes.\n\nEven on days when the sea of clouds doesn't appear, you can still enjoy the view of the Misasa River flowing through the mountains and the tranquil rural landscape below. The meticulously crafted townscape and the vast sky above—the unobstructed, expansive views are another attraction of this mountaintop.\n\n*The road leading to the summit is very narrow, with many places where it's difficult for vehicles to pass each other. Especially in the early morning, it's dark and visibility can be poor due to fog, so please drive with caution.\n\n*Signs regarding no open fires, taking your trash with you, and parking etiquette are posted at the site. Please remember that this landscape is protected by enthusiasts, and follow the rules.",
+      "coordinates": {
+        "lat": 34.59979399,
+        "lng": 132.6671036
+      },
+      "address": "739-1301 Oaza Ibara, Shirakicho, Asakita Ward, Hiroshima City, Hiroshima Prefecture",
+      "url": "https://dive-hiroshima.com/en/explore/3461",
+      "municipality": "広島市安佐北区",
+      "municipality_code": "341061",
+      "prefecture": "広島県",
+      "language": "en",
+      "quality_score": 1,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fb5c95bd5ced0d7d",
+      "name": "荒谷山",
+      "description": "位于广岛市朝北区的荒谷山，因其壮丽的云海而成为一处隐秘的宝地。从海拔620米的山顶，浓雾弥漫，将山下的城镇完全笼罩，宛如一片浩瀚的白色海洋。山顶漂浮在云海之中，如同散落在茫茫大海上的岛屿，如此神秘的景象令人忘却日常的烦恼。\n\n这种自然奇观在晴朗潮湿的清晨更容易出现，此时辐射冷却作用使得气温与前一天相比出现较大差异。9月至11月被认为是最佳观赏时间，当日出穿透云海，天空逐渐变成橙色和金色时，景色更是美不胜收。虽然只有在天气条件恰到好处时才能看到这种奇景，但在雾天，云海可以持续到早上9点左右，让您可以悠闲地欣赏随着时间推移而不断变化的景色。\n\n即使没有云海，您依然可以欣赏到三朝川蜿蜒流淌于群山之间，以及山下宁静乡村的景色。精心设计的城镇风貌与广袤无垠的天空交相辉映，一览无余的开阔视野是这座山顶的另一大魅力所在。\n\n*通往山顶的道路非常狭窄，很多地方车辆难以错车。尤其是在清晨，天色昏暗，雾气弥漫，能见度可能很差，请谨慎驾驶。\n\n*现场设有禁止生火、请带走垃圾以及停车礼仪等告示。请记住，这片美景是爱好者们共同守护的，请遵守相关规定。",
+      "coordinates": {
+        "lat": 34.59979399,
+        "lng": 132.6671036
+      },
+      "address": "739-1301 广岛县广岛市安崎区白木町大字伊原",
+      "url": "https://dive-hiroshima.com/cn/explore/3461",
+      "municipality": "広島市安佐北区",
+      "municipality_code": "341061",
+      "prefecture": "広島県",
+      "language": "unknown",
+      "quality_score": 1,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "bc9967c86f16d5be",
+      "name": "荒谷山",
+      "description": "位於廣島市朝北區的荒谷山，因其壯麗的雲海而成為隱密的寶地。從海拔620公尺的山頂，濃霧瀰漫，將山下的城鎮完全籠罩，宛如一片浩瀚的白色海洋。山頂漂浮在雲海之中，如同散落在茫茫大海上的島嶼，如此神祕的景象令人忘卻日常的煩惱。\n\n這種自然奇觀在晴朗潮濕的清晨更容易出現，此時輻射冷卻作用使得氣溫與前一天相比出現較大差異。 9月至11月被認為是最佳觀賞時間，當日出穿透雲海，天空逐漸變成橘色和金色時，景色更是美不勝收。雖然只有在天氣條件恰到好處時才能看到這種奇景，但在霧天，雲海可以持續到早上9點左右，讓您可以悠閒地欣賞隨著時間推移而不斷變化的景色。\n\n即使沒有雲海，您仍可欣賞到三朝川蜿蜒流淌於山脈之間，以及山下寧靜鄉村的景色。精心設計的城鎮風貌與廣闊無垠的天空交相輝映，一覽無遺的開闊視野是這座山頂的另一大魅力所在。\n\n*通往山頂的道路非常狹窄，許多地方車輛難以錯車。尤其是在清晨，天色昏暗，霧氣瀰漫，能見度可能很差，請謹慎駕駛。\n\n*現場設有禁止生火、請帶走垃圾、停車禮儀等告示。請記住，這片美景是愛好者共同守護的，請遵守相關規定。",
+      "coordinates": {
+        "lat": 34.59979399,
+        "lng": 132.6671036
+      },
+      "address": "739-1301 廣島縣廣島市安崎區白木町大字伊原",
+      "url": "https://dive-hiroshima.com/tw/exp
+```
+
+
+=== Case R-304 ===
+Topic / intent: ฮันนีมูนหรูหรา ฮากาตะ
+Query: มีที่พักหรูหราระดับแพงสำหรับฮันนีมูนในฟุกุโอกะไหม? ต้องการห้องน้ำออนเซนส่วนตัว
+Tool: get_hotels({"prefecture": "Fukuoka", "lang": "th"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "23e3132e5233",
+      "confidence": "confirmed",
+      "name": "ANAクラウンプラザホテル福岡",
+      "name_en": "ANA Crowne Plaza Hotel Fukuoka",
+      "name_zh": "ANA 皇冠假日酒店 福岡",
+      "name_ko": "ANA 크라운 플라자 호텔 후쿠오카",
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.58721,
+        "lng": 130.41763
+      },
+      "phone": null,
+      "website": "https://www.anacrowneplaza-fukuoka.jp/",
+      "postal_code": "812-0011",
+      "street": "812-0011 福岡県福岡市博多区博多駅前3丁目3-3",
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q111406557",
+          "url": "https://www.wikidata.org/wiki/Q111406557"
+        },
+        {
+          "source": "osm",
+          "id": "way/312866955",
+          "url": "https://www.openstreetmap.org/way/312866955"
+        }
+      ]
+    },
+    {
+      "id": "cdbb2886a74e",
+      "confidence": "confirmed",
+      "name": "Hokorobi Guest House",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hostel",
+      "lodging_type": "hostel",
+      "coordinates": {
+        "lat": 33.577645,
+        "lng": 130.3385905
+      },
+      "phone": "092-407-6836",
+      "website": "http://house.cocosys.co.jp/",
+      "postal_code": null,
+      "street": "福岡高速都市高環状線内回り",
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4226181646",
+          "url": "https://www.openstreetmap.org/node/4226181646"
+        },
+        {
+          "source": "osm",
+          "id": "node/4237168689",
+          "url": "https://www.openstreetmap.org/node/4237168689"
+        },
+        {
+          "source": "osm",
+          "id": "node/4315037389",
+          "url": "https://www.openstreetmap.org/node/4315037389"
+        }
+      ]
+    },
+    {
+      "id": "ee26a0caeec1",
+      "confidence": "confirmed",
+      "name": "アークホテルロイヤル福岡天神",
+      "name_en": "Ark Hotel Royal Fukuoka Tenjin",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.594305555,
+        "lng": 130.396166666
+      },
+      "phone": null,
+      "website": "https://www.ark-hotel.co.jp/fukuoka/",
+      "postal_code": "810-0001",
+      "street": "810-0001福岡市中央区天神三丁目13番20号",
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "wikidata",
+          "id": "Q134822725",
+          "url": "https://www.wikidata.org/wiki/Q134822725"
+        },
+        {
+          "source": "osm",
+          "id": "way/329586781",
+          "url": "https://www.openstreetmap.org/way/329586781"
+        }
+      ]
+    },
+    {
+      "id": "c6074edac75e",
+      "confidence": "confirmed",
+      "name": "アパホテル〈小倉駅前〉",
+      "name_en": "APA Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.887242,
+        "lng": 130.885518
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "40",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/1665553251",
+          "url": "https://www.openstreetmap.org/node/1665553251"
+        },
+        {
+          "source": "osm",
+          "id": "way/153941957",
+          "url": "https://www.openstreetmap.org/way/153941957"
+        }
+      ]
+    },
+    {
+      "id": "9aaf6730255e",
+      "confidence": "confirmed",
+      "name": "ザ・ルイガンズ. スパ & リゾート",
+      "name_en": "The Luigans Spa & Resort",
+      "name_zh": "The Luigans Spa度假村",
+      "name_ko": "더 루이간스 스파 & 리조트",
+      "type": "hotel",
+      "lodging_type": "hotel",
+      "coordinates": {
+        "lat": 33.662500764,
+        "lng": 130.364955067
+      },
+      "phone": null,
+      "website": "https://www.luigans.com/",
+      "postal_code": null,
+      "street": "811-0321 福岡県福岡市東区大字西戸崎18-25",
+      "prefecture_code": "40",
+     
+```
+
+
+=== Case R-305 ===
+Topic / intent: cheap local food Tohoku
+Query: Cheapest ways to eat local Tohoku food — street food, markets, and under ¥1000 meals.
+Tool: get_local_food({"prefecture": "Iwate", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "03",
+  "lang": "en",
+  "count": 500,
+  "total_matching": 607,
+  "truncated": true,
+  "truncation_note": "Response capped at 500 of 607 matches. Pass a prefecture or keyword to narrow.",
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:28",
+      "registration_number": 28,
+      "name_ja": "前沢牛",
+      "name": "Maesawa Beef",
+      "description_ja": "上質できめ細やかな霜降りで、しっとりした肉質。脂はしつこくなく上質な香りが口の中に広がり、肉が溶けるように感じられる。全国肉用牛枝肉共励会においては、全国最多となる通算6回の名誉賞（農林水産大臣賞）を受賞するなど、数々の受賞歴を有する。",
+      "description": "High-quality, finely marbled beef with a moist texture. The fat is not heavy, and a refined aroma spreads throughout the mouth, giving the impression that the meat melts. At the National Beef Carcass Competition, this beef has received the Honorary Prize (Minister of Agriculture, Forestry and Fisheries Award) a cumulative six times, the most of any producer nationwide, among numerous other awards.",
+      "registration_date": "平成29年3月3日",
+      "production_area_text": "岩手県奥州市前沢区",
+      "prefecture_codes": [
+        "03"
+      ],
+      "producer_group": "岩手県奥州市胆沢区小山字菅谷地131番地1岩手ふるさと農業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0028/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:47",
+      "registration_number": 47,
+      "name_ja": "岩手野田村荒海ホタテ",
+      "name": "Iwate Noda-mura Araumi Hotate",
+      "description_ja": "プランクトンが豊富で自由に泳ぎ回れる環境下で養殖されたホタテガイ。身は肉厚で旨味が濃く、貝柱は繊維がしっかりとして弾力がある。貝殻は表面に付着した生物が丁寧に除去されているため美しい。",
+      "description": "Scallops cultivated in an environment rich in plankton where they can swim freely. The flesh is thick with a rich umami flavor, and the adductor muscle has firm fibers and elasticity. The shells are beautiful because organisms attached to the surface have been carefully removed.",
+      "registration_date": "平成29年11月10日",
+      "production_area_text": "岩手県野田村野田湾",
+      "prefecture_codes": [
+        "03"
+      ],
+      "producer_group": "岩手県九戸郡野田村大字野田第27地割73番地野田村漁業協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0047/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:66",
+      "registration_number": 66,
+      "name_ja": "岩手木炭",
+      "name": "Iwate Charcoal",
+      "description_ja": "炭質が硬く火持ちが良い。炭素割合は概ね90％（全国規格75％以上）と高く、燃焼時の煙や炎、臭いが最小限に抑えられ、燃焼後に残る灰も少ない。その品質は高く評価され、平成18年度から参加している農林水産祭において、農林水産大臣賞や林野庁長官賞を現在に至るまで毎年受賞。",
+      "description": "The charcoal is hard in quality and burns for a long time. Its carbon content is approximately 90% (compared to the national standard of 75% or more), and smoke, flame, and odor during combustion are kept to a minimum, with little ash remaining after burning. Its quality is highly regarded, and since participating in the Agriculture, Forestry and Fisheries Festival from fiscal year 2006, it has received the Minister of Agriculture, Forestry and Fisheries Award and the Director-General of the Forestry Agency Award every year up to the present.",
+      "registration_date": "平成30年8月6日",
+      "production_area_text": "岩手県",
+      "prefecture_codes": [
+        "03"
+      ],
+      "producer_group": "岩手県盛岡市南仙北二丁目3番21号一般社団法人岩手県木炭協会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0066/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:57:16.511Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:68",
+      "registration_num
+```
+
+
+=== Case R-306 ===
+Topic / intent: أماكن الحلال في طوكيو
+Query: أبحث عن مطاعم حلال معتمدة في طوكيو. أين يمكنني إيجاد طعام حلال في المناطق السياحية؟
+Tool: search_hybrid({"q": "halal certified Tokyo restaurant", "lang": "ar"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal certified Tokyo restaurant",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.04312,
+      "rank_bm": null,
+      "rank_vec": 13,
+      "key": "spot:15ddd8ded2692be1",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "<img src=\"https://www.visit-tochigi.com/wp-content/themes/tochigi/frontend/img/top/top_heading.svg\" alt=\"Visit Tochigi\" width=\"534\" height=\"311\" decoding=\"async\" data-eio=\"l\">",
+      "description": "We use cookies on this site to enhance your user experience. If you continue to browse, you accept the use of cookies on our site. See our cookis policy for more information. Mountainous nature and culture with a long history await you. Explore the depths of Japan just a short trip outside of Tokyo. WARNING!! BE AWARE OF BEAR 2025.11.18 Golfing and Sightseeing in Japan 2025.03.20 Wellness Travel to Japanese Onsen (Hot Spring) Resorts 2025.03.20",
+      "prefecture": "栃木県",
+      "municipality": "市貝町",
+      "url": "https://www.visit-tochigi.com/"
+    },
+    {
+      "score": 0.0261,
+      "rank_bm": 43,
+      "rank_vec": 1,
+      "key": "wd:Q22119655",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "土手の伊勢屋",
+      "description": "tempra restaurant in Taito, Tokyo [Registered Tangible Cultural Property]",
+      "prefecture": "東京都",
+      "municipality": "台東区",
+      "url": "https://www.wikidata.org/wiki/Q22119655"
+    },
+    {
+      "score": 0.02008,
+      "rank_bm": 31,
+      "rank_vec": 50,
+      "key": "spot:f27587563c853b3f",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "[2026] Fukuoka Prefecture Gourmet & Restaurant Guide for Vegetarians, Vegans, and Muslims",
+      "description": "Fukuoka Prefecture is promoting food diversity under the slogan “One Dish for the World ☺.” This page features restaurants where vegetarians, vegans, and Muslims can fully enjoy Fukuoka's rich culinary landscape. Discover exquisite gourmet delights that are perfect for you in Fukuoka, the kingdom of food! We want to invite vegetarians and vegans to savor uniquely Japanese dishes such as traditional set meals, ramen, and rice bowls. You can also enjoy Fukuoka specialties, such as tonkotsu-style ramen made solely with plant-based ingredients and seasonings, dumplings filled with local vegetables, and baked curry made without the \"five pungent vegetables\" (garlic, onions, leeks, chives, and shallots). You are sure to discover highly satisfying dishes in which the rich umami and distinct flavors of vegetables, mushrooms, grains, and beans shine through. To ensure Muslim visitors can enjoy Fukuoka's food culture to their hearts' content, we have created an environment that enables you to choose your meal with confidence, with each restaurant providing information on the ingredients and seasonings used through multilingual menus and pictograms. Indulge in Fukuoka's gourmet offerings, including Halal-certified motsunabe (an offal-based hot pot), Wagyu steak, ramen that is pork-free and alcohol-free, mentaiko (seasoned cod roe), and unagi (freshwater eel) rice bowls. The detail page for each restaurant includes basic information such as address, opening hours, and contact details, as well as vegetarian-, vegan-, and Muslim-friendly menus that travelers will want to browse beforehand. You can easily filter a restaurant's dietary options by selecting “Category” during the search process. [Available Menu Information] ・Vegetarian-friendly options available ・Vegan-friendly options available ・Pork-free options available (No pork or pork-derived ingredients) ・Alcohol-free options available ・Halal-certified meat available ・Gluten-free options available ・Menu items without the \"five pungent vegetables\" (onions, garlic, leeks, chives, pickled garlic, etc.) available on request *We recommend checking on the latest information directly with
+```
+
+
+=== Case R-307 ===
+Topic / intent: makanan halal Osaka
+Query: Saya Muslim dan mencari restoran halal bersertifikat di Osaka. Di mana bisa menemukan makanan halal?
+Tool: search_hybrid({"q": "halal Osaka certified restaurant", "lang": "id"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal Osaka certified restaurant",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.1992,
+      "rank_bm": null,
+      "rank_vec": 38,
+      "key": "spot:d2901e9be72e8cf9",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "A complete guide to the charms of Osaka sightseeing! Explaining the basics of history, food, and culture | OSAKA-INFO",
+      "description": "This official guide provides a comprehensive explanation of the charms of Osaka, including its history, its food culture of \"kuidaore,\" sports, and the pop culture of Nipponbashi. From Basic information for first-time tourists to the latest spots, OSAKA-INFO provides detailed information to help you get to know Osaka better.",
+      "prefecture": "大阪府",
+      "municipality": "岬町",
+      "url": "https://osaka-info.jp/en/osaka"
+    },
+    {
+      "score": 0.10448,
+      "rank_bm": null,
+      "rank_vec": 50,
+      "key": "spot:787be22aab6642a6",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Recommended gourmet food in Osaka",
+      "description": "Yakiniku, a local specialty of Osaka, is starting to be recognized as a new staple gourmet dish among foreign tourists. Osaka is home to many popular ramen restaurants, from long-established restaurants in Minami that are always crowded with tourists to famous restaurants that attract ramen lovers from all over the country. \"Depachika\" refers to the food section in the basement of a department store. Around 2000, it began to be featured more frequently on television and in magazines, sparking a \"depachika\" boom. Osaka is known for having a wider variety of curry than other regions. There are chain restaurants and many independent restaurants, each offering unique curry with their own unique twist. When the sun shines brightly, colorful beach umbrellas are set up on the rooftops of department stores and in hotel garden spaces.",
+      "prefecture": "大阪府",
+      "municipality": "岬町",
+      "url": "https://osaka-info.jp/en/gourmet/lets_take_in"
+    },
+    {
+      "score": 0.0951,
+      "rank_bm": null,
+      "rank_vec": 25,
+      "key": "spot:6c96010ab06ab2d9",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Come on over! A trip to Osaka full of fun",
+      "description": "《Recommended Event》 A higher-class BBQ party! All-you-can-drink Kawachi Wine's recommended wines and a tasting of premium Yakiniku goou [Announcement] World Heritage Site Hot Air Balloon Shuttle Bus Service Begins! When you think of Osaka, do you think of flour-based foods? Theme parks? Comedy?Of course! But that's not all.Osaka is full of fascinating things, including history, culture, people, food, and entertainment that can only be found there!Whether you're in the north, south, east or west, there are plenty of interesting things about Osaka you haven't seen yet.Take this opportunity to explore and enjoy the Osaka you've never seen before. I am in the finishing process of making a 47cm long umbrella for both sun and rain... Put on VR goggles and stand at a circular table...",
+      "prefecture": "大阪府",
+      "municipality": "岬町",
+      "url": "https://osaka-info.jp/en/special/dc"
+    },
+    {
+      "score": 0.0835,
+      "rank_bm": null,
+      "rank_vec": 49,
+      "key": "spot:9611bd572da8f749",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Recommended gourmet food in Osaka",
+      "description": "Japanese whisky, which is both delicate and powerful, has won numerous awards both at home and abroad and is now recognized worldwide. Suntory Yamazaki Distillery is Japan's first malt whisky distillery. There is also a winery with over 100 years of history, which produces wine using 100% locally harvested grapes. Osaka Bay has long been blessed with an abundance of seafood, including not only fish such as sardines and sea bream, but also shrimp
+```
+
+
+=== Case R-308 ===
+Topic / intent: halal food Kyoto
+Query: Where can I find halal-certified restaurants near Kyoto's main tourist sites like Fushimi Inari and Kinkakuji?
+Tool: search_hybrid({"q": "halal Kyoto restaurant certified", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal Kyoto restaurant certified",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.20827,
+      "rank_bm": null,
+      "rank_vec": 48,
+      "key": "spot:2ccd7d21891753f6",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Iwate Tourism Omotenashi Master (Hospitality Experts)",
+      "description": "By using this website, you are deemed to have consented to the setting and use of cookies. For more information, please refer to our Privacy Policy. Translation is done using automatic translation software, so some words may not be accurate. Please understand this in advance. The Iwate Prefecture Tourism Association established the \"Iwate Tourism Omotenashi Meister\" certification system in 2007. This program aims to certify employees, staff, etc. of tourism-related facilities and organizations, with the goal of cultivating personnel capable of welcoming visitors with omotenashi (hospitality). Individuals who are ready to assist guests in Iwate with a spirit of omotenashi and a wealth of knowledge about tourism. They are what we call \"Iwate Tourism Omotenashi Meisters.\" Under this system, certification is granted exclusively to individuals possessing substantial work experience, trust, training, and a proactive mindset. Employees of tourism-related facilities, staff of tourism-related organizations, etc. in Iwate Naoko Takayasu (Naoko Takayasu)",
+      "prefecture": "岩手県",
+      "municipality": "一戸町",
+      "url": "https://iwatetabi.jp/en/meister"
+    },
+    {
+      "score": 0.04718,
+      "rank_bm": null,
+      "rank_vec": 32,
+      "key": "spot:6b709c0a61323607",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Kyoto Hotels",
+      "description": "Please note that the displayed price in your currency is only for reference. Newly opened at Hachijo Exit of Kyoto Station! (including tax and service charge) Deep in the mountains of Kyoto. Experience the Japanese wilderness. We are in a good location that is 10 minutes walk from Kyoto Station. All rooms have a washing machine.",
+      "prefecture": "埼玉県",
+      "municipality": "杉戸町",
+      "url": "https://www.jalan.net/en/japan_hotels_ryokan/Accommodation/Kyoto_Accommodation"
+    },
+    {
+      "score": 0.03063,
+      "rank_bm": null,
+      "rank_vec": 41,
+      "key": "spot:8af8e81463b78dce",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "About Linking to this Website",
+      "description": "By using this website, you are deemed to have consented to the setting and use of cookies. For more information, please refer to our Privacy Policy. Translation is done using automatic translation software, so some words may not be accurate. Please understand this in advance. In general, you are free to link to this website. If you choose to do so, please provide us with the URL, the name of the entity operating the website (corporation or individual), telephone number, email address, and the duration for which the link will be set up to info@iwatetabi.jp. Links from the following types of websites are not permitted. Please use the web banner below if using a web banner.",
+      "prefecture": "岩手県",
+      "municipality": "一戸町",
+      "url": "https://iwatetabi.jp/en/link"
+    },
+    {
+      "score": 0.02095,
+      "rank_bm": null,
+      "rank_vec": 37,
+      "key": "spot:15ddd8ded2692be1",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "<img src=\"https://www.visit-tochigi.com/wp-content/themes/tochigi/frontend/img/top/top_heading.svg\" alt=\"Visit Tochigi\" width=\"534\" height=\"311\" decoding=\"async\" data-eio=\"l\">",
+      "description": "We use cookies on this site to enhance your user experience. If you continue to browse, you accept the use of cookies on our site. See our cookis policy for more information. Mountainous nature and culture with a long history await you. Explore
+```
+
+
+=== Case R-309 ===
+Topic / intent: makanan halal Hokkaido
+Query: Saya mencari makanan halal di Hokkaido. Adakah restoran yang mempunyai pensijilan halal?
+Tool: search_hybrid({"q": "halal certified Hokkaido food", "lang": "ms"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal certified Hokkaido food",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.08126,
+      "rank_bm": null,
+      "rank_vec": 50,
+      "key": "spot:970bfa0a92d15d8a",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "10 Recommended Dishes in Fukuoka! Discovering the Region’s Finest Foods",
+      "description": "In Japan, Fukuoka is famous for foods like “tonkotsu” ramen, “motsunabe” hotpot, and “mentaiko” pollack roe. And that’s just for starters - the region is packed with one-of-a-kind gourmet delicacies! In this article, we’ve selected 10 local Fukuoka dishes worthy of adding to your Japan must-eat list! Tonkotsu ramen is known Japan-wide as the specialty dish of Fukuoka. It is characterized by thin, straight noodles and a collagen-rich broth packed with the rich umami of pork bones. Even for those well-versed in ramen, eating this particular variety is a journey into the unknown, bringing all sorts of new terms like “kaedama” (extra serving of noodles) and questions like “How hard do you want your noodles?” When ordering tonkotsu ramen, you will be given several options of noodle hardness. You can have your noodles “yawa” (soft), “futsu” (normal/medium), “kata” (hard), “harigane” (extra hard), “kona-otoshi” (extremely hard, only briefly put in hot water to remove flour), and “nama” (raw). For beginners, it’s best to start off around the “hard” range. After selecting the noodles, enjoy your ramen with one or more of the toppings placed on the table, which includes white sesame seeds, red pickled ginger, and mustard greens! When it comes to ramen broth, there are four basic types - soy sauce, salt, miso, and tonkotsu. Tonkotsu ramen actually originated in a city of Fukuoka called Kurume, and what started out in a local street stall in 1937 has now spread across the globe. While Fukuoka is largely known for ramen, Japanese udon (thick wheat noodles) and soba (thin buckwheat noodles) culture is said to have begun when these noodles were brought to Hakata from mainland China during the Kamakura period (1185–1333). Udon is adored by Fukuoka locals, proven by the prefecture boasting one of the largest concentrations of udon restaurants in all of Japan! Udon dishes consist of soft noodles and a clear broth of light soy sauce. Many locals then top their udon with hearty burdock root tempura and fried fish cake, along with condiments like yuzu-kosho (yuzu and chili peppers mixed into a paste). While many traditional udon restaurants serve onigiri (rice balls) and inarizushi (sushi rice wrapped in fried tofu skin), if you’re in Fukuoka, it's standard to eat udon with the local dishes “kashiwa” onigiri (chicken rice ball) or “kashiwameshi” (Japanese mixed rice).",
+      "prefecture": "福岡県",
+      "municipality": "上毛町",
+      "url": "https://www.crossroadfukuoka.jp/en/articles/gourmet"
+    },
+    {
+      "score": 0.07359,
+      "rank_bm": null,
+      "rank_vec": 46,
+      "key": "spot:94c732cfce5e08b6",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Hokkaido Hotels",
+      "description": "Please note that the displayed price in your currency is only for reference. Situated in front of Hakodate station, it is grand opening of a hotel that features the largest scale hot spring. (including tax and service charge) Located adjacent to JR Hakodate Station. The top floor includes a complimentary large public bath with a train view! Open in 2023. The hotel has 3 types of free private baths and a large public bath.",
+      "prefecture": "埼玉県",
+      "municipality": "杉戸町",
+      "url": "https://www.jalan.net/en/japan_hotels_ryokan/Accommodation/Hokkaido_Accommodation/Hakodate_Onuma_Matsumae_Accommodation"
+    },
+    {
+      "score": 0.06858,
+      "rank_bm": null,
+      "rank_vec": 44,
+      "key": "spot:223441251ac25ce2",
+      "kind": "spot",
+      "source": "municipal_scrape",
+
+```
+
+
+=== Case R-310 ===
+Topic / intent: مصلى قريب من المعالم السياحية
+Query: أحتاج إلى مكان للصلاة بالقرب من معالم سياحية طوكيو مثل أساكوسا. هل هناك مصليات؟
+Tool: search_hybrid({"q": "prayer room Muslim Tokyo Asakusa", "lang": "ar"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "prayer room Muslim Tokyo Asakusa",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "wd:Q863180",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "浅草花やしき",
+      "description": "amusement park in Asakusa, Taitō, Tokyo",
+      "prefecture": "東京都",
+      "municipality": "東京都",
+      "url": "https://www.wikidata.org/wiki/Q863180"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "wd:Q11497824",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "拝島大師",
+      "description": "temple in Akishima, Tokyo",
+      "prefecture": "東京都",
+      "municipality": "昭島市",
+      "url": "https://www.wikidata.org/wiki/Q11497824"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "spot:860c2d19467c3170",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Overview of Service",
+      "description": "Supporting travelers in the event of sudden illness, disasters, or other travel problems! Available exclusively to JR-West product users Describe injury/illness in Japanese Show nearest evacuation site on area map. Describe dietary restriction(s) in JapaneseShow prayer room information Show multilingual call centers and medical referral contacts",
+      "prefecture": "兵庫県",
+      "municipality": "加古川市",
+      "url": "https://www.westjr.co.jp/global/en/travel_support"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": null,
+      "rank_vec": 2,
+      "key": "wd:Q54152979",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "報土寺",
+      "description": "temple in Akasaka, Minato-ku",
+      "prefecture": "東京都",
+      "municipality": "港区",
+      "url": "https://www.wikidata.org/wiki/Q54152979"
+    },
+    {
+      "score": 0.01587,
+      "rank_bm": 3,
+      "rank_vec": null,
+      "key": "spot:1858792db6fdd851",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Important:",
+      "description": "Operating since 2004, Royal Brunei Airlines’ Sky Lounge at Brunei International Airport was designed and furnished with the comfort and convenience of the airline’s premium guests in mind. From the 6th of December 2017, RB Business Class guests and Royal Skies Gold members will enjoy exclusive access to the Business Class Lounge at Brunei International Airport where our guests can enjoy fine dining and unlimited access to the Sky Lounge. Staying true to Brunei’s Islamic heritage, the lounge provides a dedicated prayer and ablution area for Muslim guests. The refreshed Sky Lounge offers a buffet dining area, shower facilities, free internet access and meeting rooms^. With the opening of the newly refreshed Sky Lounge, RB guests, Royal Skies Blue members and other Airlines’ guests can now enjoy access to the newly refreshed Sky Lounge at Brunei International Airport* with a fee. *For walk-in and prepaid guests, access to the lounge is available for a maximum of three (03) hours. Each additional hour after can be purchased at BND12.",
+      "prefecture": "宮城県",
+      "municipality": "名取市",
+      "url": "https://www.flyroyalbrunei.com/brunei/en/experience/sky-lounge"
+    },
+    {
+      "score": 0.01587,
+      "rank_bm": null,
+      "rank_vec": 3,
+      "key": "wd:Q22117774",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "阿蘇神社",
+      "description": "Shinto shrine in Tokyo, Japan",
+      "prefecture": "東京都",
+      "municipality": "東京都",
+      "url": "https://www.wikidata.org/wiki/Q22117774"
+    },
+    {
+      "score": 0.01563,
+      "rank_bm": 4,
+      "rank_vec": null,
+      "key": "spot:158bd302e87bf64f",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Access",
+      "description": "Get detailed guidance on publictranspo
+```
+
+
+=== Case R-311 ===
+Topic / intent: ベジタリアン 精進料理 京都
+Query: 宗教的な理由でベジタリアンです。京都で本格的な精進料理を体験できる寺はどこ？
+Tool: search_hybrid({"q": "精進料理 京都 宿坊", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "精進料理 京都 宿坊",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.03068,
+      "rank_bm": 10,
+      "rank_vec": 1,
+      "key": "spot:60740f54a24d97e6",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "しょうじんりょうり\n            \n  精進料理",
+      "description": "日本曹洞宗の開祖・道元禅師の『典座教訓』は、炊事という日常的営みの中の仏道修行を語った教えで、野菜は根っこまで余すことなく、手順をおろそかにせず、心を込めて丁寧に調理をすることなどが書かれています。その基本は「食材を大切に調理し、相手に供すること」、食材に対しても、食べる人たちに対しても「おもてなし」を大切にし、万物に感謝することです。この手間暇を惜しまずに食事をつくる精神はまさしく和食の原点であり、精進料理の神髄です 永平寺門前町の飲食店にてお求めいただけます。 この情報は2022年03月現在のものです。店舗、施設からの情報を基に掲載していますので、変更になっている場合があります。詳しくは直接店舗、施設にお問い合わせください。 この情報は2022年03月現在のものです。店舗、施設からの情報を基に掲載していますので、変更になっている場合があります。詳しくは直接店舗、施設にお問い合わせください。",
+      "prefecture": "福井県",
+      "municipality": "永平寺町",
+      "url": "https://www.eiheiji.jp/main/archives/69"
+    },
+    {
+      "score": 0.02971,
+      "rank_bm": 11,
+      "rank_vec": 4,
+      "key": "spot:e1aa796928f94a2f",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "宿坊の紹介",
+      "description": "高野山の西の入り口で、夕日百選にも選ばれている大門に最も近くに位置しています。昭和を代表する名作庭家、重森三玲による大石庭が広がり、四季折々の美しさを回廊やほとんどの客室から望むことができます。夜には庭園のライトアップがあり、特に秋の紅葉のシーズンがみごと。客室は本格的な数寄屋造りで、宿坊らしい和の風情が感じられます。 弘法大師空海の二代目弟子、真然大徳（しんぜんだいとく）が建立。当院の位置が西南の方角、すなわち裏鬼門にあることから、高野山の裏鬼門を守護する役割を担ってきました。のちに鳥羽法皇が参詣し、当院を勅願寺と定めました。貴族の九条家をはじめ、江戸時代には武将の中川家の庇護を受け、また、徳川家康から経蔵（現在の建物は再建）を寄進されたことなどが、寺の古文書に記されています。 大門から壇上伽藍の中門へ向かう通り沿いにあり、高野山霊宝館にもほど近く、お参りや見学にも便利な場所にある宿坊寺院。季節の素材を使った家庭的な味わいの精進料理が人気で、小ぢんまりとしたお寺らしい風情を楽しむことができます。阿字観体験や写経を希望される場合は予約が必要です。各種合宿や研修など、幅広いニーズに対応可能です。 平安時代、如海（にょかい）上人により開かれました。如海上人は、弘法大師空海の実弟で十大弟子の一人、真雅の弟子。すなわち、弘法大師の孫弟子にあたります。創建後、落雷により堂宇は焼失しましたが、建久年間（1190〜99）、仁雅（にんが）という僧侶が復興、中島都史多院（なかじまとしたいん）と呼ばれました。江戸時代の慶安年間（1648〜52）、仁和寺宮報恩院の令旨を賜り、寺号を報恩院と改めました。江戸時代には、芭蕉の弟子が芭蕉の遺骨を当院に納めたと伝えられています。 壇上伽藍のほど近くにあり、朝夕の参拝に便利。夕食後には僧侶が案内するナイトウォークに参加することができます（僧侶の都合によります）。国の登録記念物の枯山水庭園は重森三玲の作で京都の龍安寺の石庭をイメージ。リノベーションされたお風呂前のスペースから大きなガラス越しに眺めることもでき、心癒されます。",
+      "prefecture": "和歌山県",
+      "municipality": "高野町",
+      "url": "https://www.koya.org/shukubo"
+    },
+    {
+      "score": 0.02929,
+      "rank_bm": 16,
+      "rank_vec": 2,
+      "key": "dmo_page:dmo_0002_一社東北観光推進機構:https://www.tohokukanko.jp/features/detail_281.html",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "和の文化とZEN（禅）のこころに触れる旅｜特集 | 旅東北 - 東北の観光・旅行情報サイト (（一社）東北観光推進機構)",
+      "description": "着物に身を包み、会津の茶道文化に親しむ 会津の歴代藩主が愛した別荘地『御薬園』。茅葺屋根の御殿や回遊庭園など、和の趣に満ちた園内で、着物に身を包み会津の茶道文化に親しむツアーはいかが？着物は、この地で古くから織られてきた伝統的工芸品の「会津木綿」。素朴な風合いの着物を着付けてもらったら、会津の茶道文化やお点前を拝見し、習った作法で薄茶をいただきます♪その後は美しい庭園を散策し、おなかがすいたら郷土料理「わっぱ飯」のランチに舌鼓を打つ、大満足のツアーです。 坐禅も飲酒もあり!?宿坊で体験するスローライフ 約3,000坪の境内に総青森ヒバ造りの本殿が建つ『おおま宿坊 普賢院』を貸切できる、１日１組限定の特別な宿泊プランです！１泊２日の滞在中、坐禅やご祈祷、写仏などを通して自分自身を清める体験ができますよ。お楽しみの食事は、大間マグロをはじめ青森の山海の幸をふんだんに使用した豪華な夕食や、仏教の教えに基づく伝統的な精進料理の朝食が楽しめます♪大間マグロを肴にお坊さんとお酒を酌み交わす、そんなゆる～い宿坊体験が叶いますよ。 森の一棟貸しの宿で、暮らすように旅する 福島県郡山市の西部、美しい森の中に建つ一棟貸しの宿を拠点に、「木」と暮らす日本の豊かさを感じる旅が楽しめますよ♪滞在中は、ガイド付きの森の散策、菌打ち体験、木桶の露天風呂など、木にまつわる多彩なオプションプログラムで旅をカスタマイズ。さらに日本酒や醤油の蔵見学や炭焼き体験など、近隣の施設に赴いての特別オプションプログラムも！さまざまな体験を通して、木を育て、守り、受け継ぐ暮らしや文化が体験できますよ。 小京都・角館のお寺でゆったり坐禅体験 みちのくの小京都・角館の武家屋敷通りの賑やかさから少し離れた閑静なエリアにある曹洞宗寺院『満福寺』。大自然に囲まれた広大な境内で、日常を抜け出して自分と向き合う坐禅体験ができますよ。ご住職の指導のもと禅の教えを学んだ後、いざ坐禅に挑戦。静寂の中で呼吸を調え、心を解放する時間を体験します。坐禅の後の、角館で生まれ育ったご住職と、お茶と和菓子を囲んでの茶話会も楽しい時間です。 着物に身を包み、会津の茶道文化に親しむ 会津の歴代藩主が愛した別荘地『御薬園』。茅葺屋根の御殿や回遊庭園など、和の趣に満ちた園内で、着物に身を包み会津の茶道文化に親しむツアーはいかが？着物は、この地で古くから織られてきた伝統的工芸品の「会津木綿」。素朴な風合いの着物を着付けてもらったら、会津の茶道文化やお点前を拝見し、習った作法で薄茶をいただきます♪その後は美しい庭園を散策し、おなかがすいたら郷土料理「わっぱ飯」のランチに舌鼓を打つ、大満足のツアーです。 会津の歴代藩主が愛した別荘地『御薬園』。茅葺屋根の御殿や回遊庭園など、和の趣に満ちた園内で、着物に身を包み会津の茶道文化に親しむツアーはいかが？着物は、この地で古くから織られてきた伝統的工芸品の「会津木綿」。素朴な風合いの着物を着付けてもらったら、会津の茶道文化やお点前を拝見し、習った作法で薄茶をいただきます♪その後は美しい庭園を散策し、おなかがすいたら郷土料理「わっぱ飯」のランチに舌鼓を打つ、大満足のツアーです。 会津の歴代藩主が愛した別荘地『御薬園』。茅葺屋根の御殿や回遊庭園など、和の趣に満ちた園内で、着物に身を包み会津の茶道文化に親しむツアーはいかが？ 着物は、この地で古くから織られてきた伝統的工芸品の「会津木綿」。素朴な風合いの着物を着付けてもらったら、会津の茶道文化やお点前を拝見し、習った作法で薄茶をいただきます♪",
+      "prefecture": "青森県 / 岩手県 / 秋田県 / 宮城県 / 山形県 / 福島県 / 新潟
+```
+
+
+=== Case R-312 ===
+Topic / intent: halal Kyushu
+Query: Saya traveling ke Kyushu dan butuh informasi tentang restoran halal. Di kota Fukuoka ada yang certified?
+Tool: search_hybrid({"q": "halal Fukuoka certified restaurant", "lang": "id"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal Fukuoka certified restaurant",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.49276,
+      "rank_bm": 31,
+      "rank_vec": 49,
+      "key": "spot:f27587563c853b3f",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "[2026] Fukuoka Prefecture Gourmet & Restaurant Guide for Vegetarians, Vegans, and Muslims",
+      "description": "Fukuoka Prefecture is promoting food diversity under the slogan “One Dish for the World ☺.” This page features restaurants where vegetarians, vegans, and Muslims can fully enjoy Fukuoka's rich culinary landscape. Discover exquisite gourmet delights that are perfect for you in Fukuoka, the kingdom of food! We want to invite vegetarians and vegans to savor uniquely Japanese dishes such as traditional set meals, ramen, and rice bowls. You can also enjoy Fukuoka specialties, such as tonkotsu-style ramen made solely with plant-based ingredients and seasonings, dumplings filled with local vegetables, and baked curry made without the \"five pungent vegetables\" (garlic, onions, leeks, chives, and shallots). You are sure to discover highly satisfying dishes in which the rich umami and distinct flavors of vegetables, mushrooms, grains, and beans shine through. To ensure Muslim visitors can enjoy Fukuoka's food culture to their hearts' content, we have created an environment that enables you to choose your meal with confidence, with each restaurant providing information on the ingredients and seasonings used through multilingual menus and pictograms. Indulge in Fukuoka's gourmet offerings, including Halal-certified motsunabe (an offal-based hot pot), Wagyu steak, ramen that is pork-free and alcohol-free, mentaiko (seasoned cod roe), and unagi (freshwater eel) rice bowls. The detail page for each restaurant includes basic information such as address, opening hours, and contact details, as well as vegetarian-, vegan-, and Muslim-friendly menus that travelers will want to browse beforehand. You can easily filter a restaurant's dietary options by selecting “Category” during the search process. [Available Menu Information] ・Vegetarian-friendly options available ・Vegan-friendly options available ・Pork-free options available (No pork or pork-derived ingredients) ・Alcohol-free options available ・Halal-certified meat available ・Gluten-free options available ・Menu items without the \"five pungent vegetables\" (onions, garlic, leeks, chives, pickled garlic, etc.) available on request *We recommend checking on the latest information directly with each store before visiting. A pamphlet introducing vegan- and Muslim-friendly restaurants in Fukuoka Prefecture. Use it to find out more for your travel and dining!",
+      "prefecture": "福岡県",
+      "municipality": "上毛町",
+      "url": "https://www.crossroadfukuoka.jp/en/articles/vegetarian-muslim"
+    },
+    {
+      "score": 0.11028,
+      "rank_bm": null,
+      "rank_vec": 50,
+      "key": "spot:970bfa0a92d15d8a",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "10 Recommended Dishes in Fukuoka! Discovering the Region’s Finest Foods",
+      "description": "In Japan, Fukuoka is famous for foods like “tonkotsu” ramen, “motsunabe” hotpot, and “mentaiko” pollack roe. And that’s just for starters - the region is packed with one-of-a-kind gourmet delicacies! In this article, we’ve selected 10 local Fukuoka dishes worthy of adding to your Japan must-eat list! Tonkotsu ramen is known Japan-wide as the specialty dish of Fukuoka. It is characterized by thin, straight noodles and a collagen-rich broth packed with the rich umami of pork bones. Even for those well-versed in ramen, eating this particular variety is a journey into the unknown, bringing all sorts of new terms like “kaedama” (extra serving of noodles) and questions like “How hard do you want your noodles?” When ordering tonkotsu ramen, you will be given several op
+```
+
+
+=== Case R-313 ===
+Topic / intent: صيام رمضان في اليابان
+Query: أسافر إلى اليابان خلال رمضان. ما هي ساعات عمل المعالم السياحية وكيف أجد طعاماً حلالاً للإفطار؟
+Tool: search_hybrid({"q": "halal food Japan Ramadan iftar", "lang": "ar"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal food Japan Ramadan iftar",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.11419,
+      "rank_bm": null,
+      "rank_vec": 45,
+      "key": "spot:8af8e81463b78dce",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "About Linking to this Website",
+      "description": "By using this website, you are deemed to have consented to the setting and use of cookies. For more information, please refer to our Privacy Policy. Translation is done using automatic translation software, so some words may not be accurate. Please understand this in advance. In general, you are free to link to this website. If you choose to do so, please provide us with the URL, the name of the entity operating the website (corporation or individual), telephone number, email address, and the duration for which the link will be set up to info@iwatetabi.jp. Links from the following types of websites are not permitted. Please use the web banner below if using a web banner.",
+      "prefecture": "岩手県",
+      "municipality": "一戸町",
+      "url": "https://iwatetabi.jp/en/link"
+    },
+    {
+      "score": 0.03741,
+      "rank_bm": null,
+      "rank_vec": 28,
+      "key": "spot:15ddd8ded2692be1",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "<img src=\"https://www.visit-tochigi.com/wp-content/themes/tochigi/frontend/img/top/top_heading.svg\" alt=\"Visit Tochigi\" width=\"534\" height=\"311\" decoding=\"async\" data-eio=\"l\">",
+      "description": "We use cookies on this site to enhance your user experience. If you continue to browse, you accept the use of cookies on our site. See our cookis policy for more information. Mountainous nature and culture with a long history await you. Explore the depths of Japan just a short trip outside of Tokyo. WARNING!! BE AWARE OF BEAR 2025.11.18 Golfing and Sightseeing in Japan 2025.03.20 Wellness Travel to Japanese Onsen (Hot Spring) Resorts 2025.03.20",
+      "prefecture": "栃木県",
+      "municipality": "市貝町",
+      "url": "https://www.visit-tochigi.com/"
+    },
+    {
+      "score": 0.02558,
+      "rank_bm": 43,
+      "rank_vec": 3,
+      "key": "spot:a9caf24b5a3e3884",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "TRADITIONAL COOKING CLASS SPECIAL INVITATION",
+      "description": "For experienced travelers, this is a private home-cooking experience where you cook traditional Japanese dishes together with Japanese hosts in a real Japanese home. It offers a deeper understanding of everyday life in Aomori, rather than a commercialized tourist activity.The experience is plant-based and vegetarian- and vegan-friendly, with possible accommodation for halal or other religious dietary needs upon prior confirmation. Advance reservation is required. Maeda, Tsuruta, Tsuruta Town, Kita-Tsugaru District, Aomori, Japan 11:00-14:00 (Advance reservation is required) 3 minutes by car from Mutsu-turuda station. Instagram Tripadviser Viator GetYourGuide",
+      "prefecture": "青森県",
+      "municipality": "弘前市",
+      "url": "https://www.hirosaki-kanko.or.jp/en/edit.html?id=tsuruta_town"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "spot:f27587563c853b3f",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "[2026] Fukuoka Prefecture Gourmet & Restaurant Guide for Vegetarians, Vegans, and Muslims",
+      "description": "Fukuoka Prefecture is promoting food diversity under the slogan “One Dish for the World ☺.” This page features restaurants where vegetarians, vegans, and Muslims can fully enjoy Fukuoka's rich culinary landscape. Discover exquisite gourmet delights that are perfect for you in Fukuoka, the kingdom of food! We want to invite vegetarians and vegans to savor uniquely Japanese dishes such as traditional set meals, ramen, and rice bowls. You can also enjoy Fukuoka specialties, suc
+```
+
+
+=== Case R-314 ===
+Topic / intent: mosque near Tokyo sightseeing
+Query: I'm Muslim and need a mosque or prayer room near the main sightseeing areas in Tokyo. Any guidance?
+Tool: search_hybrid({"q": "mosque prayer room Tokyo sightseeing", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "mosque prayer room Tokyo sightseeing",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.07197,
+      "rank_bm": null,
+      "rank_vec": 49,
+      "key": "spot:34d79b4812d82a2b",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "A power spot that will soothe your soul: World Heritage Site \"Itsukushima Shrine\"",
+      "description": "Itsukushima Shrine in Miyajima is registered as a World Heritage Site and attracts attention from both within Japan and overseas. The large torii gate standing on the sea is known as one of the most spectacular sights symbolizing Japan. There are many attractions at Itsukushima Shrine that you should not miss, such as the historic grounds and the unique fortune slips and stamp books that can only be found here. In addition, the mysterious scenery that shows different expressions during the day and at night is also a must-see. In this article, we will introduce plenty of must-see attractions if you visit Itsukushima Shrine! >One of the Three Most Scenic Spots of Japan! What is the history of Itsukushima Shrine? > Should you aim for high tide or low tide? The Great Torii Gate with two faces >The temple grounds are packed with a wide variety of things to see > Great for social media ! Original \"Omikuji and Goshuincho\" > \"Night illumination\" where you can see a mysterious sight >Be sure to check before you go! \"Access and Opening Hours\" Itsukushima Shrine is located on Miyajima, which can be accessed from the center of Hiroshima City by train, tram, or high-speed boat. It was founded in the late 6th century, and became widely known after Taira no Kiyomori became a devout believer in it in the mid -12th century. It continues to attract widespread faith to this day as a shrine where people pray for safe voyages. The large torii gate, the symbol of the shrine, was built in the ninth generation since Kiyomori's time. The contrast between the vermilion torii gate and the Seto Inland Sea is magnificent, and the shrine is counted among the \"Three Most Scenic Views of Japan\" along with Matsushima in Miyagi and Amanohashidate in Kyoto. In 1996 , it was registered as a World Heritage Site, and is one of Hiroshima's most famous tourist spots, attracting many tourists from both within Japan and overseas. The great torii gate of Itsukushima Shrine stands about 200 meters offshore from the main shrine building. It is about 16 meters high, which is almost the same height as the Great Buddha of Nara. It can be clearly seen from within the shrine grounds, as well as from ferries crossing to Miyajima. Some ferries slow down in front of the great torii gate to announce its passage. If you want to take a photo of the main shrine building and the great torii gate of Itsukushima Shrine together, we recommend taking the photo from the ferry.",
+      "prefecture": "広島県",
+      "municipality": "世羅町",
+      "url": "https://dive-hiroshima.com/en/feature/feature-38369"
+    },
+    {
+      "score": 0.04457,
+      "rank_bm": null,
+      "rank_vec": 9,
+      "key": "spot:15ddd8ded2692be1",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "<img src=\"https://www.visit-tochigi.com/wp-content/themes/tochigi/frontend/img/top/top_heading.svg\" alt=\"Visit Tochigi\" width=\"534\" height=\"311\" decoding=\"async\" data-eio=\"l\">",
+      "description": "We use cookies on this site to enhance your user experience. If you continue to browse, you accept the use of cookies on our site. See our cookis policy for more information. Mountainous nature and culture with a long history await you. Explore the depths of Japan just a short trip outside of Tokyo. WARNING!! BE AWARE OF BEAR 2025.11.18 Golfing and Sightseeing in Japan 2025.03.20 Wellness Travel to Japanese Onsen (Hot Spring) Resorts 2025.03.20",
+      "prefecture": "栃木県",
+      "municipality": "市貝町",
+      "url": "https://w
+```
+
+
+=== Case R-315 ===
+Topic / intent: solat jumaat Tokyo
+Query: Di mana saya boleh menunaikan solat Jumaat di Tokyo? Adakah masjid berhampiran kawasan pelancongan?
+Tool: search_hybrid({"q": "Friday prayer mosque Tokyo Muslim", "lang": "ms"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "Friday prayer mosque Tokyo Muslim",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.03227,
+      "rank_bm": 1,
+      "rank_vec": 3,
+      "key": "wd:Q25470397",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "Masjid Indonesia Tokyo",
+      "description": "mosque in Meguro, Tokyo, Japan",
+      "prefecture": "東京都",
+      "municipality": "目黒区",
+      "url": "https://www.wikidata.org/wiki/Q25470397"
+    },
+    {
+      "score": 0.03175,
+      "rank_bm": 4,
+      "rank_vec": 2,
+      "key": "wd:Q126126037",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "マッキーマスジド東京",
+      "description": "mosque in Katsushika, Tokyo, Japan",
+      "prefecture": "東京都",
+      "municipality": "葛飾区",
+      "url": "https://www.wikidata.org/wiki/Q126126037"
+    },
+    {
+      "score": 0.0308,
+      "rank_bm": 3,
+      "rank_vec": 7,
+      "key": "wd:Q85773424",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "蒲田モスク",
+      "description": "mosque in Ōta, Tokyo, Japan",
+      "prefecture": "東京都",
+      "municipality": "大田区",
+      "url": "https://www.wikidata.org/wiki/Q85773424"
+    },
+    {
+      "score": 0.02951,
+      "rank_bm": 12,
+      "rank_vec": 4,
+      "key": "wd:Q20410089",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "行徳モスク",
+      "description": "mosque in Japan",
+      "prefecture": "千葉県",
+      "municipality": "千葉県",
+      "url": "https://www.wikidata.org/wiki/Q20410089"
+    },
+    {
+      "score": 0.02872,
+      "rank_bm": 5,
+      "rank_vec": 15,
+      "key": "wd:Q26964771",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "The Japan Mosque",
+      "description": "mosque in Japan",
+      "prefecture": "愛知県",
+      "municipality": "愛知県",
+      "url": "https://www.wikidata.org/wiki/Q26964771"
+    },
+    {
+      "score": 0.02848,
+      "rank_bm": 15,
+      "rank_vec": 6,
+      "key": "wd:Q11414850",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "名古屋モスク",
+      "description": "mosque in Japan",
+      "prefecture": "愛知県",
+      "municipality": "愛知県",
+      "url": "https://www.wikidata.org/wiki/Q11414850"
+    },
+    {
+      "score": 0.0283,
+      "rank_bm": 24,
+      "rank_vec": 1,
+      "key": "wd:Q17501727",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "大阪茨木モスク",
+      "description": "mosque in Japan",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q17501727"
+    },
+    {
+      "score": 0.02778,
+      "rank_bm": 13,
+      "rank_vec": 11,
+      "key": "wd:Q5507696",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "福岡モスク",
+      "description": "mosque in Japan",
+      "prefecture": "福岡県",
+      "municipality": "福岡市",
+      "url": "https://www.wikidata.org/wiki/Q5507696"
+    },
+    {
+      "score": 0.02703,
+      "rank_bm": 14,
+      "rank_vec": 14,
+      "key": "wd:Q1334137",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "神戸モスク",
+      "description": "mosque in Japan",
+      "prefecture": "兵庫県",
+      "municipality": "兵庫県",
+      "url": "https://www.wikidata.org/wiki/Q1334137"
+    },
+    {
+      "score": 0.02688,
+      "rank_bm": 27,
+      "rank_vec": 5,
+      "key": "wd:Q1710283",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "東京ジャーミイ",
+      "description": "mosque in Japan",
+      "prefecture": "東京都",
+      "municipality": "渋谷区",
+      "url": "https://www.wikidata.org/wiki/Q1710283"
+    }
+  ],
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-316 ===
+Topic / intent: ハラル 認証 大阪 ミナミ
+Query: 大阪のミナミ・なんばエリアでハラール認証済みの料理店を教えて。
+Tool: search_hybrid({"q": "halal 大阪 なんば 認証", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal 大阪 なんば 認証",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "spot:89600d2d0caf791b",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "高野町KOYA TOWN",
+      "description": "新大阪駅 →（大阪メトロ御堂筋線）→ 大阪メトロなんば駅 →（徒歩約１０分） → 南海なんば駅 →（南海高野線）→ 極楽橋駅 →（南海高野山ケーブル） 新大阪駅 →（JR東海道本線）→ 大阪駅 →（大阪環状線）→ 新今宮駅 →（南海高野線） → 極楽橋駅 →（南海高野山ケーブル）→ 高野山駅 →（南海りんかんバス）→ 高野山へ 新大阪駅 →（JR東海道本線）→ 大阪駅 →（JR大阪環状線）→ 天王寺駅 →（JR阪和線）",
+      "prefecture": "和歌山県",
+      "municipality": "高野町",
+      "url": "http://www.town.koya.wakayama.jp/sangyo/kankou/19590.html"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "wd:Q124482414",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "浄方寺",
+      "description": "temple in Kita-ku, Osaka",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q124482414"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "wd:Q20079977",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "難波駅 (南海)",
+      "description": "難波駅（なんばえき）は、大阪府大阪市中央区にある南海電気鉄道の駅。駅番号はNK01。 [kinki_eki_100]",
+      "prefecture": "大阪府",
+      "municipality": null,
+      "url": "https://www.wikidata.org/wiki/Q20079977"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": null,
+      "rank_vec": 2,
+      "key": "wd:Q137858649",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "ザ ファーム ユニバーサル",
+      "description": "chain of gardens in Japan",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q137858649"
+    },
+    {
+      "score": 0.01587,
+      "rank_bm": 3,
+      "rank_vec": null,
+      "key": "spot:b48716ddbad29deb",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "茨城町特産品ブランドいっぴん第5回認証商品を募集します",
+      "description": "ブランド認証制度「茨城町特産品ブランドいっぴん」は、町内の優れた地域資源を活用した商品などをブランド認証することにより、町の魅力を広く発信し、町の認知度やイメージアップを図ることを目的としています。 これまでに、7品（梅里豚（ばいりとん）、しじみラーメン、飯沼栗、愛ちゃんメロン、たがね餅、合鴨の米、ミルキークイーンあまざけ）が認証されました。 認証されると認証書が交付され、「茨城町特産品ブランドいっぴん」の認証マークを使用できるようになります。また、認証グッズの配付、各種メディアへの掲載、各種イベント等において茨城町の特産品としてPRします。 令和7年11月17日（月曜日）～令和7年12月16日（火曜日）※期限厳守 町内産の農畜水産物を活用し、町内外の事業所で製造された商品で、かつ、町内に所在する販売事業者であること。 「茨城町特産品ブランドいっぴん認証申請書（様式第1号）」に関係資料等を添え、農業政策課までご提出ください（郵送可）。",
+      "prefecture": "茨城県",
+      "municipality": "茨城町",
+      "url": "https://www.town.ibaraki.lg.jp/gyousei/sangyoubusiness/nougyou/003735.html"
+    },
+    {
+      "score": 0.01587,
+      "rank_bm": null,
+      "rank_vec": 3,
+      "key": "wd:Q751156",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "HEP",
+      "description": "shopping mall",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "url": "https://www.wikidata.org/wiki/Q751156"
+    },
+    {
+      "score": 0.01563,
+      "rank_bm": 4,
+      "rank_vec": null,
+      "key": "spot:f67a68aae75ff6e9",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "和歌山県公式観光サイト",
+      "description": "徳川御三家の一つ、紀州徳川家のお膝元・和歌山市を中心とした、岩出市、紀の川市、海南市、紀美野町エリア。大阪との県境でアクセスが抜群！大阪市内から車で約60分、電車で新大阪やなんばから特急で約60分、関西国際空港からも約35分と大変便利です。紀州徳川家の居城・和歌山城をはじめ紀三井寺、粉河寺などの史跡や、和歌の浦など万葉集にも詠われた風光明媚な景勝地が多く、見どころがいっぱい。無人島の友ヶ島やねこ駅長など話題のスポットも見逃せません。ご当地グルメはもちろん、紀の川市などの紀の川流域では、年間を通して多彩なフルーツが楽しめます。 徳川御三家の一つ、紀州徳川家のお膝元・和歌山市を中心とした、岩出市、紀の川市、海南市、紀美野町エリア。大阪との県境でアクセスが抜群！大阪市内から車で約60分、電車で新大阪やなんばから特急で約60分、関西国際空港からも約35分と大変便利です。 紀州徳川家の居城・和歌山城をはじめ紀三井寺、粉河寺などの史跡や、和歌の浦など万葉集にも詠われた風光明媚な景勝地が多く、見どころがいっぱい。無人島の友ヶ島やねこ駅長など話題のスポットも見逃せません。 ご当地グルメはもちろん、紀の川市などの紀の川流域では、年間を通して多彩なフルーツが楽しめます。 史跡や景勝地が多く、見どころ盛りだくさんの和歌山市近郊エリア。行きたいところがいっぱいで、決められない！そんなあなたにおすすめの外せない定番や、注目のスポットなど、人気のスポットをご紹介します。",
+      "prefecture": "和歌山県",
+      "municipality": "有田川町",
+      "url": "https://www.wakayama-kanko.or.jp/features/wakayamacity"
+   
+```
+
+
+=== Case R-317 ===
+Topic / intent: makanan vegetarian Buddha Jepang
+Query: Saya Buddhist dan ingin mencoba makanan vegetarian tradisional (shojin ryori) di Jepang. Di mana tempat terbaik?
+Tool: search_hybrid({"q": "精進料理 Buddhist vegetarian Japan", "lang": "id"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "精進料理 Buddhist vegetarian Japan",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.05264,
+      "rank_bm": null,
+      "rank_vec": 46,
+      "key": "spot:acef6f4a69aa70ea",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "VegetarianGuide Saga's Table for Everyone",
+      "description": "佐賀には、野菜たっぷりのヘルシーなメニューも、地元の美味しいお肉料理も、どちらも楽しめるレストランがたくさんあります。 このページでは、ベジタリアンの方も気兼ねなく一緒に食事を楽しめるお店をご紹介。 「食の好みが違っても、同じテーブルで笑顔になれる」——そんな佐賀の食の魅力を、ぜひ体験してください。 ・原材料の詳細やアレルギーにつきましては、店舗に直接お尋ねください。 ・五葷（ごくん）とは、古来中国に伝わる自然哲学、五行思想（五行説とも）に対応する５つの野菜（タマネギ・ネギ・ニラ・ラッキョウ・ニンニク）の総称。 ・掲載金額は税込みです。 ・掲載メニューは事前のご予約をお勧めします。 ・料理内容、料金は変更になることがあります。詳細については店舗にお尋ねください。 ※上記の食材を使用しているかは、各店舗のメニューをご確認ください。 ※五葷（ごくん）・・・タマネギ、ニラ、ネギ、ラッキョウ、ニンニク Kaji synergy restaurant（カジ シナジー レストラン）",
+      "prefecture": "佐賀県",
+      "municipality": "太良町",
+      "url": "https://www.asobo-saga.jp/vegetarian-guide"
+    },
+    {
+      "score": 0.03048,
+      "rank_bm": 1,
+      "rank_vec": 11,
+      "key": "spot:acbf398da1ca6afe",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "2025/03/04\n        \n  大本山永平寺\n\n\n\n  Eiheiji Temple",
+      "description": "No.1 大本山永平寺の概要 Eiheiji Temple No.2 大本山永平寺：禅の修行 Zen Practice at Eiheiji Temple No.3 精進料理の概要 Shōjin Ryōri (Temple Cuisine) No.4 大本山永平寺：七堂伽藍 The Seven-Hall Temple (Shichidō Garan) No.4-1 七堂伽藍（法堂） Hattō (Dharma Hall) No.4-2 七堂伽藍（法堂） Hattō (Dharma Hall) No.4-3 七堂伽藍（山門） Sanmon (Main Gate) No.4-4 七堂伽藍（僧堂） Sōdō (Monk’s Hall) No.4-5 七堂伽藍（大庫院） Daikuin (Kitchen and Administrative Building) No.4-6 七堂伽藍（東司） Tōsu (Toilet) No.4-7 七堂伽藍（浴司） Yokushitsu (Bathhouse) 大本山永平寺 No.2 大本山永平寺：禅の修行 Zen Practice at Eiheiji Temple No.3 精進料理の概要 Shōjin Ryōri (Temple Cuisine) No.4 大本山永平寺：七堂伽藍 The Seven-Hall Temple (Shichidō Garan) No.4-1 七堂伽藍（法堂） Hattō (Dharma Hall)",
+      "prefecture": "福井県",
+      "municipality": "永平寺町",
+      "url": "https://www.eiheiji.jp/main/archives/181"
+    },
+    {
+      "score": 0.03008,
+      "rank_bm": 6,
+      "rank_vec": 7,
+      "key": "spot:60740f54a24d97e6",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "しょうじんりょうり\n            \n  精進料理",
+      "description": "日本曹洞宗の開祖・道元禅師の『典座教訓』は、炊事という日常的営みの中の仏道修行を語った教えで、野菜は根っこまで余すことなく、手順をおろそかにせず、心を込めて丁寧に調理をすることなどが書かれています。その基本は「食材を大切に調理し、相手に供すること」、食材に対しても、食べる人たちに対しても「おもてなし」を大切にし、万物に感謝することです。この手間暇を惜しまずに食事をつくる精神はまさしく和食の原点であり、精進料理の神髄です 永平寺門前町の飲食店にてお求めいただけます。 この情報は2022年03月現在のものです。店舗、施設からの情報を基に掲載していますので、変更になっている場合があります。詳しくは直接店舗、施設にお問い合わせください。 この情報は2022年03月現在のものです。店舗、施設からの情報を基に掲載していますので、変更になっている場合があります。詳しくは直接店舗、施設にお問い合わせください。",
+      "prefecture": "福井県",
+      "municipality": "永平寺町",
+      "url": "https://www.eiheiji.jp/main/archives/69"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "wd:Q11563958",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "満願寺",
+      "description": "Buddhist temple in Japan",
+      "prefecture": "兵庫県",
+      "municipality": "兵庫県",
+      "url": "https://www.wikidata.org/wiki/Q11563958"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "spot:a4aab9d7d3a83c6a",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "ほっきょそう\n            ほっきょ荘",
+      "description": "参道に位置し、大型観光バスも駐車可能です。１階は、お土産品を販売しています。２階は、福井名物のソースかつ丼やおろし蕎麦をはじめ、季節の幸を盛り込んだ和風料理が召し上がれます。 [住所] 永平寺町志比24-35[営業時間] 9:00 ～ 17:00[定休日] 不定休[アクセス] 【車】永平寺IC 15分【電車・バス】永平寺口駅 バス乗換 永平寺下車 徒歩3分[駐車場] あり （普通車有 ）[大型バスの駐車] 観光バス 12台[お問い合わせ先] 0776-63-3311 hokkyoso@chive.ocn.ne.jp[備考] 飲食部門 精進料理・郷土料理・各種定食 【代表メニュー】精進料理【アルコール】地酒・ビール・その他【テイクアウト】有【宴会・貸切】有 休日営業応相談【客席】最大収容人数600人・椅子350席・座敷250席小売部門 土産物・地酒・スイーツ【おすすめ】永平寺ごまどうふ・永平寺栗きんつば この情報は2025年01月現在のものです。店舗、施設からの情報を基に掲載していますので、変更になっている場合があります。詳しくは直接店舗、施設にお問い合わせください。 [住所] 永平寺町志比24-35[営業時間] 9:00 ～ 17:00[定休日] 不定休[アクセス] 【車】永平寺IC 15分【電車・バス】永平寺口駅 バス乗換 永平寺下車 徒歩3分[駐車場] あり （普通車有 ）[大型バスの駐車] 観光バス 12台[お問い合わせ先] 0776
+```
+
+
+=== Case R-318 ===
+Topic / intent: حلال في كيوتو وأوساكا
+Query: ما هي خيارات الطعام الحلال المتاحة في كيوتو وأوساكا؟ مطاعم ذات شهادة حلال معترف بها.
+Tool: search_hybrid({"q": "halal certified Kyoto Osaka restaurant", "lang": "ar"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal certified Kyoto Osaka restaurant",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.36254,
+      "rank_bm": null,
+      "rank_vec": 45,
+      "key": "spot:16c24cfd4482c068",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Savor the Unique Taste of Nagoya",
+      "description": "Japan’s various regions differ in climate, agriculture, traditions, tastes and identity. Osaka is known as Japan's kitchen. Kyoto is the center of refined cuisine, Tokyo boasts the world’s most Michelin stars, and Aichi Prefecture’s capital, Nagoya, is home to some of mainland Japan’s most unique dishes. Nagoya’s cuisine is rich in flavor and generous in its servings without forgetting about presentation. That’s what makes it unique and special! Visually, they may not be overly stimulating, but don’t judge them from their appearance, instead, be surprised by the symphony of flavors and pleasing textures. As tomatoes are an integral part of Mediterranean cuisine, soybeans are a staple ingredient for Japanese cuisine, in particular, when fermented with salt and fresh water to produce a paste called Miso. There are numerous Miso varieties and flavors. Aichi Prefecture is famed for its characteristic dark reddish-brown traditional Hatcho Miso. Rich in flavor, true Hatcho Miso is fermented for two to three years, much longer than the Miso of other regions, where wheat or rice is added to the soybeans to make the Miso paste sweeter and lighter. Hatcho Miso has been produced in Okazaki City (Aichi Prefecture) since the early Edo period. Okazaki City is known as the birthplace of Tokugawa Ieyasu, the first Shogun of the Tokugawa shogunate and the one who unified Japan. Hatcho Miso was a convenient food source for the military troops thanks to its long lasting, highly nutritious qualities and being easy to transport. Development of the Tokaido highway between Edo (Tokyo) and Kyoto in the Edo Period（1603-1868） increased the popularity of Hatcho Miso across the country. Since Okazaki was located along the route, many travelers stopped and enjoyed local Miso soup before continuing on their journey.",
+      "prefecture": "愛知県",
+      "municipality": "豊根村",
+      "url": "https://aichinow.pref.aichi.jp/en/omotenashiaichi/column_detail/6"
+    },
+    {
+      "score": 0.12227,
+      "rank_bm": null,
+      "rank_vec": 50,
+      "key": "spot:d2901e9be72e8cf9",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "A complete guide to the charms of Osaka sightseeing! Explaining the basics of history, food, and culture | OSAKA-INFO",
+      "description": "This official guide provides a comprehensive explanation of the charms of Osaka, including its history, its food culture of \"kuidaore,\" sports, and the pop culture of Nipponbashi. From Basic information for first-time tourists to the latest spots, OSAKA-INFO provides detailed information to help you get to know Osaka better.",
+      "prefecture": "大阪府",
+      "municipality": "岬町",
+      "url": "https://osaka-info.jp/en/osaka"
+    },
+    {
+      "score": 0.01861,
+      "rank_bm": 46,
+      "rank_vec": 49,
+      "key": "dmo_page:dmo_0005_一財関西観光本部:https://www.the-kansai-guide.com/en/summary/area/kyoto/",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "Kyoto | The KANSAI Guide - The Origin of Japan, KANSAI (（一財）関西観光本部)",
+      "description": "Kyoto Prefecture is located on the north side of Osaka Prefecture, and it is about 140 km long. The original scenery of fishing village from Japan's ancient times is remained even in the present, and the original scenery of rural forest is left in the center part. \"Uji\" is one of the leading Japanese tea producing areas in Japan, and \"Uji tea\" is known as one of Japan's three major teas. Must see: Ine, Miyama, and Uji Guide to Getting from Osaka to Kyoto Fastest and Cheapest Routes from Major Stations Spe
+```
+
+
+=== Case R-319 ===
+Topic / intent: Shojin ryori temple stay religious
+Query: I follow a Buddhist vegetarian diet and want to experience shojin ryori at a proper temple stay. Where in Japan is best?
+Tool: get_hotels({"prefecture": "Wakayama", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "koyasan_shukubo:annyoin",
+      "confidence": "confirmed",
+      "name": "安養院 / あんにょういん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2010",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "当院は高野山の中心に位置し、通りより少し奥まった所にあり街の騒音から逃れ塔の鈴の音を耳にしながら幽厳な聖域な宿坊であります。又奥ノ院、本山、金剛峯寺、伽藍等のご参拝には最も便利な宿坊です。しかも閑静な環境、美しい庭園、清潔な宿坊、気品に支えられた古い伝統と歴史を誇っております。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "annyoin",
+          "url": "https://www.shukubo.net/contents/stay/annyoin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:ichijoin",
+      "confidence": "confirmed",
+      "name": "一乗院 / いちじょういん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2214",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "当院は街の中央に位置し、東の奥の院、西の大伽藍等参詣の要路にあり、高野山観光に大変便利なところにあります。周囲の名刹・古刹散策、精進料理、瞑想、写経等々、これら様々なことがらを体験できます。創建以来約一千年以上もの遙かな昔から、続けられてきた僧坊の営みに触れ、心の安らぎと癒しに満ちたひとときをお過ごしください。\n    本当のごちそうとは何だろう・・・。\n    どんな食材でも簡単に手に入る現在、当院では頑なに旬と生の食材にこだわり続けています。山里ならではの食材を丁寧に調理し、決して奇をてらわず、正統で品格のある精進料理に仕上げております。心に染みる本当のごちそうを召し上がっていただくために。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "ichijoin",
+          "url": "https://www.shukubo.net/contents/stay/ichijoin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:ekoin",
+      "confidence": "confirmed",
+      "name": "惠光院 / えこういん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2514",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "当院はお寺らしい心の安らぐ宿坊を目指しています。場所は奥の院の参道入り口に近く、山門内には広い駐車場があり参詣にも大変便利です。境内の阿字観道場は講習会・学習会にもご利用いただけます。又、希望者には阿字観（座禅）や御写経などの体験修養をご指導いたします。また、ご先祖様の御回向、諸願のお祈祷等も日々勤めておりますので、ご希望の方はお申し付け下さい。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "ekoin",
+          "url": "https://www.shukubo.net/contents/stay/ekoin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:kitamuroin",
+      "confidence": "confirmed",
+      "name": "北室院 /  きたむろいん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2059",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "奥州仙台の伊達候、伊予宇和島の伊達候、播州竜野の脇坂候等、諸大名の帰依厚く特に、伊達政宗候の供養宝物などを多く蔵し政宗候以下各家歴代の位碑を安置している。\n    本尊五大力菩薩は、弘法大師の御真筆と伝えられ、仁王会の本尊として重要文化財に指定されている。仁王会は、古来毎年旧正月１１日一山の法要として、国家安泰五穀豊穣を祈願して当院に於て奉修される。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "kitamuroin",
+          "url": "https://www.shukubo.net/contents/stay/kitamuroin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:kumagaiji",
+      "confidence": "confirmed",
+      "name": "熊谷寺 /   くまがいじ",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2119",
+      "websit
+```
+
+
+=== Case R-320 ===
+Topic / intent: makanan halal Kyoto Nara
+Query: Sebagai pelancong Muslim, saya memerlukan makanan halal bersama keluarga di Kyoto dan Nara. Apa cadangan anda?
+Tool: search_hybrid({"q": "halal Kyoto Nara certified Muslim food", "lang": "ms"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal Kyoto Nara certified Muslim food",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.0378,
+      "rank_bm": null,
+      "rank_vec": 40,
+      "key": "spot:15ddd8ded2692be1",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "<img src=\"https://www.visit-tochigi.com/wp-content/themes/tochigi/frontend/img/top/top_heading.svg\" alt=\"Visit Tochigi\" width=\"534\" height=\"311\" decoding=\"async\" data-eio=\"l\">",
+      "description": "We use cookies on this site to enhance your user experience. If you continue to browse, you accept the use of cookies on our site. See our cookis policy for more information. Mountainous nature and culture with a long history await you. Explore the depths of Japan just a short trip outside of Tokyo. WARNING!! BE AWARE OF BEAR 2025.11.18 Golfing and Sightseeing in Japan 2025.03.20 Wellness Travel to Japanese Onsen (Hot Spring) Resorts 2025.03.20",
+      "prefecture": "栃木県",
+      "municipality": "市貝町",
+      "url": "https://www.visit-tochigi.com/"
+    },
+    {
+      "score": 0.03041,
+      "rank_bm": null,
+      "rank_vec": 41,
+      "key": "spot:532c47d49a352450",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Helpful Tips",
+      "description": "This website stores cookies on your computer. nThis cookie is used by this site and other media to improve the website experience and to provide more personalized services. n For more information about our cookies, please see our Privacy Policy . This site does not track the personal information of visitors.",
+      "prefecture": "広島県",
+      "municipality": "世羅町",
+      "url": "https://dive-hiroshima.com/en/information/top"
+    },
+    {
+      "score": 0.02778,
+      "rank_bm": null,
+      "rank_vec": 24,
+      "key": "spot:1d7ef24211115a14",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Laws and regulations",
+      "description": "This page has been translated using TexTra by NICT. Please note that the translation may not be completely accurate.If you find any mistranslations, we appreciate your feedback on the \"Request form for improving the automatic translation \". Submitted to the Diet: March 7, 2025 Established: May 16, 2025 Submitted to the Diet: December 9, 2024 Established: December 24, 2024 Submitted to the Diet: March 5, 2024 Established: May 31, 2024 Submitted to the Diet: March 7, 2023 Established: June 2, 2023",
+      "prefecture": "沖縄県",
+      "municipality": "座間味村",
+      "url": "https://www.digital.go.jp/en/laws"
+    },
+    {
+      "score": 0.02129,
+      "rank_bm": null,
+      "rank_vec": 36,
+      "key": "spot:8119e75d2056f195",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "The Hiroshima Brand",
+      "description": "List of Certified Specialty Products Culinary Delights Agricultural produceSeafood, etc Processedgoods, etc Seasonings, etc BeveragesAlcohol Sweets Artisan Masterpieces Craftwork, etc Culinary Delights Agricultural produceSeafood, etc Processedgoods, etc Seasonings, etc BeveragesAlcohol Sweets Artisan Masterpieces Craftwork, etc Culinary Delights Agricultural produceSeafood, etc Processedgoods, etc Seasonings, etc BeveragesAlcohol Sweets Artisan Masterpieces Craftwork, etc Topics 2026年4月6日更新 The Hiroshima Brand English Leaflet Is Now Available 2026年1月30日更新 New \"The Hiroshima Brand\"-Certified Products Added in 2026 2025年2月7日更新 Confirmation of New \"The Hiroshima Brand\"-Certified Products in 2025 2024年2月9日更新 Confirmation of New ”The Hiroshima Brand”-Certified Products 2024 2023年11月10日更新 Display of Hiroshima Brand-certified handicrafts at Aufhof in Hanover, Germany 2023年12月20日更新 \"The Hiroshima Brand\"-certified companies and \"17th Hiroshima Good Design Award\"-winning companies featured at the 11th \"Synergies Between Traditon and Modernity\" exhibition held in France 2023年7月10日更新 The Hiroshima Brand Eng
+```
+
+
+=== Case R-321 ===
+Topic / intent: ヴィーガン 仏教 高野山
+Query: ヴィーガンで宗教上の理由から動物性食品を食べられない。高野山の宿坊で精進料理は食べられる？
+Tool: get_hotels({"prefecture": "Wakayama", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "koyasan_shukubo:annyoin",
+      "confidence": "confirmed",
+      "name": "安養院 / あんにょういん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2010",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "当院は高野山の中心に位置し、通りより少し奥まった所にあり街の騒音から逃れ塔の鈴の音を耳にしながら幽厳な聖域な宿坊であります。又奥ノ院、本山、金剛峯寺、伽藍等のご参拝には最も便利な宿坊です。しかも閑静な環境、美しい庭園、清潔な宿坊、気品に支えられた古い伝統と歴史を誇っております。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "annyoin",
+          "url": "https://www.shukubo.net/contents/stay/annyoin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:ichijoin",
+      "confidence": "confirmed",
+      "name": "一乗院 / いちじょういん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2214",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "当院は街の中央に位置し、東の奥の院、西の大伽藍等参詣の要路にあり、高野山観光に大変便利なところにあります。周囲の名刹・古刹散策、精進料理、瞑想、写経等々、これら様々なことがらを体験できます。創建以来約一千年以上もの遙かな昔から、続けられてきた僧坊の営みに触れ、心の安らぎと癒しに満ちたひとときをお過ごしください。\n    本当のごちそうとは何だろう・・・。\n    どんな食材でも簡単に手に入る現在、当院では頑なに旬と生の食材にこだわり続けています。山里ならではの食材を丁寧に調理し、決して奇をてらわず、正統で品格のある精進料理に仕上げております。心に染みる本当のごちそうを召し上がっていただくために。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "ichijoin",
+          "url": "https://www.shukubo.net/contents/stay/ichijoin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:ekoin",
+      "confidence": "confirmed",
+      "name": "惠光院 / えこういん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2514",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "当院はお寺らしい心の安らぐ宿坊を目指しています。場所は奥の院の参道入り口に近く、山門内には広い駐車場があり参詣にも大変便利です。境内の阿字観道場は講習会・学習会にもご利用いただけます。又、希望者には阿字観（座禅）や御写経などの体験修養をご指導いたします。また、ご先祖様の御回向、諸願のお祈祷等も日々勤めておりますので、ご希望の方はお申し付け下さい。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "ekoin",
+          "url": "https://www.shukubo.net/contents/stay/ekoin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:kitamuroin",
+      "confidence": "confirmed",
+      "name": "北室院 /  きたむろいん",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2059",
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "30",
+      "municipality": "高野町",
+      "description_ja": "奥州仙台の伊達候、伊予宇和島の伊達候、播州竜野の脇坂候等、諸大名の帰依厚く特に、伊達政宗候の供養宝物などを多く蔵し政宗候以下各家歴代の位碑を安置している。\n    本尊五大力菩薩は、弘法大師の御真筆と伝えられ、仁王会の本尊として重要文化財に指定されている。仁王会は、古来毎年旧正月１１日一山の法要として、国家安泰五穀豊穣を祈願して当院に於て奉修される。",
+      "authority": "高野山宿坊協会",
+      "designation_jp": "高野山宿坊協会 加盟",
+      "designation_en": "Member of Koyasan Shukubo Association",
+      "sources": [
+        {
+          "source": "koyasan_shukubo",
+          "id": "kitamuroin",
+          "url": "https://www.shukubo.net/contents/stay/kitamuroin.html"
+        }
+      ]
+    },
+    {
+      "id": "koyasan_shukubo:kumagaiji",
+      "confidence": "confirmed",
+      "name": "熊谷寺 /   くまがいじ",
+      "name_en": null,
+      "type": "shukubo",
+      "lodging_type": "shukubo",
+      "coordinates": null,
+      "phone": "0736-56-2119",
+      "websit
+```
+
+
+=== Case R-322 ===
+Topic / intent: مطاعم حلال في ناغويا
+Query: هل توجد مطاعم حلال في مدينة ناغويا؟ أبحث عن خيارات حلال معتمدة للسياح المسلمين.
+Tool: search_hybrid({"q": "halal Nagoya certified restaurant Muslim", "lang": "ar"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "halal Nagoya certified restaurant Muslim",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.40377,
+      "rank_bm": null,
+      "rank_vec": 36,
+      "key": "spot:16c24cfd4482c068",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Savor the Unique Taste of Nagoya",
+      "description": "Japan’s various regions differ in climate, agriculture, traditions, tastes and identity. Osaka is known as Japan's kitchen. Kyoto is the center of refined cuisine, Tokyo boasts the world’s most Michelin stars, and Aichi Prefecture’s capital, Nagoya, is home to some of mainland Japan’s most unique dishes. Nagoya’s cuisine is rich in flavor and generous in its servings without forgetting about presentation. That’s what makes it unique and special! Visually, they may not be overly stimulating, but don’t judge them from their appearance, instead, be surprised by the symphony of flavors and pleasing textures. As tomatoes are an integral part of Mediterranean cuisine, soybeans are a staple ingredient for Japanese cuisine, in particular, when fermented with salt and fresh water to produce a paste called Miso. There are numerous Miso varieties and flavors. Aichi Prefecture is famed for its characteristic dark reddish-brown traditional Hatcho Miso. Rich in flavor, true Hatcho Miso is fermented for two to three years, much longer than the Miso of other regions, where wheat or rice is added to the soybeans to make the Miso paste sweeter and lighter. Hatcho Miso has been produced in Okazaki City (Aichi Prefecture) since the early Edo period. Okazaki City is known as the birthplace of Tokugawa Ieyasu, the first Shogun of the Tokugawa shogunate and the one who unified Japan. Hatcho Miso was a convenient food source for the military troops thanks to its long lasting, highly nutritious qualities and being easy to transport. Development of the Tokaido highway between Edo (Tokyo) and Kyoto in the Edo Period（1603-1868） increased the popularity of Hatcho Miso across the country. Since Okazaki was located along the route, many travelers stopped and enjoyed local Miso soup before continuing on their journey.",
+      "prefecture": "愛知県",
+      "municipality": "豊根村",
+      "url": "https://aichinow.pref.aichi.jp/en/omotenashiaichi/column_detail/6"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "spot:f27587563c853b3f",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "[2026] Fukuoka Prefecture Gourmet & Restaurant Guide for Vegetarians, Vegans, and Muslims",
+      "description": "Fukuoka Prefecture is promoting food diversity under the slogan “One Dish for the World ☺.” This page features restaurants where vegetarians, vegans, and Muslims can fully enjoy Fukuoka's rich culinary landscape. Discover exquisite gourmet delights that are perfect for you in Fukuoka, the kingdom of food! We want to invite vegetarians and vegans to savor uniquely Japanese dishes such as traditional set meals, ramen, and rice bowls. You can also enjoy Fukuoka specialties, such as tonkotsu-style ramen made solely with plant-based ingredients and seasonings, dumplings filled with local vegetables, and baked curry made without the \"five pungent vegetables\" (garlic, onions, leeks, chives, and shallots). You are sure to discover highly satisfying dishes in which the rich umami and distinct flavors of vegetables, mushrooms, grains, and beans shine through. To ensure Muslim visitors can enjoy Fukuoka's food culture to their hearts' content, we have created an environment that enables you to choose your meal with confidence, with each restaurant providing information on the ingredients and seasonings used through multilingual menus and pictograms. Indulge in Fukuoka's gourmet offerings, including Halal-certified motsunabe (an offal-based hot pot), Wagyu steak, ramen that is pork-free and alcohol-
+```
+
+
+=== Case R-323 ===
+Topic / intent: kosher food Japan Tokyo
+Query: Are there any kosher-certified restaurants or food options for Jewish travelers in Tokyo?
+Tool: search_hybrid({"q": "kosher Tokyo Jewish restaurant certified", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "kosher Tokyo Jewish restaurant certified",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.35511,
+      "rank_bm": null,
+      "rank_vec": 44,
+      "key": "spot:2ccd7d21891753f6",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Iwate Tourism Omotenashi Master (Hospitality Experts)",
+      "description": "By using this website, you are deemed to have consented to the setting and use of cookies. For more information, please refer to our Privacy Policy. Translation is done using automatic translation software, so some words may not be accurate. Please understand this in advance. The Iwate Prefecture Tourism Association established the \"Iwate Tourism Omotenashi Meister\" certification system in 2007. This program aims to certify employees, staff, etc. of tourism-related facilities and organizations, with the goal of cultivating personnel capable of welcoming visitors with omotenashi (hospitality). Individuals who are ready to assist guests in Iwate with a spirit of omotenashi and a wealth of knowledge about tourism. They are what we call \"Iwate Tourism Omotenashi Meisters.\" Under this system, certification is granted exclusively to individuals possessing substantial work experience, trust, training, and a proactive mindset. Employees of tourism-related facilities, staff of tourism-related organizations, etc. in Iwate Naoko Takayasu (Naoko Takayasu)",
+      "prefecture": "岩手県",
+      "municipality": "一戸町",
+      "url": "https://iwatetabi.jp/en/meister"
+    },
+    {
+      "score": 0.08917,
+      "rank_bm": 31,
+      "rank_vec": 50,
+      "key": "spot:f27587563c853b3f",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "[2026] Fukuoka Prefecture Gourmet & Restaurant Guide for Vegetarians, Vegans, and Muslims",
+      "description": "Fukuoka Prefecture is promoting food diversity under the slogan “One Dish for the World ☺.” This page features restaurants where vegetarians, vegans, and Muslims can fully enjoy Fukuoka's rich culinary landscape. Discover exquisite gourmet delights that are perfect for you in Fukuoka, the kingdom of food! We want to invite vegetarians and vegans to savor uniquely Japanese dishes such as traditional set meals, ramen, and rice bowls. You can also enjoy Fukuoka specialties, such as tonkotsu-style ramen made solely with plant-based ingredients and seasonings, dumplings filled with local vegetables, and baked curry made without the \"five pungent vegetables\" (garlic, onions, leeks, chives, and shallots). You are sure to discover highly satisfying dishes in which the rich umami and distinct flavors of vegetables, mushrooms, grains, and beans shine through. To ensure Muslim visitors can enjoy Fukuoka's food culture to their hearts' content, we have created an environment that enables you to choose your meal with confidence, with each restaurant providing information on the ingredients and seasonings used through multilingual menus and pictograms. Indulge in Fukuoka's gourmet offerings, including Halal-certified motsunabe (an offal-based hot pot), Wagyu steak, ramen that is pork-free and alcohol-free, mentaiko (seasoned cod roe), and unagi (freshwater eel) rice bowls. The detail page for each restaurant includes basic information such as address, opening hours, and contact details, as well as vegetarian-, vegan-, and Muslim-friendly menus that travelers will want to browse beforehand. You can easily filter a restaurant's dietary options by selecting “Category” during the search process. [Available Menu Information] ・Vegetarian-friendly options available ・Vegan-friendly options available ・Pork-free options available (No pork or pork-derived ingredients) ・Alcohol-free options available ・Halal-certified meat available ・Gluten-free options available ・Menu items without the \"five pungent vegetables\" (onions, garlic, leeks, chives, pickled garlic, etc.)
+```
+
+
+=== Case R-324 ===
+Topic / intent: tempat ibadah Islam Hiroshima
+Query: Apakah ada masjid atau tempat shalat bagi wisatawan Muslim di Hiroshima atau sekitarnya?
+Tool: search_hybrid({"q": "mosque prayer room Hiroshima Muslim", "lang": "id"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "mosque prayer room Hiroshima Muslim",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.02584,
+      "rank_bm": 43,
+      "rank_vec": 2,
+      "key": "wd:Q11414850",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "名古屋モスク",
+      "description": "mosque in Japan",
+      "prefecture": "愛知県",
+      "municipality": "愛知県",
+      "url": "https://www.wikidata.org/wiki/Q11414850"
+    },
+    {
+      "score": 0.02558,
+      "rank_bm": 32,
+      "rank_vec": 8,
+      "key": "wd:Q26964771",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "The Japan Mosque",
+      "description": "mosque in Japan",
+      "prefecture": "愛知県",
+      "municipality": "愛知県",
+      "url": "https://www.wikidata.org/wiki/Q26964771"
+    },
+    {
+      "score": 0.02185,
+      "rank_bm": 42,
+      "rank_vec": 23,
+      "key": "wd:Q1334137",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "神戸モスク",
+      "description": "mosque in Japan",
+      "prefecture": "兵庫県",
+      "municipality": "兵庫県",
+      "url": "https://www.wikidata.org/wiki/Q1334137"
+    },
+    {
+      "score": 0.02053,
+      "rank_bm": 40,
+      "rank_vec": 35,
+      "key": "wd:Q20410089",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "行徳モスク",
+      "description": "mosque in Japan",
+      "prefecture": "千葉県",
+      "municipality": "千葉県",
+      "url": "https://www.wikidata.org/wiki/Q20410089"
+    },
+    {
+      "score": 0.02028,
+      "rank_bm": 45,
+      "rank_vec": 33,
+      "key": "wd:Q85773424",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "蒲田モスク",
+      "description": "mosque in Ōta, Tokyo, Japan",
+      "prefecture": "東京都",
+      "municipality": "大田区",
+      "url": "https://www.wikidata.org/wiki/Q85773424"
+    },
+    {
+      "score": 0.0197,
+      "rank_bm": 41,
+      "rank_vec": 42,
+      "key": "wd:Q5507696",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "福岡モスク",
+      "description": "mosque in Japan",
+      "prefecture": "福岡県",
+      "municipality": "福岡市",
+      "url": "https://www.wikidata.org/wiki/Q5507696"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": 1,
+      "rank_vec": null,
+      "key": "spot:860c2d19467c3170",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Overview of Service",
+      "description": "Supporting travelers in the event of sudden illness, disasters, or other travel problems! Available exclusively to JR-West product users Describe injury/illness in Japanese Show nearest evacuation site on area map. Describe dietary restriction(s) in JapaneseShow prayer room information Show multilingual call centers and medical referral contacts",
+      "prefecture": "兵庫県",
+      "municipality": "加古川市",
+      "url": "https://www.westjr.co.jp/global/en/travel_support"
+    },
+    {
+      "score": 0.01639,
+      "rank_bm": null,
+      "rank_vec": 1,
+      "key": "wd:Q4425941",
+      "kind": "wikidata",
+      "source": "wikidata_attractions",
+      "name": "世界平和記念聖堂",
+      "description": "church in Hiroshima, Japan",
+      "prefecture": "広島県",
+      "municipality": "広島県",
+      "url": "https://www.wikidata.org/wiki/Q4425941"
+    },
+    {
+      "score": 0.01613,
+      "rank_bm": 2,
+      "rank_vec": null,
+      "key": "spot:e911e71659c23c87",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "Introducing restaurants in Hiroshima that vegetarians, vegans, Muslims, and everyone in between can enjoy!",
+      "description": "Among the tourists visiting Hiroshima, there are many vegetarians, vegans, and Muslims, mainly from India, Taiwan, and Europe. Additionally, in recent years, the number of restaurants and accommodations that can accommodate dietary requests such as vegetarian, vegan, and Muslim menus has been gradually increasing. On the o
+```
+
+
+=== Case R-325 ===
+Topic / intent: 雨の日 屋内 東北
+Query: 東北で台風が来たとき、宮城県内で屋内で楽しめるスポットを教えて。
+Tool: get_spots({"prefecture": "Miyagi", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1037902",
+      "name": "白石城",
+      "name_en": "Shiroishi Castle",
+      "name_zh": "白石城",
+      "name_ko": "시로이시성",
+      "description_en": "building in Shiroishi, Miyagi Prefecture, Japan",
+      "coordinates": {
+        "lat": 38.002589,
+        "lng": 140.617128
+      },
+      "url": "https://www.wikidata.org/wiki/Q1037902",
+      "municipality": "白石市",
+      "municipality_code": "042064",
+      "prefecture": "宮城県",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle",
+        "zoku_nihon_100_meijo",
+        "walking_road_500",
+        "rekishi_park_100"
+      ],
+      "prominence_score": 1.05,
+      "opening_hours": "Mo-Su 09:00-16:00",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q123010988"
+      ],
+      "heritage_designations_labels": [
+        "Municipality-designated Historic Site"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1144855",
+      "name": "松島",
+      "name_en": "Matsushima",
+      "name_zh": "松島",
+      "name_ko": "마쓰시마섬",
+      "description_en": "Matsushima (松島) is a group of islands in Miyagi Prefecture, Japan.  There are some 260 tiny islands (shima) covered in pines (matsu) – hence the name – and it is considered to be one of the Three Views of Japan.",
+      "coordinates": {
+        "lat": 38.355555555,
+        "lng": 141.076388888
+      },
+      "url": "https://www.wikidata.org/wiki/Q1144855",
+      "municipality": "宮城県",
+      "municipality_code": "040002",
+      "prefecture": "宮城県",
+      "quality_score": 0.65,
+      "kinds": [
+        "nihon_sankei",
+        "nihon_sanmeien",
+        "walking_road_500",
+        "shin_ryoko_100",
+        "hakusha_seishou_100",
+        "chishitsu_100",
+        "shin_kanko_100"
+      ],
+      "prominence_score": 1.15,
+      "website": "https://www.matsushima-kanko.com/",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q94987823",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Special Place of Scenic Beauty",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q167951",
+      "name": "蔵王連峰",
+      "name_en": "Mount Zaō",
+      "name_zh": "藏王連峰",
+      "name_ko": "자오 산맥",
+      "description_en": "mountain in Miyagi Prefecture, Japan",
+      "coordinates": {
+        "lat": 38.141,
+        "lng": 140.443
+      },
+      "url": "https://www.wikidata.org/wiki/Q167951",
+      "municipality": "宮城県",
+      "municipality_code": "040002",
+      "prefecture": "宮城県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain_range",
+        "mountain",
+        "active_volcano",
+        "volcano",
+        "walking_road_500",
+        "shin_ryoko_100",
+        "chishitsu_100",
+        "shin_kanko_100",
+        "shin_nihon_100_meizan"
+      ],
+      "prominence_score": 1.05,
+      "typical_visit_minutes": 240,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q598621",
+      "name": "仙台城",
+      "name_en": "Sendai Castle",
+      "name_zh": "仙台城",
+      "name_ko": "센다이성",
+      "description_en": "castle in Sendai city, Miyagi prefecture, Japan",
+      "coordinates": {
+        "lat": 38.252478,
+        "lng": 140.856156
+      },
+      "url": "https://www.wikidata.org/wiki/Q598621",
+      "municipality": "青葉区",
+      "municipality_code": "041017",
+      "prefecture": "宮城県",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle",
+        "nihon_100_meijo",
+        "rekishi_park_100"
+      ],
+      "prominence_score": 1,
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "defaults_source": "kinds_default",
+
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.
