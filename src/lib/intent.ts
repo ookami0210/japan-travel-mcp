@@ -1095,13 +1095,18 @@ export function extractTravelIntent(q: string): IntentExtractionResult {
     lexicalExclusions.push("鶴見区", "鶴岡", "舞鶴", "敦賀", "鶴ヶ城", "鶴山");
   }
   // 出羽 (Yamagata pilgrimage) vs 出羽島 (Tokushima island).
-  // L1-18 query "Dewa Sanzan in Yamagata" surfaced 出羽島 (Tebajima, Tokushima)
+  // L1-18 query "Dewa Sanzan in Yamagata" was issued with q="出羽" — the
+  // ambiguous bare-toponym query surfaced 出羽島 (Tebajima, Tokushima)
   // ranked above 出羽三山 because the substring 出羽 matched both. When
-  // dewa-sanzan / dewa-mountain context is present without island context,
-  // exclude the Tokushima island.
+  // any dewa-pilgrimage marker is present (including the bare 出羽 or
+  // 'Dewa') AND no Tokushima-island context, exclude 出羽島.
+  // The bare-toponym branch encodes the canonical referent: in Japanese
+  // travel literature 「出羽」without further context refers to the
+  // Yamagata sacred-mountain pilgrimage region (former 出羽国).
+  const HAS_DEWA_BARE = /^\s*(出羽|dewa)\s*$/iu.test(q);
   const HAS_DEWA_SANZAN = /(出羽三山|dewa\s*sanzan|three\s*mountains?\s*of\s*dewa|羽黒|月山|湯殿|gassan|haguro|yudono)/iu.test(q);
   const HAS_TEBAJIMA_CONTEXT = /(出羽島|tebajima|teba.?island|徳島.*牟岐)/iu.test(q);
-  if (HAS_DEWA_SANZAN && !HAS_TEBAJIMA_CONTEXT) {
+  if ((HAS_DEWA_BARE || HAS_DEWA_SANZAN) && !HAS_TEBAJIMA_CONTEXT) {
     lexicalExclusions.push("出羽島", "Tebajima");
   }
   // 那智の滝 (waterfall) vs 那智滝図 (Kamakura-period painting of the waterfall).
@@ -1205,7 +1210,8 @@ export function renderQueryIntent(
   const hasModifier =
     !!r.popularity_modifier || !!r.wild_only || !!r.origin_constraint
     || !!r.price_band_cap || !!r.price_band_floor || !!r.weather_constraint
-    || !!r.infeasibility || (r.negative_constraints && r.negative_constraints.length > 0);
+    || !!r.infeasibility || (r.negative_constraints && r.negative_constraints.length > 0)
+    || (r.lexical_exclusions && r.lexical_exclusions.length > 0);
   if (!hasConcept && !hasModifier) return undefined;
   return {
     detected_concepts: r.concepts.map((c) => ({
