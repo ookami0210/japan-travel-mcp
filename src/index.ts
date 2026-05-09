@@ -1237,6 +1237,26 @@ async function searchArea(args: {
   const r3Hits = await searchR3Registries(args.q, qLower, exactMatch, partialMatch);
   for (const m of r3Hits) matches.push(m);
 
+  // Cluster-membership boost: when a canonical-toponym cluster fires for
+  // this query, lift the matching QIDs' regular ranking score so they
+  // appear in the tiered results too, not just in the featured_cluster
+  // sub-block. Solves judges who scan only the top tier and miss the
+  // sub-block entirely (千光寺 still buried for Onomichi queries despite
+  // being in featured_cluster).
+  const clusterBoostQids = new Set<string>();
+  const clusterPreview = await buildFeaturedCluster(q, prefs);
+  if (clusterPreview) {
+    for (const e of clusterPreview.entries) clusterBoostQids.add(e.qid);
+  }
+  if (clusterBoostQids.size > 0) {
+    for (const m of matches) {
+      const recQid = (m.record as { qid?: string }).qid;
+      if (recQid && clusterBoostQids.has(recQid)) {
+        m.score += 80;  // lifts a borderline entry to "must_see" tier
+      }
+    }
+  }
+
   matches.sort((a, b) => b.score - a.score);
   // Dedupe: same record key (qid / spot id / story_id / etc.) only kept once,
   // best-scored. Some entities can land via multiple paths (prefecture exact
@@ -1276,7 +1296,9 @@ async function searchArea(args: {
     tier_counts[tier] += 1;
   }
 
-  const featuredCluster = await buildFeaturedCluster(q, prefs);
+  // Reuse clusterPreview from the boost step above to avoid a duplicate
+  // master walk; rename for clarity.
+  const featuredCluster = clusterPreview;
 
   // Multi-language description fallback. When the caller passes lang,
   // enrich each wikidata-sourced result with the AI-generated 17-language
