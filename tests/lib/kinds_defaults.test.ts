@@ -224,6 +224,33 @@ describe("passesPriceBandCap", () => {
   });
 });
 
+describe("themed kinds (2026-05-09 multi-judge follow-up)", () => {
+  it("lavender_field has outdoor + low price defaults", () => {
+    const r = enrichKindsDefaults(["lavender_field"]);
+    expect(r.indoor_capable).toBe("outdoor");
+    expect(r.price_band).toBe("low");
+    expect(r.typical_visit_minutes).toBe(90);
+  });
+  it("kabuki_theater is indoor + high price", () => {
+    const r = enrichKindsDefaults(["kabuki_theater"]);
+    expect(r.indoor_capable).toBe("indoor");
+    expect(r.price_band).toBe("high");
+  });
+  it("dark_sky is outdoor + free", () => {
+    const r = enrichKindsDefaults(["dark_sky"]);
+    expect(r.indoor_capable).toBe("outdoor");
+    expect(r.price_band).toBe("free");
+  });
+  it("pilgrimage_route minutes saturate at 480 (multi-day)", () => {
+    expect(enrichKindsDefaults(["pilgrimage_route"]).typical_visit_minutes).toBe(480);
+  });
+  it("chashitsu / tea_ceremony land at indoor + mid", () => {
+    expect(enrichKindsDefaults(["chashitsu"]).indoor_capable).toBe("indoor");
+    expect(enrichKindsDefaults(["tea_ceremony"]).indoor_capable).toBe("mixed");
+    expect(enrichKindsDefaults(["chashitsu"]).price_band).toBe("mid");
+  });
+});
+
 describe("passesIndoorFilter", () => {
   it("want=indoor accepts indoor + mixed", () => {
     expect(passesIndoorFilter("indoor", "indoor")).toBe(true);
