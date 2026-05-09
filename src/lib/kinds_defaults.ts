@@ -108,6 +108,9 @@ const KIND_MINUTES: Record<string, number> = {
   cycling_route: 240,
   fermented_food_site: 45,
   anime_pilgrimage: 30,
+  farm_experience: 180,
+  agritourism: 180,
+  wildlife_observation: 120,
 };
 
 // Price bands by kind. Most temples/shrines are free, but famous ones
@@ -180,6 +183,9 @@ const KIND_PRICE: Record<string, KindsDefaultEnrichment["price_band"]> = {
   cycling_route: "free",
   fermented_food_site: "low",
   anime_pilgrimage: "free",
+  farm_experience: "low",
+  agritourism: "low",
+  wildlife_observation: "free",
 };
 
 // Suitable-for tags. "all" is shorthand for ["family", "couple", "solo", "group"].
@@ -237,6 +243,9 @@ const KIND_SUITABLE: Record<string, string[]> = {
   cycling_route: ["solo", "couple", "group"],
   fermented_food_site: ["couple", "solo", "group"],
   anime_pilgrimage: ["solo", "couple"],
+  farm_experience: ["family", "couple", "group"],
+  agritourism: ["family", "couple", "group"],
+  wildlife_observation: ["family", "couple", "solo", "group"],
 };
 
 const ALL_PARTY = ["family", "couple", "solo", "group"];
@@ -362,6 +371,9 @@ const KIND_INDOOR: Record<string, "indoor" | "outdoor" | "mixed"> = {
   cycling_route: "outdoor",
   fermented_food_site: "indoor",
   anime_pilgrimage: "mixed",
+  farm_experience: "outdoor",
+  agritourism: "outdoor",
+  wildlife_observation: "outdoor",
 };
 
 /**
