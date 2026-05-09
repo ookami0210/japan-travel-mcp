@@ -703,6 +703,19 @@ export interface IntentExtractionResult {
    * results by origin.
    */
   origin_constraint?: OriginConstraint;
+  /**
+   * Budget cap detected in the query. When present, tool callers should
+   * filter / demote records whose price_band exceeds the cap. Free / cheap
+   * cues map to "low"; "luxury" cues map to "luxury" with a separate floor.
+   */
+  price_band_cap?: "free" | "low" | "mid" | "high" | "luxury";
+  /** Reverse — user explicitly asked for high-end / luxury experiences. */
+  price_band_floor?: "high" | "luxury";
+  /**
+   * Weather adaptability hint — when the query implies indoor activities
+   * (rainy day, heatstroke avoidance, "things to do when it rains").
+   */
+  weather_constraint?: "indoor" | "outdoor";
 }
 
 // Concepts that imply demote-popular ranking (anaba family).
@@ -742,6 +755,39 @@ const ORIGIN_STOP_TOKENS = new Set([
   "そこ", "ここ", "あそこ", "今", "昔", "後ろ", "向こう", "近所", "遠く",
   "頂上", "麓", "海側", "山側", "川", "海", "山", "空", "中心",
 ]);
+
+// ──────────────────────────────────────────────────────────────────────
+// Budget / weather constraint detectors
+//
+// These run alongside the travel-concept dictionary; they surface the
+// explicit price_band cap or indoor/outdoor preference so the tool layer
+// can filter records mechanically (the dictionary's polarity boost would
+// be too coarse — a budget cue should *exclude* luxury results, not just
+// down-rank them).
+
+const BUDGET_FREE_RE = /(無料(で|の)?|入場無料|free\s*(entry|admission)|no\s*(entrance|admission)\s*fee)/iu;
+const BUDGET_CHEAP_RE = /(\bcheap\b|\bbudget\b|\baffordable\b|\binexpensive\b|安い|格安|お(?:財布|金).*に(?:優しい|やさしい)|低予算|節約|リーズナブル|お手頃)/iu;
+const BUDGET_LUXURY_RE = /(luxur(y|ious)|high[-\s]?end|premium|upscale|opulent|高級|ラグジュアリー|高(?:価|級)?ホテル|贅沢|プレミアム|セレブ|超一流|高(?:価格)?帯)/iu;
+
+const WEATHER_INDOOR_RE = /(rainy\s*day|when\s*it\s*rains|wet\s*weather|indoor(s)?(\s*activities?)?|under\s*(a\s*)?roof|escape\s*the\s*rain|雨(の日|でも|が降っ?た)|室内|屋内|インドア|雨天(時)?(?!.{0,8}中止)|梅雨|ゲリラ豪雨)/iu;
+const WEATHER_OUTDOOR_RE = /(outdoor(s)?|outside|fresh\s*air|in\s*the\s*open|アウトドア|屋外|野外)/iu;
+
+function detectBudgetCap(q: string): IntentExtractionResult["price_band_cap"] | undefined {
+  if (BUDGET_FREE_RE.test(q)) return "free";
+  if (BUDGET_CHEAP_RE.test(q)) return "low";
+  return undefined;
+}
+
+function detectBudgetFloor(q: string): IntentExtractionResult["price_band_floor"] | undefined {
+  if (BUDGET_LUXURY_RE.test(q)) return "luxury";
+  return undefined;
+}
+
+function detectWeather(q: string): IntentExtractionResult["weather_constraint"] | undefined {
+  if (WEATHER_INDOOR_RE.test(q)) return "indoor";
+  if (WEATHER_OUTDOOR_RE.test(q)) return "outdoor";
+  return undefined;
+}
 
 function detectOrigin(q: string): OriginConstraint | undefined {
   for (const re of ORIGIN_RE_LIST) {
@@ -814,6 +860,9 @@ export function extractTravelIntent(q: string): IntentExtractionResult {
   }
 
   origin_constraint = detectOrigin(q);
+  const price_band_cap = detectBudgetCap(q);
+  const price_band_floor = detectBudgetFloor(q);
+  const weather_constraint = detectWeather(q);
 
   return {
     concepts,
@@ -824,6 +873,9 @@ export function extractTravelIntent(q: string): IntentExtractionResult {
     ...(popularity_modifier ? { popularity_modifier } : {}),
     ...(wild_only ? { wild_only } : {}),
     ...(origin_constraint ? { origin_constraint } : {}),
+    ...(price_band_cap ? { price_band_cap } : {}),
+    ...(price_band_floor ? { price_band_floor } : {}),
+    ...(weather_constraint ? { weather_constraint } : {}),
   };
 }
 
@@ -892,7 +944,8 @@ export function renderQueryIntent(
 ): Record<string, unknown> | undefined {
   const hasConcept = r.concepts.length > 0;
   const hasModifier =
-    !!r.popularity_modifier || !!r.wild_only || !!r.origin_constraint;
+    !!r.popularity_modifier || !!r.wild_only || !!r.origin_constraint
+    || !!r.price_band_cap || !!r.price_band_floor || !!r.weather_constraint;
   if (!hasConcept && !hasModifier) return undefined;
   return {
     detected_concepts: r.concepts.map((c) => ({
@@ -914,5 +967,8 @@ export function renderQueryIntent(
       : {}),
     ...(r.wild_only ? { wild_only: true } : {}),
     ...(r.origin_constraint ? { origin_constraint: r.origin_constraint } : {}),
+    ...(r.price_band_cap ? { price_band_cap: r.price_band_cap } : {}),
+    ...(r.price_band_floor ? { price_band_floor: r.price_band_floor } : {}),
+    ...(r.weather_constraint ? { weather_constraint: r.weather_constraint } : {}),
   };
 }

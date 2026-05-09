@@ -203,6 +203,58 @@ describe("renderQueryIntent", () => {
   });
 });
 
+describe("extractTravelIntent — budget cap detection", () => {
+  it("detects '無料' as free cap", () => {
+    expect(extractTravelIntent("無料で楽しめる京都の観光").price_band_cap).toBe("free");
+  });
+  it("detects 'free admission' as free cap", () => {
+    expect(extractTravelIntent("things in Tokyo with free admission").price_band_cap).toBe("free");
+  });
+  it("detects '安い' as low cap", () => {
+    expect(extractTravelIntent("安い宿で大阪を旅行").price_band_cap).toBe("low");
+  });
+  it("detects 'budget' as low cap", () => {
+    expect(extractTravelIntent("budget friendly things to do in Osaka").price_band_cap).toBe("low");
+  });
+  it("detects 'リーズナブル' as low cap", () => {
+    expect(extractTravelIntent("リーズナブルに楽しめる").price_band_cap).toBe("low");
+  });
+  it("detects '高級' as luxury floor", () => {
+    expect(extractTravelIntent("高級ホテルに泊まりたい").price_band_floor).toBe("luxury");
+  });
+  it("detects 'luxury' as luxury floor", () => {
+    expect(extractTravelIntent("luxury onsen ryokan").price_band_floor).toBe("luxury");
+  });
+  it("plain query has no budget signal", () => {
+    const r = extractTravelIntent("京都の寺");
+    expect(r.price_band_cap).toBeUndefined();
+    expect(r.price_band_floor).toBeUndefined();
+  });
+});
+
+describe("extractTravelIntent — weather constraint detection", () => {
+  it("detects 'rainy day' as indoor", () => {
+    expect(extractTravelIntent("things to do on a rainy day in Kyoto").weather_constraint).toBe("indoor");
+  });
+  it("detects '雨の日' as indoor", () => {
+    expect(extractTravelIntent("雨の日に楽しめる東京").weather_constraint).toBe("indoor");
+  });
+  it("detects '室内' as indoor", () => {
+    expect(extractTravelIntent("室内で楽しめるアクティビティ").weather_constraint).toBe("indoor");
+  });
+  it("detects 'outdoors' as outdoor", () => {
+    expect(extractTravelIntent("outdoors activities in Hokkaido").weather_constraint).toBe("outdoor");
+  });
+  it("plain query has no weather signal", () => {
+    expect(extractTravelIntent("京都の寺").weather_constraint).toBeUndefined();
+  });
+  it("does not falsely fire on '雨天中止' policy text", () => {
+    // 雨天中止 = "cancelled in rain" — event policy, not a "rainy day
+    // filter" query. The regex's negative lookahead excludes this.
+    expect(extractTravelIntent("雨天中止のイベント").weather_constraint).toBeUndefined();
+  });
+});
+
 describe("TRAVEL_CONCEPTS — invariants", () => {
   it("ids are unique", () => {
     const ids = TRAVEL_CONCEPTS.map((c) => c.id);
