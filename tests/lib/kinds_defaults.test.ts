@@ -3,6 +3,7 @@ import {
   enrichKindsDefaults,
   passesPriceBandCap,
   passesIndoorFilter,
+  deriveCrowdBand,
 } from "../../src/lib/kinds_defaults.js";
 
 describe("enrichKindsDefaults — empty input", () => {
@@ -265,5 +266,31 @@ describe("passesIndoorFilter", () => {
   it("null record fails both", () => {
     expect(passesIndoorFilter(null, "indoor")).toBe(false);
     expect(passesIndoorFilter(null, "outdoor")).toBe(false);
+  });
+});
+
+describe("deriveCrowdBand", () => {
+  it("4-language + 2 heritage = high (Himeji/Itsukushima class)", () => {
+    expect(deriveCrowdBand(4, 2, 1)).toBe("high");
+    expect(deriveCrowdBand(4, 3, 0)).toBe("high");
+  });
+  it("3-language only → medium", () => {
+    expect(deriveCrowdBand(3, 0, 0)).toBe("medium");
+  });
+  it("1 heritage designation → medium", () => {
+    expect(deriveCrowdBand(1, 1, 0)).toBe("medium");
+  });
+  it("3+ wikipedia kind tags → medium", () => {
+    expect(deriveCrowdBand(1, 0, 3)).toBe("medium");
+  });
+  it("1-2 lang only, no heritage, ≤2 tags → low", () => {
+    expect(deriveCrowdBand(1, 0, 0)).toBe("low");
+    expect(deriveCrowdBand(2, 0, 2)).toBe("low");
+  });
+  it("zero signals → unknown", () => {
+    expect(deriveCrowdBand(0, 0, 0)).toBe("unknown");
+  });
+  it("4-language + 1 heritage → medium (not yet 'high')", () => {
+    expect(deriveCrowdBand(4, 1, 0)).toBe("medium");
   });
 });

@@ -489,3 +489,39 @@ export function passesIndoorFilter(
   if (want === "indoor") return recordIndoor === "indoor" || recordIndoor === "mixed";
   return recordIndoor === "outdoor" || recordIndoor === "mixed";
 }
+
+/**
+ * Crowd-band derivation. Bands the entity by tourism prominence using
+ * deterministic public-knowledge signals — multilingual Wikipedia
+ * coverage (a 4-language entity is internationally famous; a 1-language
+ * entity is local-interest), heritage-designation count (UNESCO + 国宝 +
+ * 名勝 stack on must-see entries), and Wikipedia kind-tag richness
+ * (specialty entries with multiple curated kind tags are well-documented).
+ *
+ *   high    = 4-language ja+en+zh+ko AND ≥2 heritage designations (UNESCO
+ *             World Heritage / 国宝 etc) — Himeji Castle / Itsukushima class
+ *   medium  = 3-language OR ≥1 heritage designation OR ≥3 wikipedia kind tags
+ *             — major regional landmark
+ *   low     = 1-2 language only AND no heritage AND ≤2 wikipedia kind tags
+ *             — local-interest entity
+ *   unknown = entity has no multilingual / heritage / kind-tag signals at
+ *             all (typical of BUNKA-only inserts without Wikidata QID)
+ *
+ * Used by 「穴場 / lesser-known / hidden / non-touristy」 query handling
+ * — the demote_popular intent inverts the ranking when query implies
+ * obscurity, and the agent can also filter by band explicitly.
+ */
+export type CrowdBand = "high" | "medium" | "low" | "unknown";
+
+export function deriveCrowdBand(
+  langCount: number,
+  heritageCount: number,
+  wikipediaKindTagsCount: number,
+): CrowdBand {
+  if (langCount >= 4 && heritageCount >= 2) return "high";
+  if (langCount >= 3) return "medium";
+  if (heritageCount >= 1) return "medium";
+  if (wikipediaKindTagsCount >= 3) return "medium";
+  if (langCount === 0 && heritageCount === 0 && wikipediaKindTagsCount === 0) return "unknown";
+  return "low";
+}
