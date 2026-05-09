@@ -1,0 +1,2692 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+# CRITICAL RULES (read before scoring — these eliminate inter-judge variance)
+
+**RULE A — score the response, not the tool choice.**
+The agent decided the tool + args; the response is what the server returned. If the wrong tool was called (e.g. get_japan_heritage for a tea-ceremony query), you may note it in `improvement_hint`, but the dim scores must reflect the actual data returned, not what would have come from a different tool. A wrong-tool response with authoritative data is still partly useful — score 3, not 2.
+
+**RULE B — single root cause, single dim hit.**
+If one shortfall affects multiple dims (e.g. "wrong tool" → could affect intent / specificity / constraint), pick the ONE worst-affected dim and score that strictly; the other affected dims drop by AT MOST 1 from their otherwise-deserved score. Do NOT compound the same defect across 3-4 dims — that produces unstable inter-judge medians.
+
+**RULE C — authoritative-source-but-incomplete = 3, not 2.**
+If the response returns real, authoritative data (R-3 designations, Wikidata heritage entities, MAFF GI records, official scrapes) but the scope or filtering is incomplete (e.g. only Akita instead of all-Tohoku, or only food when craft was also requested), the affected dims are **3 (acceptable but weak)**, not 2. Score 2 only when the data is actively misleading or the relevant entity class is entirely absent.
+
+**RULE D — language mismatch is constraint failure, not hallucination.**
+If the user query is in fr / de / ko / vi / etc but the response is in en / ja, score `constraint_handling` -1 from its otherwise-deserved value. Do NOT also drop intent / specificity / expression on the same grounds — that is double-counting per Rule B.
+
+**RULE E — featured_cluster present and relevant = boost intent / specificity by 1.**
+If the response includes a `featured_cluster` block whose entries match the query toponym, the cluster delivers canonical sub-spots regardless of ranking. Add +1 to intent and specificity (capped at 5), unless the cluster items are wrong/stale.
+
+# DIMENSION SCALE (fixed anchors — do not deviate)
+
+For every numeric dimension below, use:
+  **5** = exact match for the dim's question, no caveats needed
+  **4** = match with ONE notable caveat (mention it in reasoning)
+  **3** = partial match — authoritative data with scope/filter gap (RULE C)
+  **2** = wrong scope OR major gap OR misleading
+  **1** = wrong tool, no useful data, or off-topic
+  **0** = empty / error response
+
+# DIMENSIONS
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent? (Apply RULE E if cluster fired.)
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility / language per RULE D)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic? (Apply RULE E if cluster fired.)
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ALL numeric dims are ≥4. Otherwise pick the SINGLE worst per RULE B:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints (incl. language per RULE D)
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+# OUTPUT FORMAT
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification, citing which RULE (A-E) applied if any
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case R-026 ===
+Topic / intent: 青の洞窟 沖縄
+Query: I want to go snorkeling in the Blue Cave in Okinawa.
+Tool: get_spots({"prefecture": "Okinawa", "q": "青の洞窟", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11661070",
+      "name": "青の洞窟",
+      "name_en": "Blue Cave",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 26.4425,
+        "lng": 127.77333333
+      },
+      "url": "https://www.wikidata.org/wiki/Q11661070",
+      "municipality": "恩納村",
+      "municipality_code": "473111",
+      "prefecture": "沖縄県",
+      "quality_score": 0.65,
+      "kinds": [
+        "cave"
+      ],
+      "q_relevance": 100,
+      "prominence_score": 0.65,
+      "crowd_band": "low",
+      "typical_visit_minutes": 45,
+      "price_band": "low",
+      "suitable_for": [
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    }
+  ],
+  "spot_tier_counts": {
+    "must_see": 1,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 1,
+  "total_before_limit": 1,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-027 ===
+Topic / intent: 高千穂峡
+Query: 高千穂峡の見どころについて教えて
+Tool: get_spots({"prefecture": "Miyazaki", "city": "高千穂", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q2027215",
+      "name": "高千穂峡",
+      "name_en": "Takachihokyo",
+      "name_zh": "高千穂峡",
+      "name_ko": "다카치호 협곡",
+      "description_en": null,
+      "coordinates": {
+        "lat": 32.700833,
+        "lng": 131.300556
+      },
+      "url": "https://www.wikidata.org/wiki/Q2027215",
+      "municipality": "高千穂町",
+      "municipality_code": "454419",
+      "prefecture": "宮崎県",
+      "quality_score": 0.65,
+      "kinds": [
+        "valley",
+        "walking_road_500",
+        "shin_kanko_100"
+      ],
+      "prominence_score": 1.05,
+      "crowd_band": "high",
+      "typical_visit_minutes": 90,
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q122904442",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ef3c2a4a4336f240",
+      "name": "高千穂峡 貸しボート",
+      "description": "宮崎県 高千穂の観光スポット、宿、ホテル、イベントなど旅行に便利な情報が満載です。ガイドブック、路線図、施設案内のダウンロードも是非ご利用ください。",
+      "coordinates": {
+        "lat": 32.715862,
+        "lng": 131.320145
+      },
+      "address": "〒882-1101 宮崎県西臼杵郡高千穂町大字三田井809-1",
+      "url": "https://takachiho-kanko.info/boat/detail.php",
+      "municipality": "高千穂町",
+      "municipality_code": "454419",
+      "prefecture": "宮崎県",
+      "language": "ja",
+      "quality_score": 0.76,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "bddec1ff06bca4e5",
+      "name": "高千穂神楽のご案内",
+      "description": "宮崎県 高千穂の観光スポット、宿、ホテル、イベントなど旅行に便利な情報が満載です。ガイドブック、路線図、施設案内のダウンロードも是非ご利用ください。",
+      "coordinates": {
+        "lat": 32.715862,
+        "lng": 131.320145
+      },
+      "address": "〒882-1101 宮崎県西臼杵郡高千穂町大字三田井809-1",
+      "url": "https://takachiho-kanko.info/kagura/information",
+      "municipality": "高千穂町",
+      "municipality_code": "454419",
+      "prefecture": "宮崎県",
+      "language": "ja",
+      "quality_score": 0.76,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "68b3daecf46ede21",
+      "name": "高千穂の魅力",
+      "description": "宮崎県 高千穂の観光スポット、宿、ホテル、イベントなど旅行に便利な情報が満載です。ガイドブック、路線図、施設案内のダウンロードも是非ご利用ください。",
+      "coordinates": {
+        "lat": 32.715862,
+        "lng": 131.320145
+      },
+      "address": "〒882-1101 宮崎県西臼杵郡高千穂町大字三田井809-1",
+      "url": "https://takachiho-kanko.info/highlights",
+      "municipality": "高千穂町",
+      "municipality_code": "454419",
+      "prefecture": "宮崎県",
+      "language": "ja",
+      "quality_score": 0.76,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "1c6f3a8086261dd2",
+      "name": "高千穂峡 貸しボート",
+      "description": "宮崎県 高千穂の観光スポット、宿、ホテル、イベントなど旅行に便利な情報が満載です。ガイドブック、路線図、施設案内のダウンロードも是非ご利用ください。",
+      "coordinates": {
+        "lat": 32.715862,
+        "lng": 131.320145
+      },
+      "address": "〒882-1101 宮崎県西臼杵郡高千穂町大字三田井809-1",
+      "url": "https://takachiho-kanko.info/boat",
+      "municipality": "高千穂町",
+      "municipality_code": "454419",
+      "prefecture": "宮崎県",
+      "language": "ja",
+      "quality_score": 0.76,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "e94b08e8dd370dd4",
+      "name": "高千穂の神話",
+      "description": "宮崎県 高千穂の観光スポット、宿、ホテル、イベントなど旅行に便利な情報が満載です。ガイドブック、路線図、施設案内のダウンロードも是非ご利用ください。",
+      "coordinates": {
+        "lat": 32.715862,
+        "lng": 131.320145
+      },
+      "address": "〒882-1101 宮崎県西臼杵郡高千穂町大字三田井809-1",
+      "url": "https://takachiho-kanko.info/shinwa",
+      "municipality": "高千穂町",
+      "municipality_code": "454419",
+      "prefecture": "宮崎県",
+      "language": "ja",
+      "quality_score": 0.76,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q3514126",
+      "name": "高千穂神社",
+      "name_en": "Takachiho Shrine",
+      "name_zh": "高千穗神社",
+    
+```
+
+
+=== Case R-028 ===
+Topic / intent: 雪の大谷 立山
+Query: Tell me about the Snow Wall Corridor (Yuki-no-Otani) at Tateyama in Toyama.
+Tool: get_spots({"prefecture": "Toyama", "q": "立山 雪", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-029 ===
+Topic / intent: 仙台 七夕
+Query: Расскажи о фестивале Танабата в Сендае.
+Tool: get_festivals({"prefecture": "Miyagi", "keyword": "七夕", "lang": "ru"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "04",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "lang": "ru",
+  "count": 1,
+  "total_matching": 1,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11377772",
+      "qid": "Q11377772",
+      "name_ja": "仙台七夕花火祭",
+      "name": "仙台七夕花火祭",
+      "description_ja": "仙台七夕花火祭（せんだいたなばたはなびまつり）は、宮城県仙台市で開催される花火大会である。主催者は仙台青年会議所であり、仙台七夕まつりの前日に当たる8月5日に行われる。",
+      "description": "仙台七夕花火祭（せんだいたなばたはなびまつり）は、宮城県仙台市で開催される花火大会である。主催者は仙台青年会議所であり、仙台七夕まつりの前日に当たる8月5日に行われる。",
+      "prefecture_code": "04",
+      "prefecture": "宮城県",
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11377772",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    }
+  ],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-030 ===
+Topic / intent: 鳥取砂丘
+Query: 鳥取砂丘の観光情報を教えてください
+Tool: get_spots({"prefecture": "Tottori", "city": "鳥取市", "q": "砂丘", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "5ecd11aa1f258509",
+      "name": "観光名刺「鳥取県の観光・特産品写真入りの名刺台紙」",
+      "description": "鳥取県公式観光・旅行情報サイト。鳥取砂丘などの観光名所から穴場スポット、日帰り・宿泊旅行のモデルコース、グルメ、お土産、温泉、イベントなどとっとり旅に役立つ生情報が満載。",
+      "coordinates": {
+        "lat": 35.501408,
+        "lng": 134.229294
+      },
+      "address": "〒680-0034 鳥取県鳥取市元魚町二丁目201番地",
+      "url": "https://www.tottori-guide.jp/774.html",
+      "municipality": "鳥取市",
+      "municipality_code": "312011",
+      "prefecture": "鳥取県",
+      "language": "ja",
+      "quality_score": 0.78,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "83c9de87140752c9",
+      "name": "鳥取市観光サイト",
+      "description": "鳥取駅北口から徒歩で約5分。鳥取県東部の名産・特産品(砂丘らっきょう・梨・菓子・民工芸品・地酒他)など鳥取のいいものが一堂にそろう特産品ショップです。観光案内も行っており、観光地のパンフレットや地図などが揃っているので、旅先に迷った時には立ち…",
+      "coordinates": {
+        "lat": 35.494388888,
+        "lng": 134.221611111
+      },
+      "address": "680-0833 鳥取県鳥取市末広温泉町160",
+      "url": "https://www.torican.jp/spot/detail_1068.html",
+      "municipality": "鳥取市",
+      "municipality_code": "312011",
+      "prefecture": "鳥取県",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q780905",
+      "name": "鳥取砂丘",
+      "name_en": "Tottori Sand Dunes",
+      "name_zh": "鳥取砂丘",
+      "name_ko": "돗토리 사구",
+      "description_en": "dunes in Tottori, Japan",
+      "coordinates": {
+        "lat": 35.54,
+        "lng": 134.2275
+      },
+      "url": "https://www.wikidata.org/wiki/Q780905",
+      "municipality": "鳥取県",
+      "municipality_code": "310000",
+      "prefecture": "鳥取県",
+      "quality_score": 0.65,
+      "kinds": [
+        "sand_dune",
+        "walking_road_500",
+        "nagisa_100",
+        "shin_ryoko_100",
+        "chishitsu_100",
+        "shin_kanko_100"
+      ],
+      "q_relevance": 20,
+      "prominence_score": 1.1,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 60,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q122904442"
+      ],
+      "heritage_designations_labels": [
+        "Nationally-designated Natural Monument"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "3a23fcbae257965c",
+      "name": "鳥取市観光サイト",
+      "description": "鳥取砂丘やマリンスポーツ、ものづくりなど、麒麟のまちエリア（鳥取市と近隣の岩美町・若桜町・智頭町・八頭町・香美町・新温泉町）で体験できる多彩なアクティビティをご紹介！家族で、友達やカップルで&hellip;大切な人たちと楽しい旅の思い出を作り…",
+      "coordinates": {
+        "lat": 35.494388888,
+        "lng": 134.221611111
+      },
+      "address": null,
+      "url": "https://www.torican.jp/feature/activity",
+      "municipality": "鳥取市",
+      "municipality_code": "312011",
+      "prefecture": "鳥取県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c0d046c1115359ff",
+      "name": "鳥取市観光サイト",
+      "description": "「ループ麒麟獅子」は鳥取駅発着で、鳥取砂丘、鳥取港、鳥取城跡などの鳥取市の人気の観光スポットを巡る観光周遊バスです。１日乗車券を利用して鳥取市観光を満喫しよう！■運行日土・日・祝日（元日は除く）・振替休日・お盆（8/13～8/15）※台風や気象、道…",
+      "coordinates": {
+        "lat": 35.494388888,
+        "lng": 134.221611111
+      },
+      "address": null,
+      "url": "https://www.torican.jp/spot/detail_1127.html",
+      "municipality": "鳥取市",
+      "municipality_code": "312011",
+      "prefecture": "鳥取県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "38fac02881e49e92",
+      "name": "鳥取市観光サイト",
+      "description": "鳥取・因幡をGururi（グルリ）とめぐるGood(グッド）な日帰りバスツアー「鳥取・因幡Gバス（ジーバス）」（2026年5月1日更新）～お待たせいたしました！2026年出発分の募集を開始しました～鳥取砂丘などの定番の観光地を巡って、美味しい昼食、「砂の美術館…",
+      "coordinates": {
+        "lat": 35.494388888,
+        "lng": 134.221611111
+      
+```
+
+
+=== Case R-031 ===
+Topic / intent: 五稜郭 函館
+Query: 函館の五稜郭について教えてください
+Tool: get_spots({"prefecture": "Hokkaido", "city": "函館", "q": "五稜郭", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "94be6bfb59ac27fb",
+      "name": "函館市五稜郭観光駐車場",
+      "description": "北海道函館市の行政サービスポータルサイト。住民登録、子育て支援、高齢者福祉、保育園入園、医療保険、介護保険など、暮らしに必要な行政サービスをまとめてご案内します。",
+      "coordinates": {
+        "lat": 41.769032,
+        "lng": 140.728226
+      },
+      "address": "〒040-8666 北海道函館市東雲町4番13号（地図・駐車場",
+      "url": "https://www.city.hakodate.hokkaido.jp/docs/2014022000519",
+      "municipality": "函館市",
+      "municipality_code": "012025",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.77,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f46c7a18f3aa05e8",
+      "name": "五稜郭公園・ 函館公園のお花見",
+      "description": "五稜郭公園 函館公園 住吉公園グラウンド（臨時駐車場） 2026年4月21日（火）～5月6日（水）",
+      "coordinates": {
+        "lat": 41.796803,
+        "lng": 140.75737
+      },
+      "address": "函館市五稜郭町44",
+      "url": "https://www.hakobura.jp/events/366",
+      "municipality": "函館市",
+      "municipality_code": "012025",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.73,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "a3d2b2e37a6a1c70",
+      "name": "五稜郭公園",
+      "description": "星型城郭「五稜郭跡」は国の特別史跡に指定されている。戊辰戦争最後の戦い、箱館戦争の舞台となった。春は桜の名所、冬は堀の周りをイルミネーションが彩る。復元された箱館奉行所も見もの。",
+      "coordinates": {
+        "lat": 41.796803,
+        "lng": 140.75737
+      },
+      "address": "函館市五稜郭町44",
+      "url": "https://www.hakobura.jp/spots/355",
+      "municipality": "函館市",
+      "municipality_code": "012025",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.78,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "36a5fdca67d498f7",
+      "name": "五稜郭のお花見プラン（ジンギスカンセット）",
+      "description": "北海道では「花見」と言えばジンギスカン。五稜郭公園（屋外）で、桜を眺めながらジンギスカンを楽しめる。（要予約）",
+      "coordinates": {
+        "lat": 41.795139,
+        "lng": 140.754028
+      },
+      "address": "函館市五稜郭町43-9 五稜郭タワー2階",
+      "url": "https://www.hakobura.jp/spots/68",
+      "municipality": "函館市",
+      "municipality_code": "012025",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.74,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "0c47d692f20d028b",
+      "name": "春の函館・桜ガイド",
+      "description": "旅行計画の参考に、過去の正確な開花・満開データと、詳しい観光ガイド記事をまとめました。 函館地方気象台は4月18日午前10時、函館市五稜郭公園にあるソメイヨシノの標本木で５輪以上の花が咲いたことを確認し「開花宣言」を発表しました！昨年より5日早く、平年より10日早い開花です。 https://tenki.jp/sakura/expectation/",
+      "coordinates": {
+        "lat": 41.768666666,
+        "lng": 140.728916666
+      },
+      "address": null,
+      "url": "https://www.hakobura.jp/features/393",
+      "municipality": "函館市",
+      "municipality_code": "012025",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9acf799b9642159d",
+      "name": "函館と近郊のおすすめ桜スポット23+2",
+      "description": "函館の桜は、例年春の大型連休ごろが見ごろになります。暖かくなって一気に咲き出す桜は、函館の街じゅうを包み込むような迫力。 五稜郭公園や函館公園などの名所はもちろんのこと、歴史を感じさせる観光スポットから民家の庭先まで、街並みに溶け込んだ満開の桜は函館ならではのお楽しみです。 函館と近郊のおすすめ桜スポットをご紹介します。   （見ごろの目安は早めの年から遅めの年までを含めて提示。2026年は4月中旬から下旬に開花する予想となっています）⇒函館の桜の開花予想   【函館の市街地にある花見スポット】   ◆特別史跡五稜郭跡     かつて榎本武揚、土方歳三らが率いる旧幕府軍にとって最後の砦となった、国の特別史跡五稜郭跡。多くの木々と堀に囲まれた星型の城郭は、大型連休の頃、桜色に染まります。堀の内外を囲むように植えられた桜は、ソメイヨシノを中心に約1500本。最初に咲くのは日当たりのいい六花亭五稜郭店の裏で、一の橋を渡り切った右手の土手にある桜も、周囲に日を遮るものがないためか、特に見栄えがします。五稜郭タワーから見おろす全景は必見！　散り際には堀の水面が花びらで覆い尽くされ、また一味違った趣です。   ※2025年のお花見情報（電飾、火気使用、飲酒・宴会・食べ歩きなど）については最新情報をご確認ください ※五稜郭公園周辺は交通渋滞が発生しますので、ご注意ください（詳細）   所在地　函館市五稜郭町44番地　 アクセス　市電五稜郭公園前電停から徒歩約15分 見ごろの目安　4月下旬～5月中旬   関連記事 　函館の桜メモリー2021～市内の公園から近郊まで 　函館桜だより2019～五稜郭公園、函館公園、桜が丘通など 　桜レポート2018 満開でにぎわう五稜郭公園の朝昼夜 　桜レポート2018 開花日直後の五稜郭公園と函館公園 　春の絶景ナンバーワン、五稜郭公園の桜三昧 　箱館戦争から150年、五稜郭の見どころ案内 　五稜郭公園・函館公園のお花見     ◆函館公園     自然が豊かな函館山のふもとにある、北海
+```
+
+
+=== Case R-032 ===
+Topic / intent: 桜島
+Query: What should I know about Sakurajima volcano near Kagoshima City?
+Tool: get_spots({"prefecture": "Kagoshima", "q": "桜島", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "66c65740dd97ee8e",
+      "name": "<img src=\"https://kagoshima-barrierfree.com/wp-content/themes/barrierfreeRN-temp/img/logo.png\" alt=\"バリアフリーツアーセンター\" width=\"457\" height=\"58\" data-eio=\"l\">",
+      "description": "桜島港フェリーターミナルの料金所を出てすぐの場所にある観光案内所です。各種パンフレットがあり、スタッフが桜島の",
+      "coordinates": {
+        "lat": 31.584061,
+        "lng": 130.595276
+      },
+      "address": "鹿児島市桜島横山町61-4（桜島港フェリーターミナル3階）",
+      "url": "https://kagoshima-barrierfree.com/barrier-furee/%e6%a1%9c%e5%b3%b6%e8%a6%b3%e5%85%89%e6%a1%88%e5%86%85%e6%89%80%ef%bc%88%e6%a1%9c%e5%b3%b6%e3%82%b3%e3%83%b3%e3%82%b7%e3%82%a7%e3%83%ab%e3%82%b8%e3%83%a5%ef%bc%89",
+      "municipality": "鹿児島市",
+      "municipality_code": "462012",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.74,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q128841",
+      "name": "桜島",
+      "name_en": "Sakurajima",
+      "name_zh": "櫻島",
+      "name_ko": "사쿠라지마섬",
+      "description_en": "volcano and island located in Kagoshima prefecture, Japan",
+      "coordinates": {
+        "lat": 31.580555555,
+        "lng": 130.658055555
+      },
+      "url": "https://www.wikidata.org/wiki/Q128841",
+      "municipality": "鹿児島市",
+      "municipality_code": "462012",
+      "prefecture": "鹿児島県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "active_volcano",
+        "volcano",
+        "walking_road_500",
+        "shin_ryoko_100",
+        "chishitsu_100",
+        "nihon_200_meizan"
+      ],
+      "q_relevance": 100,
+      "prominence_score": 1.05,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "b08fcefd1d1a128a",
+      "name": "鹿児島在住の車いすユーザーが桜島や歴史を満喫するユニバーサルな旅！バリアフリー情報もチェック！",
+      "description": "鹿児島を旅する車いす、ご高齢、ベビーカーの方は必見！定番の桜島や西郷さんの歴史を楽しめるコースを紹介。かごしまバリアフリーツアーセンターが調査した、カヤック、温泉、仙厳園、奄美の里、人力車、大島紬着付け、桜島フェリー等のバリアフリー情報も！心のバリアフリー認定施設もご紹介。",
+      "coordinates": {
+        "lat": 31.584639,
+        "lng": 130.544479
+      },
+      "address": "〒890-0053 鹿児島市中央町10番地",
+      "url": "https://www.kagoshima-yokanavi.jp/article/universal",
+      "municipality": "鹿児島市",
+      "municipality_code": "462012",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "1622cbf08a8fd39d",
+      "name": "錦江湾でマリンレジャーを楽しもう！（錦江湾奥会議観光専門部会）",
+      "description": "錦江湾奥会議専門部会では、錦江湾（鹿児島湾）の奥部に位置する鹿児島市、垂水市、霧島市、姶良市が連携し、桜島や錦江湾ならではの魅力的な体験をＨＰ「ブルーツーリズム鹿児島」で発信しています！",
+      "coordinates": {
+        "lat": 31.728214,
+        "lng": 130.627838
+      },
+      "address": "〒899-5492鹿児島県姶良市宮島町25番地",
+      "url": "http://www.city.aira.lg.jp/shokan/bluetourism.html",
+      "municipality": "姶良市",
+      "municipality_code": "462250",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q3214941",
+      "name": "池田湖",
+      "name_en": "Lake Ikeda",
+      "name_zh": "池田湖",
+      "name_ko": null,
+      "description_en": "lake on Kyūshū island, Japan",
+      "coordinates": {
+        "lat": 31.233333333,
+        "lng": 130.566666666
+      },
+      "url": "https://www.wikidata.org/wiki/Q3214941",
+      "municipality": "鹿児島県",
+      "municipality_code": "460001",
+      "prefecture": "鹿児島県",
+      "quality_score": 0.65,
+      "kinds": [
+        "volcano",
+        "lake",
+        "walking_road_500"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.8,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+  
+```
+
+
+=== Case R-033 ===
+Topic / intent: 倉敷美観地区
+Query: 岡山の倉敷美観地区の観光情報
+Tool: get_spots({"prefecture": "Okayama", "city": "倉敷", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11386772",
+      "name": "倉敷美観地区",
+      "name_en": "Kurashiki Bikan Historical Quarter",
+      "name_zh": "倉敷美觀地區",
+      "name_ko": "구라시키 미관지구",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.596428,
+        "lng": 133.770883
+      },
+      "url": "https://www.wikidata.org/wiki/Q11386772",
+      "municipality": "倉敷市",
+      "municipality_code": "332020",
+      "prefecture": "岡山県",
+      "quality_score": 0.65,
+      "kinds": [
+        "preservation_district",
+        "walking_road_500"
+      ],
+      "prominence_score": 1,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ae583bf81546c219",
+      "name": "わけ観光ガイド",
+      "description": "広さ7,000平米の園内には、幅7m、総延長500mの藤棚を配し、北海道から鹿児島まで全国46都道府県の著名な藤や中国・韓国の藤が栽培されており、100種類140本の藤が咲き乱れる「種類日本一の藤公園」。紫・ピンク・白、花房の長いものや八重のものなど様々な色…",
+      "coordinates": {
+        "lat": 34.817612,
+        "lng": 134.172928
+      },
+      "address": "〒709-0412 岡山県和気郡和気町藤野1893",
+      "url": "https://www.okayama-kanko.jp/wake/event/detail_12471.html",
+      "municipality": "倉敷市",
+      "municipality_code": "332020",
+      "prefecture": "岡山県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "b8cff4e1f514504a",
+      "name": "みまさか観光ポータル",
+      "description": "「アートを巡るシャトルバス」と題して、岡山駅・湯郷温泉・奈義町を結ぶ観光に便利なシャトルバスを運行されます。このバスを使って、さまざまなアートが溶け込む湯郷温泉や自然とアートで出来ているまち奈義町へ足を運ぶことができます。JRや路線バスと組…",
+      "coordinates": {
+        "lat": 35.026367,
+        "lng": 134.15976
+      },
+      "address": "〒707-8501 岡山県美作市美来1番地",
+      "url": "https://www.okayama-kanko.jp/mimasaka/event/detail_101654.html",
+      "municipality": "倉敷市",
+      "municipality_code": "332020",
+      "prefecture": "岡山県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c014bb3e0f1f0c2f",
+      "name": "岡山観光WEB 晴れの国×くだもの王国",
+      "description": "「大原美術館」を音声ガイド付き（本館のみ）で鑑賞し、向かいの「語らい座 大原本邸」入館とブックカフェでのコーヒーセットまたは離れ座敷でのお抹茶セットをまるごとパックにしたお得なチケットです。利用方法などの詳細については、公式サイトをご確認く…",
+      "coordinates": {
+        "lat": 34.596256,
+        "lng": 133.770905
+      },
+      "address": "〒710-8575 岡山県倉敷市中央1-1-15、1-2-1",
+      "url": "https://www.okayama-kanko.jp/event/detail_1002440.html",
+      "municipality": "倉敷市",
+      "municipality_code": "332020",
+      "prefecture": "岡山県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "17b68c118797205e",
+      "name": "岡山観光WEB 晴れの国×くだもの王国",
+      "description": "「備前岡山京橋朝市」とは、毎月第1日曜日に、旭川に架かる京橋西詰めの旭川河川敷広場と堤防緑地一帯で行われている朝市です。午前5:00～10:00頃まで多数のテントが並び、新鮮な農産物や魚介などの販売、個性豊かなグルメが楽しめます。当日は、ベテランス…",
+      "coordinates": {
+        "lat": 34.657799,
+        "lng": 133.931717
+      },
+      "address": "〒700-0831 岡山県岡山市北区京橋西詰河川敷",
+      "url": "https://www.okayama-kanko.jp/event/detail_1002329.html",
+      "municipality": "倉敷市",
+      "municipality_code": "332020",
+      "prefecture": "岡山県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "03677261ae365fc7",
+      "name": "情報を探す",
+      "description": "高梁川流域の観光スポットを車でめぐるスタンプラリーを4月20日から12月25日まで実施します。スマホで集めて楽しむスタンプラリーになっています。ぜひこの機会に流域の魅力に触れてみてください。抽選で各市町の特産品をプレゼントします。",
+      "coordinates": {
+        "lat": 34.584923,
+        "lng": 133.77211
+      },
+      "address": "〒710-8565 倉敷市西中新田640番地電話番号：086-426-3411",
+ 
+```
+
+
+=== Case R-034 ===
+Topic / intent: 広島平和記念公園
+Query: Informação sobre o Parque Memorial da Paz em Hiroshima.
+Tool: search_area({"q": "広島 平和公園", "lang": "pt"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "広島 平和公園",
+  "match_count": 83,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "1313b96cc220c90a",
+      "name": "観光・文化・スポーツ",
+      "description": "観光・文化・スポーツ ページ番号1000005 更新日 2025年3月31日 印刷大きな文字で印刷 クイックメニュー 観光サイト Dive!Hiroshima おうちでミュージアム 広島とりっ歩（ぷ） HIROSHIMA PEACE TOURISM ひろしま国際平和文化祭 歴史・文化 広島市公文書館 文化振興 文化施設 中央公園（広島城区域） 音楽・美術・アニメーション 文化表彰 文化財 スポーツ スポーツ振興 スポーツ関連施設 スポーツ施設整備 地元プロスポーツ スポーツ大会・イベント 東京オリンピック・パラリンピック 広島競輪場 観光 観光戦略・MICE 観光情報の発信 観光データ 外国人観光客の誘致・受け入れ 宿泊施設 国際交流・インバウンド 第48回南極条約協議国会議の広島開催 姉妹・友好都市 多文化共生 国際協力事業 2023年G7サミットの広島開催 海外からの賓客訪問実績 外国領事館・二国間協会等 旅の目的別 観る・遊ぶ 食べる・買う 泊まる 世界遺産 ピースツーリズム モデルコース 交流体験型観光 観光サイト Dive! Hiroshima ザ・広島ブランド ひろしまフェニックス賞 イベントカレンダー 広告欄 広告の内容等に関する一切の責任は、広告主等に帰属します。広島市が推奨等をするものではありません。 市の広告事業のご案内 ホームページへの広告掲載のご案内 ページ番号1000005 更新日 2025年3月31日 印刷大きな文字で印刷 クイックメニュー 観光サイト Dive!Hiroshima おうちでミュージアム 広島とりっ歩（ぷ） HIROSHIMA PEACE TOURISM ひろしま国際平和文化祭 歴史・文化 広島市公文書館 文化振興 文化施設 中央公園（広島城区域） 音楽・美術・アニメーション 文化表彰 文化財 スポーツ スポーツ振興 スポーツ関連施設 スポーツ施設整備 地元プロスポーツ スポーツ大会・イベント 東京オリンピック・パラリンピック 広島競輪場 観光 観光戦略・MICE 観光情報の発信 観光データ 外国人観光客の誘致・受け入れ 宿泊施設 国際交流・インバウンド 第48回南極条約協議国会議の広島開催 姉妹・友好都市 多文化共生 国際協力事業 2023年G7サミットの広島開催 海外からの賓客訪問実績 外国領事館・二国間協会等 旅の目的別 観る・遊ぶ 食べる・買う 泊まる 世界遺産 ピースツーリズム モデルコース 交流体験型観光 歴史・文化 広島市公文書館 文化振興 文化施設 中央公園（広島城区域） 音楽・美術・アニメーション 文化表彰 文化財 スポーツ スポーツ振興 スポーツ関連施設 スポーツ施設整備 地元プロスポーツ スポーツ大会・イベント 東京オリンピック・パラリンピック 広島競輪場 観光 観光戦略・MICE 観光情報の発信 観光データ 外国人観光客の誘致・受け入れ 宿泊施設 国際交流・インバウンド 第48回南極条約協議国会議の広島開催 姉妹・友好都市 多文化共生 国際協力事業 2023年G7サミットの広島開催 海外からの賓客訪問実績 外国領事館・二国間協会等",
+      "url": "https://www.city.hiroshima.lg.jp/tourism-culture",
+      "municipality": "広島市安芸区",
+      "prefecture": "広島県",
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1207208",
+      "name_ja": "平和記念公園",
+      "description_en": "memorial park located in Hiroshima, Japan [Place of Scenic Beauty] [rekishi_park_100]",
+      "prefecture_code": "34",
+      "prefecture": "広島県",
+      "municipality": "広島県",
+      "heritage_designations": [
+        "Q11414752",
+        "Q30834580",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Place of Scenic Beauty (Japan)",
+        "Historic Site of Japan",
+        "Natural Monument of Japan"
+      ],
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q93490",
+      "name_ja": "平和公園",
+      "description_en": "memorial park in Nagasaki, Japan",
+      "prefecture_code": "42",
+      "prefecture": "長崎県",
+      "municipality": "長崎県",
+      "heritage_designations": [
+        "Q7309389"
+      ],
+      "heritage_designations_labels": [
+        "Registered Monument of Japan"
+      ],
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q6149037",
+      "name_ja": "平和公園",
+      "description_en": "park in Nagoya, Aichi, Japan",
+      "prefecture_code": "23",
+      "prefecture": "愛知県",
+      "municipality": "愛知県",
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "tier": "broader"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "36c0ae4daf9db92a",
+      "name": "おうちに博物館の「学び」と「楽しみ」を届けます。",
+      "description": "おうちに博物館の「学び」と「楽しみ」を届けます。 ページ番号1028408 更新日 2025年4月9日 印刷大きな文字で印刷 「おうちでミュージアム」では、おうちに居ながらにして、博物館・美術館の知る喜び、楽しさを感じていただけるよう、インターネットで情報発信します。 下記のリンク先からお楽しみ下さい。 広島城（外部リンク） 所蔵資料の一部や季節に合わせた話題を御紹介。広島城キャラクターの「しろうニャ」ぬり絵も掲載中です。 郷土資料館（外部リンク） 所蔵資料の一部を御紹介するほか、「広島の段差めぐり」や紙芝居「猿猴と河童の話」を動画で公開しています。 5-Days こども文化科学館（外部リンク） 天文や電気、植物等、多岐にわたる科学のお話をブログで紹介しています。 江波山気象館（外部リンク） 公式インスタグラム等でお天気や自然についての画像や動画等を発信しています。 ヌマジ交通ミュージアム（外部リンク） 公式フェイスブックで、館の新しい展示や話題、簡単な工作や実験、いろいろな乗り物などを紹介しています。 現代美術館（外部リンク） 公式X（旧ツイッター）、フェイスブック、インスタグラム、ユーチューブで、画像や動画をはじめ様々な楽しみを発信しています。 このページに関するお問い合わせ 市民局文化スポーツ部 文化振興課〒730-8586 広島市中区国泰寺町一丁目6番34号電話：082-504-2500（代表） ファクス：082-504-2066[email protected] ページ番号1028408 更新日 2025年4月9日 印刷大きな文字で印刷 「おうちでミュージアム」では、おうちに居ながらにして、博物館・美術館の知る喜び、楽しさを感じていただけるよう、
+```
+
+
+=== Case R-035 ===
+Topic / intent: 下呂温泉
+Query: What are the hot springs at Gero Onsen in Gifu Prefecture?
+Tool: get_hotels({"prefecture": "Gifu", "city": "下呂", "hotel_type": "onsen_ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "hito_yu_kai:625",
+      "confidence": "confirmed",
+      "name": "朝日荘",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒509-3111 岐阜県下呂市小坂町落合2383",
+      "prefecture_code": "21",
+      "municipality": null,
+      "description_ja": "星降る里　手つかずの自然と源泉かけ流しの湯",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "625",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=625"
+        }
+      ]
+    },
+    {
+      "id": "ec9d9358f242",
+      "confidence": "singleton",
+      "name": "つるつるの湯 下呂温泉 みのり荘",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.8061558,
+        "lng": 137.2374537
+      },
+      "phone": "0576-25-3038",
+      "website": "http://www.minoriso.co.jp/",
+      "postal_code": "509-2206",
+      "street": null,
+      "prefecture_code": "21",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/1183677050",
+          "url": "https://www.openstreetmap.org/way/1183677050"
+        }
+      ]
+    },
+    {
+      "id": "c55467b35525",
+      "confidence": "singleton",
+      "name": "下呂温泉　冨岳",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.8104267,
+        "lng": 137.2398226
+      },
+      "phone": "0576-25-3428",
+      "website": "https://gero-fugaku.com/",
+      "postal_code": "509-2207",
+      "street": null,
+      "prefecture_code": "21",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/1184822841",
+          "url": "https://www.openstreetmap.org/way/1184822841"
+        }
+      ]
+    },
+    {
+      "id": "c0cc5db88d19",
+      "confidence": "singleton",
+      "name": "下呂温泉 望川館",
+      "name_en": "Bosenkan",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.8116134,
+        "lng": 137.2377541
+      },
+      "phone": "0576-25-2048",
+      "website": "https://www.bosenkan.co.jp/",
+      "postal_code": "509-2207",
+      "street": null,
+      "prefecture_code": "21",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/1183679793",
+          "url": "https://www.openstreetmap.org/way/1183679793"
+        }
+      ]
+    },
+    {
+      "id": "1c526db8b094",
+      "confidence": "singleton",
+      "name": "下呂温泉山形屋",
+      "name_en": "Gero Onsen Yamagataya",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.8109036,
+        "lng": 137.2386858
+      },
+      "phone": "0576-25-2601",
+      "website": "https://www.geroyamagataya.com/",
+      "postal_code": "509-2207",
+      "street": null,
+      "prefecture_code": "21",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/1183681437",
+          "url": "https://www.openstreetmap.org/way/1183681437"
+        }
+      ]
+    }
+  ],
+  "count": 5,
+  "truncated": false,
+  "total_matching": 5,
+  "r3_official_count": 1,
+  "hotel_type_filter": "onsen_ryokan",
+  "lodging_types_note": "lodging_type values: ryokan, onsen_ryokan (incl. 日本秘湯を守る会 official hisoyu), shukubo (temple lodging, incl. 高野山宿坊協会 members), kominka (traditional house), minshuku, hostel, guest_house, apartment, motel, hotel. Group aliases for hotel_type arg: 'traditional', 'onsen', 'budget'.",
+  "note": "Information only — does NOT include availability or pricing. For bookings, visit the hotel's official webs
+```
+
+
+=== Case R-036 ===
+Topic / intent: 川越 小江戸
+Query: 埼玉の川越、小江戸の観光スポットについて
+Tool: get_spots({"prefecture": "Saitama", "city": "川越", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q24898133",
+      "name": "川越",
+      "name_en": "Kawagoe",
+      "name_zh": "川越",
+      "name_ko": "가와고에",
+      "description_en": "A region in Saitama Prefecture, Japan",
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q24898133",
+      "municipality": "埼玉県",
+      "municipality_code": "110001",
+      "prefecture": "埼玉県",
+      "quality_score": 0.65,
+      "kinds": [
+        "jokamachi",
+        "preservation_district"
+      ],
+      "prominence_score": 1,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 120,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1073688",
+      "name": "川越城",
+      "name_en": "Kawagoe Castle",
+      "name_zh": "川越城",
+      "name_ko": "가와고에성",
+      "description_en": "Kawagoe Castle (川越城, Kawagoe-jō) is a flatland Japanese castle in the city of Kawagoe, in Japan's Saitama Prefecture. It is the closest castle to Tokyo to be accessible to visitors, as Edo castle is now the Imperial palace, and largely inaccessible.",
+      "coordinates": {
+        "lat": 35.924514,
+        "lng": 139.491503
+      },
+      "url": "https://www.wikidata.org/wiki/Q1073688",
+      "municipality": "埼玉県",
+      "municipality_code": "110001",
+      "prefecture": "埼玉県",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle",
+        "nihon_100_meijo"
+      ],
+      "prominence_score": 0.95,
+      "crowd_band": "medium",
+      "fee": "yes",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "indoor_capable": "mixed",
+      "defaults_source": "osm_override",
+      "heritage_designations": [
+        "Q2901860"
+      ],
+      "heritage_designations_labels": [
+        "Tangible Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11479246",
+      "name": "川越市蔵造り資料館",
+      "name_en": "Museum of Kurazukuri",
+      "name_zh": "川越市藏造資料館",
+      "name_ko": null,
+      "description_en": "museum in Kuruzukuri, Japan",
+      "coordinates": {
+        "lat": 35.923722222,
+        "lng": 139.482777777
+      },
+      "url": "https://www.wikidata.org/wiki/Q11479246",
+      "municipality": "埼玉県",
+      "municipality_code": "110001",
+      "prefecture": "埼玉県",
+      "quality_score": 0.65,
+      "kinds": [
+        "museum",
+        "memorial"
+      ],
+      "prominence_score": 0.8,
+      "crowd_band": "medium",
+      "opening_hours": "closed",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q850649"
+      ],
+      "heritage_designations_labels": [
+        "Important Preservation District for Groups of Traditional Buildings"
+      ],
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "23b501e2cbee4400",
+      "name": "大宮駅の推しみやげ",
+      "description": "埼玉県の豊かな自然と文化が育んだ特産品が、ここ大宮駅に集結しています。地元の生産者が丹精込めて作った美味しさを、手軽に楽しむチャンスです。埼玉の魅力をぜひ体験してください。",
+      "coordinates": {
+        "lat": 35.904289,
+        "lng": 139.624069
+      },
+      "address": "〒330-0853 埼玉県さいたま市大宮区錦町６３０",
+      "url": "https://chocotabi-saitama.jp/special/oshimiyage",
+      "municipality": "川越市",
+      "municipality_code": "112011",
+      "prefecture": "埼玉県",
+      "language": "ja",
+      "quality_score": 0.78,
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11344966",
+      "name": "ヤオコー川越美術館",
+      
+```
+
+
+=== Case R-037 ===
+Topic / intent: 長崎 グラバー園
+Query: Cuéntame sobre el Jardín de Glover en Nagasaki.
+Tool: search_area({"q": "グラバー園", "lang": "es"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "グラバー園",
+  "match_count": 68,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q63465",
+      "name_ja": "グラバー園",
+      "name_en": "Glover Garden",
+      "description_en": "park in Nagasaki",
+      "coordinates": {
+        "lat": 32.73444444,
+        "lng": 129.86888889
+      },
+      "prefecture_code": "42",
+      "prefecture": "長崎県",
+      "prominence_score": 0.9500000000000001,
+      "crowd_band": "high",
+      "kinds": [
+        "garden",
+        "museum"
+      ],
+      "heritage_designations": [
+        "Q1188622",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan",
+        "Natural Monument of Japan"
+      ],
+      "opening_hours": "Mo-Su 08:00-18:00",
+      "phone": "+81 095-822-8223",
+      "website": "https://www.glover-garden.jp/english",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "08642b4f4493b29b",
+      "name": "旅のプランニング",
+      "description": "神奈川県には美しい花々や 豊かな自然を満喫できる スポットが数多くあります。 県内を巡り、四季折々の鮮やかな景色を お楽しみください。 沢山のご応募ありがとうございました。素晴らしい作品の中から、最優秀作品賞、かながわ観光親善大使賞、エリア賞が決定いたしました！ 里山風景広がるあじさいの開成と、緑豊かな山北を巡る1泊2日【春】 樹齢400年の大山桜と七沢ミツマタ大群生地ハイキング1泊2日【春】 当サイトでは利便性の向上のため、Cookieを使用しています。 サイトの閲覧を続行した場合、Cookieの使用に同意したことになります。 詳細はクッキーポリシーをご確認ください。",
+      "url": "https://www.kanagawa-kankou.or.jp/flower",
+      "municipality": "真鶴町",
+      "prefecture": "神奈川県",
+      "tier": "notable"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "244981c4ac074d0f",
+      "name": "北方文化博物館 大藤棚ライトアップ",
+      "description": "北方文化博物館は、越後の大地主・伊藤家の歴史と地方文化を当時の姿のままに伝える豪農の館です。8,800坪の敷地に、65の部屋を設けた1,200坪の母屋。敷地のまわりは土塁や塀、濠で囲まれ、土蔵づくりの門、総欅づくり唐破風の大玄関など、現存する新潟の豪農の屋敷の中でも最大規模を誇ります。 この北方文化博物館の中庭には、樹齢150年、幹まわり1m60cm以上、一本の木から広がる大藤があります。開花は5月初旬から中旬、甘い香りを放って藤色の花を房状に咲かせます。開花に合わせ、大藤と第二庭園「八藤園」をライトアップします。 八藤園は、藤を愛した八代伊藤文吉にちなみ、白、紫、ピンク、混合、長藤などの八つの藤棚がカギ型に連なります。 エリア 新潟・阿賀エリア カテゴリー 花・紅葉・蛍 イルミネーション・雪灯り 条件 ユニバーサルデザイン情報有 北方文化博物館は、越後の大地主・伊藤家の歴史と地方文化を当時の姿のままに伝える豪農の館です。8,800坪の敷地に、65の部屋を設けた1,200坪の母屋。敷地のまわりは土塁や塀、濠で囲まれ、土蔵づくりの門、総欅づくり唐破風の大玄関など、現存する新潟の豪農の屋敷の中でも最大規模を誇ります。 この北方文化博物館の中庭には、樹齢150年、幹まわり1m60cm以上、一本の木から広がる大藤があります。開花は5月初旬から中旬、甘い香りを放って藤色の花を房状に咲かせます。開花に合わせ、大藤と第二庭園「八藤園」をライトアップします。 八藤園は、藤を愛した八代伊藤文吉にちなみ、白、紫、ピンク、混合、長藤などの八つの藤棚がカギ型に連なります。 エリア 新潟・阿賀エリア カテゴリー 花・紅葉・蛍 イルミネーション・雪灯り 条件 ユニバーサルデザイン情報有 基本情報 開催期間 2026年5月7日（木曜日）～5月12日（火曜日） 開催時間 17時30分～20時 住所新潟県新潟市江南区沢海2丁目15番25／北方文化博物館 交通アクセス●JR新潟駅よりタクシーで20分、またはJR信越本線「新津駅」よりタクシーで5分 ●日本海東北自動車道「新潟亀田IC」より車で15分 ●JR新潟駅より徒歩で10分、万代シティバスセンター発「沢海経由新津行」バスで約40分、「上沢海博物館前」下車、徒歩で2分 駐車場●普通車：400台 ●大型車：30台 料金●大藤のライトアップ観覧料：高校生以上500円 ※未就学児、小・中学生は無料 ※館内の見学はできません ユニバーサルデザイン対応貸出車椅子可、障害者用トイレ有 備考※博物館は17時に閉館致します。正門受付、中門受付ともに17時に閉門致しますので、ライトアップをご覧のお客様は一度ご退館後、17時30分より大門からあらためてのご入場をお願いしております。 ※混雑時は入場制限（入替）を行いますので、入場までお待ちいただく場合があります。 ※多くのお客様にご鑑賞いただくため、藤棚内での三脚等を用いた長時間の撮影はご遠慮願います。 ※会場でのマスク着脱はお客様のご都合に合わせて行ってください。 ※「おみやげ処」のみライトアップ時間も営業いたします（喫茶・そば処は閉店）。 問い合わせ先 問い合わせ先北方文化博物館 電話番号025-385-2001 FAX番号025-385-3929 メールアドレスncm2006@vanilla.ocn.ne.jp 関連サイト 北方文化博物館 公式サイト 基本情報 開催期間 2026年5月7日（木曜日）～5月12日（火曜日） 開催時間 17時30分～20時 住所新潟県新潟市江南区沢海2丁目15番25／北方文化博物館 交通アクセス●JR新潟駅よりタクシーで20分、またはJR信越本線「新津駅」よりタクシーで5分 ●日本海東北自動車道「新潟亀田IC」より車で15分 ●JR新潟駅より徒歩で10分、万代シティバスセンター発「沢海経由新津行」バスで約40分、「上沢海博物館前」下車、徒歩で2分 駐車場●普通車：400台 ●大型車：30台 料金●大藤のライトアップ観覧料：高校生以上500円 ※未就学児、小・中学生は無料 ※館内の見学はできません ユニバーサルデザイン対応貸出車椅子可、障害者用トイレ有 備考※博物館は17時に閉館致します。正門受付、中門受付ともに17時に閉門致しますので、ライトアップをご覧のお客様は一度ご退館後、17時30分より大門からあらためてのご入場をお願いしております。 ※混雑時は入場制限（入替）を行いますので、入場までお待ちいただく場合があります。 ※多くのお客様にご鑑賞いただくため、藤棚内での三脚等を用いた長時間の撮影はご遠慮願います。 ※会場でのマスク着脱はお客様のご都合に合わせて行ってください。 ※「おみやげ処」のみライトアップ時間も営業いたします（喫茶・そば処は閉店）。",
+      "url": "https://niigata-kankou.or.jp/event/3880",
+      "municipality": "粟島浦村",
+      "prefecture": "新潟県",
+```
+
+
+=== Case R-038 ===
+Topic / intent: 大和路 古社寺
+Query: Nara's ancient temples and shrines along the Yamatoji route.
+Tool: get_japan_heritage({"prefecture": "Nara", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "29",
+  "region": null,
+  "region_prefecture_codes": null,
+  "theme_filter": null,
+  "q": null,
+  "lang": "en",
+  "count": 22,
+  "tool_scope_note": "IMPORTANT: 日本遺産 (this tool) and UNESCO WHS / 国宝 / 特別史跡 are DIFFERENT programs. If the user asked about UNESCO World Heritage Sites, 国宝, hidden christian heritage, pilgrimage routes (Kumano Kodo / Henro / Saigoku), or specific famous landmarks — see `see_also_wikidata_heritage` below OR call search_area / get_traditional_arts.",
+  "top_canonical_heritage": [
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q1039675",
+      "name_ja": "高松塚古墳",
+      "name_en": "Takamatsuzuka Tomb",
+      "description_en": "kofun",
+      "coordinates": {
+        "lat": 34.46222222,
+        "lng": 135.80647222
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q26764449",
+        "Q30834580",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Special Historic Site of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan"
+      ],
+      "kinds": [
+        "archaeological_site",
+        "monument",
+        "buddhist_monastery",
+        "kofun"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q1039675"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q1070863",
+      "name_ja": "興福寺",
+      "name_en": "Kōfuku-ji Temple",
+      "description_en": "Kōfuku-ji (興福寺; Japanese pronunciation: [koꜜː.ɸɯ̥.kɯ.dʑi]) is a Buddhist temple in Japan that was once one of the powerful Nanto Shichi Daiji 'Seven Great Temples' in the city of Nara. The temple is the national headquarters of the East Asian Yogācāra school.",
+      "coordinates": {
+        "lat": 34.683207,
+        "lng": 135.831302
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "kinds": [
+        "religious_building",
+        "shinto_shrine",
+        "buddhist_temple",
+        "saigoku_33",
+        "saigoku_yakushi_49"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q1070863"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q11526469",
+      "name_ja": "東大寺盧舎那仏像",
+      "name_en": "Tōdai-ji Daibutsu",
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.68915,
+        "lng": 135.8398
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622",
+        "Q11579194",
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan",
+        "Registered Tangible Cultural Property of Japan",
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "kinds": [
+        "monument",
+        "great_buddha"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11526469"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q1203099",
+      "name_ja": "元興寺",
+      "name_en": "Gangō-ji Temple",
+      "description_en": "Gangō-ji (元興寺) was one of the first Buddhist temples in Japan, and was ranked as one of the  powerful Seven Great Temples, in Nara, Japan. It was mostly destroyed in the Muromachi period and the old town of Naramachi occupies most of what was once the temple's precincts.",
+      "coordinates": {
+        "lat": 34.678055555,
+        "lng": 135.831111111
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": 
+```
+
+
+=== Case R-039 ===
+Topic / intent: 福岡 太宰府
+Query: 福岡の太宰府天満宮への行き方と見どころ
+Tool: get_spots({"prefecture": "Fukuoka", "city": "太宰府", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "0f1493e2146571e2",
+      "name": "【太宰府天満宮】鬼すべ神事",
+      "description": "福岡県の無形民俗文化財に指定されている、日本三大火祭りのひとつ。寛和2年（986年）に菅原道真公のひ孫の菅原輔正によって始められたとされている、災難消除・火除けの神事です。災い事の象徴である鬼を天満宮の鬼すべ堂に追い込み、煙でいぶし出して退治するというもので、毎年多くの参拝者が、燃え上がる巨大な炎に一年間の幸せを祈ります。\n見どころは、終盤の「火渡し」。堂内に煙を送る燻手（すべて）と鬼すべ堂の中から壁を叩いて反撃する鬼警固（おにけご）が、激しい戦いを繰り広げます。約300人から発せられる「鬼じゃ、鬼じゃ」という掛け声と、壁の鳴る音の臨場感は圧巻。\n\n「うそ替え神事」に引き続き、毎年1月7日の21:00頃に斎火を点火して最高潮を迎えます。",
+      "coordinates": {
+        "lat": 33.521496,
+        "lng": 130.535431
+      },
+      "address": "〒818-0195 福岡県太宰府市宰府4-7-1",
+      "url": "https://www.crossroadfukuoka.jp/event/13582",
+      "municipality": "太宰府市",
+      "municipality_code": "402214",
+      "prefecture": "福岡県",
+      "language": "ja",
+      "quality_score": 0.87,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q3192777",
+      "name": "観世音寺",
+      "name_en": "Kanzeon-ji Temple",
+      "name_zh": "觀世音寺",
+      "name_ko": "간제온지",
+      "description_en": "Buddhist temple in Dazaifu, Fukuoka prefecture, Japan",
+      "coordinates": {
+        "lat": 33.515,
+        "lng": 130.52138889
+      },
+      "url": "https://www.wikidata.org/wiki/Q3192777",
+      "municipality": "太宰府市",
+      "municipality_code": "402214",
+      "prefecture": "福岡県",
+      "quality_score": 0.65,
+      "kinds": [
+        "buddhist_temple",
+        "religious_building",
+        "shinto_shrine",
+        "chokuganji",
+        "soundscape_100"
+      ],
+      "prominence_score": 0.95,
+      "crowd_band": "medium",
+      "opening_hours": "Mo-Su 09:00-17:00",
+      "typical_visit_minutes": 30,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q30834580"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q710786",
+      "name": "太宰府天満宮",
+      "name_en": "Dazaifu Tenmangū",
+      "name_zh": "太宰府天滿宮",
+      "name_ko": "다자이후텐만구",
+      "description_en": "Shinto shrine in Fukuoka Prefecture, Japan",
+      "coordinates": {
+        "lat": 33.521433,
+        "lng": 130.535002
+      },
+      "url": "https://www.wikidata.org/wiki/Q710786",
+      "municipality": "福岡県",
+      "municipality_code": "400009",
+      "prefecture": "福岡県",
+      "quality_score": 0.65,
+      "kinds": [
+        "shinto_shrine",
+        "religious_building"
+      ],
+      "prominence_score": 0.95,
+      "crowd_band": "high",
+      "opening_hours": "Mo-Su 06:30-19:00",
+      "phone": "+81 92-922-8225",
+      "website": "https://www.dazaifutenmangu.or.jp/",
+      "fee": "no",
+      "typical_visit_minutes": 30,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "osm_override",
+      "heritage_designations": [
+        "Q1188622",
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan",
+        "Registered Tangible Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "73a6710aedeb399d",
+      "name": "太宰府天満宮",
+      "description": "言わずと知れた学問の神様・菅原道真公を祀る太宰府天満宮。全国約12,000社の天満宮の総本宮と称えられ、九州最大級の規模を誇る神社には国内外から多くの人が祈願に訪れます。\n朱塗りの御本殿とそれを取り囲む神苑をはじめ、敷地内には天開稲荷社や宝物殿、菅公歴史館など、さまざまな由緒ある建造物が点在。境内には天然記念物のヒロハチシャやクスの木のほか、梅や花菖蒲などが次々と華麗な花を咲かせ、四季折々の風情が楽しめます。道真公がこよなく愛した梅の花。天満宮の紋にも梅の花を使用しているだけあり、梅の時期は特別。なかでも、本殿に向かって右正面にある御神木「飛梅（とびうめ）」は、道真公を慕って都から大宰府へ一夜にして飛んできたという伝説がある梅の木として広く知られています。\n年間を通してお祭りや催しなどさまざまな見どころが多く、1100年以上にわたり続いている悠久の歴史を今に紡いでいます。",
+      "coordinates": {
+        "lat": 33.521496,
+        "lng": 130.535431
+      },
+      "address": "〒818-0117 福岡県太宰府市宰府4-7-1",
+      "url": "https://www.cros
+```
+
+
+=== Case R-040 ===
+Topic / intent: 蔵王温泉 樹氷
+Query: 山形の蔵王温泉と樹氷について教えて
+Tool: get_spots({"prefecture": "Yamagata", "city": "山形市", "q": "蔵王 樹氷", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-041 ===
+Topic / intent: ねぶた祭
+Query: Tell me about the Nebuta Festival in Aomori.
+Tool: get_festivals({"prefecture": "Aomori", "keyword": "ねぶた", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "02",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "lang": "en",
+  "count": 1,
+  "total_matching": 1,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q862407",
+      "name_ja": "青森ねぶた",
+      "name_en": "Aomori Nebuta Matsuri",
+      "name": "Aomori Nebuta",
+      "description_ja": "日本の青森県青森市で毎年8月に開催される祭",
+      "description_en": "Japanese summer festival",
+      "description": "A festival held every August in Aomori City, Aomori Prefecture, Japan.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q862407",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-042 ===
+Topic / intent: 竹田城
+Query: 兵庫县竹田城，日本的天空城。
+Tool: search_area({"q": "竹田城", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "竹田城",
+  "match_count": 82,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q8013060",
+      "name_ja": "竹田城",
+      "name_en": "Takeda Castle",
+      "description_en": "ruined castle in Japan",
+      "coordinates": {
+        "lat": 35.3005,
+        "lng": 134.829
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 1,
+      "crowd_band": "high",
+      "kinds": [
+        "castle",
+        "japanese_castle",
+        "mountain_castle",
+        "nihon_100_meijo"
+      ],
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "opening_hours": "Mar 01-May 31 Mo-Su 08:00-18:00; Jun 01-Dec 01 Mo-Su 05:00-17:00; Jan 04-Feb 29 off",
+      "website": "https://www.city.asago.hyogo.jp/site/takeda/",
+      "fee": "yes",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "osm_override",
+      "tier": "must_see"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "a400592fb7dafba5",
+      "name": "岡山観光WEB 晴れの国×くだもの王国",
+      "description": "たくさんの応募ありがとうございました。4つの部門それぞれに入賞した作品をご紹介します。皆さん、受賞おめでとうございます！ 「昼のお庭」部門 @mie_korinbo 様の作品 【審査員からのコメント】 青々とした芝生、澄み渡る青空、雲と傘と竹鞠の白色のコントラストが目を引く、これぞ「晴れの国おかやま」と感じさせる作品です。 「昼のお城」部門 @ yu_n_id 様の作品 【審査員からのコメント】 晴れの国らしい真っ青な空と、雄大な旭川を背後に見下ろす岡山城の凛とした佇まいに引き込まれる作品です。 「夜のお庭」部門 @cwc04_photograph 様の作品 【審査員からのコメント】 夜空に映えるお城をバックに、竹毬灯りの柔らかで優美な光に包まれたお庭。園内を散策する人々の穏やかな表情が思い浮かびます。 「夜のお城」部門 @hk___rs_ 様の作品 【審査員からのコメント】 石垣に映し出された「烏城灯源郷」の文字の背後で、漆黒の夜空の下に浮かび上がる岡山城が印象的で目を引く作品。構図が素晴らしい。 ＜Wチャンス賞当選者の発表について＞Ｗチャンスとして、入賞されなかった方の中から抽選で15名に岡山県の特産品（3千円相当）をプレゼントします。当選者の発表は、岡山後楽園（@okayamakorakuen）又は岡山城（@okayama_castle）のInstagramのダイレクトメッセージでの連絡をもって代えさせていただきます。 Ｗチャンスとして、入賞されなかった方の中から抽選で15名に岡山県の特産品（3千円相当）をプレゼントします。 当選者の発表は、岡山後楽園（@okayamakorakuen）又は岡山城（@okayama_castle）のInstagramのダイレクトメッセージでの連絡をもって代えさせていただきます。",
+      "url": "https://www.okayama-kanko.jp/feature/niwashiro-photocontest2025",
+      "municipality": "吉備中央町",
+      "prefecture": "岡山県",
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11284269",
+      "name_ja": "浜田城",
+      "description_en": "Hamada Castle (浜田城, Hamada-jō) is a castle structure in Hamada, Shimane Prefecture, Japan. [Prefecture-designated Historic Site]",
+      "prefecture_code": "32",
+      "prefecture": "島根県",
+      "municipality": "島根県",
+      "heritage_designations": [
+        "Q123010864"
+      ],
+      "heritage_designations_labels": [
+        "Prefecture-designated Historic Site"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11361159",
+      "name_ja": "下田原城",
+      "description_en": "ryukyuan gusuku in Taketomi, Okinawa Prefecture [Historic Site of Japan]",
+      "prefecture_code": "47",
+      "prefecture": "沖縄県",
+      "municipality": "竹富町",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q2969493",
+      "name_ja": "岸和田城",
+      "description_en": "building in Kishiwada City, Osaka Prefecture, Japan [Place of Scenic Beauty]",
+      "prefecture_code": "27",
+      "prefecture": "大阪府",
+      "municipality": "大阪府",
+      "heritage_designations": [
+        "Q11414752",
+        "Q30834580",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Place o
+```
+
+
+=== Case R-043 ===
+Topic / intent: 十和田湖
+Query: What is Lake Towada in Aomori and Akita?
+Tool: get_spots({"prefecture": "Akita", "q": "十和田湖", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "dc1d5106cac6ecd1",
+      "name": "十和田湖西湖畔樹木マップ",
+      "description": "十和田湖西湖畔の遊歩道を散策しながら湖畔の自然が探索できます。\t十和田湖西湖畔樹木マップ （PDF,5.46MB）",
+      "coordinates": {
+        "lat": 40.332066,
+        "lng": 140.735306
+      },
+      "address": "〒017-0292秋田県鹿角郡小坂町小坂字上谷地41-1電話番号：0186-29-3908ファックス：0186-29-5481",
+      "url": "https://www.town.kosaka.akita.jp/machinososhiki/kankosangyoka/kankoshokohan/4/285.html",
+      "municipality": "小坂町",
+      "municipality_code": "053031",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.74,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "1e389e5030a54108",
+      "name": "十和田湖の現状変更について",
+      "description": "十和田湖は、昭和27年3月29日に「十和田湖および奥入瀬渓流」として、国の特別名勝及び天然記念物に指定されました。貴重な文化財を守るため、地区内の現状変更（土木工事、建物や住宅の新改築・撤去、樹木の伐採など）を行う場合は、文化庁への許可申請が必要です。看板の設置や枝の刈り払いなど、些細なものでも申請が必要ですので、必ず事前に郷土館または小坂町教育委員会へご相談ください。なお、申請から許可を受けるまで3か月程度かかりますので、お早めにご相談いただきますようお願いします。範囲や基準など、詳細は下記「十和田湖現状変更のしおり」をご確認ください。十和田湖現状変更のしおり 保存管理基準の留意事項(PDFファイル:546.3KB) 申請書様式・記載例十和田湖現状変更申請様式(Wordファイル:20.5KB)(記入例)十和田湖現状変更申請様式(PDFファイル:165.5KB) 終了報告書様式・記載例十和田湖現状変更終了報告書様式(Wordファイル:19.4KB)(記入例)十和田湖現状変更終了報告様式(PDFファイル:97.3KB) 現状変更のお問い合わせ先小坂町総合博物館 郷土館〒017-0201秋田県鹿角郡小坂町小坂字中前田48-1電話番号：0186-29-4726 小坂町教育委員会事務局 学習振興班〒017-0201秋田県鹿角郡小坂町小坂字砂森7-1（小坂町交流センター・セパーム内）電話番号：0186-29-2069",
+      "coordinates": {
+        "lat": 40.333055555,
+        "lng": 140.736111111
+      },
+      "address": "〒017-0201",
+      "url": "https://www.town.kosaka.akita.jp/machinososhiki/sonotashisetsu/sogouhakubutsukan/2671.html",
+      "municipality": "小坂町",
+      "municipality_code": "053031",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q174309",
+      "name": "田沢湖",
+      "name_en": "Lake Tazawa",
+      "name_zh": "田澤湖",
+      "name_ko": "다자와호",
+      "description_en": "crater lake",
+      "coordinates": {
+        "lat": 39.725,
+        "lng": 140.661388888
+      },
+      "url": "https://www.wikidata.org/wiki/Q174309",
+      "municipality": "秋田県",
+      "municipality_code": "050008",
+      "prefecture": "秋田県",
+      "quality_score": 0.65,
+      "kinds": [
+        "volcano",
+        "lake",
+        "walking_road_500",
+        "shin_ryoko_100",
+        "shin_kanko_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 1,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group",
+        "family"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "13ee7d99840bfc19",
+      "name": "【新デザイン追加】観光名刺（台紙）をご利用ください",
+      "description": "小坂町では観光PRを兼ねて観光名刺（名刺台紙）をご用意しています。町民の方、または町内の企業や職場にお勤めの方であれば、どなたでも自由に無料でご利用いただくことができます。この度、新しいデザインを3種類追加して下記のとおり全7種類となりましたので、ご活用ください。小坂町を象徴する「十和田湖」をはじめ、「ブルートレインあけぼの」「小坂町マスコットキャラクターかぶきん」の3種類が追加となりました。これまでの康楽館や小坂鉱山事務所、十和田湖といった小坂町を代表する観光スポットが入ったデザインも継続して提供しています。デザインの空白部分には、名前や連絡先などを自由に入れていただくことができます。なお、それらの印刷は各自行っていただきますが、ご自身のパソコンとプリンターで作成、印刷いただいたり、印刷業者へ持ち込みで印刷をすることも可能です。名刺台紙の裏面は空白になっておりますので、メッセージを添えたりするなど自由にご利用いただくことも可能です。ご希望の方は、小坂町役場2階観光産業課観光商工班の窓口で受け渡しをしています。1セット100枚、下記7種類のデザインの中からご希望をお伝えいただき、名刺台紙をお受け取り下さい。",
+      "coordinates": {
+        "lat": 40.332066,
+        "lng": 140.735306
+      },
+      "address": "〒017-0292秋田県鹿角郡小坂町小坂字上谷地41-1電話番号：0186-29-3908ファックス：0186-29-5481",
+      "url": "https://www.town.kosaka.akita.jp/machinososhiki/kankosangyoka/kankoshokohan/3/173.html",
+      "municipality": "小坂町",
+      "municipality_code": "053031",
+      "prefecture": "秋田県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_sc
+```
+
+
+=== Case R-044 ===
+Topic / intent: しまなみ海道
+Query: しまなみ海道のサイクリングルートについて
+Tool: get_spots({"prefecture": "Hiroshima", "q": "しまなみ海道", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "919a3abd6f24c202",
+      "name": "瀬戸田サンセットビーチ",
+      "description": "しまなみ海道の中間地点、尾道市瀬戸田町の西側に広がる県内屈指の規模を誇る海浜公園。海に浮かぶ島々を目の前に見渡せる、瀬戸内海ならではのロケーションが最大の特徴です。特に夕暮れ時の景観は素晴らしく、空と海が一体となって黄金色に染まる光景を収めようと、多くの写真愛好家や観光客が訪れます。対岸に連なる島々の合間へと沈んでいく太陽と、それによって浮かび上がる島影のシルエットが作り出すコントラストは、この場所ならではの眺望です。\n\n透明度が高く、波が穏やかなビーチとしても知られています。シーカヤックやSUP（サップ）などのマリンアクティビティも気軽に楽しむことができ、初めての方でもスタッフに教わりながら海上からの景色を満喫することができます。また、島全体を一つの美術館に見立てた「島ごと美術館」の作品が砂浜や緑地に点在しているのも特徴。散策しながら個性豊かな彫刻作品を鑑賞し、アートと自然が融合した独特の空間を体感できます。\n\n施設内には、自転車旅の途中に立ち寄りやすいレンタサイクルターミナルのほか、更衣室やシャワーなどの設備も完備。レストランでは海を眺めながら食事が楽しむことができ、ツーリング中の休憩や家族連れでのレジャーなど、幅広く利用されています。キャンプ場やBBQ設備も整っており、好みや目的に合わせて自由に過ごせる海辺のスポットです。",
+      "coordinates": {
+        "lat": 34.2802751,
+        "lng": 133.0722982
+      },
+      "address": "722-2404 広島県尾道市瀬戸田町垂水1506-15",
+      "url": "https://dive-hiroshima.com/explore/160",
+      "municipality": "尾道市",
+      "municipality_code": "342050",
+      "prefecture": "広島県",
+      "language": "ja",
+      "quality_score": 1,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "1a0290d4502c6828",
+      "name": "【2026年版】広島県 春のおすすめ観光スポット９選｜#HIT編集部",
+      "description": "春の広島観光はこれで決まり！桜の名所・千光寺や平和記念公園、春の花畑が広がる世羅高原農場、この時期旬のいちご狩り、瀬戸内の多島美を巡るクルーズ、広島の街の魅力を体感するサイクリングツアーなど、春ならではのアクティビティも満載です！爽やかな春風を感じながら、広島の春の魅力を満喫しませんか？",
+      "coordinates": {
+        "lat": 34.586805555,
+        "lng": 133.056611111
+      },
+      "address": null,
+      "url": "https://dive-hiroshima.com/feature/feature-92817",
+      "municipality": "世羅町",
+      "municipality_code": "344621",
+      "prefecture": "広島県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q10936643",
+      "name": "大浜パーキングエリア",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "大浜パーキングエリア（おおはまパーキングエリア）は、広島県尾道市因島大浜町にある西瀬戸自動車道（瀬戸内しまなみ海道）のパーキングエリアである。",
+      "coordinates": {
+        "lat": 34.35238889,
+        "lng": 133.17016667
+      },
+      "url": "https://www.wikidata.org/wiki/Q10936643",
+      "municipality": null,
+      "municipality_code": null,
+      "prefecture": "広島県",
+      "quality_score": 0.65,
+      "kinds": [
+        "cycling_route"
+      ],
+      "q_relevance": 20,
+      "prominence_score": 0.6,
+      "crowd_band": "low",
+      "typical_visit_minutes": 240,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11485191",
+      "name": "広島県道466号向島因島瀬戸田自転車道線",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "広島県道466号向島因島瀬戸田自転車道線（ひろしまけんどう466ごう むかいしまいんのしませとだじてんしゃどうせん）は、尾道市向島町津部田と同市瀬戸田町垂水を結ぶ総排気量125cc以下の自動二輪車・原動機付自転車・小型特殊自動車・自転車・歩行者専用の一般県道である。愛媛県道325号今治大三島自転車道線と併せてしまなみ海道サイクリングロードと呼ばれている。",
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q11485191",
+      "municipality": null,
+      "municipality_code": null,
+      "prefecture": "広島県",
+      "quality_score": 0.65,
+      "kinds": [
+        "cycling_route"
+      ],
+      "q_relevance": 20,
+      "prominence_score": 0.6,
+      "crowd_band": "low",
+      "typical_visit_minutes": 240,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11042049",
+      "name": "尾道大橋出入口",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "尾道大橋出入口（おのみちおおはしでいりぐち）は、広島県尾道市山波町にある西瀬戸自動車道（通称・しまなみ海道）のインターチェンジである。",
+      "coordinates": {
+        "lat": 34.41602778,
+        "lng": 133.22019444
+      },
+      "url": "h
+```
+
+
+=== Case R-045 ===
+Topic / intent: 四万十川
+Query: 高知県の四万十川について教えてください
+Tool: get_spots({"prefecture": "Kochi", "q": "四万十川", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=710",
+      "municipality": "室戸市",
+      "municipality_code": "392022",
+      "prefecture": "高知県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=710",
+      "municipality": "安芸市",
+      "municipality_code": "392031",
+      "prefecture": "高知県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=710",
+      "municipality": "南国市",
+      "municipality_code": "392049",
+      "prefecture": "高知県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=710",
+      "municipality": "土佐市",
+      "municipality_code": "392057",
+      "prefecture": "高知県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=710",
+      "municipality": "須崎市",
+      "municipality_code": "392065",
+      "prefecture": "高知県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=710",
+      "municipality": "宿毛市",
+      "municipality_code": "392081",
+      "prefecture": "高知県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=710",
+      "municipality": "香南市",
+      "municipality_code": "392111",
+      "prefecture": "高知県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fddb4e2235233071",
+      "name": "四万十川",
+      "description": null,
+      "coordinates": {
+        "lat": 33.566841,
+        "lng": 133.543152
+      },
+      "address": "〒780-0056 高知県高知市北本町2-10-17",
+      "
+```
+
+
+=== Case R-046 ===
+Topic / intent: 那智の滝
+Query: 와카야마현의 나치노타키 폭포에 대해 알려주세요.
+Tool: search_area({"q": "那智の滝", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "那智の滝",
+  "match_count": 90,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q1365882",
+      "name_ja": "那智滝",
+      "description_en": "waterfall in Wakayama Prefecture, Japan [Place of Scenic Beauty / Natural Monument of Japan] [soundscape_100 / shin_ryoko_100 / saigoku_33 / heisei_meisui_100]",
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "municipality": "那智勝浦町",
+      "heritage_designations": [
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q710359",
+      "name_ja": "熊野那智大社",
+      "description_en": "Shinto shrine in Nachikatsuura, Wakayama Prefecture, Japan [Natural Monument of Japan / Important Cultural Property of Japan] [walking_road_500 / saigoku_33]",
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "municipality": "和歌山県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "notable"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "c5b686c0f20aad22",
+      "name": "仁淀川を堪能！仁淀ブルーの名所を巡る旅 | 高知県観光情報Webサイト「こうち旅ネット」",
+      "description": "仁淀川の水は透明度が高く、青く見えることから「仁淀ブルー」と呼ばれています。このコースは仁淀ブルーを堪能できる名所をぎゅっと１日で巡ります。もっとゆっくり巡って宿泊したり、アクティビティを楽しんだりとアレンジ可能な基本コースです。 仁淀ブルーの愛称で知られる仁淀川で最も下流にある沈下橋。 日高村といの町を結ぶ生活道で、交通量が比較的多く、待避所が4ヶ所設けられています。 橋の中央からは川面に立ったかのような絶景を楽しむことができます。 「仁淀ブルー」という言葉を全国に広めた、仁淀川支流にある神秘的な青い滝壺です。太陽の光や季節により刻々と変化する幻想的なブルーが、訪れる人々を魅了し続けています。水神の化身とされる大蛇伝説が残る地元の聖地でもあり、静かに見守る心で訪れたい特別な場所。写真愛好家、自然を愛する方、パワースポット好きにおすすめです。 透き通った青い水が美しい渓谷で、水晶淵、飛龍の滝、昇龍の滝、砂防ダムなど見どころ満載。 透明度の高い水と豊かな自然に包まれ、ハイキングが楽しめます。特に夏は水の青さが際立ち、四季折々の山の緑と調和して、訪れる人の心を癒します。レストラン・宿泊施設「宝来荘」があり、天然鮎や地元産のお茶を使った茶そばが楽しめます。（当日の営業情報を事前にご確認ください。） 池川大橋の下、土居川と小郷川にはさまれた河原にある自然豊かなキャンプ場。川の流れが穏やかなため親子連れも多く訪れ、川の透明度も高く「仁淀ブルー」が見れると人気スポットです。河原近くの高台にはトイレを完備。",
+      "url": "https://kochi-tabi.jp/model_course_secondry_item.html?id=45",
+      "municipality": "黒潮町",
+      "prefecture": "高知県",
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642741",
+      "name_ja": "那智四十八滝",
+      "description_en": "和歌山県那智勝浦町にある瀧篭行の行場",
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "municipality": "和歌山県",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642740",
+      "name_ja": "那智原始林",
+      "description_en": "forest in Japan [Natural Monument of Japan / Nationally-designated Natural Monument]",
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "municipality": "和歌山県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q122904442",
+        "Q30834580",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Nationally-designated Natural Monument",
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "tier": "notable"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q56347238",
+      "name_ja": "曾以の滝",
+      "description_en": "和歌山県那智勝浦町にある滝",
+      "prefecture_code": "30",
+      "prefecture": "和歌山県",
+      "municipality": "那智勝浦町",
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "tier": "broader"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11642744",
+    
+```
+
+
+=== Case R-047 ===
+Topic / intent: 阿波踊り
+Query: Tell me about the Awa Odori dance festival in Tokushima.
+Tool: get_festivals({"prefecture": "Tokushima", "keyword": "阿波踊り", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "36",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "lang": "en",
+  "no_local_festivals_advisory": {
+    "message_en": "No festivals are indexed in our local Schema.org Event corpus for the queried prefecture. The corpus prioritises 文化庁 重要無形民俗文化財 + UNESCO ICH + structured Event records; many marquee matsuri are surfaced via the canonical_festivals block below or via search_area.",
+    "message_ja": "このツールの Schema.org Event コーパスには該当県の祭りが未収録です。 主要 matsuri は下の canonical_festivals または search_area で取得してください。",
+    "alternative": "Try search_area with a specific festival name (e.g. q='雪まつり', q='ねぶた', q='祇園祭') — the search index covers the broader Wikidata catalogue."
+  },
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-048 ===
+Topic / intent: 有馬温泉
+Query: 有馬温泉の金泉・銀泉について教えて
+Tool: search_area({"q": "有馬温泉", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "有馬温泉",
+  "match_count": 37,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q4790673",
+      "name_ja": "有馬温泉",
+      "name_en": "Arima Onsen",
+      "description_en": "hot springs in Japan",
+      "coordinates": {
+        "lat": 34.79805556,
+        "lng": 135.2475
+      },
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 0.8500000000000001,
+      "crowd_band": "medium",
+      "kinds": [
+        "nihon_sanko_yu"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q4790676",
+      "name_ja": "有馬温泉駅",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": null,
+      "prefecture_code": "28",
+      "prefecture": "兵庫県",
+      "prominence_score": 0.55,
+      "crowd_band": "low",
+      "kinds": [
+        "kinki_eki_100"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "wheelchair": "yes",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_website",
+      "key": "dmo_page:dmo_0035_公社ひょうご観光本部:https://www.hyogo-tourism.jp/feature/detail_49.html",
+      "name": "有馬温泉徹底解説！楽しみ方・見どころから、グルメ・お土産・日帰り温泉や宿までご紹介。アクセス・周辺のおすすめ観光スポットも\t\t\t\t｜特集｜【公式】兵庫県観光サイト  兵庫観光ナビ (（公社）ひょうご観光本部)",
+      "description": "古くは『日本書紀』や『枕草子』に登場し、古くから高い評価を受けてきた有馬温泉。あの豊臣秀吉も妻のねね（北政所）とともに何度も有馬温泉に訪れ、その発展に力を注いだことで知られます。秀吉ゆかりの「太閤橋」や「ねね橋」のほか、贅を尽くした「湯山御殿」の遺構が展示される「太閤の湯殿館」も見どころ。有馬温泉を訪れたら、歴史散歩も楽しんでくださいね。 有馬温泉は2つの泉質で知られ、両方に浸かることで全身のコンディションが整うといわれています。まずは鉄分と塩分を含んだ赤茶色の「金泉」で体を芯から温め、次に炭酸を含んだ無色透明の「銀泉」で肌を整えて代謝をアップ。銀の湯の近くには「炭酸泉源公園」があり、天然の炭酸水を飲むこともできます。また、温泉街のメインストリート湯本坂や太閤通り沿いには、和菓子店やお土産物店が並びます。 有馬温泉には、塩分濃度が高く保湿、保温効果が高い「金泉」、炭酸によるデトックス効果が期待できる「銀泉」があり、各温泉旅館や公共の湯で日帰り入浴できます。ぜひ湯めぐりして有馬の温泉力を体感しましょう！ ■有馬温泉 太閤の湯日帰り入浴ができる大型温泉。金泉、銀泉の両方に加え、26種類のお風呂や岩盤浴、サウナとバラエティ豊か。レストランも併設されているので、ここだけで1日中過ごせます。電車代と入館券がセットになったクーポンや、WEB予約限定のお得なチケットも要チェック。 有馬温泉に着いたらまずはこれ！食べ歩きグルメからランチを楽しめる食事処まで、おすすめの立ち寄りスポットをご紹介します。",
+      "url": "https://www.hyogo-tourism.jp/feature/detail_49.html",
+      "tier": "broader"
+    },
+    {
+      "type": "designation",
+      "source": "dmo_website",
+      "key": "dmo_page:dmo_0035_公社ひょうご観光本部:https://www.hyogo-tourism.jp/spot/detail_1030.html",
+      "name": "有馬温泉 太閤の湯｜スポット｜【公式】兵庫県観光サイト  兵庫観光ナビ (（公社）ひょうご観光本部)",
+      "description": "郵便番号 〒651-1401 住所 兵庫県神戸市北区有馬町池の尻292-2 電話番号 078-904-2291 お問い合わせ 8:00〜20:00 営業時間 10:00〜22:00（最終入館は21:00） レストラン 「花じゅらく」 12:00～15:00（L.O.14:30）、17:30～21:30（L.O.20:30） フードコート「湯の山街道」11:00～21:30（L.O.21:00） 定休日 不定休 料金 【入館料】 ［平日］ 大人（フルタイムプラン）2,750円 小人（小学生）1,239円 幼児（3～5歳）440円 ［土・日曜、祝日、12月29日～31日］ 大人（フルタイムプラン）2,970円 小人（小学生）1,430円 幼児（3～5歳）550円 ［1月1日～3日・5月3日～5日・8月9日～15日］ 大人 3,300円 小人（小学生）1,430円 幼児（3～5歳）550円 ※他にも料金プランあり。詳細は公式サイトにてご確認ください。 ※「太閤の夢蒸楽」「ひょうたん夢蒸楽」は別途料金が必要です。 アクセス（車） 中国自動車道「西宮北IC」から約15分 阪神高速北神戸線「有馬口IC」から約10分 アクセス（公共交通機関） 神戸電鉄有馬線「有馬温泉駅」から徒歩約10分 駐車場 あり（4時間まで無料） ※館内での利用2,000円毎に1時間無料（最大合計7時間） 【駐車料金】 ［普通車］以降1時間400円、※土・日曜、祝日、特定日600円 ［バイク］無料 ※バスはお問い合わせください。 関連サイト 有馬温泉 太閤の湯公式サイト公式Instagram 有馬本温泉 金の湯 https://www.hyogo-tourism.jp/spot/detail_1028.html 有馬温泉 https://www.hyogo-tourism.jp/spot/detail_5256.html 瑞宝寺公園 https://www.hyogo-tourism.jp/spot/detail_1018.html 六甲ガーデンテラス https://www.hyogo-tourism.jp/spot/detail_1029.html 神戸市立六甲山牧場 https://www.hyogo-tourism.jp/spot/detail_1014.html 保久良神社 https://www.hyogo-tourism.jp/spot/detail_1025.html 武田尾温泉 https://www.hyogo-tourism.jp/spot/detail_6490.html 摩耶山・掬星台 https://www.hyogo-tourism.jp/spot/detail_1026.html 福知山線廃線敷 https://www.hyogo-tourism.jp/spot/detail_1037.html 神戸三田プレミアム・アウトレット https://www.hyogo-tourism.jp/spot/detail_1011.html https://www.hyogo-tourism.jp/spot/detail_1028.html https://www.hyogo-tourism.jp/spot/detail_5256.html https://www.hyogo-tourism.jp/spot/detail_1018.html",
+      "url": "https://www.hyog
+```
+
+
+=== Case R-049 ===
+Topic / intent: 沖縄 美ら海水族館
+Query: Haberlerini duymak istiyorum Okinawa'daki Churaumi Akvaryumu hakkında.
+Tool: get_spots({"prefecture": "Okinawa", "q": "美ら海水族館", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1445750",
+      "name": "沖縄美ら海水族館",
+      "name_en": "Okinawa Churaumi Aquarium",
+      "name_zh": "沖繩美麗海水族館",
+      "name_ko": "추라우미 수족관",
+      "description_en": "aquarium in Okinawa, Japan",
+      "coordinates": {
+        "lat": 26.69438889,
+        "lng": 127.87794444
+      },
+      "url": "https://www.wikidata.org/wiki/Q1445750",
+      "municipality": "本部町",
+      "municipality_code": "473081",
+      "prefecture": "沖縄県",
+      "quality_score": 0.65,
+      "kinds": [
+        "tourist_attraction",
+        "park",
+        "aquarium"
+      ],
+      "q_relevance": 20,
+      "prominence_score": 0.9,
+      "crowd_band": "medium",
+      "opening_hours": "Oct-Feb Mo-Su 08:30-18:30; Mar-Sep Mo-Su 08:30-20:00",
+      "wheelchair": "yes",
+      "phone": "+81 980483748",
+      "website": "https://churaumi.okinawa/",
+      "fee": "yes",
+      "typical_visit_minutes": 150,
+      "price_band": "mid",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "osm_override",
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ff6845b5d53a7b1c",
+      "name": "一般社団法人本部町観光協会",
+      "description": null,
+      "coordinates": {
+        "lat": 26.658037,
+        "lng": 127.885056
+      },
+      "address": "〒905-0212 沖縄県本部町字大浜881-1TEL：0980-47-3641",
+      "url": "https://www.motobu-ka.com/tourist_info",
+      "municipality": "本部町",
+      "municipality_code": "473081",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.47,
+      "q_relevance": 20,
+      "tier": "broader"
+    }
+  ],
+  "spot_tier_counts": {
+    "must_see": 1,
+    "notable": 0,
+    "broader": 1
+  },
+  "count": 2,
+  "total_before_limit": 2,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-050 ===
+Topic / intent: 熱海 温泉街
+Query: 静岡県熱海の温泉と観光スポット
+Tool: search_area({"q": "熱海", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "熱海",
+  "match_count": 96,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11257168",
+      "name_ja": "熱海城",
+      "name_en": "Atami Castle",
+      "description_en": "Atami Castle (熱海城, Atami-jō) is a Japanese castle replica on the summit of Nishikigaura Mountain in Atami, Shizuoka Prefecture. It is one of the most scenic spots in Atami City, offering a panoramic view of the city and southern Atami.",
+      "coordinates": {
+        "lat": 35.086388888,
+        "lng": 139.078611111
+      },
+      "prefecture_code": "22",
+      "prefecture": "静岡県",
+      "prominence_score": 0.8500000000000001,
+      "crowd_band": "medium",
+      "kinds": [
+        "tourist_attraction",
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "website": "https://atamijyo.com/",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "indoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q60987689",
+      "name_ja": "熱海梅園",
+      "name_en": "Atami Baien",
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.09725,
+        "lng": 139.0605
+      },
+      "prefecture_code": "22",
+      "prefecture": "静岡県",
+      "prominence_score": 0.8500000000000001,
+      "crowd_band": "medium",
+      "kinds": [
+        "garden"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "typical_visit_minutes": 60,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "BUNKA-00001246",
+      "name_ja": "熱海輪店（旧千葉銀行大網支店）",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.52538448,
+        "lng": 140.32126369
+      },
+      "prefecture_code": "12",
+      "prefecture": "千葉県",
+      "prominence_score": 0.6000000000000001,
+      "crowd_band": "medium",
+      "kinds": null,
+      "heritage_designations": [
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Q11633166"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q24868410",
+      "name_ja": "熱海トリックアート迷宮館",
+      "name_en": "Atami Trick Art Museum",
+      "description_en": null,
+      "coordinates": null,
+      "prefecture_code": "22",
+      "prefecture": "静岡県",
+      "prominence_score": 0.65,
+      "crowd_band": "low",
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "indoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q65272704",
+      "name_ja": "熱海秘宝館",
+      "name_en": "Atami Adult Museum",
+      "description_en": null,
+      "coordinates": {
+        "lat": 35.086833333,
+        "lng": 139.080222222
+      },
+      "prefecture_code": "22",
+      "prefecture": "静岡県",
+      "prominence_score": 0.65,
+      "crowd_band": "low",
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "opening_hours": "Mo-Su 9:30-17:30",
+      "fee": "yes",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+     
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.
