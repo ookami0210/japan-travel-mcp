@@ -68,23 +68,29 @@ if [ "$cmd" = "prepare" ]; then
   # iterations even before the LLM judges have started.
   "$PY" docs/quality/deterministic_metrics.py --label "$label" || true
 
-  # Multi-judge default: copy batch dir to a sibling for the second judge.
+  # Multi-judge default: copy batch dir to siblings for judges 2 and 3.
   # Each judge scores the same prompts independently; the median is taken
-  # at aggregation time so single-session judge variance is halved.
+  # at aggregation time so single-session judge variance is reduced.
+  # Three judges (vs the previous two) eliminate the "single outlier swings
+  # the median" failure mode — the median of 3 is the middle vote, robust
+  # to one rogue judge.
   src_dir="docs/quality/judge_v3_batches/${label}_100case"
   if [ -d "$src_dir" ]; then
-    rm -rf "docs/quality/judge_v3_batches/${label}_100case_j2"
-    cp -r "$src_dir" "docs/quality/judge_v3_batches/${label}_100case_j2"
-    rm -f "docs/quality/judge_v3_batches/${label}_100case_j2"/batch_*_scored.jsonl
+    for jn in 2 3; do
+      rm -rf "docs/quality/judge_v3_batches/${label}_100case_j${jn}"
+      cp -r "$src_dir" "docs/quality/judge_v3_batches/${label}_100case_j${jn}"
+      rm -f "docs/quality/judge_v3_batches/${label}_100case_j${jn}"/batch_*_scored.jsonl
+    done
   fi
 
   echo
-  echo "✅ Prepare done. Now spawn 8 Sonnet subagents (one per batch × 2 judges) — multi-judge default."
+  echo "✅ Prepare done. Now spawn 12 Sonnet subagents (4 batches × 3 judges) — multi-judge default."
   echo "   Judge 1 batches: docs/quality/judge_v3_batches/${label}_100case/"
   echo "   Judge 2 batches: docs/quality/judge_v3_batches/${label}_100case_j2/"
-  echo "   Each batch_N_prompt.txt is identical between j1/j2; the variance"
+  echo "   Judge 3 batches: docs/quality/judge_v3_batches/${label}_100case_j3/"
+  echo "   Each batch_N_prompt.txt is identical across j1/j2/j3; the variance"
   echo "   we are pinning down sits in the Sonnet session itself, not the prompt."
-  echo "   When all 8 scored.jsonl files are written, run:"
+  echo "   When all 12 scored.jsonl files are written, run:"
   echo "     bash docs/quality/auto_loop.sh aggregate $label <previous-label>"
   exit 0
 fi
@@ -94,6 +100,7 @@ if [ "$cmd" = "aggregate" ]; then
 
   batch_dir="docs/quality/judge_v3_batches/${label}_100case"
   batch_dir_j2="docs/quality/judge_v3_batches/${label}_100case_j2"
+  batch_dir_j3="docs/quality/judge_v3_batches/${label}_100case_j3"
   if [ ! -d "$batch_dir" ]; then
     echo "  batch dir missing: $batch_dir" >&2
     exit 2
@@ -102,24 +109,29 @@ if [ "$cmd" = "aggregate" ]; then
   expected_batches=4
   j1_found=$(ls "$batch_dir"/batch_*_scored.jsonl 2>/dev/null | wc -l | tr -d ' ')
   if [ "$j1_found" -ne "$expected_batches" ]; then
+    # Maybe j1 was already renamed in a previous aggregate run
+    j1_found=$(ls "$batch_dir"/batch_*_judge1_scored.jsonl 2>/dev/null | wc -l | tr -d ' ')
+  fi
+  if [ "$j1_found" -ne "$expected_batches" ]; then
     echo "  expected $expected_batches j1 scored batches, found $j1_found in $batch_dir" >&2
     exit 3
   fi
 
-  # Multi-judge default: when judge 2 outputs are present, consolidate them
-  # alongside judge 1 and run the multi-judge aggregator (median per case
-  # per dim). This is the canonical scoring path post 2026-05-09; single-
-  # judge variance was measured at ±20pp Sat which is too noisy to compare.
+  # Multi-judge default: 3-judge consolidation. j1 lives in $batch_dir
+  # (renamed to _judge1_scored.jsonl), j2 in $batch_dir_j2 (copied as
+  # _judge2_scored.jsonl), j3 in $batch_dir_j3 (copied as _judge3_scored.jsonl).
+  # The aggregator computes the per-dim median across the 3 judges.
   j2_found=0
+  j3_found=0
   if [ -d "$batch_dir_j2" ]; then
     j2_found=$(ls "$batch_dir_j2"/batch_*_scored.jsonl 2>/dev/null | wc -l | tr -d ' ')
   fi
+  if [ -d "$batch_dir_j3" ]; then
+    j3_found=$(ls "$batch_dir_j3"/batch_*_scored.jsonl 2>/dev/null | wc -l | tr -d ' ')
+  fi
 
   if [ "$j2_found" -eq "$expected_batches" ]; then
-    echo "── aggregate $label MULTI-JUDGE (prev=$prev)"
-    # Rename j1 outputs to batch_N_judge1_scored.jsonl and copy j2 outputs
-    # to batch_N_judge2_scored.jsonl in the same dir, so the multijudge
-    # aggregator finds both halves.
+    echo "── aggregate $label MULTI-JUDGE (j1+j2$([ "$j3_found" -eq "$expected_batches" ] && echo "+j3"); prev=$prev)"
     for n in 1 2 3 4; do
       if [ -f "$batch_dir/batch_${n}_scored.jsonl" ] && [ ! -f "$batch_dir/batch_${n}_judge1_scored.jsonl" ]; then
         mv "$batch_dir/batch_${n}_scored.jsonl" "$batch_dir/batch_${n}_judge1_scored.jsonl"
@@ -127,10 +139,11 @@ if [ "$cmd" = "aggregate" ]; then
       if [ -f "$batch_dir_j2/batch_${n}_scored.jsonl" ]; then
         cp "$batch_dir_j2/batch_${n}_scored.jsonl" "$batch_dir/batch_${n}_judge2_scored.jsonl"
       fi
+      if [ -f "$batch_dir_j3/batch_${n}_scored.jsonl" ]; then
+        cp "$batch_dir_j3/batch_${n}_scored.jsonl" "$batch_dir/batch_${n}_judge3_scored.jsonl"
+      fi
     done
     "$PY" docs/quality/aggregate_v3_multijudge.py --label "$label"
-    # Mirror the multijudge file to the canonical scored path so detail_v3
-    # / delta-comparison logic that reads the .v3.jsonl file still works.
     cp "docs/quality/test_results_scored.${label}.v3.multijudge.jsonl" \
        "docs/quality/test_results_scored.${label}.v3.jsonl"
     "$PY" docs/quality/detail_v3.py --label "$label"
