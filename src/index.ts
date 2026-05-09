@@ -1000,6 +1000,12 @@ async function searchArea(args: {
         const aName = `${a.name_ja ?? ""} ${a.name_en ?? ""}`;
         if (intent.lexical_exclusions.some((tok) => aName.includes(tok))) continue;
       }
+      // Negative-constraint filter: drop entities whose name OR
+      // admin_name OR prefecture name contains any excluded toponym.
+      if (intent.negative_constraints && intent.negative_constraints.length > 0) {
+        const haystack = `${a.name_ja ?? ""} ${a.name_en ?? ""} ${a.admin_name ?? ""} ${p.prefecture.name} ${p.prefecture.name_en ?? ""}`;
+        if (intent.negative_constraints.some((tok) => haystack.includes(tok))) continue;
+      }
       addMatch(
         s + notability + langBoost + heritageBoost + intentKindsBoost + wildPenalty + regionBoost,
         {
@@ -1280,6 +1286,14 @@ async function searchArea(args: {
         : "Embedding index not built — falling back to lexical match. Run `npm run embed:build` to enable hybrid retrieval.",
     ...(queryIntentField ? { query_intent: queryIntentField } : {}),
     ...(routingHintField ? { routing_hint: routingHintField } : {}),
+    ...(intent.infeasibility
+      ? {
+          not_available: {
+            ...intent.infeasibility,
+            note: "The query implies a request that is not realistically possible in Japan. Surface the reason verbatim to the end user, then offer alternatives via the listed alt_kinds.",
+          },
+        }
+      : {}),
   };
 }
 
@@ -2146,6 +2160,11 @@ async function getSpots(args: {
         const aName = `${a.name_ja ?? ""} ${a.name_en ?? ""}`;
         if (intent.lexical_exclusions.some((tok) => aName.includes(tok))) continue;
       }
+      // Negative-constraint filter (NOT / 以外 / except).
+      if (intent?.negative_constraints && intent.negative_constraints.length > 0) {
+        const haystack = `${a.name_ja ?? ""} ${a.name_en ?? ""} ${a.admin_name ?? ""} ${p.prefecture.name} ${p.prefecture.name_en ?? ""}`;
+        if (intent.negative_constraints.some((tok) => haystack.includes(tok))) continue;
+      }
       if (heritageClassMatched) wkRec.via = "heritage_class_match";
       else if (kindsClassMatched) wkRec.via = "kinds_class_match";
       if (heritageCount > 0) {
@@ -2225,6 +2244,14 @@ async function getSpots(args: {
       "the top-N by raw quality (fallback_used=true).",
     ...(queryIntentField ? { query_intent: queryIntentField } : {}),
     ...(routingHintField ? { routing_hint: routingHintField } : {}),
+    ...(intent?.infeasibility
+      ? {
+          not_available: {
+            ...intent.infeasibility,
+            note: "The query implies a request that is not realistically possible in Japan. Surface the reason verbatim to the end user, then offer alternatives via the listed alt_kinds.",
+          },
+        }
+      : {}),
   };
 }
 
