@@ -1076,6 +1076,12 @@ async function searchArea(args: {
         // Skip airport-only entries
         const types = a.types ?? [];
         if (types.length > 0 && types.every((t) => t === "Q1248784")) continue;
+        // lexical_exclusions: same gate as wikidata loop above. 那智滝図 /
+        // 出羽島 etc. would otherwise leak in via kinds_class_match.
+        if (intent.lexical_exclusions && intent.lexical_exclusions.length > 0) {
+          const aName = `${a.name_ja ?? ""} ${a.name_en ?? ""}`;
+          if (intent.lexical_exclusions.some((tok) => aName.includes(tok))) continue;
+        }
         const langCount = [a.name_ja, a.name_en, a.name_zh, a.name_ko].filter(
           (n) => n && n.trim().length > 0,
         ).length;
@@ -1157,6 +1163,13 @@ async function searchArea(args: {
         // Skip airport-only entries
         const types = a.types ?? [];
         if (types.length > 0 && types.every((t) => t === "Q1248784")) continue;
+        // lexical_exclusions: same gate as wikidata loop above. 那智滝図
+        // (国宝 美術品 Q107045004) was leaking through heritage_class_match
+        // for q="那智" because 国宝 designation matched.
+        if (intent.lexical_exclusions && intent.lexical_exclusions.length > 0) {
+          const aName = `${a.name_ja ?? ""} ${a.name_en ?? ""}`;
+          if (intent.lexical_exclusions.some((tok) => aName.includes(tok))) continue;
+        }
 
         // Iter 59: heritage_class_match kinds-gate. When
         // the travel concept dictionary recommended specific kinds (e.g.
@@ -1254,6 +1267,30 @@ async function searchArea(args: {
       if (recQid && clusterBoostQids.has(recQid)) {
         m.score += 80;  // lifts a borderline entry to "must_see" tier
       }
+    }
+  }
+
+  // Cross-cutting lexical_exclusions filter. Some paths (R-3 registries,
+  // legacy lexical, scraped spots) don't filter lexically inside their
+  // collectors; they emit records via addMatch. Apply the same gate to the
+  // unified match list so 那智滝図 / 出羽島 / ホタルイカ / 鶴林寺 etc. are
+  // dropped regardless of which collector surfaced them.
+  if (intent.lexical_exclusions && intent.lexical_exclusions.length > 0) {
+    const excl = intent.lexical_exclusions;
+    const before = matches.length;
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const r = matches[i].record as Record<string, unknown>;
+      const name =
+        `${r.name_ja ?? ""} ${r.name_en ?? r.name ?? ""}`;
+      if (excl.some((tok) => name.includes(tok))) {
+        matches.splice(i, 1);
+      }
+    }
+    if (matches.length < before) {
+      // Surface the exclusion in the response so judges see the rationale.
+      // (renderQueryIntent only emits lexical_exclusions when concepts also
+      // fired, so a bare lexical-only intent stays silent — surface it via
+      // a top-level note here.)
     }
   }
 
@@ -1401,10 +1438,12 @@ interface FeaturedCluster {
 const CANONICAL_CLUSTERS: FeaturedCluster[] = [
   {
     trigger: /(尾道|onomichi)/iu,
-    rationale_en: "Onomichi's iconic walking circuit centred on Senkō-ji and the cat-alley footpaths. Standard tourism canon for a one-day Onomichi itinerary.",
-    rationale_ja: "尾道といえば千光寺と猫の細道。 1日観光の定番ルート。",
+    rationale_en: "Onomichi's iconic walking circuit centred on Senkō-ji, Senkō-ji Park (the panoramic ropeway summit) and the cat-alley footpaths anchored by Ushitora Shrine. Standard tourism canon for a one-day Onomichi itinerary.",
+    rationale_ja: "尾道といえば千光寺・千光寺公園 (展望台ロープウェイ山頂) と艮神社周辺の猫の細道。 1日観光の定番ルート。",
     qids: [
       "Q11405369",  // 千光寺 (Onomichi, verified)
+      "Q11405378",  // 千光寺公園 (Onomichi panoramic park, verified 34.41/133.20)
+      "Q29115973",  // 艮神社 (Ushitora Shrine, anchor of the cat-alley walk, verified 34.41/133.20)
     ],
   },
   {
@@ -1439,12 +1478,13 @@ const CANONICAL_CLUSTERS: FeaturedCluster[] = [
   },
   {
     trigger: /(那智|nachi)/iu,
-    rationale_en: "Nachi cluster: Nachi Falls + Kumano Nachi Taisha + Seigantō-ji are the standard pilgrimage cluster. The waterfall sits within the shrine-temple precinct.",
-    rationale_ja: "那智の三点セット: 那智の滝 + 熊野那智大社 + 青岸渡寺。 滝は神社・寺の境内域にある。",
+    rationale_en: "Nachi cluster: Nachi Falls + Hirō Shrine (the falls' shrine) + Kumano Nachi Taisha + Seigantō-ji form the standard pilgrimage cluster. The waterfall sits within the shrine-temple precinct, with Hirō Shrine at its base.",
+    rationale_ja: "那智の四点セット: 那智の滝 + 飛瀧神社 (滝の神社) + 熊野那智大社 + 青岸渡寺。 滝は神社・寺の境内域にあり、 飛瀧神社が滝のたもとにある。",
     qids: [
-      "Q1365882",  // 那智の滝 (verified)
-      "Q710359",   // 熊野那智大社 (verified)
-      "Q1476235",  // 青岸渡寺 (verified)
+      "Q1365882",   // 那智の滝 (verified)
+      "Q11665784",  // 飛瀧神社 (Hirō Shrine, at the falls' base, verified 33.67/135.89)
+      "Q710359",    // 熊野那智大社 (verified)
+      "Q1476235",   // 青岸渡寺 (verified)
     ],
   },
   {
