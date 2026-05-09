@@ -1337,49 +1337,47 @@ interface FeaturedCluster {
   qids: string[];
 }
 
+// QIDs verified against current master (data/_state/wikidata_attractions.json)
+// 2026-05-09 dev session. When master is re-fetched these may need re-audit;
+// the resolver gracefully drops cluster items not in master so a stale QID
+// becomes a no-op rather than an error.
 const CANONICAL_CLUSTERS: FeaturedCluster[] = [
   {
     trigger: /(尾道|onomichi)/iu,
     rationale_en: "Onomichi's iconic walking circuit centred on Senkō-ji and the cat-alley footpaths. Standard tourism canon for a one-day Onomichi itinerary.",
     rationale_ja: "尾道といえば千光寺と猫の細道。 1日観光の定番ルート。",
     qids: [
-      "Q11491268",  // 千光寺 (Onomichi)
-      "Q11491270",  // 千光寺公園
-      "Q11526073",  // 浄土寺 (Onomichi)
-      "Q11515395",  // 西國寺
-      "Q1185645",   // しまなみ海道 (cycling route from Onomichi)
+      "Q11405369",  // 千光寺 (Onomichi, verified)
     ],
   },
   {
     trigger: /(直島|naoshima)/iu,
-    rationale_en: "Naoshima art-island canon: Benesse Art Site + the headline museums (Chichu, Lee Ufan) + the Art House Project + Yayoi Kusama's outdoor pumpkins. The Honmura villageside Art Houses anchor the village walking route.",
-    rationale_ja: "直島アート巡りの定番。 ベネッセハウス周辺 + 地中美術館 + 李禹煥美術館 + 家プロジェクト + 草間彌生のかぼちゃ。",
+    rationale_en: "Naoshima art-island canon: Benesse House + Chichu Art Museum + Lee Ufan Museum. The Honmura villageside Art Houses anchor the village walking route.",
+    rationale_ja: "直島アート巡りの定番。 ベネッセハウス + 地中美術館 + 李禹煥美術館。",
     qids: [
-      "Q1146589",   // 地中美術館 (Chichu Art Museum)
-      "Q11556073",  // 李禹煥美術館 (Lee Ufan Museum)
-      "Q1052875",   // ベネッセハウス
-      "Q11277717",  // 家プロジェクト (Art House Project)
+      "Q4556499",    // 地中美術館 (Chichu Art Museum, verified)
+      "Q11337013",   // ベネッセハウス (Benesse House, verified)
+      "Q131630258",  // ベネッセハウス ミュージアム (verified)
+      "Q11522528",   // 李禹煥美術館 (Lee Ufan Museum, verified)
     ],
   },
   {
     trigger: /(出羽三山|dewa\s*sanzan|three\s*mountains\s*of\s*dewa)/iu,
-    rationale_en: "Dewa Sanzan = three sacred mountains of Yamagata pilgrimage: Haguro / Gas / Yudono. Each peak has its own shrine; the standard pilgrimage walks all three.",
-    rationale_ja: "出羽三山 = 山形の三つの霊峰 (羽黒山 / 月山 / 湯殿山)。 巡礼は三山すべてを歩く。",
+    rationale_en: "Dewa Sanzan = three sacred mountains of Yamagata pilgrimage. Yudono Shrine and Haguro cedar-lined paths anchor the standard pilgrimage walk.",
+    rationale_ja: "出羽三山 = 山形の三霊峰。 湯殿山神社と羽黒のスギ並木が巡礼定番ルート。",
     qids: [
-      "Q1190095",   // 羽黒山
-      "Q1129030",   // 月山
-      "Q1187471",   // 湯殿山
-      "Q11623078",  // 出羽三山神社
+      "Q11563607",   // 湯殿山神社 (verified)
+      "Q113643746",  // 羽黒山のスギ並木 (verified)
+      "Q112080442",  // 羽黒山の爺スギ (verified)
     ],
   },
   {
     trigger: /(角館|kakunodate)/iu,
-    rationale_en: "Kakunodate samurai district. Individual buke yashiki (Aoyagi-ke, Ishiguro-ke, Iwahashi-ke, Kawarada-ke, Odano-ke) anchor the walk; weeping cherries line the streets.",
-    rationale_ja: "角館武家屋敷通り。 個別の屋敷 (青柳家 / 石黒家 / 岩橋家 / 河原田家 / 小田野家) が歩きの軸、 しだれ桜の通り。",
+    rationale_en: "Kakunodate samurai district. Individual buke yashiki (Aoyagi-ke, Ishiguro-ke) anchor the walk; weeping cherries line the streets.",
+    rationale_ja: "角館武家屋敷通り。 青柳家 / 石黒家 が歩きの軸、 しだれ桜の通り。",
     qids: [
-      "Q11505094",  // 青柳家
-      "Q11516022",  // 石黒家
-      "Q11457866",  // 岩橋家
+      "Q11456008",  // 青柳家 (verified)
+      "Q11432009",  // 石黒家 (verified)
     ],
   },
   {
@@ -1387,19 +1385,18 @@ const CANONICAL_CLUSTERS: FeaturedCluster[] = [
     rationale_en: "Nachi cluster: Nachi Falls + Kumano Nachi Taisha + Seigantō-ji are the standard pilgrimage cluster. The waterfall sits within the shrine-temple precinct.",
     rationale_ja: "那智の三点セット: 那智の滝 + 熊野那智大社 + 青岸渡寺。 滝は神社・寺の境内域にある。",
     qids: [
-      "Q1365882",  // 那智の滝
-      "Q1162527",  // 熊野那智大社
-      "Q1187419",  // 青岸渡寺
+      "Q1365882",  // 那智の滝 (verified)
+      "Q710359",   // 熊野那智大社 (verified)
+      "Q1476235",  // 青岸渡寺 (verified)
     ],
   },
   {
     trigger: /(高野山|mount\s*koya|koyasan)/iu,
-    rationale_en: "Mount Koya headline destinations: Kongōbu-ji (head temple), Okunoin (cemetery + Kobo Daishi mausoleum), Daimon, Konpon Daitō. Standard pilgrimage circuit.",
-    rationale_ja: "高野山の中核: 金剛峯寺 (総本山) / 奥之院 (弘法大師御廟) / 大門 / 根本大塔。 巡礼定番ルート。",
+    rationale_en: "Mount Koya headline destinations: Kongōbu-ji (head temple), Okunoin (Kobo Daishi mausoleum). Standard pilgrimage circuit.",
+    rationale_ja: "高野山の中核: 金剛峯寺 / 奥之院。 巡礼定番ルート。",
     qids: [
-      "Q535065",   // 高野山
-      "Q1189489",  // 金剛峯寺
-      "Q1198782",  // 奥之院
+      "Q535065",    // 高野山 (verified)
+      "Q134534294", // 奥之院 (verified)
     ],
   },
   {
@@ -1407,17 +1404,16 @@ const CANONICAL_CLUSTERS: FeaturedCluster[] = [
     rationale_en: "Yakushima signature trails: Jōmon Sugi (oldest cedar) and Shiratani Unsuikyō (the Princess Mononoke moss forest), reached via Arakawa / Kusugawa trailheads.",
     rationale_ja: "屋久島の代表ルート: 縄文杉 (最古の屋久杉) と白谷雲水峡 (もののけ姫の苔の森)。 荒川登山口 / 楠川登山口から。",
     qids: [
-      "Q860066",   // 縄文杉 (Jomon Sugi)
-      "Q11649097", // 白谷雲水峡 (Shiratani Unsuikyo)
+      "Q1056108",   // 縄文杉 (verified)
+      "Q11580376",  // 白谷雲水峡 (verified)
     ],
   },
   {
     trigger: /(石見銀山|iwami\s*ginzan)/iu,
-    rationale_en: "Iwami Ginzan UNESCO WHS components: Ryūgenji mineshaft + Ōmori district preserved townscape + transport route to Tomogaura.",
-    rationale_ja: "石見銀山 UNESCO WHS の構成: 龍源寺間歩 + 大森町並み保存地区 + 鞆ヶ浦への銀山街道。",
+    rationale_en: "Iwami Ginzan UNESCO WHS area: the Ōmori preserved townscape anchors the silver-mine heritage route.",
+    rationale_ja: "石見銀山 UNESCO WHS エリア: 大森町並み保存地区が銀山遺産ルートの中心。",
     qids: [
-      "Q11502077",  // 龍源寺間歩
-      "Q11541793",  // 大森地区
+      "Q11436294",  // 大森 (verified — Ōmori district)
     ],
   },
 ];
