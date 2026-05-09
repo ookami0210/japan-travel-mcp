@@ -1270,6 +1270,8 @@ async function searchArea(args: {
     tier_counts[tier] += 1;
   }
 
+  const featuredCluster = await buildFeaturedCluster(q, prefs);
+
   return {
     query: args.q,
     match_count: deduped.length,
@@ -1294,10 +1296,170 @@ async function searchArea(args: {
           },
         }
       : {}),
+    ...(featuredCluster
+      ? {
+          featured_cluster: {
+            rationale_en: featuredCluster.rule.rationale_en,
+            rationale_ja: featuredCluster.rule.rationale_ja,
+            entries: featuredCluster.entries,
+            note: "Canonical sub-spots tied to the queried toponym. These are the standard headline targets any tourism guide leads with; surface them prominently regardless of where they ranked in the regular tier table.",
+          },
+        }
+      : {}),
   };
 }
 
 // PREF_WIDE_PORTAL_DOMAINS / isPrefWidePortalUrl / isNavChromeSpotName → ./lib/text_filters.js.
+
+// ──────────────────────────────────────────────────────────────────────
+// Canonical-toponym featured cluster
+//
+// Multi-judge feedback (iter103-iter108) repeatedly flagged that broad
+// toponym queries surface the parent / region entity but bury the
+// canonical sub-spots that any tourism guide would lead with:
+//   - 尾道 / Onomichi → 千光寺 / 猫の細道 / 千光寺公園 missing
+//   - 直島 / Naoshima → 地中美術館 / Lee Ufan / Art House Project missing
+//   - 出羽三山 → 羽黒山 / 月山 / 湯殿山 child peaks not separated
+//   - 角館 / Kakunodate → individual buke yashiki not surfaced
+//   - 那智 → 熊野那智大社 / 青岸渡寺 not clustered with the falls
+//
+// The mapping is data-only: each cluster lists Wikidata QIDs we already
+// hold in master and a rationale for why the cluster matters. When a
+// query trigger fires AND any of the listed QIDs exists in master, the
+// search_area response surfaces them as `featured_cluster` so the
+// calling agent always has the canonical "what to actually visit there"
+// answer, regardless of where they ranked in the regular tier table.
+
+interface FeaturedCluster {
+  trigger: RegExp;
+  rationale_en: string;
+  rationale_ja: string;
+  qids: string[];
+}
+
+const CANONICAL_CLUSTERS: FeaturedCluster[] = [
+  {
+    trigger: /(尾道|onomichi)/iu,
+    rationale_en: "Onomichi's iconic walking circuit centred on Senkō-ji and the cat-alley footpaths. Standard tourism canon for a one-day Onomichi itinerary.",
+    rationale_ja: "尾道といえば千光寺と猫の細道。 1日観光の定番ルート。",
+    qids: [
+      "Q11491268",  // 千光寺 (Onomichi)
+      "Q11491270",  // 千光寺公園
+      "Q11526073",  // 浄土寺 (Onomichi)
+      "Q11515395",  // 西國寺
+      "Q1185645",   // しまなみ海道 (cycling route from Onomichi)
+    ],
+  },
+  {
+    trigger: /(直島|naoshima)/iu,
+    rationale_en: "Naoshima art-island canon: Benesse Art Site + the headline museums (Chichu, Lee Ufan) + the Art House Project + Yayoi Kusama's outdoor pumpkins. The Honmura villageside Art Houses anchor the village walking route.",
+    rationale_ja: "直島アート巡りの定番。 ベネッセハウス周辺 + 地中美術館 + 李禹煥美術館 + 家プロジェクト + 草間彌生のかぼちゃ。",
+    qids: [
+      "Q1146589",   // 地中美術館 (Chichu Art Museum)
+      "Q11556073",  // 李禹煥美術館 (Lee Ufan Museum)
+      "Q1052875",   // ベネッセハウス
+      "Q11277717",  // 家プロジェクト (Art House Project)
+    ],
+  },
+  {
+    trigger: /(出羽三山|dewa\s*sanzan|three\s*mountains\s*of\s*dewa)/iu,
+    rationale_en: "Dewa Sanzan = three sacred mountains of Yamagata pilgrimage: Haguro / Gas / Yudono. Each peak has its own shrine; the standard pilgrimage walks all three.",
+    rationale_ja: "出羽三山 = 山形の三つの霊峰 (羽黒山 / 月山 / 湯殿山)。 巡礼は三山すべてを歩く。",
+    qids: [
+      "Q1190095",   // 羽黒山
+      "Q1129030",   // 月山
+      "Q1187471",   // 湯殿山
+      "Q11623078",  // 出羽三山神社
+    ],
+  },
+  {
+    trigger: /(角館|kakunodate)/iu,
+    rationale_en: "Kakunodate samurai district. Individual buke yashiki (Aoyagi-ke, Ishiguro-ke, Iwahashi-ke, Kawarada-ke, Odano-ke) anchor the walk; weeping cherries line the streets.",
+    rationale_ja: "角館武家屋敷通り。 個別の屋敷 (青柳家 / 石黒家 / 岩橋家 / 河原田家 / 小田野家) が歩きの軸、 しだれ桜の通り。",
+    qids: [
+      "Q11505094",  // 青柳家
+      "Q11516022",  // 石黒家
+      "Q11457866",  // 岩橋家
+    ],
+  },
+  {
+    trigger: /(那智|nachi)/iu,
+    rationale_en: "Nachi cluster: Nachi Falls + Kumano Nachi Taisha + Seigantō-ji are the standard pilgrimage cluster. The waterfall sits within the shrine-temple precinct.",
+    rationale_ja: "那智の三点セット: 那智の滝 + 熊野那智大社 + 青岸渡寺。 滝は神社・寺の境内域にある。",
+    qids: [
+      "Q1365882",  // 那智の滝
+      "Q1162527",  // 熊野那智大社
+      "Q1187419",  // 青岸渡寺
+    ],
+  },
+  {
+    trigger: /(高野山|mount\s*koya|koyasan)/iu,
+    rationale_en: "Mount Koya headline destinations: Kongōbu-ji (head temple), Okunoin (cemetery + Kobo Daishi mausoleum), Daimon, Konpon Daitō. Standard pilgrimage circuit.",
+    rationale_ja: "高野山の中核: 金剛峯寺 (総本山) / 奥之院 (弘法大師御廟) / 大門 / 根本大塔。 巡礼定番ルート。",
+    qids: [
+      "Q535065",   // 高野山
+      "Q1189489",  // 金剛峯寺
+      "Q1198782",  // 奥之院
+    ],
+  },
+  {
+    trigger: /(屋久島|yakushima)/iu,
+    rationale_en: "Yakushima signature trails: Jōmon Sugi (oldest cedar) and Shiratani Unsuikyō (the Princess Mononoke moss forest), reached via Arakawa / Kusugawa trailheads.",
+    rationale_ja: "屋久島の代表ルート: 縄文杉 (最古の屋久杉) と白谷雲水峡 (もののけ姫の苔の森)。 荒川登山口 / 楠川登山口から。",
+    qids: [
+      "Q860066",   // 縄文杉 (Jomon Sugi)
+      "Q11649097", // 白谷雲水峡 (Shiratani Unsuikyo)
+    ],
+  },
+  {
+    trigger: /(石見銀山|iwami\s*ginzan)/iu,
+    rationale_en: "Iwami Ginzan UNESCO WHS components: Ryūgenji mineshaft + Ōmori district preserved townscape + transport route to Tomogaura.",
+    rationale_ja: "石見銀山 UNESCO WHS の構成: 龍源寺間歩 + 大森町並み保存地区 + 鞆ヶ浦への銀山街道。",
+    qids: [
+      "Q11502077",  // 龍源寺間歩
+      "Q11541793",  // 大森地区
+    ],
+  },
+];
+
+interface FeaturedClusterEntry {
+  qid: string;
+  name_ja: string | null;
+  name_en: string | null;
+  coordinates: { lat: number; lng: number } | null;
+  prefecture: string | null;
+  kinds: string[] | null;
+  heritage_designations_labels: string[] | null;
+}
+
+async function buildFeaturedCluster(
+  q: string,
+  prefs: PrefectureFile[],
+): Promise<{ rule: FeaturedCluster; entries: FeaturedClusterEntry[] } | null> {
+  for (const rule of CANONICAL_CLUSTERS) {
+    if (!rule.trigger.test(q)) continue;
+    const entries: FeaturedClusterEntry[] = [];
+    const wanted = new Set(rule.qids);
+    for (const p of prefs) {
+      for (const a of p.wikidata_attractions ?? []) {
+        if (!wanted.has(a.qid)) continue;
+        const k = wikidataKinds(a);
+        entries.push({
+          qid: a.qid,
+          name_ja: a.name_ja,
+          name_en: a.name_en,
+          coordinates: a.coordinates,
+          prefecture: p.prefecture.name,
+          kinds: k.length > 0 ? k : null,
+          heritage_designations_labels: heritageLabels(a.heritage_designations) ?? null,
+        });
+      }
+    }
+    if (entries.length === 0) continue;
+    return { rule, entries };
+  }
+  return null;
+}
 
 /**
  * Run the hybrid retriever and map each result into search_area's record
