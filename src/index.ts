@@ -996,6 +996,10 @@ async function searchArea(args: {
           && !passesPriceBandCap(kindsDefaults.price_band, intent.price_band_cap)) continue;
       if (intent.weather_constraint
           && !passesIndoorFilter(kindsDefaults.indoor_capable, intent.weather_constraint)) continue;
+      if (intent.lexical_exclusions && intent.lexical_exclusions.length > 0) {
+        const aName = `${a.name_ja ?? ""} ${a.name_en ?? ""}`;
+        if (intent.lexical_exclusions.some((tok) => aName.includes(tok))) continue;
+      }
       addMatch(
         s + notability + langBoost + heritageBoost + intentKindsBoost + wildPenalty + regionBoost,
         {
@@ -2133,6 +2137,14 @@ async function getSpots(args: {
       if (effectiveWeather
           && !passesIndoorFilter(wkKindsDefaults.indoor_capable, effectiveWeather)) {
         continue;
+      }
+      // Lexical-disambiguation guard: drop entities whose name contains
+      // any token from intent.lexical_exclusions (firefly query → drop
+      // firefly-squid; crane query → drop municipality/place names with
+      // 鶴 substring). Cheap O(n) substring scan; rare path.
+      if (intent?.lexical_exclusions && intent.lexical_exclusions.length > 0) {
+        const aName = `${a.name_ja ?? ""} ${a.name_en ?? ""}`;
+        if (intent.lexical_exclusions.some((tok) => aName.includes(tok))) continue;
       }
       if (heritageClassMatched) wkRec.via = "heritage_class_match";
       else if (kindsClassMatched) wkRec.via = "kinds_class_match";

@@ -255,6 +255,30 @@ describe("extractTravelIntent — weather constraint detection", () => {
   });
 });
 
+describe("extractTravelIntent — lexical disambiguation", () => {
+  it("hotaru / firefly query without squid context fires lexical_exclusions", () => {
+    const r = extractTravelIntent("firefly viewing in Japan");
+    expect(r.lexical_exclusions).toBeDefined();
+    expect(r.lexical_exclusions).toContain("ホタルイカ");
+  });
+  it("hotaru WITH squid context does NOT fire", () => {
+    const r = extractTravelIntent("ホタルイカ漁 in 富山湾");
+    expect(r.lexical_exclusions).toBeUndefined();
+  });
+  it("crane query without toponym fires", () => {
+    const r = extractTravelIntent("crane wintering grounds Hokkaido");
+    expect(r.lexical_exclusions).toContain("鶴見区");
+    expect(r.lexical_exclusions).toContain("舞鶴");
+  });
+  it("crane query WITH toponym (Maizuru) does NOT fire crane filter", () => {
+    const r = extractTravelIntent("舞鶴の景色");
+    expect(r.lexical_exclusions).toBeUndefined();
+  });
+  it("plain query has no exclusions", () => {
+    expect(extractTravelIntent("京都の寺").lexical_exclusions).toBeUndefined();
+  });
+});
+
 describe("TRAVEL_CONCEPTS — invariants", () => {
   it("ids are unique", () => {
     const ids = TRAVEL_CONCEPTS.map((c) => c.id);
