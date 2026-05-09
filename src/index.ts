@@ -1366,12 +1366,37 @@ async function searchArea(args: {
     }
   }
 
+  // When infeasibility is detected (e.g. aurora in Japan, panda in the wild),
+  // promote the not_available block to the TOP of the response so it sits
+  // within the first ~4 KB any reader will see. Without this promotion the
+  // block was buried after `results` (a 25-100 KB array), where readers
+  // truncating to early bytes could not see it. The result list is also
+  // truncated to top-5 when infeasibility fires — the entries the resolver
+  // surfaced are alternatives, not the original ask, so quantity beyond
+  // a handful is noise.
+  const infeasibilityBlock = intent.infeasibility
+    ? {
+        not_available: {
+          ...intent.infeasibility,
+          note: "The query implies a request that is not realistically possible in Japan. Surface the reason verbatim to the end user, then offer alternatives via the listed alt_kinds. The `results` field below contains alternative-class entries the resolver chose to satisfy alt_kinds; treat them as suggestions, NOT as a match for the original query.",
+        },
+      }
+    : null;
+  const resultsArray = infeasibilityBlock ? tiered.slice(0, 5) : tiered;
+  const truncatedFlag = infeasibilityBlock
+    ? deduped.length > 5
+    : deduped.length > limit;
+
   return {
     query: args.q,
+    // INFEASIBILITY-FIRST PRINCIPLE: when the query is fundamentally
+    // unanswerable (aurora in Japan, wild panda, etc.), the user-facing
+    // agent must lead with the warning, not a list of alternatives.
+    ...(infeasibilityBlock ?? {}),
     match_count: deduped.length,
-    results: tiered,
+    results: resultsArray,
     tier_counts,
-    truncated: deduped.length > limit,
+    truncated: truncatedFlag,
     tiering_note: "tier in {must_see, notable, broader} reflects retrieval-confidence band (>=200 / 130-199 / <130). 'must_see' = exact name + multilingual + heritage signal; 'notable' = heritage class / hybrid top / region-level; 'broader' = lexical or partial.",
     data_as_of: dataAsOf(prefs),
     disclaimer: DISCLAIMER,
@@ -1382,14 +1407,6 @@ async function searchArea(args: {
         : "Embedding index not built — falling back to lexical match. Run `npm run embed:build` to enable hybrid retrieval.",
     ...(queryIntentField ? { query_intent: queryIntentField } : {}),
     ...(routingHintField ? { routing_hint: routingHintField } : {}),
-    ...(intent.infeasibility
-      ? {
-          not_available: {
-            ...intent.infeasibility,
-            note: "The query implies a request that is not realistically possible in Japan. Surface the reason verbatim to the end user, then offer alternatives via the listed alt_kinds.",
-          },
-        }
-      : {}),
     ...(featuredCluster
       ? {
           featured_cluster: {
