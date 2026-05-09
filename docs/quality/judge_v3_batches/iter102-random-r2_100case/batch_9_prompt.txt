@@ -1,0 +1,2278 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case R-201 ===
+Topic / intent: 根室 流氷 冬
+Query: 北海道の流氷を見たい。根室や野付半島で流氷と野鳥を同時に楽しめる場所を教えて。
+Tool: get_spots({"prefecture": "Hokkaido", "q": "流氷"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "d04d026ffcbf5bd1",
+      "name": "北海道観光公式サイト HOKKAIDO LOVE!",
+      "description": "氷を砕く衝撃が響く船上で、白い大地をダイナミックに楽しむ冬のオホーツククルーズ。毎年1月下旬、網走の海は中国とロシアの国境を流れるアムール川から南下してきた流氷に覆われます。「流氷観光砕氷船おーろら」は、この真っ白な氷原を力強く砕きながら進…",
+      "coordinates": {
+        "lat": 43.010222222,
+        "lng": 141.695138888
+      },
+      "address": "〒093-0003",
+      "url": "https://www.visit-hokkaido.jp/spot/detail_10045.html",
+      "municipality": "長沼町",
+      "municipality_code": "014281",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "d04d026ffcbf5bd1",
+      "name": "北海道観光公式サイト HOKKAIDO LOVE!",
+      "description": "氷を砕く衝撃が響く船上で、白い大地をダイナミックに楽しむ冬のオホーツククルーズ。毎年1月下旬、網走の海は中国とロシアの国境を流れるアムール川から南下してきた流氷に覆われます。「流氷観光砕氷船おーろら」は、この真っ白な氷原を力強く砕きながら進…",
+      "coordinates": {
+        "lat": 42.551222222,
+        "lng": 141.355888888
+      },
+      "address": "〒093-0003",
+      "url": "https://www.visit-hokkaido.jp/spot/detail_10045.html",
+      "municipality": "白老町",
+      "municipality_code": "015784",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "28989560e2b3cf44",
+      "name": "稚内・利尻・礼文観光WEBサイト",
+      "description": "宗谷岬にある、通年で氷点下の世界を体験できる施設。本物の流氷展示や最北端到達証明書の発行が人気です。鮮やかなブルーの外壁が目を引くこの施設は、宗谷岬観光で見逃せない体験スポットです。最大の見どころは、室温がマイナス10度以下に保たれた極寒の…",
+      "coordinates": {
+        "lat": 45.415638888,
+        "lng": 141.673083333
+      },
+      "address": "〒098-6758",
+      "url": "https://www.north-hokkaido.com/spot/detail_1025.html",
+      "municipality": "稚内市",
+      "municipality_code": "012149",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c7966fc969605c47",
+      "name": "北海道観光公式サイト HOKKAIDO LOVE!",
+      "description": "海岸に広がるまるで宝石のように輝く「ジュエリーアイス」。十勝川でつくられた氷が太平洋に流れ出て、海岸に打ち上げられたものです。波にもまれながら尖った部分が穏やかな丸みを帯び、透き通った宝石のような氷になります。流氷とも異なるその美しさは、…",
+      "coordinates": {
+        "lat": 43.010222222,
+        "lng": 141.695138888
+      },
+      "address": "〒089-5461",
+      "url": "https://www.visit-hokkaido.jp/spot/detail_10517.html",
+      "municipality": "長沼町",
+      "municipality_code": "014281",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c7966fc969605c47",
+      "name": "北海道観光公式サイト HOKKAIDO LOVE!",
+      "description": "海岸に広がるまるで宝石のように輝く「ジュエリーアイス」。十勝川でつくられた氷が太平洋に流れ出て、海岸に打ち上げられたものです。波にもまれながら尖った部分が穏やかな丸みを帯び、透き通った宝石のような氷になります。流氷とも異なるその美しさは、…",
+      "coordinates": {
+        "lat": 42.551222222,
+        "lng": 141.355888888
+      },
+      "address": "〒089-5461",
+      "url": "https://www.visit-hokkaido.jp/spot/detail_10517.html",
+      "municipality": "白老町",
+      "municipality_code": "015784",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "aabceaa798cbbb11",
+      "name": "稚内・利尻・礼文観光WEBサイト",
+      "description": "2026年1月1日(木)開催新しい年の幕開けを、日本最北端の地、宗谷岬で迎えましょう！「初日の出inてっぺん」イベントでは、壮大な日の出を眺めながら新年の幸運を祈る特別なひとときをお届けします。当日は先着1,200名様に記念品をプレゼント！新年の思い出に…",
+      "coordinates": {
+        "lat": 45.417011,
+        "lng": 141.67659
+      },
+      "address": "〒097-0022 稚内市中央3丁目6－1",
+      "url": "https://www.north-hokkaido.com/event/detail_1154.html",
+      "municipality": "稚内市",
+      "municipality_code": "012149",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ae08f2f
+```
+
+
+=== Case R-202 ===
+Topic / intent: Kyushu summer fireworks
+Query: What are the major summer fireworks festivals in Kyushu? Looking for ones with traditional significance.
+Tool: get_festivals({"prefecture": "Kumamoto", "keyword": "花火", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "43",
+  "lang": "en",
+  "count": 1,
+  "total_matching": 1,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "wikipedia_list",
+      "kind_tag": "hanabi",
+      "list_title": "日本の花火大会一覧",
+      "key": "wikipedia_hanabi:Q11280396",
+      "qid": "Q11280396",
+      "name_ja": "やつしろ全国花火競技大会",
+      "name": "やつしろ全国花火競技大会",
+      "description_ja": "やつしろ全国花火競技大会（やつしろぜんこくはなびきょうぎたいかい）は、熊本県八代市の球磨川河川敷で開催される花火大会である。八代の秋を彩る花火競技大会である。",
+      "description": "やつしろ全国花火競技大会（やつしろぜんこくはなびきょうぎたいかい）は、熊本県八代市の球磨川河川敷で開催される花火大会である。八代の秋を彩る花火競技大会である。",
+      "prefecture_code": "43",
+      "prefecture": "熊本県",
+      "coordinates": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11280396",
+      "authority": "Wikipedia / Wikidata (CC BY-SA, QID-linked)"
+    }
+  ],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "query_intent": {
+    "detected_concepts": [
+      {
+        "id": "hanabi",
+        "matched_text": "花火",
+        "rationale_en": "Hanabi — fireworks festival, typically summer.",
+        "polarity": "boost",
+        "routing_tool": "get_events"
+      }
+    ],
+    "suggested_tool": "get_events"
+  },
+  "routing_hint": {
+    "suggested_tool": "get_events",
+    "reason_en": "Hanabi — fireworks festival, typically summer.",
+    "reason_ja": "花火大会。夏季が中心。",
+    "matched_concept": "hanabi",
+    "matched_text": "花火",
+    "arg_template": {
+      "prefecture": "<pref>",
+      "q": "花火"
+    }
+  }
+}
+```
+
+
+=== Case R-203 ===
+Topic / intent: 那須高原 紅葉
+Query: 那須高原の紅葉時期と、那須岳周辺で紅葉が美しいトレッキングコースを教えて。
+Tool: get_spots({"prefecture": "Tochigi", "municipality": "那須", "q": "紅葉"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11642887",
+      "name": "那須どうぶつ王国",
+      "name_en": "Nasu Animal Kingdom",
+      "name_zh": "那须动物王国",
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 37.128889,
+        "lng": 140.036944
+      },
+      "url": "https://www.wikidata.org/wiki/Q11642887",
+      "municipality": "那須町",
+      "municipality_code": "094072",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "tourist_attraction",
+        "park",
+        "zoo"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.8,
+      "website": "https://nasu-oukoku.com/",
+      "typical_visit_minutes": 240,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q28068900",
+      "name": "那須サファリパーク",
+      "name_en": "Nasu Safari Park",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 37.059166666,
+        "lng": 140.005833333
+      },
+      "url": "https://www.wikidata.org/wiki/Q28068900",
+      "municipality": "那須町",
+      "municipality_code": "094072",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "tourist_attraction",
+        "park",
+        "zoo"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.7,
+      "typical_visit_minutes": 240,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11642921",
+      "name": "那須平成の森",
+      "name_en": "Nasu Heisei-no-mori Forest",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "Japanese park",
+      "coordinates": {
+        "lat": 37.117639,
+        "lng": 140.008361
+      },
+      "url": "https://www.wikidata.org/wiki/Q11642921",
+      "municipality": "那須町",
+      "municipality_code": "094072",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.65,
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q122335446",
+      "name": "塩原温泉天皇の間記念公園",
+      "name_en": "Shiobara Onsen Imperial Villa Memorial Park",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q122335446",
+      "municipality": "那須塩原市",
+      "municipality_code": "092134",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "monument",
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.65,
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q56349920",
+      "name": "那須アルパカ牧場",
+      "name_en": "Nasu Alpaca Farm",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 37.12285,
+        "lng": 140.05555
+      },
+      "url": "https://www.wikidata.org/wiki/Q56349920",
+      "municipality": "那須町",
+      "municipality_code": "094072",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "tourist_attraction",
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.65,
+      "website": "http://www.nasubigfarm.com/",
+      "t
+```
+
+
+=== Case R-204 ===
+Topic / intent: Yoshino sakura peak bloom
+Query: When is peak cherry blossom season at Mount Yoshino in Nara? What makes Yoshino's sakura historically significant?
+Tool: search_hybrid({"q": "吉野山 桜", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "吉野山 桜",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.32357,
+      "rank_bm": 34,
+      "rank_vec": 35,
+      "key": "spot:94988e493fa80c85",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "四季のおすすめスポット",
+      "description": "世界遺産 吉野大峯。古来より日本一の桜の名所として知られる吉野山 吉野山／吉野町 下･中･上千本 4月上旬?中旬、奧千本 4月中旬?下旬 吉野は日本一の桜の名所です。春になればおよそ３万本もの桜の花が下千本・中千本・上千本・奥千本へと約１ヶ月をかけて豪華絢爛に咲き乱れます。その優雅で気品のある桜は、古くは古今和歌集にも読まれ、現代に至るまで多くの人の心を惹きつけてきました。吉野の桜は、花見のために植えられたのではなく、山岳宗教と密接に結びついた信仰の桜として現在まで大切に保護されてきました。また2004年には吉野山・高野山から熊野にかけての霊場と参詣道が『紀伊山地の霊場と参詣道』としてユネスコの世界遺産に登録されました。 春日大社・興福寺／奈良市 5月 第3週 金曜日～5月 第3週 土曜日 新緑まばゆい5月に春日大社と興福寺にて薪御能が行われます。薪御能の始まりは貞観11年（869）の興福寺西金堂修二会での薪猿楽とされています。猿楽は唐から飛来した散楽に起源をもち、諸大寺で神事芸能を奉仕しながら室町・観阿弥の時代に能として芸能の域に達しました。薪御能では、他では見られない儀式である「舞台あらため・外僉義（げのせんぎ）」や神殿を背にして四方正面の型で行われ、橋掛かりが通常の逆となるのが珍しい「御社上りの儀（みやしろあがりのぎ）」など、能楽の源流に触れられます。",
+      "prefecture": "奈良県",
+      "municipality": "川上村",
+      "url": "http://yamatoji.nara-kankou.or.jp/season"
+    },
+    {
+      "score": 0.09386,
+      "rank_bm": 7,
+      "rank_vec": 6,
+      "key": "spot:2f03f52501075d87",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "もっと奈良を楽しむ",
+      "description": "ひと目千本とも言われる吉野山の桜から、神社・仏閣を彩る桜や一本桜の名所まで、関西屈指の桜の名所を有する奈良のお花見スポットをご紹介！ 桜の開花情報や各地で開催されるライトアップや桜まつりなどの情報もCheck！ 春爛漫の奈良の絶景をお楽しみください。 日本屈指の桜の名所。シロヤマザクラを中心に約200種3万本が咲き誇ります。ソメイヨシノの華やかさとは違って可憐な感じを与えるヤマザクラですが、これだけ咲きそろうと圧巻。下千本から中千本、上千本、奥千本と咲き上がるので、見頃が長く楽しめます。 夜にはライトアップも行われます。 吉野郡吉野町吉野山 0746-32-1007（吉野山観光協会） 電話：平日9:00～16:00（休み / 不定休）毎年２月から４月の期間は問い合わせが増え、お待たせすることがあるのでご了承下さい。 春には湖畔に桜が咲き、遊覧船や釣りをしながら湖上から楽しむことができます。 吉野郡吉野町平尾0746-32-2847 （津風呂湖観光協会）",
+      "prefecture": "奈良県",
+      "municipality": "下市町",
+      "url": "http://yamatoji.nara-kankou.or.jp/page/page_28.html"
+    },
+    {
+      "score": 0.03227,
+      "rank_bm": 40,
+      "rank_vec": 34,
+      "key": "spot:bda9ad22c572cee8",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "コラム もっと奈良を楽しむ",
+      "description": "鬼の調伏式 全国から追われてきた鬼を迎え入れ、仏法を説く節分法要で「福は内、鬼も内」と唱える。 修験道は山岳や自然を神の坐す場所として畏れ敬うという日本古来の信仰風土に仏教的行法が加わり成り立った神仏習合の宗教といわれています。吉野山から大峯山山上ケ岳にかけての一帯は、古くから金峯山（きんぷせん）と称する聖域でした。役行者が入山し、修験道の本尊・金剛蔵王権現を感得、その姿を山桜に刻んで祭祀されたのが金峯山寺の開創と伝わります。 金峯山寺のご本尊・金剛蔵王権現は秘仏。普段は拝顔できませんが、11月19日から12月11日まで特別開帳が行われます。また、期間外は鎌倉時代作の木造金剛蔵王権現立像が拝顔できます。凛とした冬、日本の心にふれる聖なる 吉野山へでかけませんか。毎朝の勤行をはじめ、2月3日には金峯山寺独特の節分会・鬼の調伏式が行われます。同日、金峯山寺とその周辺が幻想的な灯りにつつまれる 鬼火の祭典も開催されます。 (問) 0746-32-8371 (所)吉野郡吉野町吉野山2500 (時) 8：30～16：30（受付は16：00まで） (￥) 500円（特別御開帳の期間は1,000円）(P) なし (交) 近鉄吉野駅からロープウェイ吉野山駅下車、徒歩約10分 𠮷水神社は、元吉水院（もときっすいいん）と称し、役行者の創立と伝わる吉野修験宗の僧坊でした。明治維新の神仏分離により神社として復興しました。𠮷水神社は、時代ごとに歴史の舞台となってきました。吉野へ行幸された後醍醐天皇を迎え南朝の皇宮となったのも、源義経が静御前や弁慶たちと逃げ延びて潜居したのも、豊臣秀吉が催した盛大な花見の本陣となったのも𠮷水神社と伝わり、はかなくも華やかな歴史の舞台であったことがうかがえます。重要文化財の書院内には様々な宝物等が所狭しと展示されています。吉野に残る悠久の歴史にひととき浸ってみてはいかがでしょう。 (問) 0746-32-3024 (所)吉野郡吉野町吉野山579 (時) 9:00～17:00 (￥) 400円 (P) あり（無料） (交) 近鉄吉野駅からロープウェイ吉野山駅下車、徒歩約15分",
+      "prefecture": "奈良県",
+      "municipality": "大淀町",
+      "url": "http://yamatoji.nara-kankou.or.jp/page/page_37.html"
+    },
+    {
+      "score": 0.0266,
+      "rank_bm": 1,
+      "rank_vec": 38,
+      "key": "dmo_page:dmo_0229_一社吉野ビジターズビューロー:https://yoshino-kankou.jp/news/news-001/002474.html",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "令和8年度　奈良県吉野山観光駐車場・バス予約制のご案内（2/2更新） | 最新情報 | 吉野ビジターズビューロー (（一社）吉野ビジターズビューロー)",
+      "description": "吉野山および周辺地域では、観桜期の交通渋滞の緩和や吉野山の環境保全などを目的として、吉野山観光駐車場においてバスを対象とした予約制を実施しております。令和８年の観桜期は下記の要領で実施することになりましたのでお知らせいたします。 なお、申込み方法などの詳細は、改めてお知らせします。 １．予約制による利用期間 令和８年３月２０日（金・春分の日）～令和８年５月１０日（日）２．予約受付 令和８年２月２日（月） 午前１０時より受付開始（予定）３．対象駐車場 吉野山観光駐車場（奈良県吉野山下千本）４．対象車両 観光バス・自家用バス等、乗車定員１１名以上の車両５．利用料金 ① 特定日：１台１日１９，８００円（消費税１，８００円を含む） ② 通常日：１台１日１３，２００円（消費税１，２００円を含む） ※ 特定日：令和８年３月２８日(土)・２９日(日)、４月４日(土)・５日(日)・１１日(土)・１２日(日) ※ 通常日：特定日以外の日 ※ 利用料金には、駐車料金のほか交通渋滞の緩和や環境保全、吉野山の桜保全等を目的とした事業に活用するための協力金も含まれます。 ※ 運営にかかる諸費用高騰のため、利用料金を改定いたします。よろしくご了承下さい。６．問い合わせ先 吉野山交通・環境対策協議会
+```
+
+
+=== Case R-205 ===
+Topic / intent: 奥只見 紅葉ドライブ
+Query: 奥只見湖の紅葉シーズンに行きたい。紅葉が見頃の時期とドライブルートを教えて。
+Tool: get_spots({"prefecture": "Niigata", "q": "紅葉"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "715dfbf3ebe2e2f1",
+      "name": "魚沼芝桜まつり",
+      "description": "「魚沼芝桜まつり」の情報は「にいがた観光ナビ」で。花と緑と雪の里に植えられた約20万株の芝桜が例年5月中旬に見頃を迎えます。見渡す限り広がる芝桜の姿は圧巻。公園にある展望台からは魚沼市の市内が一望でき、越後三山も見られます。関越自動車道堀之内インターから車で約2分とアクセス抜群。\n※開花状況は残雪の状況により異なります。\n※魚沼芝桜まつり期間中の土日、祝日は大変な混雑・渋滞が予想されます。ご注意ください。\n\n◎魚沼芝桜まつり 最新情報はこちら",
+      "coordinates": {
+        "lat": 37.902454,
+        "lng": 139.023331
+      },
+      "address": "〒950-8570 新潟県新潟市中央区新光町4番地1",
+      "url": "https://niigata-kankou.or.jp/event/3324",
+      "municipality": "新潟市",
+      "municipality_code": "151009",
+      "prefecture": "新潟県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "244981c4ac074d0f",
+      "name": "北方文化博物館 大藤棚ライトアップ",
+      "description": "「北方文化博物館 大藤棚ライトアップ」の情報は「にいがた観光ナビ」で。北方文化博物館は、越後の大地主・伊藤家の歴史と地方文化を当時の姿のままに伝える豪農の館です。8,800坪の敷地に、65の部屋を設けた1,200坪の母屋。敷地のまわりは土塁や塀、濠で囲まれ、土蔵づくりの門、総欅づくり唐破風の大玄関など、現存する新潟の豪農の屋敷の中でも最大規模を誇ります。\nこの北方文化博物館の中庭には、樹齢150年、幹まわり1m60cm以上、一本の木から広がる大藤があります。開花は5月初旬から中旬、甘い香りを放って藤色の花を房状に咲かせます。開花に合わせ、大藤と第二庭園「八藤園」をライトアップします。\n\n八藤園は、藤を愛した八代伊藤文吉にちなみ、白、紫、ピンク、混合、長藤などの八つの藤棚がカギ型に連なります。",
+      "coordinates": {
+        "lat": 37.902454,
+        "lng": 139.023331
+      },
+      "address": "〒950-8570 新潟県新潟市中央区新光町4番地1",
+      "url": "https://niigata-kankou.or.jp/event/3880",
+      "municipality": "新潟市",
+      "municipality_code": "151009",
+      "prefecture": "新潟県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ad191b2b335e8218",
+      "name": "北方文化博物館 紅葉ライトアップ",
+      "description": "「北方文化博物館 紅葉ライトアップ 」の情報は「にいがた観光ナビ」で。紅葉の見頃に合わせて、大広間から望む庭園をライトアップします。モミジの朱や黄にマツの緑が重なる、美しい対比をご覧いただけます。ライトアップによって庭園全体の奥行や立体感も印象的に感じられます。今年から古民家付近「逆さモミジ」、「第二庭園」（一部）も照らします。",
+      "coordinates": {
+        "lat": 37.902454,
+        "lng": 139.023331
+      },
+      "address": "〒950-8570 新潟県新潟市中央区新光町4番地1",
+      "url": "https://niigata-kankou.or.jp/event/13339",
+      "municipality": "新潟市",
+      "municipality_code": "151009",
+      "prefecture": "新潟県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "d679f851795d82d2",
+      "name": "越後三条・高城ヒメサユリ祭り",
+      "description": "「越後三条・高城ヒメサユリ祭り」の情報は「にいがた観光ナビ」で。「ヒメサユリ」は昔から三条市下田地区（旧下田村）の山野に群生し、その清楚可憐な姿は多くの方に親しまれてきました。\n森町の高城城址はその「ヒメサユリ」の群生地として知られ、特に花が咲き乱れる「ヒメサユリの小径」は約1時間の高城へのハイキングコースとなっており、花の咲く時期には毎年多くの方が訪れます。\n\n開花にあわせて行われる「越後三条・高城ヒメサユリ祭り」では、地元の採れたて野菜や山菜の販売も行われます。\n（祭り期間中は維持管理協力金（300円）をいただいています。）\n\n2026年5月17日（日曜日） \n時間：午前8時半～\n登山者お楽しみ抽選会：コシヒカリ、笹団子など\n\n2026年5月19日（火曜日）\n時間：午前11時～午後1時\n坂井進歌謡ショー\n※雨天の場合5月20日（水曜日）に延期\n\n2026年5月23日（土曜日）\n時間：午前9時～\nおにぎり無料サービス：先着100名\n\n期間中毎日　午前8時～午後4時\n地元の採れたて野菜・山菜を販売します。",
+      "coordinates": {
+        "lat": 37.902454,
+        "lng": 139.023331
+      },
+      "address": "〒950-8570 新潟県新潟市中央区新光町4番地1",
+      "url": "https://niigata-kankou.or.jp/event/1925",
+      "municipality": "新潟市",
+      "municipality_code": "151009",
+      "prefecture": "新潟県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "72a84a95fedd7629",
+      "name": "にいがた カナール彩",
+      "description": "「にいがた カナール彩」の情報は「にいがた観光ナビ」で。新潟市中心部からほど近い鳥屋野潟に隣接する新潟県立スポーツ公園（デンカビッグスワンスタジアム周辺）とカナール広場で、鳥屋野潟の豊かな自然に触れるイベント盛りだくさん。夜には花火が打ち上がります。\n\n内容：カヌー／花と緑の体験教室／健康ウォーク／ステージイベント／キッチンカー（飲食販売）／高所作業車体験／フリーマーケット（トランクdeマルシェ）／花苗販売 など（予定）",
+      "coordinates": {
+        "lat": 37.902454,
+        "lng": 139.023331
+      },
+      "address": "〒950-8570 新潟県新潟市中央区新光町4番地1",
+      "url": "https://niigata-kankou.or.jp/event/1877",
+      "municipality": "新潟市中央区",
+      "municipality_code": "151033",
+      "prefecture": "新潟県",
+      "language": "ja",
+      "quality_score": 0.97,
+ 
+```
+
+
+=== Case R-206 ===
+Topic / intent: Sapporo Yuki Matsuri
+Query: Tell me about Sapporo Snow Festival. What is its history and when does it take place?
+Tool: get_festivals({"prefecture": "Hokkaido", "keyword": "雪まつり", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "01",
+  "lang": "en",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "query_intent": {
+    "detected_concepts": [
+      {
+        "id": "kaido",
+        "matched_text": "kaido",
+        "rationale_en": "Kaido — ancient highway / road, often a heritage cultural landscape.",
+        "polarity": "boost",
+        "target_kinds": [
+          "pilgrimage_site",
+          "historic_site"
+        ]
+      },
+      {
+        "id": "matsuri",
+        "matched_text": "まつり",
+        "rationale_en": "Matsuri — Japanese festival, prefer get_events for date-bound queries.",
+        "polarity": "boost",
+        "routing_tool": "get_events"
+      },
+      {
+        "id": "yuki_matsuri",
+        "matched_text": "雪まつり",
+        "rationale_en": "Yuki Matsuri — snow festival, Sapporo most famous.",
+        "polarity": "boost",
+        "routing_tool": "get_events"
+      }
+    ],
+    "suggested_tool": "get_events"
+  },
+  "routing_hint": {
+    "suggested_tool": "get_events",
+    "reason_en": "Matsuri — Japanese festival, prefer get_events for date-bound queries.",
+    "reason_ja": "祭り。日付付きクエリは get_events を優先。",
+    "matched_concept": "matsuri",
+    "matched_text": "まつり",
+    "arg_template": {
+      "prefecture": "<pref>"
+    }
+  }
+}
+```
+
+
+=== Case R-207 ===
+Topic / intent: 長野 御柱祭
+Query: 長野の諏訪大社で開催される御柱祭について教えて。7年に一度の神事の見どころは？
+Tool: get_festivals({"prefecture": "Nagano", "keyword": "御柱", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "20",
+  "lang": "ja",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-208 ===
+Topic / intent: Nikko autumn maple temples
+Query: Which shrines and temples in Nikko have the best autumn maple colors? When is peak foliage in Okunikko?
+Tool: get_spots({"prefecture": "Tochigi", "municipality": "日光", "q": "紅葉"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11504890",
+      "name": "日光田母沢御用邸記念公園",
+      "name_en": "Nikkō Tamozawa Imperial Villa Memorial Park",
+      "name_zh": "日光田母澤御用邸紀念公園",
+      "name_ko": null,
+      "description_en": "garden in Nikkō, Japan",
+      "coordinates": {
+        "lat": 36.7525,
+        "lng": 139.59138889
+      },
+      "url": "https://www.wikidata.org/wiki/Q11504890",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "rekishi_park_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.85,
+      "opening_hours": "Tu off; Apr-Oct We-Mo 09:00-17:00, \"Last entry: 16:30\"; Nov-Mar We-Mo 09:00-16:30, \"Last entry: 16:00\"; Dec 29-Jan 01 off",
+      "phone": "+81 288-53-6767",
+      "website": "https://www.park-tochigi.com/tamozawa/",
+      "fee": "yes",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "osm_override",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1188532",
+      "name": "東武ワールドスクウェア",
+      "name_en": "Tobu World Square",
+      "name_zh": "東武世界廣場",
+      "name_ko": "도부 월드스퀘어",
+      "description_en": "theme park in Tochigi Prefecture, Japan",
+      "coordinates": {
+        "lat": 36.8078,
+        "lng": 139.712
+      },
+      "url": "https://www.wikidata.org/wiki/Q1188532",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.85,
+      "phone": "+81 288 77 1055",
+      "website": "https://www.tobuws.co.jp/",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11504885",
+      "name": "日光江戸村",
+      "name_en": "Edo Wonderland Nikko Edomura",
+      "name_zh": "日光江戶村",
+      "name_ko": null,
+      "description_en": "Edo Wonderland Nikko Edomura (江戸ワンダーランド 日光江戸村, Edo Wandārando Nikkō Edomura) is a Japanese cultural theme park  in the Kinugawa Onsen area of Nikkō, Tochigi. The park resurrects and showcases the life and culture of the Edo period.",
+      "coordinates": {
+        "lat": 36.791,
+        "lng": 139.698
+      },
+      "url": "https://www.wikidata.org/wiki/Q11504885",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "tourist_attraction",
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.75,
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11286710",
+      "name": "イタリア大使館別荘記念公園",
+      "name_en": "Italian Embassy Villa Memorial Park",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "park in Nikkō, Japan",
+      "coordinates": {
+        "lat": 36.725389,
+        "lng": 139.485194
+      },
+      "url": "https://www.wikidata.org/wiki/Q11286710",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.7,
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family
+```
+
+
+=== Case R-209 ===
+Topic / intent: 青の洞窟 冬 照明
+Query: 青の洞窟のイルミネーションが美しいのはどの季節？渋谷と代々木公園の冬のイルミを教えて。
+Tool: get_festivals({"prefecture": "Tokyo", "keyword": "イルミネーション", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "13",
+  "lang": "ja",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-210 ===
+Topic / intent: Sakura Yoshino Nara
+Query: What is the significance of Yoshino's cherry blossoms? How are they connected to Japan Heritage?
+Tool: get_japan_heritage({"prefecture": "Nara", "q": "吉野", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "29",
+  "region": null,
+  "region_prefecture_codes": null,
+  "theme_filter": null,
+  "q": "吉野",
+  "lang": "en",
+  "count": 6,
+  "tool_scope_note": "IMPORTANT: 日本遺産 (this tool) and UNESCO WHS / 国宝 / 特別史跡 are DIFFERENT programs. If the user asked about UNESCO World Heritage Sites, 国宝, hidden christian heritage, pilgrimage routes (Kumano Kodo / Henro / Saigoku), or specific famous landmarks — see `see_also_wikidata_heritage` below OR call search_area / get_traditional_arts.",
+  "top_canonical_heritage": [
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q1039675",
+      "name_ja": "高松塚古墳",
+      "name_en": "Takamatsuzuka Tomb",
+      "description_en": "kofun",
+      "coordinates": {
+        "lat": 34.46222222,
+        "lng": 135.80647222
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q26764449",
+        "Q30834580",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Special Historic Site of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan"
+      ],
+      "kinds": [
+        "archaeological_site",
+        "monument",
+        "buddhist_monastery",
+        "kofun"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q1039675"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q1070863",
+      "name_ja": "興福寺",
+      "name_en": "Kōfuku-ji Temple",
+      "description_en": "Kōfuku-ji (興福寺; Japanese pronunciation: [koꜜː.ɸɯ̥.kɯ.dʑi]) is a Buddhist temple in Japan that was once one of the powerful Nanto Shichi Daiji 'Seven Great Temples' in the city of Nara. The temple is the national headquarters of the East Asian Yogācāra school.",
+      "coordinates": {
+        "lat": 34.683207,
+        "lng": 135.831302
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan"
+      ],
+      "kinds": [
+        "religious_building",
+        "shinto_shrine",
+        "buddhist_temple",
+        "saigoku_33",
+        "saigoku_yakushi_49"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q1070863"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q1203099",
+      "name_ja": "元興寺",
+      "name_en": "Gangō-ji Temple",
+      "description_en": "Gangō-ji (元興寺) was one of the first Buddhist temples in Japan, and was ranked as one of the  powerful Seven Great Temples, in Nara, Japan. It was mostly destroyed in the Muromachi period and the old town of Naramachi occupies most of what was once the temple's precincts.",
+      "coordinates": {
+        "lat": 34.678055555,
+        "lng": 135.831111111
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan"
+      ],
+      "kinds": [
+        "shinto_shrine",
+        "buddhist_temple",
+        "religious_building",
+        "saigoku_yakushi_49"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q1203099"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q1351209",
+      "name_ja": "法起寺",
+      "name_en": "Hokki-ji Temple",
+      "description_en": "Hokki-ji or Hōki-ji (法起寺; the ‘temple of the Arising Dharma’) – formerly known as Okamoto-dera (岡本寺) and Ikejiri-dera (池後寺) – is a Buddhist temple temple in the Okamoto neighborhood of the town of Ikaruga, Nara Prefecture, Japan. The temple's honorary sangō prefix is \"Kōhonzan\" (岡本山), although it is rarely used.",
+      "coordinates": {
+        "lat": 34.62277778,
+        "lng": 135.74611111
+      },
+      "prefecture": "奈良県",
+      "municipality": "奈良県",
+      "heritage_designations": [
+   
+```
+
+
+=== Case R-211 ===
+Topic / intent: 阿波踊り 徳島
+Query: 徳島の阿波踊りの開催時期と、踊り手として参加できるかどうか教えて。
+Tool: get_festivals({"prefecture": "Tokushima", "keyword": "阿波踊り", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "36",
+  "lang": "ja",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-212 ===
+Topic / intent: 秋叶京都
+Query: 京都最美的红叶景点在哪里？岚山、清水寺以外还有哪些推荐？
+Tool: search_hybrid({"q": "京都 紅葉 秋", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "京都 紅葉 秋",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.05085,
+      "rank_bm": null,
+      "rank_vec": 31,
+      "key": "spot:7671705d31b4aad4",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報",
+      "description": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報 季節：秋 , 紅葉 , 自然景色 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 更新日：2025年09月30日 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 「志賀高原山の駅」から徒歩すぐの場所にある「蓮池」。池のまわりには遊歩道があるので散策をしながら紅葉鑑賞が楽しめる ©志賀高原観光協会 長野県の北東部、標高1,300メートル以上の高地に広がる志賀高原は、四季折々の自然を感じられる国立公園内の高原リゾート。春から秋にかけては湿原や湖沼をめぐるトレッキングが人気。四十八池湿原や大沼池など、火山地形が生んだ神秘的な風景が広がり、高山植物や野鳥観察も楽しめる。志賀高原の紅葉は、標高差と多様な植生によって生まれる色彩のグラデーションが大きな魅力だ。標高2,300mの横手山から1,500メートル付近にある蓮池、丸池まで、800メートル程の高低差があるため、紅葉前線が山頂から徐々に麓へと降りていく様子が長期間に渡って楽しめる。 横手山から望む秋を感じる一枚。山肌を彩る秋の色合いと雄大な眺望が広がる ©志賀高原観光協会 背後にそびえる横手山。標高2,307メートルの山頂からは、鮮やかな新緑のパノラマが高原一帯に広がっている ©志賀高原観光協会",
+      "prefecture": "長野県",
+      "municipality": "辰野町",
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn25-9-3"
+    },
+    {
+      "score": 0.03037,
+      "rank_bm": 3,
+      "rank_vec": 9,
+      "key": "dmo_page:dmo_0033_公社京都府観光連盟:https://www.kyoto-kankou.or.jp/",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "京都府観光連盟公式サイト - 京都府観光ガイド (（公社）京都府観光連盟)",
+      "description": "春を感じさせる梅と椿の見どころ、お花見シーズンに向けた桜の見どころ、春爛漫を感じさせる、つつじとさつきの見どころをご紹介します。 梅雨の季節を彩るあじさいの見どころ、京都にある海水浴スポット、海上あり山中ありの自然豊かな京都で開催される花火大会をご紹介します。 ぶどう狩り、梨狩りが体験できるスポット、秋の味覚、くり・いも・柿の収穫体験ができるスポット、紅葉シーズンに向けて、紅葉の見どころをご紹介します。 カニ・カキ・ブリに猪、冬ならではの味覚、除夜の鐘を“聞く”“撞く”ことができるスポット、初詣におすすめのスポット、節分行事を“見る”“体験できる”スポットをご紹介します。 百商一気「桜プロジェクト」 ～与謝野の食べる桜～ 投稿日: 04月30日(木) 与謝野町 海の京都",
+      "prefecture": "京都府",
+      "municipality": null,
+      "url": "https://www.kyoto-kankou.or.jp/"
+    },
+    {
+      "score": 0.02874,
+      "rank_bm": 1,
+      "rank_vec": 21,
+      "key": "dmo_page:dmo_0033_公社京都府観光連盟:https://www.kyoto-kankou.or.jp/calendar?id=3",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "見頃カレンダー（桜・紅葉等） | 京都府観光連盟公式サイト (（公社）京都府観光連盟)",
+      "description": "盛り過ぎ 【向日神社】紅葉 向日市 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 続きを見る 盛り過ぎ 【向日神社】紅葉 向日市 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 盛り過ぎ 【向日神社】紅葉 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 向日市 詳細ページを見る 盛り過ぎ 【向日神社】紅葉 参道は見頃、紅葉の御朱印めぐり 11/22～12/14（期間限定御朱印の授与） 向日市",
+      "prefecture": "京都府",
+      "municipality": null,
+      "url": "https://www.kyoto-kankou.or.jp/calendar?id=3"
+    },
+    {
+      "score": 0.02619,
+      "rank_bm": 24,
+      "rank_vec": 10,
+      "key": "dmo_page:dmo_0033_公社京都府観光連盟:https://www.kyoto-kankou.or.jp/areas/bamboo",
+      "kind": "r3",
+      "source": "dmo_website",
+      "name": "エリア詳細 | 京都府観光連盟公式サイト (（公社）京都府観光連盟)",
+      "description": "「竹の里・乙訓」「お茶の京都」まるっと周遊 デジタルスタンプラリーを開催します！ 投稿日: 2025年10月24日(金) 向日市 大山崎町 長岡京市 竹の里・乙訓 お茶の京都 京都西山 竹の里・乙訓 紅葉の御朱印めぐり 投稿日: 2025年11月21日(金) 大山崎町 向日市 長岡京市 竹の里・乙訓 京都西山 竹の里・乙訓 青もみじとあじさいの御朱印めぐり 投稿日: 2025年03月28日(金) 大山崎町 長岡京市 向日市 竹の里・乙訓 阪急沿線 観光あるき ウォーキングイベント 投稿日: 2025年06月10日(火) 向日市 大山崎町 長岡京市 竹の里・乙訓 春の例祭 開催日: 5. 3（日･祝）～ 5. 4（月･祝） 大山崎町 イベント等",
+      "prefecture": "京都府",
+      "municipality": null,
+      "url": "https://www.kyoto-kankou.or.jp/areas/bamboo"
+    },
+    {
+      "score": 0.02571,
+      "rank_bm": null,
+      "rank_vec": 22,
+      "key": "spot:156e048ad5bcf89d",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "京都・祇園と並ぶ花街「古町」や大河をめぐり 感性を磨く新潟・阿賀の2Days",
+      "description": "京都・祇園と並ぶ花街「古町」や大河をめぐり 感性を磨く新潟・阿賀の2Days 1泊2日
+```
+
+
+=== Case R-213 ===
+Topic / intent: 羊蹄山 秋 紅葉
+Query: 北海道の羊蹄山やニセコ周辺の紅葉を楽しみたい。見頃の時期と展望スポットを教えて。
+Tool: get_spots({"prefecture": "Hokkaido", "q": "紅葉"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1196357",
+      "name": "五稜郭",
+      "name_en": "Goryōkaku",
+      "name_zh": "五稜郭",
+      "name_ko": "고료카쿠",
+      "description_en": "Goryōkaku (五稜郭; lit. 'five-point fort') is a star fort in the Japanese city of Hakodate on the island of Hokkaido. The fortress was completed in 1866.",
+      "coordinates": {
+        "lat": 41.796944,
+        "lng": 140.756944
+      },
+      "url": "https://www.wikidata.org/wiki/Q1196357",
+      "municipality": "北海道",
+      "municipality_code": "010006",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "monument",
+        "nihon_100_meijo",
+        "rekishi_park_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 1.1,
+      "opening_hours": "Mo-Su 09:00-18:00",
+      "wheelchair": "yes",
+      "phone": "+81 01-382-13456",
+      "website": "https://www.city.hakodate.hokkaido.jp/docs/2014011601161/",
+      "fee": "no",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "defaults_source": "osm_override",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q30834580",
+        "Q26764449",
+        "Q11403686"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Special Historic Site of Japan",
+        "Hokkaido Heritage"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q3107971",
+      "name": "大通公園",
+      "name_en": "Odori Park",
+      "name_zh": "大通公園",
+      "name_ko": "오도리 공원",
+      "description_en": "park in Sapporo, Japan",
+      "coordinates": {
+        "lat": 43.059722,
+        "lng": 141.346389
+      },
+      "url": "https://www.wikidata.org/wiki/Q3107971",
+      "municipality": "札幌市",
+      "municipality_code": "011002",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "garden",
+        "michi_100",
+        "rekishi_park_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.95,
+      "website": "https://odori-park.jp/",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f646124849f2c14e",
+      "name": "「第3回かみすながわぐるっと紅葉マラニック」参加者募集中",
+      "description": "昨年に引き続き、北海道で一番小さな町を、紅葉を堪能しながらひと回りする「かみすながわぐるっと紅葉マラニック」を開催します。皆さまのご参加をお待ちしております。※9月1日追記申込期間を9月10日（水曜日）まで延長いたしました。",
+      "coordinates": {
+        "lat": 43.481754,
+        "lng": 141.987213
+      },
+      "address": "〒073-0292北海道空知郡上砂川町字上砂川町40番地10",
+      "url": "https://town.kamisunagawa.hokkaido.jp/soshiki/kikaku/sangyo/event/2120.html",
+      "municipality": "上砂川町",
+      "municipality_code": "014257",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.81,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11396030",
+      "name": "函館西部地区の町並み",
+      "name_en": "Seibuchiku area in Hakodate",
+      "name_zh": "函館西部地區景觀",
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q11396030",
+      "municipality": "北海道",
+      "municipality_code": "010006",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "preservation_district",
+        "machiya",
+        "rekishi_park_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.95,
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo"
+      ],
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q850649",
+        "Q11403686"
+  
+```
+
+
+=== Case R-214 ===
+Topic / intent: Shikoku summer festivals
+Query: What are the major summer traditional festivals in Shikoku? I know about Awa Odori but what else?
+Tool: get_festivals({"prefecture": "Kochi", "keyword": "夏", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "39",
+  "lang": "en",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11271139",
+      "name_ja": "たてもん祭り",
+      "name_en": "Uozu Tatemon Festival",
+      "name": "Tatemon Festival",
+      "description_ja": "富山県魚津市の諏訪神社の夏季祭礼",
+      "description_en": null,
+      "description": "A summer festival held at Suwa Shrine in Uozu City, Toyama Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11271139",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    }
+  ],
+  "national_heritage_note": "These are nationwide UNESCO Intangible Cultural Heritage inscriptions (e.g. 歌舞伎, 和食). They are NOT specific to the queried prefecture — listed separately so agents do not present them as prefecture-local festivals.",
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-215 ===
+Topic / intent: なばなの里 冬 イルミネーション
+Query: なばなの里のイルミネーションの点灯時期と規模を教えて。どんなテーマ展示があるの？
+Tool: get_spots({"prefecture": "Mie", "municipality": "桑名"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "9cb738e62dbbfd63",
+      "name": "旧東海道桑名\n            きゅうとうかいどうくわな",
+      "description": "桑名は、江戸から京都までをつなぐ東海道42番目の宿場町です。 41番目の宿場町・宮と桑名は、東海道中で唯一の海路で、その距離が七里あったことから「七里の渡」と呼ばれていました。船の行き来も非常に盛んで、宿場町としえ、東海道では宮宿に次いで、2番目に賑わっていました。 | 旧東海道桑名",
+      "coordinates": {
+        "lat": 34.735172,
+        "lng": 136.510681
+      },
+      "address": "〒514-0009 三重県津市羽所町700",
+      "url": "https://www.kankomie.or.jp/spot/1814",
+      "municipality": "桑名市",
+      "municipality_code": "242055",
+      "prefecture": "三重県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "5a1fef9883e8ee60",
+      "name": "桑名水郷花火大会\n            クワナスイゴウハナビタイカイ",
+      "description": "〈桑名水郷花火大会〉 昭和9年の伊勢大橋完成記念として始まった桑名水郷花火大会は、戦時中に一時中断したものの現在まで引き継がれている伝統のある花火大会です。特徴は“水郷のまち・くわな”ならではの川の幅・深さを使った花火大会で、大迫力のスターマインや東海地区最大級の２尺玉が見どころです。 ◎三重県の花火大会特集2022はコチラ→三重県の花火大会特集2022年版　スケジュール・開催場所など人気の花火大会を紹介！ | 桑名水郷花火大会",
+      "coordinates": {
+        "lat": 34.735172,
+        "lng": 136.510681
+      },
+      "address": "〒514-0009 三重県津市羽所町700",
+      "url": "https://www.kankomie.or.jp/event/40455",
+      "municipality": "桑名市",
+      "municipality_code": "242055",
+      "prefecture": "三重県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7c6509f9263a1319",
+      "name": "桑名石取祭\n            クワナイシドリマツリ",
+      "description": "「日本一やかましい祭り」「天下の奇祭」として知られる、桑名市の春日神社を中心に行われる祭です。 華麗な装飾を施した最大40台の祭車に鉦や太鼓をつけ、それらを一斉に打ち鳴らす音が、見る者を圧倒させる勢いある勇壮な祭りで、桑名の夏の風物詩として、地元の方に昔から親しまれています。 本楽では春日神社への巡行を行うため、旧東海道などを練り歩くその姿は荒々しく、勇敢さを感じると言われています。 立川和四郎富重の彫刻や高村光雲作の飾り物をもつ歴史的にも価値の高い祭車もあり、各地区の住民は総出で参加し、一年一度の最大の娯楽行事ともなっています。 2007（平成19）年3月7日に国の重要無形民俗文化財に指定され、2016（平成28）年12月1日には、「山・鉾・屋台行事」としてユネスコ無形文化遺産代表一覧に記載されました。 ユネスコ無形文化遺産に登録された桑名・四日市・伊賀の三重県のお祭りをご紹介 酷暑が想定されますので暑さ対策は万全でお越しください 桑名石取祭は泊まって満喫しよう！当日の宿の予約はこちら 三重県の夏祭り特集はコチラ→三重県の夏祭り・イベント特集　熱い夏を楽しもう！ | 桑名石取祭",
+      "coordinates": {
+        "lat": 34.735172,
+        "lng": 136.510681
+      },
+      "address": "〒514-0009 三重県津市羽所町700",
+      "url": "https://www.kankomie.or.jp/event/35039",
+      "municipality": "桑名市",
+      "municipality_code": "242055",
+      "prefecture": "三重県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "88b7be87f9fdf6eb",
+      "name": "【GW】桑名で初夏の花めぐり！つつじ・ネモフィラ・春バラを巡るモデルコース",
+      "description": "GWは桑名市で花めぐり！九華公園のつつじとなばなの里のネモフィラ・春バラを楽しむモデルコースを紹介します。名古屋から日帰りで満喫できる初夏のおでかけプランです。 | 【GW】桑名で初夏の花めぐり！つつじ・ネモフィラ・春バラを巡るモデルコース",
+      "coordinates": {
+        "lat": 35.062194444,
+        "lng": 136.683666666
+      },
+      "address": "〒511-0022",
+      "url": "https://www.kankomie.or.jp/report/2164",
+      "municipality": "桑名市",
+      "municipality_code": "242055",
+      "prefecture": "三重県",
+      "language": "ja",
+      "quality_score": 0.79,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "5c8ea59e790c85a6",
+      "name": "第35回　桑名市民芸術文化祭\n            クワナシミンゲイジュツブンカサイ",
+      "description": "市民芸術文化祭を開催します。さまざまな文化・芸術にふれてみませんか。皆様のご来場をお待ちしています。 音楽、芸能（古典、洋舞）、美術展、お茶会など | 第35回　桑名市民芸術文化祭",
+      "coordinates": {
+        "lat": 34.735172,
+        "lng": 136.510681
+      },
+      "address": "〒514-0009 三重県津市羽所町700",
+      "url": "https://www.kankomie.or.jp/event/20618",
+      "municipality": "桑名市",
+      "municipality_code": "242055",
+      "prefecture": "三重県",
+      "language": "ja",
+      "quality_score": 0.78,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c5e2f0119a978d8d",
+      "name": "北桑名総社（北桑名神社）",
+      "description": "佐乃富神社、中臣神社、太一丸神明社などを合祀し、現社名に改称。「持統天皇御舊跡」の石碑があります。 | 北桑名総社（北桑名神社）",
+      "coordinates": {
+        "lat": 34.735172,
+        "lng": 136.510681
+      },
+      "address": "〒514-0009 三重県津市羽所町700",
+      "url": "https://www.kankomie.or.jp/spot/2910"
+```
+
+
+=== Case R-216 ===
+Topic / intent: ชมดอกซากุระ ฮอกไกโด
+Query: อยากไปชมดอกซากุระที่ฮอกไกโด ช่วงเวลาไหนดีที่สุด และมีที่ไหนแนะนำบ้าง?
+Tool: get_spots({"prefecture": "Hokkaido", "q": "桜"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "e64f60439f114d87",
+      "name": "桜が丘通の桜並木",
+      "description": "柏木町と松陰町の町境をまっすぐに走る通り。およそ800mに及ぶ道路沿いには約100本のサクラが植え込まれており、4月下旬から5月初旬のサクラの開花時期には絶景となる。",
+      "coordinates": {
+        "lat": 41.788235,
+        "lng": 140.761383
+      },
+      "address": "函館市松陰町",
+      "url": "https://www.hakobura.jp/spots/594",
+      "municipality": "函館市",
+      "municipality_code": "012025",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.77,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "e43c2036f1cb5bd7",
+      "name": "桜の杜",
+      "description": "こちらのページは北海道空知管内北部に位置する町「秩父別町」のホームページ、「見る・学ぶ」の「桜の杜」ページです。",
+      "coordinates": {
+        "lat": 43.767,
+        "lng": 141.957833333
+      },
+      "address": "〒078-2192",
+      "url": "https://www.town.chippubetsu.hokkaido.jp/category/detail.html?category=tourism&content=295",
+      "municipality": "秩父別町",
+      "municipality_code": "014346",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.71,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "cf2805b5def13419",
+      "name": "桜まつり期間中におけるドローンの飛行について",
+      "description": "北海道新ひだか町の公式ホームページ。くらし・手続き、観光・産業、行政情報など。",
+      "coordinates": {
+        "lat": 42.340542,
+        "lng": 142.36937
+      },
+      "address": "〒056-8650 北海道日高郡新ひだか町静内御幸町3丁目2番50号",
+      "url": "https://www.shinhidaka-hokkaido.jp/hotnews/detail/00007713.html",
+      "municipality": "新ひだか町",
+      "municipality_code": "016101",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.72,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1143974",
+      "name": "松前城",
+      "name_en": "Matsumae Castle",
+      "name_zh": "松前城",
+      "name_ko": "마쓰마에성",
+      "description_en": "Matsumae Castle (松前城, Matsumae-jō) is a castle located in Matsumae, Hokkaido, Japan, and is the northernmost castle in Japan. The only traditional style Edo period castle in Hokkaidō, it was the chief residence of the han (estate) of the Matsumae clan.",
+      "coordinates": {
+        "lat": 41.429833,
+        "lng": 140.108389
+      },
+      "url": "https://www.wikidata.org/wiki/Q1143974",
+      "municipality": "北海道",
+      "municipality_code": "010006",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "japanese_castle",
+        "nihon_100_meijo",
+        "sakura_meisho_100",
+        "rekishi_park_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 1.15,
+      "website": "https://www.town.matsumae.hokkaido.jp/bunkazai/detail/00001681.html",
+      "fee": "yes",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "defaults_source": "osm_override",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q123130241",
+        "Q11403686",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Component of Nationally-designated Historic Site",
+        "Hokkaido Heritage",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9d5e0185a90ca4bc",
+      "name": "第77回 もりまち桜まつり開催について",
+      "description": "今年もいよいよ、もりまち桜まつりが、青葉ヶ丘公園を舞台に開催されます！期間中は、メインイベントの歌謡ショーや、毎年恒例になりつつあるティラノレース、お子様に人気の「ふわふわランド」など、ご家族で楽しむことのできるさまざまなイベントを予定しておりますので、ぜひご来場ください！",
+      "coordinates": {
+        "lat": 42.105587,
+        "lng": 140.576859
+      },
+      "address": "〒049-2393北海道茅部郡森町字御幸町144番地１",
+      "url": "https://www.town.hokkaido-mori.lg.jp/soshiki/shokorodokanko/1/2311.html",
+      "municipality": "森町",
+      "municipality_code": "013455",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id"
+```
+
+
+=== Case R-217 ===
+Topic / intent: 秩父 夜祭
+Query: 秩父夜祭は日本三大曳山祭のひとつと聞いた。開催時期と見どころを教えて。
+Tool: get_festivals({"prefecture": "Saitama", "keyword": "秩父", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "11",
+  "lang": "ja",
+  "count": 1,
+  "total_matching": 1,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q11596116",
+      "name_ja": "秩父夜祭",
+      "name_en": "Chichibu Night Festival",
+      "name": "秩父夜祭",
+      "description_ja": "埼玉県秩父市にある秩父神社の例祭",
+      "description_en": "Chichibu Shrine's annual festival celebrated on the nights of December 1-6",
+      "description": "埼玉県秩父市にある秩父神社の例祭",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q11596116",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "national_heritage": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11596116",
+      "name_ja": "秩父夜祭",
+      "name_en": "Chichibu Night Festival",
+      "name": "秩父夜祭",
+      "description_ja": "埼玉県秩父市にある秩父神社の例祭",
+      "description_en": "Chichibu Shrine's annual festival celebrated on the nights of December 1-6",
+      "description": "埼玉県秩父市にある秩父神社の例祭",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11596116",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    }
+  ],
+  "national_heritage_note": "These are nationwide UNESCO Intangible Cultural Heritage inscriptions (e.g. 歌舞伎, 和食). They are NOT specific to the queried prefecture — listed separately so agents do not present them as prefecture-local festivals.",
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-218 ===
+Topic / intent: Koyo Japan autumn
+Query: Best autumn foliage destinations in Japan for late November when most of the country is past peak.
+Tool: search_hybrid({"q": "紅葉 11月 遅い", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "紅葉 11月 遅い",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.06215,
+      "rank_bm": null,
+      "rank_vec": 8,
+      "key": "spot:7671705d31b4aad4",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報",
+      "description": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報 季節：秋 , 紅葉 , 自然景色 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 更新日：2025年09月30日 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 「志賀高原山の駅」から徒歩すぐの場所にある「蓮池」。池のまわりには遊歩道があるので散策をしながら紅葉鑑賞が楽しめる ©志賀高原観光協会 長野県の北東部、標高1,300メートル以上の高地に広がる志賀高原は、四季折々の自然を感じられる国立公園内の高原リゾート。春から秋にかけては湿原や湖沼をめぐるトレッキングが人気。四十八池湿原や大沼池など、火山地形が生んだ神秘的な風景が広がり、高山植物や野鳥観察も楽しめる。志賀高原の紅葉は、標高差と多様な植生によって生まれる色彩のグラデーションが大きな魅力だ。標高2,300mの横手山から1,500メートル付近にある蓮池、丸池まで、800メートル程の高低差があるため、紅葉前線が山頂から徐々に麓へと降りていく様子が長期間に渡って楽しめる。 横手山から望む秋を感じる一枚。山肌を彩る秋の色合いと雄大な眺望が広がる ©志賀高原観光協会 背後にそびえる横手山。標高2,307メートルの山頂からは、鮮やかな新緑のパノラマが高原一帯に広がっている ©志賀高原観光協会",
+      "prefecture": "長野県",
+      "municipality": "辰野町",
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn25-9-3"
+    },
+    {
+      "score": 0.05603,
+      "rank_bm": null,
+      "rank_vec": 19,
+      "key": "spot:b0865e9d53516e89",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "車を降りると目の前に広がる紅葉の絶景！｜愛媛で気軽に立ち寄れる人気紅葉スポット（古岩屋・白滝公園・龍王公園）３選",
+      "description": "車を降りると目の前に広がる紅葉の絶景！｜愛媛で気軽に立ち寄れる人気紅葉スポット（古岩屋・白滝公園・龍王公園）３選 2025.11.12 はじめに 愛媛の秋が深まる１１月中旬、山々は赤や黄色に色づき、各地で紅葉の名所が鮮やかに彩られます。まさに今が紅葉狩りにぴったりのシーズンです。とはいえ、「駐車場から長く歩く」「山道を登らないとたどり着けない」といったイメージを持つ方も多いのではないでしょうか。 そこで、おすすめしたいのが、車を降りるとすぐに紅葉の絶景に出会えるスポット。今回は、今まさに見頃を迎えている愛媛の人気紅葉スポットの中から厳選して３カ所をご紹介します。 愛媛の秋が深まる１１月中旬、山々は赤や黄色に色づき、各地で紅葉の名所が鮮やかに彩られます。まさに今が紅葉狩りにぴったりのシーズンです。とはいえ、「駐車場から長く歩く」「山道を登らないとたどり着けない」といったイメージを持つ方も多いのではないでしょうか。 そこで、おすすめしたいのが、車を降りるとすぐに紅葉の絶景に出会えるスポット。今回は、今まさに見頃を迎えている愛媛の人気紅葉スポットの中から厳選して３カ所をご紹介します。 ・久万高原町の「古岩屋（ふるいわや）」 ・大洲市の「白滝公園」 ・内子町五十崎（いかざき）の「龍王公園」 いずれもアクセス抜群です。 古岩屋（久万高原町） 久万高原町にある「古岩屋」は、国の名勝に指定されている自然美あふれる景勝地です。高さ約６０～１００メートルにも及ぶ奇石（礫岩峰）が連なる雄大な景観は迫力満点で、秋にはその岩肌を彩る紅葉が美しい景色を描き出します。 駐車場に車を停めた瞬間から、視界いっぱいに広がる紅葉と奇石のダイナミックな風景を楽しめるのが大きな魅力です。散策をしなくても、駐車場から眺める景色はまるで一枚の絵画のようです。",
+      "prefecture": "愛媛県",
+      "municipality": "四国中央市",
+      "url": "https://www.iyokannet.jp/blog/170"
+    },
+    {
+      "score": 0.03743,
+      "rank_bm": 11,
+      "rank_vec": 35,
+      "key": "spot:c1aa0f442e8fcc2a",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "ひらかわ紅葉めぐり2025【10/25～11/9】",
+      "description": "ひらかわの紅葉スポットを巡ろう🍁 【開催期間】２０２５年１０月２５日(土)～１１月９日(日) 10月下旬～11月にかけて市内の観光スポットは紅葉し美しい秋の風景が広がります。 猿賀公園 東屋 盛美園 碇ヶ関 三笠山公園 白岩森林公園 志賀坊森林公園 夕景 ひらかわ紅葉めぐり期間中の平川市内では紅葉狩りや秋の味覚が楽しめるイベントが盛沢山となっております！ 期間中のイベント 猿賀公園 紅葉まつり 【開催期間】10月25日(土)～11月9日(日) 10：00～16：00【場所】平川市猿賀公園 恒例イベントとなった、ぷらすマルシェや猿賀ルチャー祭りなど猿賀公園の紅葉スポットをめぐるイベントが盛沢山✨ ↓画像をクリックして詳細ページへ☆ 碇ヶ関 紅葉と収穫祭 【開催日】10月19日(日) 10：00～15：00 ※雨天決行【場所】道の駅いかりがせき 津軽関の庄 「平川サガリ」や「豚汁」「塩おにぎり」など秋の味覚を味わえるイベント✨豪華景品が当たる大抽選会も行います！ ↓画像をクリックして詳細ページへ☆ 盛美園ライトアップ 【開催日】11月1日(土)、11月2日(日) 16：30～20：30 【場所】国指定名勝 盛美園 好評だった盛美園ライトアップを今年も開催！盛美園と紅葉が美しい光に照らされ、いつもと違う雰囲気に…✨パフォーマンスイベントもございます！↓画像をクリックして詳細ページへ☆ ひらかわ紅葉フォトコンテスト2025 【募集期間】10月18日(土)～11月9日(日)【対象エリア】猿賀公園一帯、 盛美園 、志賀坊森林公園 白岩森林公園、三笠山公園【応募方法】SNS投稿、メール、郵送の3つの方法でご応募できます✨ ↓画像をクリックして詳細ページへ☆ こちらもおすすめ！ひらかわ秋・冬フォトコンテスト＆SNSフォトコンテスト入賞作品決定ひらかわ猿賀の秋フォトコンテスト2022入賞作品発表白岩森林公園青森県平川市夕焼けスポットまとめ ▼この記事をシェアする 10月下旬～11月にかけて市内の観光スポットは紅葉し美しい秋の風景が広がります。 ひらかわ紅葉めぐり期間中の平川市内では紅葉狩りや秋の味覚が楽しめるイベントが盛沢山となっております！ 【開催期間】10月25日(土)～11月9日(日) 10：00～16：00【場所】平川市猿賀公園 恒例イベントとなった、ぷらすマルシェや猿賀ルチャー祭りなど猿賀公園の紅葉スポットをめぐるイベントが盛沢山✨",
+      "prefecture": "青森県",
+      "mun
+```
+
+
+=== Case R-219 ===
+Topic / intent: 五箇山 雪の合掌造り
+Query: 雪が積もった五箇山の合掌造り集落を見に行きたい。積雪の多い時期と宿泊場所を教えて。
+Tool: get_spots({"prefecture": "Toyama", "municipality": "南砺", "q": "合掌造り"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "248f7f06b370d858",
+      "name": "事業者向け情報",
+      "description": "富山湾から立山まで全フィールドが学びの場。\n見所、体験どころが満載！ダイナミック富山を体験しよう！",
+      "coordinates": {
+        "lat": 36.696819,
+        "lng": 137.211029
+      },
+      "address": "〒930-8501 富山市新総曲輪1-7",
+      "url": "https://www.info-toyama.com/business/information/kyouiku",
+      "municipality": "南砺市",
+      "municipality_code": "162108",
+      "prefecture": "富山県",
+      "language": "ja",
+      "quality_score": 0.73,
+      "q_relevance": 20,
+      "tier": "notable"
+    }
+  ],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 1,
+    "broader": 0
+  },
+  "count": 1,
+  "total_before_limit": 1,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-04T03:57:35.824Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-220 ===
+Topic / intent: 가을 단풍 닛코
+Query: 닛코의 가을 단풍 시즌은 언제인가요? 특히 신교와 도쇼구 주변 단풍이 궁금합니다.
+Tool: search_hybrid({"q": "日光 紅葉 秋", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "日光 紅葉 秋",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.15633,
+      "rank_bm": 10,
+      "rank_vec": 37,
+      "key": "spot:102305bef6c5dd7a",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "中禅寺湖(日光市)",
+      "description": "美しい紅葉とともに楽しむ歴史遺産や、旬を迎えるおいしいグルメ秋の栃木は、魅力あふれるスポットが盛りだくさんです 世界遺産と悠久の歴史だけではない、四季折々の表情を持つ日光の大自然 アクティビティ、テーマパーク、牧場、史跡、幅広く楽しめる魅力の尽きない那須 竹林や花々、フォトジェニックな風景と個性溢れるローカルグルメを楽しもう 都心からのアクセスも良好。伝統と文化を感じる蔵の街や歴史スポットを散策しよう",
+      "prefecture": "栃木県",
+      "municipality": "那須町",
+      "url": "https://www.tochigiji.or.jp/tochigitabi/index_autumn"
+    },
+    {
+      "score": 0.13159,
+      "rank_bm": null,
+      "rank_vec": 40,
+      "key": "spot:da70f6e732640248",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "STAY YAMAGATA",
+      "description": "四季精彩景點 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 春 櫻花宣告春天到來、花草樹木漸開枝芽，在大自然中吸收純淨氣息，恢復能量。 more 夏 前往名峰瀑布等納涼勝地，享用新鮮櫻桃，欣賞夏季現蹤的螢火蟲。 more 秋 當紅葉渲染群山，便代表水果採收的季節來臨了。 more 冬 必訪！見證山形雪怪「樹冰」，沉浸在夢幻的雪中燈景。 more 從旅遊主題搜尋 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 夏之祭典 more 賞櫻勝地 more 紅葉名勝 more 冬季戶外活動 more 雪燈‧雪之祭典 more 親子之旅 more 能量之旅 more 賞花勝地 more 點閱率排行榜 山寺（寶珠山立石寺） more 山形城遺址、霞城公園 more 藏王樹冰 ／ Juhyo ／ Snow Monster （Zao’s Juhyo ／ Zao’s Rime ／ Frost Covered Trees of Zao） more 置賜公園香草園（置賜公園香草園展） more 天童温泉♨（Tendo Onsen） more 最上川堤防千本櫻 more Nakano Kanko Kajuen more Benihana Musuem more Michi-no-Eki Sagae Cherry Land more 月山 more Zao Bodaira Highlands more 更多景點 更多活動",
+      "prefecture": "山形県",
+      "municipality": "白鷹町",
+      "url": "https://yamagatakanko.com/zh_TW"
+    },
+    {
+      "score": 0.06581,
+      "rank_bm": null,
+      "rank_vec": 38,
+      "key": "spot:ae02fbb6d344b191",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "STAY YAMAGATA",
+      "description": "季节推荐景点 春 樱花报春来，草木吐新芽 以大自然的恩惠充电蓄能 more 夏 前往名峰、瀑布等凉爽景点 樱桃、萤火虫也正是时节 more 秋 红叶尽染群山之时 水果采摘季节也到来 more 冬 雪怪“雾凇”决不可错过 不妨沉浸在梦幻般的雪灯风情中 more 春 樱花报春来，草木吐新芽 以大自然的恩惠充电蓄能 more 夏 前往名峰、瀑布等凉爽景点 樱桃、萤火虫也正是时节 more 秋 红叶尽染群山之时 水果采摘季节也到来 more 冬 雪怪“雾凇”决不可错过 不妨沉浸在梦幻般的雪灯风情中 more 按旅游主题搜索 夏祭 more 樱花名胜 more 红叶名胜 more 冬季活动 more 雪灯・冰雪节 more 亲子之旅 more 心灵之旅 more 花卉名胜 more 夏祭 more 樱花名胜 more 红叶名胜 more 冬季活动 more 雪灯・冰雪节 more 亲子之旅 more 心灵之旅 more 花卉名胜 more 访问排名 银山温泉 more 烏帽子山公园 more Zao Echo Line more 滑翔伞体验 / Nanyo Sky Park more Takeda Winery more Kasugasan Rinsenji Temple more 月山 more 山形城遗迹・霞城公园 more 肘折温泉 more Zuishin-mon more Denkoku No Mori Yonezawa City Uesugi Museum more 更多景点 更多活动",
+      "prefecture": "山形県",
+      "municipality": "白鷹町",
+      "url": "https://yamagatakanko.com/zh_CN"
+    },
+    {
+      "score": 0.05435,
+      "rank_bm": 18,
+      "rank_vec": 48,
+      "key": "spot:7671705d31b4aad4",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報",
+      "description": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報 季節：秋 , 紅葉 , 自然景色 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 更新日：2025年09月30日 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 「志賀高原山の駅」から徒歩すぐの場所にある「蓮池」。池のまわりには遊歩道があるので散策をしながら紅葉鑑賞が楽しめる ©志賀高原観光協会 長野県の北東部、標高1,300メートル以上の高地に広がる志賀高原は、四季折々の自然を感じられる国立公園内の高原リゾート。春から秋にかけては湿原や湖沼をめぐるトレッキングが人気。四十八池湿原や大沼池など、火山地形が生んだ神秘的な風景が広がり、高山植物や野鳥観察も楽しめる。志賀高原の紅葉は、標高差と多様な植生によって生まれる色彩のグラデーションが大きな魅力だ。標高2,300mの横手山から1,500メートル付近にある蓮池、丸池まで、800メートル程の高低差があるため、紅葉前線が山頂から徐々に麓へと降りていく様子が長期間に渡って楽しめる。 横手山から望む秋を感じる一枚。山肌を彩る秋の色合いと雄大な眺望が広がる ©
+```
+
+
+=== Case R-221 ===
+Topic / intent: 祇園祭 京都
+Query: 京都祇園祭の山鉾巡行の日程と、見物スポットや前祭・後祭の違いを教えて。
+Tool: get_festivals({"prefecture": "Kyoto", "keyword": "祇園祭", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "26",
+  "lang": "ja",
+  "count": 1,
+  "total_matching": 1,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q979873",
+      "name_ja": "祇園祭",
+      "name_en": "Gion Matsuri",
+      "name": "祇園祭",
+      "description_ja": "京都市の祭り",
+      "description_en": "festival in Kyoto city, Japan",
+      "description": "京都市の祭り",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": "0869-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q979873",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "national_heritage": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11383026",
+      "name_ja": "佐原の大祭",
+      "name_en": "Sawara Float Festival",
+      "name": "佐原の大祭",
+      "description_ja": "千葉県香取市佐原で行われる本宿祇園祭と新宿秋祭りの総称",
+      "description_en": null,
+      "description": "千葉県香取市佐原で行われる本宿祇園祭と新宿秋祭りの総称",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11383026",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11509924",
+      "name_ja": "日田祇園祭",
+      "name_en": "Hita Gion Festival",
+      "name": "日田祇園祭",
+      "description_ja": "大分県日田市で行われる神事",
+      "description_en": null,
+      "description": "大分県日田市で行われる神事",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11509924",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q116838032",
+      "name_ja": "山鉾",
+      "name_en": "Kyoto Gion Festival Yamahoko Parade",
+      "name": "山鉾",
+      "description_ja": "京都祇園祭で巡行される山車",
+      "description_en": null,
+      "description": "京都祇園祭で巡行される山車",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q116838032",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q979873",
+      "name_ja": "祇園祭",
+      "name_en": "Gion Matsuri",
+      "name": "祇園祭",
+      "description_ja": "京都市の祭り",
+      "description_en": "festival in Kyoto city, Japan",
+      "description": "京都市の祭り",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q979873",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    }
+  ],
+  "national_heritage_note": "These are nationwide UNESCO Intangible Cultural Heritage inscriptions (e.g. 歌舞伎, 和食). They are NOT specific to the queried prefecture — listed separately so agents do not present them as prefecture-local festivals.",
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-associ
+```
+
+
+=== Case R-222 ===
+Topic / intent: Hokkaido winter poweder snow
+Query: Where in Hokkaido has the best powder snow for winter sports? Any officially listed winter attractions?
+Tool: get_spots({"prefecture": "Hokkaido", "q": "スキー"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "2c7f499f39b07d9c",
+      "name": "スキー場",
+      "description": "■日高国際スキー場■日高国際スキー場北海道・日高山脈のふもと北日高岳を一気に滑る、日高地方唯一の本格的スキー場です。",
+      "coordinates": {
+        "lat": 42.842861,
+        "lng": 142.463776
+      },
+      "address": "〒055-2315 北海道沙流郡日高町字富岡444−1電話01457-6-3667営業期間通常営業",
+      "url": "https://hidaka-kankou.jp/outdoor-2/kokusaisukijou",
+      "municipality": "日高町",
+      "municipality_code": "016012",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.74,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "d03d886b363ece56",
+      "name": "冬のPremium体験",
+      "description": "北海道の冬は本州よりも長く、11月下旬から5月上旬まで続きます。赤井川村は、そんな雪国・北海道の中でも、ひときわ降雪量の多い地域のひとつです。シーズンになると、上質なパウダースノーを求めて、全国からゲレンデにお客様が集まります。しかし楽しむことができるのは、スキーやスノーボードだけではありません。白銀の世界に包まれる赤井川村だからこそ楽しめる、「冬のPremium体験」をご紹介します。",
+      "coordinates": {
+        "lat": 43.090599,
+        "lng": 140.952988
+      },
+      "address": "〒046-0571 北海道余市郡赤井川村字常盤128番地1",
+      "url": "https://visit-akaigawa.com/experience/winter",
+      "municipality": "赤井川村",
+      "municipality_code": "014095",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "e0d2295aa1c8bf5c",
+      "name": "アウトドア",
+      "description": "体いっぱい大自然を楽しめるアウトドアの町、日高町！日高町にはスキー場やキャンプ場のほか、日高の自然を活かしてラフティングやキャニオニングのほか、 ガイドの案内により自然を活かした様々なアクティビティを楽しむことができる民間の施...",
+      "coordinates": {
+        "lat": 42.480614,
+        "lng": 142.07338
+      },
+      "address": "〒059-2192 北海道沙流郡日高町門別本町210番地の1",
+      "url": "https://hidaka-kankou.jp/outdoor-2",
+      "municipality": "日高町",
+      "municipality_code": "016012",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.81,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f55e16894768349b",
+      "name": "体験する",
+      "description": "下川町内にあるミニスキー場。スキーロープリフトで上がることができ、無料となっています。 スキー場は、小さいため、滑走すると１，２分で下まで着いてしまいますが、子供向けとして休日には子供達がスキーを楽しんでいます。スキー場 […]",
+      "coordinates": {
+        "lat": 44.301434,
+        "lng": 142.639221
+      },
+      "address": "〒098-1203 下川町共栄町１番地１",
+      "url": "https://www.shimokawa-time.net/activity/skipark",
+      "municipality": "下川町",
+      "municipality_code": "014681",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.81,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "36b624b56348237b",
+      "name": "ホテルナトゥールヴァルト富良野",
+      "description": "富良野スキー場から徒歩約2分のホテルです。夏はラベンダー畑や広大な自然、冬はウィンタースポーツを楽しめ、家族旅行にもピッタリです。富良野産の食材を豊富に使用したシェフ自慢の料理。宿泊予約は当ホームページからどうぞ。",
+      "coordinates": {
+        "lat": 43.342606,
+        "lng": 142.360596
+      },
+      "address": "〒076-0034 北海道富良野市北の峰町14-46",
+      "url": "https://naturwald-furano.com/",
+      "municipality": "富良野市",
+      "municipality_code": "012297",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.8,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "a2e0a0110bc63d34",
+      "name": "増毛町",
+      "description": "暑寒別岳スキー場は、白銀の暑寒別岳と紺碧の日本海という抜群のロケーションの中にあって、ビギナーからエキスパートまで存分に滑りを楽しめるゲレンデです。豪快なダウンヒル、舞い上がるパウダースノーを満喫してください。",
+      "coordinates": {
+        "lat": 43.767899,
+        "lng": 141.48938
+      },
+      "address": "〒077-0216 北海道増毛郡増毛町暑寒沢698-1TEL",
+      "url": "https://www.town.mashike.hokkaido.jp/tourism/place/ski",
+      "municipality": "増毛町",
+      "municipality_code": "014818",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.8,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7ec6ee767349fdae",
+      "name": "美深町観光協会::心やすらぐ大自然 美しく深い町 美深",
+      "description": "国道40号沿い 駅より車で約5分 
+```
+
+
+=== Case R-223 ===
+Topic / intent: 桜島 桜 春
+Query: 鹿児島の桜島や市内の桜の名所を教えて。活火山と桜の絶景スポットが知りたい。
+Tool: get_spots({"prefecture": "Kagoshima", "q": "桜"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "66c65740dd97ee8e",
+      "name": "<img src=\"https://kagoshima-barrierfree.com/wp-content/themes/barrierfreeRN-temp/img/logo.png\" alt=\"バリアフリーツアーセンター\" width=\"457\" height=\"58\" data-eio=\"l\">",
+      "description": "桜島港フェリーターミナルの料金所を出てすぐの場所にある観光案内所です。各種パンフレットがあり、スタッフが桜島の",
+      "coordinates": {
+        "lat": 31.584061,
+        "lng": 130.595276
+      },
+      "address": "鹿児島市桜島横山町61-4（桜島港フェリーターミナル3階）",
+      "url": "https://kagoshima-barrierfree.com/barrier-furee/%e6%a1%9c%e5%b3%b6%e8%a6%b3%e5%85%89%e6%a1%88%e5%86%85%e6%89%80%ef%bc%88%e6%a1%9c%e5%b3%b6%e3%82%b3%e3%83%b3%e3%82%b7%e3%82%a7%e3%83%ab%e3%82%b8%e3%83%a5%ef%bc%89",
+      "municipality": "鹿児島市",
+      "municipality_code": "462012",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.74,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "b08fcefd1d1a128a",
+      "name": "鹿児島在住の車いすユーザーが桜島や歴史を満喫するユニバーサルな旅！バリアフリー情報もチェック！",
+      "description": "鹿児島を旅する車いす、ご高齢、ベビーカーの方は必見！定番の桜島や西郷さんの歴史を楽しめるコースを紹介。かごしまバリアフリーツアーセンターが調査した、カヤック、温泉、仙厳園、奄美の里、人力車、大島紬着付け、桜島フェリー等のバリアフリー情報も！心のバリアフリー認定施設もご紹介。",
+      "coordinates": {
+        "lat": 31.584639,
+        "lng": 130.544479
+      },
+      "address": "〒890-0053 鹿児島市中央町10番地",
+      "url": "https://www.kagoshima-yokanavi.jp/article/universal",
+      "municipality": "鹿児島市",
+      "municipality_code": "462012",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "d641d1f53497cc30",
+      "name": "虎居のクルメツツジ山",
+      "description": "さつま町虎居の民家の裏山にて、約1000本のクルメツツジと芝桜を植栽しています。多趣味で元気なご夫婦が精魂込めて育てたクルメツツジは、満開になると圧巻の光景です。晴れた日には、澄んだ青空と色とりどりのクルメツツジ、クルメツツジ山でこいのぼりが風に吹かれる光景を見ることができます。おおよそ開花のピークは、4月上旬ごろ。開花の終わりは、4月中旬までとなる予想です。赤、白、ピンクの美しいクルメツツジを見ようと遠方からも人が訪れます。町民の方が見学開放をしている場所です。駐車や観覧マナーをお守りいただきますよう、よろしくお願いします。",
+      "coordinates": {
+        "lat": 31.905945,
+        "lng": 130.455704
+      },
+      "address": "〒895-1803鹿児島県薩摩郡さつま町宮之城屋地1565番地2電話番号：0996-24-8950ファックス：0996-52-3514メールフォームによるお問い合わせ",
+      "url": "https://www.satsuma-net.jp/kanko/event/1/6158.html",
+      "municipality": "さつま町",
+      "municipality_code": "463922",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c73f69e3fb1b1f73",
+      "name": "太鼓岩(白谷雲水峡)",
+      "description": "白谷雲水峡最奥にある花崗岩の巨石。白谷入口から約2.8キロ、標高1050メートル地点にあり、季節ごとに異なる眺望が楽しめます。特に春には山桜のピンクや新緑の黄緑色、杉の緑など、美しい自然の絨毯が広がります。管理棟からは片道約2時間で到着します。辻峠からは一方通行となっていますので、案内表示に従って下さい。 （補足）リンク：",
+      "coordinates": {
+        "lat": 30.39025,
+        "lng": 130.6515
+      },
+      "address": "〒891-4292 鹿児島県熊毛郡",
+      "url": "https://www.town.yakushima.kagoshima.jp/soshiki/kanko_machizukuri/kankosushin/kankospot/yama/861.html",
+      "municipality": "屋久島町",
+      "municipality_code": "465054",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "1622cbf08a8fd39d",
+      "name": "錦江湾でマリンレジャーを楽しもう！（錦江湾奥会議観光専門部会）",
+      "description": "錦江湾奥会議専門部会では、錦江湾（鹿児島湾）の奥部に位置する鹿児島市、垂水市、霧島市、姶良市が連携し、桜島や錦江湾ならではの魅力的な体験をＨＰ「ブルーツーリズム鹿児島」で発信しています！",
+      "coordinates": {
+        "lat": 31.728214,
+        "lng": 130.627838
+      },
+      "address": "〒899-5492鹿児島県姶良市宮島町25番地",
+      "url": "http://www.city.aira.lg.jp/shokan/bluetourism.html",
+      "municipality": "姶良市",
+      "municipality_code": "462250",
+      "prefecture": "鹿児島県",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "68feb1e6d87c1191",
+      "name": "清水岩屋公園",
+      "description": "南九州市川辺町にある，数百本の桜や紅葉，カフェ・流水プール・キャンプ場が楽しめる人
+```
+
+
+=== Case R-224 ===
+Topic / intent: Autumn foliage outside Kyoto
+Query: What are the best autumn foliage destinations in Japan besides Kyoto? I want less crowded alternatives.
+Tool: search_hybrid({"q": "紅葉 おすすめ", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "available": true,
+  "query": "紅葉 おすすめ",
+  "prefecture_code": null,
+  "kind": null,
+  "k": 10,
+  "bm_count": 50,
+  "vec_count": 50,
+  "results": [
+    {
+      "score": 0.13245,
+      "rank_bm": null,
+      "rank_vec": 42,
+      "key": "spot:cc5751c02dbeea5e",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "福井県観光情報ホームページ ふくいドットコム",
+      "description": "約5万本が咲き乱れる日本海側髄一のつつじの名所。毎年5月上旬、つつじまつりが行われ多くの人で賑わいます。他にも園内には、芝生広場やアスレチックス広場、日本庭園など子供も大人も楽しめるスポットがいっぱいです。展望台からは、さばえ市街地はもちろん、遠く白山連峰の眺望も楽しめます。 エリア 丹南 鯖江市 カテゴリー 自然・公園 紅葉 条件 バリアフリー 電話番号 0778-51-1001（鯖江市公園管理事務所） 住所 福井県鯖江市桜町3-7-20 営業時間 入園自由 定休日 年中無休 料金 無料 アクセス 福井鉄道西山公園駅から徒歩約1分/ハピライン鯖江駅から徒歩約20分/北陸自動車道鯖江ICから車で約5分 駐車場 あり 駐車場：台数 30 ウェブサイト 鯖江市公式ホームページ第62回さばえつつじまつり 西山公園 https://www.fuku-e.com/spot/detail_1535.html 西山動物園 https://www.fuku-e.com/spot/detail_1462.html 西山公園の紅葉 https://www.fuku-e.com/spot/detail_1538.html 西山公園の桜 https://www.fuku-e.com/spot/detail_1537.html 道の駅西山公園 https://www.fuku-e.com/spot/detail_1590.html パンダランド 冒険の森(西山公園) https://www.fuku-e.com/spot/detail_1438.html 結びのチャイム(西山公園) https://www.fuku-e.com/spot/detail_1328.html まなべの館 https://www.fuku-e.com/spot/detail_1206.html 鯖江市嚮陽会館 https://www.fuku-e.com/spot/detail_4952.html 地蔵橋 https://www.fuku-e.com/spot/detail_1030.html サバエ・シティーホテル https://www.fuku-e.com/stay/detail_4447.html カフェ&ホステル La Tempo https://www.fuku-e.com/stay/detail_7065.html La Tempoはなれ レッサーパンダの宿 https://www.fuku-e.com/stay/detail_7930.html ホテルアルファーワン鯖江 https://www.fuku-e.com/stay/detail_4452.html ホテルおさむら https://www.fuku-e.com/stay/detail_4453.html 鯖江第一ホテル https://www.fuku-e.com/stay/detail_4449.html ホテルニューオサムラ https://www.fuku-e.com/stay/detail_4454.html さばえ神明旅館 https://www.fuku-e.com/stay/detail_4448.html 三六温泉 神明苑 https://www.fuku-e.com/spot/detail_4817.html 三六温泉神明苑 https://www.fuku-e.com/spot/detail_4450.html",
+      "prefecture": "福井県",
+      "municipality": "若狭町",
+      "url": "https://www.fuku-e.com/spot/detail_1536.html"
+    },
+    {
+      "score": 0.12318,
+      "rank_bm": null,
+      "rank_vec": 49,
+      "key": "spot:0d7f8abd4f7d0f3e",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "新潟の紅葉スポット",
+      "description": "雄大な自然を満喫できる新潟県。情緒溢れる紅葉の名所が揃っており、アクセスのよい場所にある名所から、ドライブしながら巡る紅葉スポット、ロープウェーから見渡す赤く染まった山景色など、お気に入りの紅葉名所がきっと見つかるはず。 紅葉の状況は、現地から随時発信。もみじ狩りのプランニングにお役立てください。 更新時期：9月下旬～11月中旬 各スポットページに表示されている「お気に入り」ボタンをクリックすることで、「お気に入り」を作成できます。 「共有URLを作成」ボタンをクリックすると、固有のURLを発行できます。 友達や家族と共有したり、PCで作成したリストをスマートフォンに送ったり、旅のプランニングにお役立てください。",
+      "prefecture": "新潟県",
+      "municipality": "粟島浦村",
+      "url": "https://niigata-kankou.or.jp/season/autumn_leaves"
+    },
+    {
+      "score": 0.0593,
+      "rank_bm": null,
+      "rank_vec": 10,
+      "key": "spot:7671705d31b4aad4",
+      "kind": "spot",
+      "source": "municipal_scrape",
+      "name": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報",
+      "description": "特集・紅葉ハイキング＆自然を味わう Vol.3 紅葉のはじまりを歩く、信州“早秋の森“ 地元ガイドが案内する紅葉見頃・満喫情報 季節：秋 , 紅葉 , 自然景色 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 更新日：2025年09月30日 長野県には、標高差を生かした紅葉の名所が数多く点在しています。なかでも、山ノ内・小諸・白馬・駒ヶ根の４エリアにある標高が高いスポットは、県内でもひと足早く秋の彩りが訪れる場所として知られています。今回は、それぞれの地域をよく知る４名の方に、紅葉の見どころや散策におすすめの立ち寄りスポットなどを伺いました。緑から黄、赤へと移り変わる色彩のグラデーションが美しい、季節のはじまりならではの風景を、信州の“早秋の森”で見つけてみませんか。 「志賀高原山の駅」から徒歩すぐの場所にある「蓮池」。池のまわりには遊歩道があるので散策をしながら紅葉鑑賞が楽しめる ©志賀高原観光協会 長野県の北東部、標高1,300メートル以上の高地に広がる志賀高原は、四季折々の自然を感じられる国立公園内の高原リゾート。春から秋にかけては湿原や湖沼をめぐるトレッキングが人気。四十八池湿原や大沼池など、火山地形が生んだ神秘的な風景が広がり、高山植物や野鳥観察も楽しめる。志賀高原の紅葉は、標高差と多様な植生によって生まれる色彩のグラデーションが大きな魅力だ。標高2,300mの横手山から1,500メートル付近にある蓮池、丸池まで、800メートル程の高低差があるため、紅葉前線が山頂から徐々に麓へと降りていく様子が長期間に渡って楽しめる。 横手山から望む秋を感じる一枚。山肌を彩る秋の色合いと雄大な眺望が広がる ©志賀高原観光協会 背後にそびえる横手山。標高2,307メートルの山頂からは、鮮やかな新緑のパノラマが高原一帯に広がっている ©志賀高原観光協会",
+      "prefecture": "長野県",
+      "municipality": "辰野町",
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn
+```
+
+
+=== Case R-225 ===
+Topic / intent: 東北 冬まつり
+Query: 東北の冬のお祭りを巡りたい。なまはげや横手かまくら、弘前城雪燈籠まつりの日程を教えて。
+Tool: get_festivals({"prefecture": "Akita", "keyword": "冬", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "05",
+  "lang": "ja",
+  "count": 0,
+  "total_matching": 0,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [],
+  "national_heritage": [],
+  "national_heritage_note": null,
+  "sources": [
+    {
+      "name": "文化庁 重要無形民俗文化財 (via Wikidata, CC0)"
+    },
+    {
+      "name": "UNESCO Intangible Cultural Heritage (Japan, via Wikidata, CC0)"
+    },
+    {
+      "name": "Schema.org Event objects scraped from municipal and tourism-association websites"
+    }
+  ],
+  "note": "Multi-source aggregation — designated folk rituals, UNESCO inscriptions, and any structured Event objects we found in the municipal scrape. For live Wikidata festival queries (with month filtering) use get_events.",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.
