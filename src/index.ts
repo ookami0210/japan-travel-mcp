@@ -1382,6 +1382,45 @@ async function searchArea(args: {
         },
       }
     : null;
+
+  // Curated wildlife-encounter canonical block: when the query is for a
+  // marine-mammal encounter activity (wild-dolphin swimming, whale
+  // watching) and the canonical site set is NOT in master (御蔵島
+  // Mikurajima, Ogasawara, etc.), surface a hand-curated reference so
+  // the agent has specific entries instead of generic captive aquariums
+  // surfaced via lexical match. Each entry pairs site with QID + season +
+  // boat-tour operator type for a complete answer.
+  const qLowerCanon = (args.q ?? "").toLowerCase();
+  const isWildDolphinQuery =
+    /(イルカ|dolphin)/iu.test(args.q ?? "") &&
+    !/(水族館|aquarium|park\b|パーク)/iu.test(args.q ?? "");
+  const isWhaleWatchQuery =
+    /(クジラ|鯨|whale|whale[-\s]*watch|baleine)/iu.test(args.q ?? "");
+  const wildlifeCanonical: Array<{ qid: string; name_ja: string; name_en: string; period_jp: string; description_en: string; activity: string }> = [];
+  if (isWildDolphinQuery) {
+    wildlifeCanonical.push(
+      { qid: "Q1183194", name_ja: "御蔵島", name_en: "Mikurajima", period_jp: "4-11 月 (ピーク 7-9 月)", description_en: "Tokyo's Izu Islands. Boat tours operated by the village allow swimming with a resident pod of ~150 wild Indo-Pacific bottlenose dolphins. Guides hold permits; access from Tokyo by overnight ferry.", activity: "wild_dolphin_swim" },
+      { qid: "Q865762", name_ja: "天草諸島", name_en: "Amakusa Islands", period_jp: "通年 (ピーク 4-10 月)", description_en: "Kumamoto Pref. Year-round wild bottlenose dolphin sightings off the Itsuwa coast (~99% boat-encounter rate per local operators). No swim allowed; observation only.", activity: "wild_dolphin_watch" },
+      { qid: "Q243869", name_ja: "小笠原諸島", name_en: "Ogasawara Islands", period_jp: "通年", description_en: "UNESCO Natural Heritage. Two species (Indo-Pacific bottlenose, spinner dolphin) routinely sighted; permitted boat tours offer in-water encounters with spinner pods. Access via 24h ferry from Tokyo.", activity: "wild_dolphin_swim" },
+    );
+  }
+  if (isWhaleWatchQuery) {
+    wildlifeCanonical.push(
+      { qid: "Q133879", name_ja: "羅臼", name_en: "Rausu", period_jp: "4-10 月 (orca: 5-7 月、 sperm whale: 7-9 月)", description_en: "Hokkaido Shiretoko Peninsula. Nemuro Strait whale-watching: orca, sperm whale, minke whale all routinely sighted. Boat tours from Rausu Port.", activity: "whale_watching" },
+      { qid: "Q243869", name_ja: "小笠原諸島", name_en: "Ogasawara Islands", period_jp: "humpback: 1-4 月、 sperm whale: 通年", description_en: "UNESCO Natural Heritage. Humpback whales over-winter near Chichi-jima/Haha-jima (Jan-Apr); sperm whales year-round. Permitted whale-watching boats from Futami Port.", activity: "whale_watching" },
+      { qid: "Q1339014", name_ja: "土佐清水", name_en: "Tosashimizu", period_jp: "通年 (ブライダクジラ: 4-10 月)", description_en: "Kochi Pref. Bryde's whale and dolphin sightings in Tosa Bay. 'Whale Watching Cape Ashizuri' boat operators run year-round tours.", activity: "whale_watching" },
+    );
+  }
+  const wildlifeBlock = wildlifeCanonical.length > 0
+    ? {
+        canonical_wildlife_sites: wildlifeCanonical.map((e) => ({
+          ...e,
+          source: "curated_canonical",
+          source_url: `https://www.wikidata.org/entity/${e.qid}`,
+        })),
+        canonical_wildlife_sites_note: "Hand-curated canonical sites for marine-mammal encounter activities. The lexical search index over-weights captive aquariums (壱岐イルカパーク, のとじま水族館) for short queries; this block surfaces the wild-encounter alternatives directly. Use get_description with the qid for richer detail.",
+      }
+    : {};
   const resultsArray = infeasibilityBlock ? tiered.slice(0, 5) : tiered;
   const truncatedFlag = infeasibilityBlock
     ? deduped.length > 5
@@ -1393,6 +1432,7 @@ async function searchArea(args: {
     // unanswerable (aurora in Japan, wild panda, etc.), the user-facing
     // agent must lead with the warning, not a list of alternatives.
     ...(infeasibilityBlock ?? {}),
+    ...wildlifeBlock,
     match_count: deduped.length,
     results: resultsArray,
     tier_counts,
