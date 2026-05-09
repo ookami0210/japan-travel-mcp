@@ -59,35 +59,82 @@ if [ "$cmd" = "prepare" ]; then
 
   cp docs/quality/test_results.jsonl "docs/quality/test_results.${label}.jsonl"
 
-  echo "── [3/3] build v3 prompts (4 batches)"
+  echo "── [3/3] build v3 prompts (4 batches × 2 judges)"
   "$PY" docs/quality/build_v3_prompts.py --label "$label" --batches 4
 
+  # Multi-judge default: copy batch dir to a sibling for the second judge.
+  # Each judge scores the same prompts independently; the median is taken
+  # at aggregation time so single-session judge variance is halved.
+  src_dir="docs/quality/judge_v3_batches/${label}_100case"
+  if [ -d "$src_dir" ]; then
+    rm -rf "docs/quality/judge_v3_batches/${label}_100case_j2"
+    cp -r "$src_dir" "docs/quality/judge_v3_batches/${label}_100case_j2"
+    rm -f "docs/quality/judge_v3_batches/${label}_100case_j2"/batch_*_scored.jsonl
+  fi
+
   echo
-  echo "✅ Prepare done. Now spawn 4 Sonnet subagents (one per batch) and have them write batch_N_scored.jsonl."
-  echo "   Batches at: docs/quality/judge_v3_batches/${label}_100case/"
-  echo "   When all 4 are done, run: bash docs/quality/auto_loop.sh aggregate $label <previous-label>"
+  echo "✅ Prepare done. Now spawn 8 Sonnet subagents (one per batch × 2 judges) — multi-judge default."
+  echo "   Judge 1 batches: docs/quality/judge_v3_batches/${label}_100case/"
+  echo "   Judge 2 batches: docs/quality/judge_v3_batches/${label}_100case_j2/"
+  echo "   Each batch_N_prompt.txt is identical between j1/j2; the variance"
+  echo "   we are pinning down sits in the Sonnet session itself, not the prompt."
+  echo "   When all 8 scored.jsonl files are written, run:"
+  echo "     bash docs/quality/auto_loop.sh aggregate $label <previous-label>"
   exit 0
 fi
 
 if [ "$cmd" = "aggregate" ]; then
-  prev="${1:?previous label required for delta (e.g. after-festivals-fix)}"
+  prev="${1:?previous label required for delta (e.g. bigday-0508-rejudge)}"
 
   batch_dir="docs/quality/judge_v3_batches/${label}_100case"
+  batch_dir_j2="docs/quality/judge_v3_batches/${label}_100case_j2"
   if [ ! -d "$batch_dir" ]; then
     echo "  batch dir missing: $batch_dir" >&2
     exit 2
   fi
 
   expected_batches=4
-  found=$(ls "$batch_dir"/batch_*_scored.jsonl 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$found" -ne "$expected_batches" ]; then
-    echo "  expected $expected_batches scored batches, found $found in $batch_dir" >&2
+  j1_found=$(ls "$batch_dir"/batch_*_scored.jsonl 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$j1_found" -ne "$expected_batches" ]; then
+    echo "  expected $expected_batches j1 scored batches, found $j1_found in $batch_dir" >&2
     exit 3
   fi
 
-  echo "── aggregate $label (prev=$prev)"
-  "$PY" docs/quality/aggregate_v3.py --label "$label"
-  "$PY" docs/quality/detail_v3.py --label "$label"
+  # Multi-judge default: when judge 2 outputs are present, consolidate them
+  # alongside judge 1 and run the multi-judge aggregator (median per case
+  # per dim). This is the canonical scoring path post 2026-05-09; single-
+  # judge variance was measured at ±20pp Sat which is too noisy to compare.
+  j2_found=0
+  if [ -d "$batch_dir_j2" ]; then
+    j2_found=$(ls "$batch_dir_j2"/batch_*_scored.jsonl 2>/dev/null | wc -l | tr -d ' ')
+  fi
+
+  if [ "$j2_found" -eq "$expected_batches" ]; then
+    echo "── aggregate $label MULTI-JUDGE (prev=$prev)"
+    # Rename j1 outputs to batch_N_judge1_scored.jsonl and copy j2 outputs
+    # to batch_N_judge2_scored.jsonl in the same dir, so the multijudge
+    # aggregator finds both halves.
+    for n in 1 2 3 4; do
+      if [ -f "$batch_dir/batch_${n}_scored.jsonl" ] && [ ! -f "$batch_dir/batch_${n}_judge1_scored.jsonl" ]; then
+        mv "$batch_dir/batch_${n}_scored.jsonl" "$batch_dir/batch_${n}_judge1_scored.jsonl"
+      fi
+      if [ -f "$batch_dir_j2/batch_${n}_scored.jsonl" ]; then
+        cp "$batch_dir_j2/batch_${n}_scored.jsonl" "$batch_dir/batch_${n}_judge2_scored.jsonl"
+      fi
+    done
+    "$PY" docs/quality/aggregate_v3_multijudge.py --label "$label"
+    # Mirror the multijudge file to the canonical scored path so detail_v3
+    # / delta-comparison logic that reads the .v3.jsonl file still works.
+    cp "docs/quality/test_results_scored.${label}.v3.multijudge.jsonl" \
+       "docs/quality/test_results_scored.${label}.v3.jsonl"
+    "$PY" docs/quality/detail_v3.py --label "$label"
+  else
+    echo "── aggregate $label SINGLE-JUDGE FALLBACK (prev=$prev)"
+    echo "  WARNING: only $j1_found / $expected_batches judge 2 batches present."
+    echo "  Single-judge variance is ±20pp Sat — treat results as indicative only."
+    "$PY" docs/quality/aggregate_v3.py --label "$label"
+    "$PY" docs/quality/detail_v3.py --label "$label"
+  fi
 
   # Compute delta if previous label exists
   prev_scored="docs/quality/test_results_scored.${prev}.v3.jsonl"
