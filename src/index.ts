@@ -1458,13 +1458,42 @@ const CANONICAL_CLUSTERS: FeaturedCluster[] = [
     ],
   },
   {
-    trigger: /(出羽三山|dewa\s*sanzan|three\s*mountains\s*of\s*dewa)/iu,
-    rationale_en: "Dewa Sanzan = three sacred mountains of Yamagata pilgrimage. Yudono Shrine and Haguro cedar-lined paths anchor the standard pilgrimage walk.",
-    rationale_ja: "出羽三山 = 山形の三霊峰。 湯殿山神社と羽黒のスギ並木が巡礼定番ルート。",
+    // Trigger broadened from "出羽三山" to include bare "出羽" / "dewa"
+    // (the canonical referent in travel literature) and the individual
+    // peak names (羽黒 / 月山 / 湯殿). L1-18 query q="出羽" was missing the
+    // cluster because the previous trigger required "三山".
+    trigger: /(出羽三山|dewa\s*sanzan|three\s*mountains?\s*of\s*dewa|出羽神社|^出羽$|^dewa$|羽黒山|月山|湯殿山|gassan|haguro|yudono)/iu,
+    rationale_en: "Dewa Sanzan = the three sacred mountains of Yamagata pilgrimage (Haguro / Gassan / Yudono). The five-storey pagoda of Haguro and the three-shrine combined hall (Sanjin Gosaiden), plus Yudono Shrine and Haguro cedar-lined paths, anchor the standard pilgrimage walk.",
+    rationale_ja: "出羽三山 = 山形の三霊峰 (羽黒山・月山・湯殿山)。 羽黒山五重塔と三神合祭殿、 湯殿山神社、 羽黒のスギ並木が巡礼定番ルート。",
     qids: [
-      "Q11563607",   // 湯殿山神社 (verified)
+      "Q11610424",   // 羽黒山五重塔 (Haguro 5-storey pagoda, verified 38.71/139.97)
+      "Q11516052",   // 月山神社 (Gassan Shrine, verified 38.55/140.03)
+      "Q11563607",   // 湯殿山神社 (Yudono Shrine, verified)
+      "Q135194465",  // 出羽神社三神合祭殿 (Sanjin Gosaiden, verified 38.70/139.98)
       "Q113643746",  // 羽黒山のスギ並木 (verified)
       "Q112080442",  // 羽黒山の爺スギ (verified)
+    ],
+  },
+  {
+    trigger: /(出雲大社|izumo\s*taisha|izumo\s*grand\s*shrine|^出雲$|^izumo$)/iu,
+    rationale_en: "Izumo Taisha cluster: the Grand Shrine itself plus the surrounding sacred sites — Yaegaki Shrine (the marriage-divination pond), Susa Shrine (kami of storms), Miho Shrine (Ebisu's home), and the precinct ruins. These are the standard Izumo pilgrimage stops.",
+    rationale_ja: "出雲大社の聖地クラスター: 大社本体に加え、 八重垣神社 (縁結び占い)、 須佐神社 (素戔嗚の根源)、 美保神社 (恵比須の社)、 境内遺跡 — 出雲信仰の定番巡礼。",
+    qids: [
+      "Q696362",     // 出雲大社 (main, verified 35.40/132.69)
+      "Q11395864",   // 出雲大社境内遺跡 (precinct archaeological site, verified)
+      "Q3571285",    // 八重垣神社 (Yaegaki Shrine, verified 35.43/133.07)
+      "Q11664502",   // 須佐神社 (Susa Shrine, verified 35.23/132.74)
+      "Q3313076",    // 美保神社 (Miho Shrine, verified 35.56/133.31)
+    ],
+  },
+  {
+    trigger: /(厳島|宮島|itsukushima|miyajima)/iu,
+    rationale_en: "Itsukushima / Miyajima cluster: the UNESCO Shinto shrine on the island, the iconic torii gate in the tide, the inner haraidono (purification hall), and Momijidani Park (the maple valley behind the shrine that frames autumn-foliage walks).",
+    rationale_ja: "厳島・宮島の定番クラスター: 厳島神社本社 (UNESCO)、 海中の大鳥居、 本社祓殿、 紅葉谷公園 (神社背後の楓の渓谷、 紅葉狩りの定番)。",
+    qids: [
+      "Q191763",     // 厳島神社 (main, verified 34.30/132.32)
+      "Q107020641",  // 厳島神社本社祓殿 (haraidono, verified 34.30/132.32)
+      "Q6897278",    // 紅葉谷公園 (Momijidani Park, verified 34.29/132.32)
     ],
   },
   {
