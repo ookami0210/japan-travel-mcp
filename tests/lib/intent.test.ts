@@ -279,6 +279,48 @@ describe("extractTravelIntent — lexical disambiguation", () => {
   });
 });
 
+describe("extractTravelIntent — infeasibility detection", () => {
+  it("aurora in Japan → infeasibility flagged with alt_kinds=dark_sky/observatory", () => {
+    const r = extractTravelIntent("aurora viewing in Japan");
+    expect(r.infeasibility).toBeDefined();
+    expect(r.infeasibility?.alt_kinds).toContain("dark_sky");
+  });
+  it("オーロラ in 日本 → infeasibility flagged", () => {
+    expect(extractTravelIntent("日本でオーロラを見たい").infeasibility).toBeDefined();
+  });
+  it("camel safari → infeasibility flagged", () => {
+    expect(extractTravelIntent("camel safari in Japan").infeasibility).toBeDefined();
+  });
+  it("polar bear wild encounter → infeasibility flagged", () => {
+    expect(extractTravelIntent("wild polar bear safari").infeasibility).toBeDefined();
+  });
+  it("plain query (cherry blossoms) does NOT fire", () => {
+    expect(extractTravelIntent("cherry blossoms in Kyoto").infeasibility).toBeUndefined();
+  });
+});
+
+describe("extractTravelIntent — negative-constraint detection", () => {
+  it("'Tottori 以外の砂丘' → exclude Tottori + 鳥取", () => {
+    const r = extractTravelIntent("Tottori 以外の砂丘");
+    expect(r.negative_constraints).toBeDefined();
+    expect(r.negative_constraints).toContain("Tottori");
+    expect(r.negative_constraints).toContain("鳥取");
+  });
+  it("'京都 以外の buke yashiki' → exclude 京都 + Kyoto", () => {
+    const r = extractTravelIntent("京都 以外の武家屋敷");
+    expect(r.negative_constraints).toContain("京都");
+    expect(r.negative_constraints).toContain("Kyoto");
+  });
+  it("'onsen towns NOT in Hokkaido' → exclude Hokkaido + 北海道", () => {
+    const r = extractTravelIntent("onsen towns not in Hokkaido");
+    expect(r.negative_constraints).toContain("Hokkaido");
+    expect(r.negative_constraints).toContain("北海道");
+  });
+  it("plain query has no exclusions", () => {
+    expect(extractTravelIntent("京都の寺").negative_constraints).toBeUndefined();
+  });
+});
+
 describe("TRAVEL_CONCEPTS — invariants", () => {
   it("ids are unique", () => {
     const ids = TRAVEL_CONCEPTS.map((c) => c.id);
