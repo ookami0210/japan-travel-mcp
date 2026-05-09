@@ -1584,6 +1584,50 @@ const CANONICAL_CLUSTERS: FeaturedCluster[] = [
       "Q3594058",   // 大内宿 (verified)
     ],
   },
+  {
+    trigger: /(富士山|mount\s*fuji|mt\.?\s*fuji|富士五湖|fuji\s*five\s*lakes|fujisan|^富士$)/iu,
+    rationale_en: "Mount Fuji UNESCO cultural-heritage cluster: the two head Sengen shrines that anchor the pilgrimage tradition (Kitaguchi Hongū Fuji Sengen Jinja at the Yoshida 5th-station, Fujisan Hongū Sengen Taisha at the southern base) and the Fujikawaguchiko onsen district / Yamanaka-ko flower park that anchor the Fuji Five Lakes loop.",
+    rationale_ja: "富士山UNESCO文化遺産クラスター: 富士信仰の二大本宮浅間神社 (北口本宮冨士浅間神社・吉田登山口、 富士山本宮浅間大社・南麓本宮)、 富士五湖周遊の拠点 (富士河口湖温泉郷、 山中湖花の都公園)。",
+    qids: [
+      "Q11401286",  // 北口本宮冨士浅間神社 (Yoshida-side head shrine, verified 35.47/138.79)
+      "Q653180",    // 富士山本宮浅間大社 (southern head shrine, verified 35.23/138.61)
+      "Q17211390",  // 富士河口湖温泉郷 (Kawaguchiko onsen district, verified 35.53/138.76)
+      "Q3126659",   // 山中湖花の都公園 (Yamanakako flower park, verified 35.44/138.85)
+    ],
+  },
+  {
+    trigger: /(原爆|atomic\s*bomb|hibakusha|hibaku|peace\s*memorial|平和記念)/iu,
+    rationale_en: "Canonical Japanese atomic-bomb / peace-memorial sites in Hiroshima and Nagasaki — the two cities bombed in August 1945 and the standard pilgrimage of remembrance for end-users researching the war, peace history, or UNESCO World Heritage. Hiroshima cluster centres on the A-Bomb Dome (UNESCO) and Peace Memorial Park / Museum / Cenotaph; Nagasaki adds the Peace Park, Atomic Bomb Museum, and National Peace Memorial Hall for the Atomic Bomb Victims.",
+    rationale_ja: "原爆・平和記念の代表的巡礼地。 広島は原爆ドーム (UNESCO) を中心に平和記念公園・資料館・原爆死没者慰霊碑、 長崎は平和公園・原爆資料館・国立長崎原爆死没者追悼平和祈念館が定番。",
+    qids: [
+      "Q231140",    // 原爆ドーム (Hiroshima A-Bomb Dome, UNESCO WHS, verified 34.40/132.45)
+      "Q1207208",   // 平和記念公園 (Hiroshima Peace Memorial Park, verified)
+      "Q1200076",   // 広島平和記念資料館 (Hiroshima Peace Memorial Museum, verified)
+      "Q11409718",  // 原爆死没者慰霊碑 (Hiroshima Cenotaph, verified)
+      "Q93490",     // 平和公園 (Nagasaki Peace Park, verified 32.78/129.86)
+      "Q1099077",   // 長崎原爆資料館 (Nagasaki Atomic Bomb Museum, verified)
+      "Q133628",    // 国立長崎原爆死没者追悼平和祈念館 (Nagasaki National Peace Memorial Hall, verified)
+    ],
+  },
+  {
+    trigger: /(縄文|jomon|jōmon|prehistoric\s*japan)/iu,
+    rationale_en: "Jōmon (Neolithic Japan) UNESCO cluster: the Jomon Prehistoric Sites in Northern Japan inscription includes Sannai-Maruyama (the largest Jomon settlement, Aomori), Korekawa (rich late-Jomon ceramics, Aomori), Ōyu Stone Circles (Akita, ceremonial stone circles), and Kamegaoka (terminal-Jomon tradition, Aomori).",
+    rationale_ja: "縄文時代の代表遺跡 (UNESCO「北海道・北東北の縄文遺跡群」): 三内丸山遺跡 (青森、 国内最大級の縄文集落)、 是川遺跡 (青森、 晩期縄文土器)、 大湯環状列石 (秋田、 ストーンサークル)、 亀ヶ岡石器時代遺跡 (青森、 終末期縄文)。",
+    qids: [
+      "Q911970",    // 三内丸山遺跡 (Sannai-Maruyama, verified 40.81/140.70)
+      "Q11514205",  // 是川遺跡 (Korekawa, verified)
+      "Q11437550",  // 大湯環状列石 (Ōyu Stone Circles, verified)
+      "Q11370708",  // 亀ヶ岡石器時代遺跡 (Kamegaoka, verified)
+    ],
+  },
+  {
+    trigger: /(知床|shiretoko)/iu,
+    rationale_en: "Shiretoko Peninsula UNESCO Natural Heritage cluster: the Shiretoko National Park itself anchors the protected area encompassing the peninsula's pristine coastline, brown bear habitat, and Sea of Okhotsk drift-ice ecosystem.",
+    rationale_ja: "知床半島 UNESCO 自然遺産クラスター: 知床国立公園が半島全域 (原生海岸線、 ヒグマ生息地、 オホーツク流氷生態系) を覆う保護区。",
+    qids: [
+      "Q739391",    // 知床国立公園 (Shiretoko National Park, verified 44.16/145.24)
+    ],
+  },
 ];
 
 interface FeaturedClusterEntry {
