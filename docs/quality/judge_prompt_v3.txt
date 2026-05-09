@@ -2,37 +2,59 @@ You are scoring tool responses from the japan-travel-mcp server, an OSS Japan to
 
 Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
 
-For each numeric dimension, use 0-5:
-  5 = excellent — agent can use as-is
-  4 = good — minor gap, mostly useful
-  3 = acceptable — works but weak
-  2 = problematic — intent matches but practically thin
-  1 = bad — incorrect, off-target, or unsafe
+# CRITICAL RULES (read before scoring — these eliminate inter-judge variance)
 
-DIMENSIONS:
+**RULE A — score the response, not the tool choice.**
+The agent decided the tool + args; the response is what the server returned. If the wrong tool was called (e.g. get_japan_heritage for a tea-ceremony query), you may note it in `improvement_hint`, but the dim scores must reflect the actual data returned, not what would have come from a different tool. A wrong-tool response with authoritative data is still partly useful — score 3, not 2.
 
-1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+**RULE B — single root cause, single dim hit.**
+If one shortfall affects multiple dims (e.g. "wrong tool" → could affect intent / specificity / constraint), pick the ONE worst-affected dim and score that strictly; the other affected dims drop by AT MOST 1 from their otherwise-deserved score. Do NOT compound the same defect across 3-4 dims — that produces unstable inter-judge medians.
+
+**RULE C — authoritative-source-but-incomplete = 3, not 2.**
+If the response returns real, authoritative data (R-3 designations, Wikidata heritage entities, MAFF GI records, official scrapes) but the scope or filtering is incomplete (e.g. only Akita instead of all-Tohoku, or only food when craft was also requested), the affected dims are **3 (acceptable but weak)**, not 2. Score 2 only when the data is actively misleading or the relevant entity class is entirely absent.
+
+**RULE D — language mismatch is constraint failure, not hallucination.**
+If the user query is in fr / de / ko / vi / etc but the response is in en / ja, score `constraint_handling` -1 from its otherwise-deserved value. Do NOT also drop intent / specificity / expression on the same grounds — that is double-counting per Rule B.
+
+**RULE E — featured_cluster present and relevant = boost intent / specificity by 1.**
+If the response includes a `featured_cluster` block whose entries match the query toponym, the cluster delivers canonical sub-spots regardless of ranking. Add +1 to intent and specificity (capped at 5), unless the cluster items are wrong/stale.
+
+# DIMENSION SCALE (fixed anchors — do not deviate)
+
+For every numeric dimension below, use:
+  **5** = exact match for the dim's question, no caveats needed
+  **4** = match with ONE notable caveat (mention it in reasoning)
+  **3** = partial match — authoritative data with scope/filter gap (RULE C)
+  **2** = wrong scope OR major gap OR misleading
+  **1** = wrong tool, no useful data, or off-topic
+  **0** = empty / error response
+
+# DIMENSIONS
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent? (Apply RULE E if cluster fired.)
 2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
 3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
 4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
-5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility / language per RULE D)?
 6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
-7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic? (Apply RULE E if cluster fired.)
 8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
 9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
 10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
-11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ALL numeric dims are ≥4. Otherwise pick the SINGLE worst per RULE B:
     - A. Retrieval Failure — needed data wasn't fetched
     - B. Ranking Failure — data present but buried below noise
     - C. Reasoning Failure — data present but synthesised wrong
     - D. Grounding Failure — mentions things not in the corpus
     - E. Practicality Failure — correct but unusable
-    - F. Constraint Failure — ignored explicit constraints
+    - F. Constraint Failure — ignored explicit constraints (incl. language per RULE D)
     - G. Coverage Failure — sparse, too few options
     - H. Safety / Cultural Failure — dangerous or insensitive
 
+# OUTPUT FORMAT
+
 Plus three free-form fields (≤80 words each):
-- **reasoning** — short justification of your scoring
+- **reasoning** — short justification, citing which RULE (A-E) applied if any
 - **missing_data** — what *should* be there but isn't ('' if nothing)
 - **wrong_data** — incorrect / fabricated content ('' if none)
 - **improvement_hint** — concrete next-step the server could take
