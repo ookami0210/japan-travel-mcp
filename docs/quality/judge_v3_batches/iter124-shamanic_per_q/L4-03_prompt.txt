@@ -1,0 +1,179 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+# CRITICAL RULES (read before scoring — these eliminate inter-judge variance)
+
+**RULE A — score the response, not the tool choice.**
+The agent decided the tool + args; the response is what the server returned. If the wrong tool was called (e.g. get_japan_heritage for a tea-ceremony query), you may note it in `improvement_hint`, but the dim scores must reflect the actual data returned, not what would have come from a different tool. A wrong-tool response with authoritative data is still partly useful — score 3, not 2.
+
+**RULE B — single root cause, single dim hit.**
+If one shortfall affects multiple dims (e.g. "wrong tool" → could affect intent / specificity / constraint), pick the ONE worst-affected dim and score that strictly; the other affected dims drop by AT MOST 1 from their otherwise-deserved score. Do NOT compound the same defect across 3-4 dims — that produces unstable inter-judge medians.
+
+**RULE C — authoritative-source-but-incomplete = 3, not 2.**
+If the response returns real, authoritative data (R-3 designations, Wikidata heritage entities, MAFF GI records, official scrapes) but the scope or filtering is incomplete (e.g. only Akita instead of all-Tohoku, or only food when craft was also requested), the affected dims are **3 (acceptable but weak)**, not 2. Score 2 only when the data is actively misleading or the relevant entity class is entirely absent.
+
+**RULE D — language mismatch is constraint failure, not hallucination.**
+If the user query is in fr / de / ko / vi / etc but the response is in en / ja, score `constraint_handling` -1 from its otherwise-deserved value. Do NOT also drop intent / specificity / expression on the same grounds — that is double-counting per Rule B.
+
+**RULE E — featured_cluster present and relevant = boost intent / specificity by 1.**
+If the response includes a `featured_cluster` block whose entries match the query toponym, the cluster delivers canonical sub-spots regardless of ranking. Add +1 to intent and specificity (capped at 5), unless the cluster items are wrong/stale.
+
+# DIMENSION SCALE (fixed anchors — do not deviate)
+
+For every numeric dimension below, use:
+  **5** = exact match for the dim's question, no caveats needed
+  **4** = match with ONE notable caveat (mention it in reasoning)
+  **3** = partial match — authoritative data with scope/filter gap (RULE C)
+  **2** = wrong scope OR major gap OR misleading
+  **1** = wrong tool, no useful data, or off-topic
+  **0** = empty / error response
+
+# DIMENSIONS
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent? (Apply RULE E if cluster fired.)
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility / language per RULE D)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic? (Apply RULE E if cluster fired.)
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ALL numeric dims are ≥4. Otherwise pick the SINGLE worst per RULE B:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints (incl. language per RULE D)
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+# OUTPUT FORMAT
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification, citing which RULE (A-E) applied if any
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score the following case:
+
+=== Case L4-03 ===
+Topic / intent: 失われゆく職人技
+Query: Forgotten craftsman skills still alive in Japan.
+Tool: get_traditional_arts({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "ok": true,
+  "response": {
+    "category_filter": null,
+    "keyword": null,
+    "lang": "en",
+    "count": 183,
+    "cross_program_advisory": {
+      "note": "get_traditional_arts with no filters returns 183 文化庁 + UNESCO ICH records. If the user query is about a specific sub-category (mountain shamanic / yamabushi / itako, regional kagura, ritual dance, performing arts venues, food / tea ceremony), the canonical anchor is listed below — many of these live in OTHER tools (search_area / get_japan_heritage) because they are heritage SITES rather than designated art forms.",
+      "featured_subcategories": [
+        {
+          "subcategory": "Mountain shamanic / yamabushi / itako (修験道 / 山岳信仰)",
+          "intent_keywords": [
+            "mountain shaman",
+            "shamanic",
+            "yamabushi",
+            "山岳信仰",
+            "修験道",
+            "出羽三山",
+            "itako",
+            "イタコ",
+            "shugendo"
+          ],
+          "canonical_entities": [
+            {
+              "qid": "Q244329",
+              "name_ja": "出羽三山",
+              "name_en": "Dewa Sanzan",
+              "note": "Yamagata Pref. The 3-mountain pilgrimage (Haguro / Gassan / Yudono) is the historic center of yamabushi (修験道) practice. Living shukubo lodging at Mt. Haguro."
+            },
+            {
+              "qid": "Q1198218",
+              "name_ja": "大峰山",
+              "name_en": "Mt. Omine",
+              "note": "Nara Pref. UNESCO WHS 'Sacred Sites and Pilgrimage Routes in the Kii Mountain Range'. Hongu Shugendo headquarters — women-restricted upper section preserves traditional 修行."
+            },
+            {
+              "qid": "Q649194",
+              "name_ja": "恐山",
+              "name_en": "Osorezan",
+              "note": "Aomori Pref. 'One of the 3 great spiritual mountains'. Itako shamans channel the dead during the July festival; Bodaiji temple shukubo."
+            },
+            {
+              "qid": "Q133873",
+              "name_ja": "御嶽山",
+              "name_en": "Mt. Mitake",
+              "note": "Nagano-Gifu border. 御嶽教 sect mountain worship; living kō (講) pilgrim associations."
+            },
+            {
+              "qid": "Q133898",
+              "name_ja": "立山",
+              "name_en": "Tateyama",
+              "note": "Toyama Pref. Tateyama mountain faith with 立山博物館 and 芦峅寺 shrine; one of Japan's 3 holy mountains."
+            }
+          ],
+          "canonical_tools": [
+            {
+              "tool": "search_area",
+              "args": {
+                "q": "山岳信仰"
+              }
+            },
+            {
+              "tool": "search_area",
+              "args": {
+                "q": "修験道"
+              }
+            },
+            {
+              "tool": "get_japan_heritage",
+              "args": {
+                "prefecture": "Yamagata"
+              },
+              "note": "出羽三山 stories"
+            }
+          ]
+        },
+        {
+          "subcategory": "Regional kagura / sacred dance",
+          "intent_keywords": [
+            "kagura",
+            "神楽",
+            "ritual dance",
+            "sacred dance"
+          ],
+          "canonical_entities": [
+            {
+              "qid": "Q11511418",
+              "name_ja": "早池峰神楽",
+              "name_en": "Hayachine Kagura",
+              "note": "Iwate Pref. UNESCO ICH (2009). Living mountain-shrine kagura at Hayachine Shrine — one of the most authentic surviving kagura traditions."
+            },
+            {
+              "qid": "Q11529115",
+              "name_ja": "石見神楽",
+              "name_en": "Iwami Kagura",
+              "note": "Shimane Pref. Living regional kagura performed at shrine festivals across Iwami area."
+            },
+            {
+              "qid": "Q11339974",
+              "name_ja": "高千穂神楽",
+              "name_en": "Takachiho Kagura",
+              "note": "Miyazaki Pref. Mythological 'Iwato' cycle performed nightly at Takachiho Shrine for visitors year-round."
+            }
+   
+... (truncated)
+```

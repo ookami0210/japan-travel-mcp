@@ -1,0 +1,160 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+# CRITICAL RULES (read before scoring — these eliminate inter-judge variance)
+
+**RULE A — score the response, not the tool choice.**
+The agent decided the tool + args; the response is what the server returned. If the wrong tool was called (e.g. get_japan_heritage for a tea-ceremony query), you may note it in `improvement_hint`, but the dim scores must reflect the actual data returned, not what would have come from a different tool. A wrong-tool response with authoritative data is still partly useful — score 3, not 2.
+
+**RULE B — single root cause, single dim hit.**
+If one shortfall affects multiple dims (e.g. "wrong tool" → could affect intent / specificity / constraint), pick the ONE worst-affected dim and score that strictly; the other affected dims drop by AT MOST 1 from their otherwise-deserved score. Do NOT compound the same defect across 3-4 dims — that produces unstable inter-judge medians.
+
+**RULE C — authoritative-source-but-incomplete = 3, not 2.**
+If the response returns real, authoritative data (R-3 designations, Wikidata heritage entities, MAFF GI records, official scrapes) but the scope or filtering is incomplete (e.g. only Akita instead of all-Tohoku, or only food when craft was also requested), the affected dims are **3 (acceptable but weak)**, not 2. Score 2 only when the data is actively misleading or the relevant entity class is entirely absent.
+
+**RULE D — language mismatch is constraint failure, not hallucination.**
+If the user query is in fr / de / ko / vi / etc but the response is in en / ja, score `constraint_handling` -1 from its otherwise-deserved value. Do NOT also drop intent / specificity / expression on the same grounds — that is double-counting per Rule B.
+
+**RULE E — featured_cluster present and relevant = boost intent / specificity by 1.**
+If the response includes a `featured_cluster` block whose entries match the query toponym, the cluster delivers canonical sub-spots regardless of ranking. Add +1 to intent and specificity (capped at 5), unless the cluster items are wrong/stale.
+
+# DIMENSION SCALE (fixed anchors — do not deviate)
+
+For every numeric dimension below, use:
+  **5** = exact match for the dim's question, no caveats needed
+  **4** = match with ONE notable caveat (mention it in reasoning)
+  **3** = partial match — authoritative data with scope/filter gap (RULE C)
+  **2** = wrong scope OR major gap OR misleading
+  **1** = wrong tool, no useful data, or off-topic
+  **0** = empty / error response
+
+# DIMENSIONS
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent? (Apply RULE E if cluster fired.)
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility / language per RULE D)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic? (Apply RULE E if cluster fired.)
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ALL numeric dims are ≥4. Otherwise pick the SINGLE worst per RULE B:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints (incl. language per RULE D)
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+# OUTPUT FORMAT
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification, citing which RULE (A-E) applied if any
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score the following case:
+
+=== Case L4-01 ===
+Topic / intent: 伝統食 知られざる
+Query: Tell me about Japan's traditional food culture that hasn't gone mainstream yet.
+Tool: get_local_food({"lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "ok": true,
+  "response": {
+    "prefecture_code": null,
+    "lang": "en",
+    "count": 500,
+    "total_matching": 22864,
+    "truncated": true,
+    "truncation_note": "Response capped at 500 of 22864 matches. Pass a prefecture or keyword to narrow.",
+    "items": [
+      {
+        "source": "maff_gi",
+        "category": "designated_food",
+        "key": "maff_gi:1",
+        "registration_number": 1,
+        "name_ja": "あおもりカシス",
+        "name": "Aomori Cassis",
+        "description_ja": "品種は「あおもりカシス」。さわやかな酸味や独特の芳香があり、アントシアニンも豊富。完熟したものから選別し、全て手摘みで収穫。",
+        "description": "The variety is 'Aomori Cassis'. It has a refreshing acidity and a distinctive aroma, and is also rich in anthocyanins. Berries are selected from fully ripened fruit and harvested entirely by hand-picking.",
+        "registration_date": "平成27年12月22日",
+        "production_area_text": "東青地域(青森県青森市、青森県東津軽郡平内町、青森県東津軽郡今別町、青森県東津軽郡蓬田村、青森県東津軽郡外ヶ浜町)",
+        "prefecture_codes": [
+          "02"
+        ],
+        "producer_group": "青森県青森市栄町2丁目4番6号 2階あおもりカシスの会公式ページ",
+        "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0001/index.html",
+        "translation_meta": {
+          "source": "official_translated",
+          "generated_at": "2026-04-26T22:22:44.349Z",
+          "confidence": "high"
+        }
+      },
+      {
+        "source": "maff_gi",
+        "category": "designated_food",
+        "key": "maff_gi:2",
+        "registration_number": 2,
+        "name_ja": "但馬牛",
+        "name": "Tajima Beef",
+        "description_ja": "兵庫県北部の但馬地方の山あいで長い歳月をかけ改良が重ねられた但馬牛を素牛として肥育し、A・B2等級以上に格付けされた枝肉であり、肉そのものが柔らかい。",
+        "description": "Carcass meat graded A or B, grade 2 or higher, produced by fattening Tajima cattle—a breed refined over many years in the mountain valleys of the Tajima region in northern Hyogo Prefecture—as feeder cattle. The meat itself is tender.",
+        "registration_date": "平成27年12月22日",
+        "production_area_text": "兵庫県内",
+        "prefecture_codes": [
+          "28"
+        ],
+        "producer_group": "兵庫県神戸市西区玉津町居住88番神戸肉流通推進協議会公式ページ",
+        "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0002/index.html",
+        "translation_meta": {
+          "source": "official_translated",
+          "generated_at": "2026-04-26T14:48:29.087Z",
+          "confidence": "high"
+        }
+      },
+      {
+        "source": "maff_gi",
+        "category": "designated_food",
+        "key": "maff_gi:4",
+        "registration_number": 4,
+        "name_ja": "夕張メロン",
+        "name": "Yubari Melon",
+        "description_ja": "果実は、内部色はオレンジ色で、繊維質が少ないことから非常に柔らかく、ジューシー。 芳醇な香りが強い「夕張キング」という品種を使用しており、糖度は10度以上。",
+        "description": "The flesh is orange in color, very soft and juicy due to its low fiber content. The variety used is 'Yubari King,' which has a strong, rich aroma, with a sugar content of 10 degrees Brix or higher.",
+        "registration_date": "平成27年12月22日",
+        "production_area_text": "北海道夕張市",
+        "prefecture_codes": [
+          "01"
+        ],
+        "producer_group": "北海道夕張市沼ノ沢213番地27夕張市農業協同組合公式ページ",
+        "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0004/index.html",
+        "translation_meta": {
+          "source": "official_translated",
+          "generated_at": "2026-04-26T22:52:44.059Z",
+          "confidence": "high"
+        }
+      },
+      {
+        "source": "maff_gi",
+        "category": "designated_food",
+        "key": "maff_gi:5",
+        "registration_number": 5,
+        "name_ja": "八女伝統本玉露",
+        "name": "Yame Traditional Gyokuro",
+        "description_ja": "茶葉収穫前に稲わら等の天然資材で被覆することにより「覆い香」といわれる香気成分の含有量が高い茶葉が生産される。味は濃厚で非常にうま味が強く、「まろやか」で「こく」がある。",
+        "description": "By covering the tea leaves with natural materials such as rice straw before harvest, tea leaves with a high content of the aroma component known as 'covering fragrance' (ooi-ka) are produced. The flavor is rich, with a very strong umami character, and has a smooth, full-bodied quality.",
+        "regi
+... (truncated)
+```
