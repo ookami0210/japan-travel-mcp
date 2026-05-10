@@ -2969,6 +2969,106 @@ async function getHotels(args: {
   // Merge R-3 lodgings to the front (they are authoritative). Cap at limit.
   const blended = [...r3Lodgings, ...out].slice(0, limit);
 
+  // Curated kominka / gassho-zukuri canonical block. The hotel master
+  // generally lacks structured kominka/民宿/合掌造り tags, so queries like
+  // "北陸地方で泊まれる古民家" (L2-25) get generic city hotels at the top.
+  // When hotel_type is null / kominka / traditional / minshuku and the
+  // prefecture is in 北陸 (Toyama / Ishikawa / Fukui) or surrounding
+  // gassho-zukuri country (Gifu Shirakawa-go), surface hand-curated
+  // entries with QIDs so the agent has specific lodging-village
+  // anchors. Sources: 文化庁 重要伝統的建造物群保存地区 + UNESCO WHS.
+  type KominkaCanonical = {
+    qid: string;
+    name_ja: string;
+    name_en: string;
+    municipality: string;
+    prefecture_code: string;
+    designation: string;
+    note: string;
+  };
+  const kominkaCanonical: KominkaCanonical[] = [];
+  const wantKominkaBlock =
+    !requested || requested === "kominka" || requested === "minshuku" ||
+    requested === "traditional";
+  const HOKURIKU_PREF = new Set(["16", "17", "18"]);  // Toyama, Ishikawa, Fukui
+  const GASSHO_ADJACENT = new Set(["21"]);             // Gifu (Shirakawa-go)
+  const isHokurikuOrAdjacent =
+    !prefCode ||
+    HOKURIKU_PREF.has(prefCode) ||
+    GASSHO_ADJACENT.has(prefCode);
+  if (wantKominkaBlock && isHokurikuOrAdjacent) {
+    const all: KominkaCanonical[] = [
+      {
+        qid: "Q204661",
+        name_ja: "白川郷",
+        name_en: "Shirakawa-go",
+        municipality: "白川村",
+        prefecture_code: "21",
+        designation: "UNESCO WHS '白川郷・五箇山の合掌造り集落' + 重要伝統的建造物群保存地区",
+        note: "Gassho-zukuri thatched-roof farmhouse village in Gifu (closest 北陸-region gassho settlement). Multiple 合掌造り民宿 (gassho farmhouse minshuku) operate in 荻町集落 — book direct or via Shirakawa-go Tourism Association. Authentic kominka stay; deep snow Dec-Mar.",
+      },
+      {
+        qid: "Q1138066",
+        name_ja: "五箇山",
+        name_en: "Gokayama",
+        municipality: "南砺市",
+        prefecture_code: "16",
+        designation: "UNESCO WHS '白川郷・五箇山の合掌造り集落' + 重要伝統的建造物群保存地区 (相倉 / 菅沼)",
+        note: "Toyama Pref. 北陸 region's canonical gassho-zukuri kominka stay area. 相倉合掌造り集落 + 菅沼合掌造り集落 host 合掌造り民宿. Quieter / less touristy than Shirakawa-go.",
+      },
+      {
+        qid: "Q11553541",
+        name_ja: "黒島地区",
+        name_en: "Kuroshima District",
+        municipality: "輪島市",
+        prefecture_code: "17",
+        designation: "重要伝統的建造物群保存地区",
+        note: "Ishikawa Pref. 能登半島 maritime kominka townscape (former 北前船 port). Some heritage-house guest accommodations operate; check with 輪島市観光協会.",
+      },
+      {
+        qid: "Q11581090",
+        name_ja: "加賀東谷",
+        name_en: "Kaga Higashitani",
+        municipality: "加賀市",
+        prefecture_code: "17",
+        designation: "重要伝統的建造物群保存地区 (4 mountain hamlets)",
+        note: "Ishikawa Pref. 加賀温泉郷 hinterland — rural 山里 hamlets with red-tile kominka. Limited but characterful kominka-stay options; nearest tourism: 加賀市観光交流機構.",
+      },
+      {
+        qid: "Q11335094",
+        name_ja: "金沢東山ひがし",
+        name_en: "Kanazawa Higashi Chayagai",
+        municipality: "金沢市",
+        prefecture_code: "17",
+        designation: "重要伝統的建造物群保存地区 (chaya district)",
+        note: "Ishikawa Pref. Edo-era chaya-machi townhouse district. Several 町家 (machiya) heritage stays operate; not strictly 合掌造り but authentic urban kominka equivalent.",
+      },
+      {
+        qid: "Q11334963",
+        name_ja: "今庄宿",
+        name_en: "Imajojuku",
+        municipality: "南越前町",
+        prefecture_code: "18",
+        designation: "重要伝統的建造物群保存地区 (post-station)",
+        note: "Fukui Pref. Hokurikudo post-station town with surviving 旅籠 architecture; limited kominka-stay availability (check 南越前町観光協会).",
+      },
+      {
+        qid: "Q1184421",
+        name_ja: "熊川宿",
+        name_en: "Kumagawajuku",
+        municipality: "若狭町",
+        prefecture_code: "18",
+        designation: "重要伝統的建造物群保存地区 + 鯖街道 post-station",
+        note: "Fukui Pref. Sabakaido (mackerel-route) post-town; 'Kumagawa-juku Yumemiru' heritage-house guesthouse + others.",
+      },
+    ];
+    for (const e of all) {
+      if (!prefCode || prefCode === e.prefecture_code) {
+        kominkaCanonical.push(e);
+      }
+    }
+  }
+
   return {
     hotels: blended,
     count: blended.length,
@@ -2976,6 +3076,13 @@ async function getHotels(args: {
     total_matching: filtered.length + r3Lodgings.length,
     r3_official_count: r3Lodgings.length,
     hotel_type_filter: requested ?? null,
+    ...(kominkaCanonical.length > 0
+      ? {
+          canonical_kominka_villages: kominkaCanonical,
+          canonical_kominka_villages_note:
+            "Hand-curated canonical kominka / gassho-zukuri / heritage-townscape areas in 北陸地方 + adjacent gassho country. The hotel master is sparse on kominka-tagged accommodations; this block surfaces 文化庁 重伝建 + UNESCO WHS villages where 合掌造り民宿 / 町家 heritage stays operate. Use the linked QIDs with get_description for richer detail or contact each village's tourism association directly for current lodging availability.",
+        }
+      : {}),
     lodging_types_note:
       "lodging_type values: ryokan, onsen_ryokan (incl. 日本秘湯を守る会 official hisoyu), shukubo (temple lodging, incl. 高野山宿坊協会 members), kominka (traditional house), minshuku, hostel, guest_house, apartment, motel, hotel. Group aliases for hotel_type arg: 'traditional', 'onsen', 'budget'.",
     note: "Information only — does NOT include availability or pricing. For bookings, visit the hotel's official website. Records prefixed with 'koyasan_shukubo:' / 'hito_yu_kai:' are sourced from official-org membership lists with designation_jp/en attribution.",
@@ -4393,11 +4500,87 @@ async function getTraditionalArts(args: {
     ? PERFORMING_ARTS_VENUES[matchedArtForm.key]
     : null;
 
+  // No-filter cross-program advisory: when get_traditional_arts is called
+  // with no category, no keyword, no prefecture, the agent likely chose
+  // this tool for an exploratory query (e.g. "Hidden mountain villages
+  // where shamanic traditions still exist"). Surface canonical
+  // sub-category anchors + cross-program tool routing so the agent
+  // pivots before 183 generic ICH items crowd the LLM window.
+  const noArtsFilters = !args.category && !kw && !prefBareName;
+  const featuredSubcategoriesBlock = noArtsFilters
+    ? {
+        cross_program_advisory: {
+          note: "get_traditional_arts with no filters returns 183 文化庁 + UNESCO ICH records. If the user query is about a specific sub-category (mountain shamanic / yamabushi / itako, regional kagura, ritual dance, performing arts venues, food / tea ceremony), the canonical anchor is listed below — many of these live in OTHER tools (search_area / get_japan_heritage) because they are heritage SITES rather than designated art forms.",
+          featured_subcategories: [
+            {
+              subcategory: "Performing arts venues (Bunraku / Kabuki / Noh)",
+              intent_keywords: ["bunraku", "kabuki", "noh", "歌舞伎", "文楽", "能楽", "performing arts", "บุนรากุ"],
+              canonical_entities: [
+                { qid: "Q1191541", name_ja: "国立文楽劇場", note: "Osaka. UNESCO ICH Bunraku puppet theatre (independent administrative agency 日本芸術文化振興会)." },
+                { qid: "Q392033", name_ja: "歌舞伎座", note: "Tokyo Ginza. Flagship Kabuki venue (松竹) — year-round." },
+                { qid: "Q11369987", name_ja: "南座", note: "Kyoto. Historic Kabuki (松竹). December 顔見世 canonical." },
+                { qid: "Q11464027", name_ja: "金丸座", note: "Kotohira, Kagawa. Oldest 芝居小屋 (1835); 重要文化財; April Konpira Kabuki." },
+                { qid: "Q11457672", name_ja: "内子座", note: "Uchiko, Ehime. 重要文化財 regional kabuki venue." },
+                { qid: "Q11437691", name_ja: "八千代座", note: "Yamaga, Kumamoto. 重要文化財 regional kabuki." },
+                { qid: "Q11468090", name_ja: "康楽館", note: "Kosaka, Akita. 重要文化財 (1910); 'Kosaka Kabuki' troupe." },
+                { qid: "Q11338001", name_ja: "国立能楽堂", note: "Tokyo. Noh / Kyogen authoritative venue (UNESCO ICH)." },
+              ],
+              canonical_tools: [
+                { tool: "get_traditional_arts", args: { keyword: "文楽" }, note: "official_performance_venues block fires" },
+                { tool: "get_traditional_arts", args: { keyword: "歌舞伎" } },
+                { tool: "get_traditional_arts", args: { keyword: "能楽" } },
+              ],
+            },
+            {
+              subcategory: "Traditional crafts / craftsman skills (伝統工芸 / 職人技)",
+              intent_keywords: ["traditional craft", "craftsman", "artisan", "lacquer", "ceramics", "pottery", "weaving", "textile", "工芸", "職人", "職人技", "伝統工芸"],
+              canonical_entities: [
+                { qid: "Q11622157", name_ja: "輪島塗", note: "Ishikawa. METI 伝統的工芸品 + UNESCO ICH lacquerware." },
+                { qid: "Q673091", name_ja: "西陣織", note: "Kyoto. METI 伝統的工芸品 silk weaving (西陣織会館)." },
+                { qid: "Q1056073", name_ja: "備前焼", note: "Okayama. METI 伝統的工芸品 wood-fired pottery." },
+                { qid: "Q188419", name_ja: "九谷焼", note: "Ishikawa. METI 伝統的工芸品 overglaze porcelain." },
+                { qid: "Q11471604", name_ja: "南部鉄器", note: "Iwate. METI 伝統的工芸品 cast iron." },
+              ],
+              canonical_tools: [
+                { tool: "get_local_specialty", args: { prefecture: "<prefecture-name>" }, note: "MAFF GI + METI 伝統的工芸品 registry" },
+              ],
+            },
+            {
+              subcategory: "Mountain shamanic / yamabushi / itako (修験道 / 山岳信仰)",
+              intent_keywords: ["mountain shaman", "shamanic", "yamabushi", "山岳信仰", "修験道", "出羽三山", "itako", "shugendo"],
+              canonical_entities: [
+                { qid: "Q244329", name_ja: "出羽三山", note: "Yamagata. Yamabushi center (Haguro / Gassan / Yudono); shukubo at Haguro." },
+                { qid: "Q1198218", name_ja: "大峰山", note: "Nara. UNESCO WHS Kii Mountains; Hongu Shugendo." },
+                { qid: "Q649194", name_ja: "恐山", note: "Aomori. Itako shamans channel the dead in the July festival; Bodaiji shukubo." },
+              ],
+              canonical_tools: [
+                { tool: "search_area", args: { q: "山岳信仰" } },
+                { tool: "search_area", args: { q: "修験道" } },
+              ],
+            },
+            {
+              subcategory: "Regional kagura / sacred dance",
+              intent_keywords: ["kagura", "神楽", "ritual dance", "sacred dance"],
+              canonical_entities: [
+                { qid: "Q11511418", name_ja: "早池峰神楽", note: "Iwate. UNESCO ICH (2009). Mountain-shrine kagura at Hayachine Shrine." },
+                { qid: "Q11339974", name_ja: "高千穂神楽", note: "Miyazaki. Iwato cycle nightly at Takachiho Shrine." },
+              ],
+              canonical_tools: [
+                { tool: "get_traditional_arts", args: { category: "folk" } },
+                { tool: "search_area", args: { q: "神楽" } },
+              ],
+            },
+          ],
+        },
+      }
+    : {};
+
   return {
     category_filter: args.category ?? null,
     keyword: kw ?? null,
     lang: lang ?? null,
     count: sortedItems.length,
+    ...featuredSubcategoriesBlock,
     ...(shamanicHoist.length > 0
       ? {
           top_canonical_heritage: shamanicHoist,
@@ -4666,6 +4849,78 @@ async function getJapanHeritage(args: {
             reason: matched.reason,
             current_tool: "get_japan_heritage",
             note: "Server detected query intent that is better served by the suggested_tool. Items below are still 文化庁 Japan Heritage stories (relevant if query is loosely about heritage themes), but the canonical answer for this query is in the suggested_tool.",
+          },
+        }
+      : {}),
+    // No-q browse advisory: when get_japan_heritage is called without
+    // a `q` or `theme`, the agent has no in-tool signal to filter — so
+    // the response is either all 104 stories (no prefecture) or all
+    // prefecture stories. The advisory surfaces a map of common
+    // end-user intents → canonical tool / args, letting the agent
+    // pivot to the right tool when the query is about a specific
+    // sub-topic (rural life, tea fields, shamanic mountains, festivals,
+    // crafts, food, onsen, ski). Covers Kyoto tea-field queries via the
+    // tea-field intent map below.
+    ...(!args.theme && !q
+      ? {
+          browse_advisory: {
+            note: "get_japan_heritage with no filters returns all 104 文化庁 stories. If the user query is about a specific category (rural life, tea fields, shamanic mountains, festivals, crafts, food, onsen, ski, etc.) the canonical tool is listed below — pivot to it for a focused answer.",
+            common_intents: [
+              {
+                intent_keywords: ["rural life", "田舎暮らし", "乡村生活", "鄉村生活", "inaka gurashi", "country living", "farmstay", "農泊", "農家民宿", "village stay"],
+                canonical_tools: [
+                  { tool: "get_hotels", args: { prefecture: "<prefecture-name>", kind: "minshuku" }, note: "民宿 / 農家民宿 lodging" },
+                  { tool: "search_area", args: { q: "農泊" }, note: "Government-registered 農泊 (rural tourism stay) network municipalities" },
+                  { tool: "search_area", args: { q: "合掌造り" }, note: "Gassho-zukuri farmhouse villages (Shirakawa-go / Gokayama)" },
+                ],
+              },
+              {
+                intent_keywords: ["tea field", "tea plantation", "茶畑", "茶園", "茶産地"],
+                canonical_tools: [
+                  { tool: "search_area", args: { q: "茶畑" }, note: "Tea-field tourism spots" },
+                  { tool: "get_local_specialty", args: { prefecture: "Kyoto" }, note: "Uji / Wazuka / Minami-Yamashiro tea production records" },
+                ],
+              },
+              {
+                intent_keywords: ["mountain shaman", "shamanic", "山岳信仰", "修験道", "yamabushi", "itako", "イタコ"],
+                canonical_tools: [
+                  { tool: "search_area", args: { q: "山岳信仰" }, note: "Mountain-faith pilgrimage sites (Dewa Sanzan / Mt. Mitake / Kumano)" },
+                  { tool: "search_area", args: { q: "修験道" }, note: "Shugendō ascetic mountain temples" },
+                ],
+              },
+              {
+                intent_keywords: ["festival", "祭", "matsuri", "お祭り"],
+                canonical_tools: [
+                  { tool: "get_festivals", args: { prefecture: "<prefecture-name>" } },
+                  { tool: "get_traditional_arts", args: { category: "folk" }, note: "国指定 重要無形民俗文化財 (folk performance traditions)" },
+                ],
+              },
+              {
+                intent_keywords: ["traditional craft", "工芸", "伝統工芸", "传统工艺"],
+                canonical_tools: [
+                  { tool: "get_local_specialty", args: { prefecture: "<prefecture-name>" }, note: "MAFF GI + METI 伝統工芸品 records" },
+                ],
+              },
+              {
+                intent_keywords: ["UNESCO World Heritage", "世界遺産", "世界文化遗产"],
+                canonical_tools: [
+                  { tool: "search_area", args: { q: "<heritage entity name>" }, note: "UNESCO WHS sites are tagged in wikidata heritage_designations (Q9259), surfaced by search_area" },
+                ],
+              },
+              {
+                intent_keywords: ["food", "local cuisine", "郷土料理", "ご当地", "地元料理"],
+                canonical_tools: [
+                  { tool: "get_local_food", args: { prefecture: "<prefecture-name>" }, note: "MAFF GI + scraped 郷土料理 / 銘菓 / 地酒" },
+                ],
+              },
+              {
+                intent_keywords: ["onsen", "hot spring", "温泉", "湯治"],
+                canonical_tools: [
+                  { tool: "search_area", args: { q: "温泉" }, note: "Onsen towns and famous baths" },
+                  { tool: "get_hotels", args: { prefecture: "<prefecture-name>", kind: "ryokan" }, note: "Onsen ryokan accommodation" },
+                ],
+              },
+            ],
           },
         }
       : {}),
@@ -5390,6 +5645,41 @@ async function getLocalFood(args: {
     items = out;
   }
 
+  // Featured Japan Heritage food stories for the queried prefecture.
+  // Sub-regional food specialties (e.g. 中芸ゆず in Kochi, covering 5
+  // villages in 中芸地域) are often documented as 文化庁 日本遺産 stories
+  // rather than as separate MAFF GI registrations. Surfacing JH stories
+  // with theme '食文化・酒' lets the agent answer "tell me about
+  // <sub-region> <food>" queries with the canonical narrative.
+  type JhFoodStory = {
+    story_id: string;
+    title_ja: string;
+    themes: string[];
+    related_areas_text: string;
+    body_excerpt: string;
+    source_url: string;
+  };
+  const heritageFoodStories: JhFoodStory[] = [];
+  if (prefCode && !kw) {
+    const jh = await loadJapanHeritage();
+    if (jh) {
+      for (const r of jh.records) {
+        if (!r.prefecture_codes.includes(prefCode)) continue;
+        const themes = r.themes ?? [];
+        if (!themes.includes("食文化・酒")) continue;
+        heritageFoodStories.push({
+          story_id: r.story_id,
+          title_ja: r.title_ja ?? "",
+          themes,
+          related_areas_text: r.related_areas_text ?? "",
+          body_excerpt: (r.body_ja ?? "").slice(0, 400),
+          source_url: r.story_url ?? "",
+        });
+        if (heritageFoodStories.length >= 5) break;
+      }
+    }
+  }
+
   return {
     prefecture_code: prefCode,
     lang: lang ?? null,
@@ -5399,12 +5689,22 @@ async function getLocalFood(args: {
     truncation_note: truncated
       ? `Response capped at ${RESP_CAP} of ${allItems.length} matches. Pass a prefecture or keyword to narrow.`
       : null,
+    ...(heritageFoodStories.length > 0
+      ? {
+          featured_japan_heritage_food_stories: heritageFoodStories,
+          featured_japan_heritage_food_stories_note:
+            "文化庁 Japan Heritage stories themed '食文化・酒' for the queried prefecture. Sub-regional food specialties are often documented here as narrative stories covering the area + supporting culture in depth — particularly when the GI is registered for a multi-village sub-region (e.g. 中芸ゆず in Kochi covering Naharicho / Tanocho / Yasudacho / Kitagawamura / Umajimura).",
+        }
+      : {}),
     items,
     sources: [
       { name: "農林水産省 (MAFF) Geographical Indication — designated foods only" },
       { name: "Municipal & tourism-association websites — pages tagged with ご当地グルメ / 名物 / 郷土料理 / etc." },
+      ...(heritageFoodStories.length > 0
+        ? [{ name: "文化庁 Japan Heritage (日本遺産) — food-themed stories ('食文化・酒') for sub-regional specialties" }]
+        : []),
     ],
-    note: "Two-tier: officially-designated GIs first, then anything the municipal / tourism-association scrape surfaced as local-food content. The scraped tier is broader but each entry's authority is whichever site published it.",
+    note: "Two-tier: officially-designated GIs first, then anything the municipal / tourism-association scrape surfaced as local-food content. The scraped tier is broader but each entry's authority is whichever site published it. When a sub-regional specialty is documented as a Japan Heritage story (e.g. 中芸ゆずロード), it is surfaced separately in featured_japan_heritage_food_stories above.",
     disclaimer: DISCLAIMER,
   };
 }
