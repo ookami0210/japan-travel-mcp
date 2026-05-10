@@ -28,8 +28,23 @@ def main() -> None:
         required=True,
         help="single case id, e.g. L3-03; OR comma-separated list",
     )
-    parser.add_argument("--max-chars", type=int, default=4000)
+    # Token budget for the response excerpt shown to the judge.
+    # Approximated as chars/3 for JP-mixed content (the dominant content
+    # type in this corpus). Default 4000 tokens ~= 12000 chars for
+    # JP-mixed text, matching what a real LLM client would consume from
+    # a typical tool response and aligning with the response budget
+    # framework (target 1700, soft 2300, hard 2500 per
+    # whitepaper_tool_response_token_budget). Override via --max-tokens.
+    # The legacy --max-chars flag is preserved for backward compat.
+    parser.add_argument("--max-tokens", type=int, default=4000)
+    parser.add_argument(
+        "--max-chars",
+        type=int,
+        default=None,
+        help="legacy: char-based budget; if set, overrides --max-tokens",
+    )
     args = parser.parse_args()
+    char_budget = args.max_chars if args.max_chars is not None else args.max_tokens * 3
 
     case_ids = [c.strip() for c in args.case.split(",") if c.strip()]
 
@@ -59,15 +74,21 @@ def main() -> None:
         cd = calls[cid]
         rd = results[cid]
         result_str = json.dumps(rd.get("result", ""), ensure_ascii=False, indent=2)
-        if len(result_str) > args.max_chars:
-            result_str = result_str[: args.max_chars] + "\n... (truncated)"
+        truncated = len(result_str) > char_budget
+        if truncated:
+            result_str = result_str[:char_budget] + "\n... (truncated)"
+        approx_tokens = len(result_str) // 3
+        budget_label = (
+            f"~{approx_tokens} tokens (chars/3 approx; budget {args.max_tokens} tokens / {char_budget} chars)"
+            + (", truncated" if truncated else "")
+        )
         body = (
             f"{rubric}\n\nScore the following case:\n\n"
             f"=== Case {cid} ===\n"
             f"Topic / intent: {cd.get('topic', '')}\n"
             f"Query: {cd.get('query', '')}\n"
             f"Tool: {cd['tool']}({json.dumps(cd['args'], ensure_ascii=False)})\n\n"
-            f"Response (truncated to {args.max_chars} chars):\n```\n{result_str}\n```\n"
+            f"Response ({budget_label}):\n```\n{result_str}\n```\n"
         )
         out_path = out_dir / f"{cid}_prompt.txt"
         out_path.write_text(body, encoding="utf-8")
