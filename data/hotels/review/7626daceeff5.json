@@ -1,0 +1,106 @@
+{
+  "id": "7626daceeff5",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 51m",
+    "name similarity 0.79 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/12066866849",
+      "source_url": "https://www.openstreetmap.org/node/12066866849",
+      "name": "APA Hotel (Asakusa Ekimae)",
+      "name_en": "APA Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.7082947,
+        "lng": 139.7955931
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "1110043",
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/12066866849",
+        "osm_url": "https://www.openstreetmap.org/node/12066866849",
+        "type": "hotel",
+        "name": "APA Hotel (Asakusa Ekimae)",
+        "name_en": "APA Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.7082947,
+          "lng": 139.7955931
+        },
+        "postal_code": "1110043",
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:postcode": "1110043",
+          "brand": "アパホテル",
+          "brand:en": "APA Hotel",
+          "brand:ja": "アパホテル",
+          "brand:wikidata": "Q11284497",
+          "name": "APA Hotel (Asakusa Ekimae)",
+          "name:en": "APA Hotel",
+          "name:ja": "アパホテル",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/12137303924",
+      "source_url": "https://www.openstreetmap.org/node/12137303924",
+      "name": "Hotel Amanek Asakusa Ekimae",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.70787,
+        "lng": 139.7958081
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": "https://amanekhotels.jp/asakusa/information/",
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/12137303924",
+        "osm_url": "https://www.openstreetmap.org/node/12137303924",
+        "type": "hotel",
+        "name": "Hotel Amanek Asakusa Ekimae",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.70787,
+          "lng": 139.7958081
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": "https://amanekhotels.jp/asakusa/information/",
+        "stars": null,
+        "raw_tags": {
+          "brand": "Amenek",
+          "name": "Hotel Amanek Asakusa Ekimae",
+          "tourism": "hotel",
+          "website": "https://amanekhotels.jp/asakusa/information/",
+          "wikidata": "Q112008903"
+        }
+      }
+    }
+  ]
+}
