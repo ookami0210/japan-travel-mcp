@@ -1,9 +1,13 @@
 name: Daily Scrape
 
 on:
-  schedule:
-    # 03:00 JST = 18:00 UTC (previous day)
-    - cron: "0 18 * * *"
+  # The daily cron is disabled while we resolve the missing
+  # data/_state/municipalities.json prerequisite that has caused every
+  # scheduled run since 2026-05-09 to fail and spam the maintainer with
+  # failure notifications. Trigger manually via the Actions tab when
+  # state is restored, or re-enable the cron in a follow-up PR.
+  # schedule:
+  #   - cron: "0 18 * * *"  # 03:00 JST = 18:00 UTC (previous day)
   workflow_dispatch:
     inputs:
       batch_size:
