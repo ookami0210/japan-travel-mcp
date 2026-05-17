@@ -86,7 +86,12 @@ def main() -> None:
     calls = {c["id"]: c for c in json.loads(calls_path.read_text())}
 
     cases = []
-    for line in results_path.read_text().splitlines():
+    # Use \n-only split (file.readlines / split("\n")) to avoid splitlines'
+    # behaviour of splitting on \r,  ,   etc. — some scraped
+    # body_paragraphs contain those characters inside JSON string values,
+    # which makes splitlines treat one logical record as multiple "lines"
+    # and break json.loads downstream.
+    for line in results_path.read_text().split("\n"):
         if not line.strip():
             continue
         rec = json.loads(line)

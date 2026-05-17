@@ -121,7 +121,7 @@ def main() -> None:
     else:
         results_path = REPO / "docs" / "quality" / "test_results.jsonl"
     test_results = {}
-    for line in results_path.read_text().splitlines():
+    for line in results_path.read_text().split("\n"):
         if not line.strip():
             continue
         r = json.loads(line)
@@ -131,7 +131,7 @@ def main() -> None:
     scored_records: list[dict] = []
     for batch_path in sorted(batch_dir.glob("batch_*_scored.jsonl")):
         records = []
-        for line in batch_path.read_text().splitlines():
+        for line in batch_path.read_text().split("\n"):
             line = line.strip()
             if not line or not line.startswith("{"):
                 continue
