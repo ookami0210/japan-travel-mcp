@@ -79,7 +79,7 @@ def main():
         return
 
     cases = []
-    for line in scored_path.read_text().splitlines():
+    for line in scored_path.read_text().split("\n"):
         if not line.strip(): continue
         cases.append(json.loads(line))
 
