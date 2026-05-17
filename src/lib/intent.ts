@@ -922,6 +922,57 @@ const INFEASIBILITY_RULES: {
     reason_ja: "アフリカ式 big-five サファリは日本にはありません。 富士サファリパーク等の動物園 / サファリパーク形式があります。",
     alt_kinds: ["zoo"],
   },
+  // iter152: extend impossibility rules for ADV adversarial cases.
+  // iter151 r420 batch 14 noted ADV-002/003/005/006/007/010/012/016/018/019
+  // all lack the not_available pattern that ADV-004 (aurora) handles well.
+  {
+    re: /(野生.*パンダ|wild\s*panda|giant\s*panda.*habitat|wild.*ジャイアントパンダ|panda.*wild|panda.*habitat)/iu,
+    reason_en: "Giant pandas are not native to Japan and not found wild anywhere outside China's mountain forests. In Japan they exist only at Ueno Zoo (Tokyo), Adventure World (Wakayama-Shirahama), and previously Oji Zoo (Kobe).",
+    reason_ja: "ジャイアントパンダは日本に野生分布せず、中国の山岳森林以外には野生個体は存在しません。日本では上野動物園 (東京)、アドベンチャーワールド (和歌山・白浜) のみで飼育されています。",
+    alt_kinds: ["zoo"],
+  },
+  {
+    re: /(palm\s*beach|tropical\s*beach|coconut.*beach|ヤシ.*ビーチ|南国ビーチリゾート|tropical.*resort)\b.*\b(北海道|hokkaido|tohoku|本州.*north|northern\s*japan)/iu,
+    reason_en: "Palm-tree / tropical-beach resorts do not exist in Hokkaido or northern Honshu — they are sub-tropical climates only. Sub-tropical palm beaches in Japan are limited to Okinawa, Amami Islands (Kagoshima), Ogasawara (Tokyo Bonin Islands), and southern Kyushu.",
+    reason_ja: "ヤシの木が並ぶ南国ビーチリゾートは、北海道・東北・本州北部には存在しません (亜熱帯気候のみ)。日本でヤシのある南国ビーチは沖縄・奄美 (鹿児島) ・小笠原 (東京) ・南九州に限られます。",
+    alt_kinds: ["beach", "tropical_island"],
+  },
+  {
+    re: /(沖縄.*(雪|スキー|snow|skiing)|hokkaido.*(雪|snow).*月|okinawa.*snow|snow.*okinawa)/iu,
+    reason_en: "Okinawa does not get snow — sub-tropical climate, winter lows around 15°C. Japan's snow / ski destinations are concentrated in Hokkaido, Tohoku, Niigata, Nagano, Gifu, and elevated Honshu mountain areas.",
+    reason_ja: "沖縄は亜熱帯気候で雪は降りません (冬の最低気温は約15℃)。日本の雪 / スキー destinations は北海道・東北・新潟・長野・岐阜・本州標高山地に集中しています。",
+    alt_kinds: ["beach", "tropical_island"],
+  },
+  {
+    re: /(5\s*月.*紅葉|May.*koyo|May.*autumn\s*(leaves|foliage)|紅葉.*5月|autumn\s*leaves.*may|オフシーズン.*紅葉)/iu,
+    reason_en: "Autumn foliage (紅葉 / koyo) season in Japan runs September (Hokkaido high alpine) through early December (Kyushu coast). May is the wrong season — that's late-spring fresh-green (新緑 / shinryoku). Asking for koyo in May is calendar-incompatible.",
+    reason_ja: "日本の紅葉シーズンは9月 (北海道高山) から12月初旬 (九州沿岸) に集中します。5月は晩春の新緑シーズンで紅葉は見られません。5月の紅葉は季節カレンダー上不可能です。",
+    alt_kinds: ["fresh_green", "spring_landscape"],
+  },
+  {
+    re: /(10\s*月.*桜|October.*sakura|October.*cherry\s*bloss|桜.*10月|10月に見頃の桜|オフシーズン.*桜)/iu,
+    reason_en: "Cherry blossom (桜 / sakura) season in Japan runs late January (Okinawa) through early May (Hokkaido). October is the wrong season — that's koyo (autumn foliage) territory. Asking for sakura in October is calendar-incompatible. Some October-blooming variants exist (Jugatsu-zakura at Naganohara, Fuyu-zakura at Kobayashi-jinja) but these are rare exceptions, not seasonal sakura.",
+    reason_ja: "日本の桜シーズンは1月下旬 (沖縄) から5月上旬 (北海道) に集中します。10月は紅葉シーズンで桜は咲きません。十月桜 / 冬桜 (寒桜系) は一部見られますが、 一般的な桜の花見ではありません。",
+    alt_kinds: ["winter_sakura_jugatsu", "koyo"],
+  },
+  {
+    re: /(夢幻県|架空.*県|fictional\s*prefecture|imaginary\s*prefecture|nonexistent\s*prefecture|不存在.*県|梦幻县|imaginäres\s*Land|幻ヶ浦村|架空.*市|架空.*村)/iu,
+    reason_en: "This place name appears to be fictional or imaginary — it does not exist as one of Japan's 47 prefectures or 1,718 municipalities. The agent should clarify with the user whether they meant a real location.",
+    reason_ja: "この地名は架空 / 想像上のものと思われ、日本の47都道府県・1,718市区町村のどれにも該当しません。実在の地名を指していないか、ユーザーに確認すべきです。",
+    alt_kinds: ["real_location_clarification"],
+  },
+  {
+    re: /(高級.*格安|luxury.*budget|exclusive.*cheap|hidden\s*gem.*famous|混雑.*秘境|crowded.*hidden)/iu,
+    reason_en: "This query contains contradictory constraints — luxury vs budget, or hidden / off-beaten-path vs crowded / famous. Surface both interpretation paths to the agent so they can ask the user which axis to prioritize.",
+    reason_ja: "矛盾する条件 (高級と格安、秘境と混雑、隠れた名所と有名スポット 等) が含まれます。どの軸を優先するか、エージェントはユーザーに確認すべきです。",
+    alt_kinds: ["clarify_priority_axis"],
+  },
+  {
+    re: /(camp.*car|キャンピング.*カー|RV\s*rental|モーターホーム)\b.*\b(deserted|empty|無人|off\s*grid)/iu,
+    reason_en: "Off-grid / deserted RV camping is highly restricted in Japan. Wild camping outside designated 'auto-camp' sites is generally prohibited. Use officially-listed auto-camp ground (オートキャンプ場) directories instead.",
+    reason_ja: "日本では off-grid / 無人地でのキャンピングカー泊は基本的に禁止 / 制限されます。オートキャンプ場 (公式登録) を利用してください。",
+    alt_kinds: ["auto_camp_site"],
+  },
 ];
 
 function detectInfeasibility(q: string): IntentExtractionResult["infeasibility"] | undefined {
@@ -963,6 +1014,9 @@ const NEGATIVE_STOP_TOKENS = new Set([
 // Common toponym aliases — when the user writes English, also exclude
 // the JA equivalent (and vice versa) so an entity tagged in either
 // language is filtered.
+// iter152: extended map. iter151 r420 R-072 / R-352 surfaced 'except
+// Yakushima/Amami' style queries that still returned Yakushima because
+// the alias didn't cover the JA / pref-suffix variants.
 const TOPONYM_ALIASES: Record<string, string[]> = {
   "tottori": ["鳥取", "鳥取県"],
   "kyoto": ["京都", "京都府", "京都市"],
@@ -971,12 +1025,51 @@ const TOPONYM_ALIASES: Record<string, string[]> = {
   "osaka": ["大阪", "大阪府", "大阪市"],
   "kanagawa": ["神奈川", "神奈川県"],
   "okinawa": ["沖縄", "沖縄県"],
+  "yakushima": ["屋久島", "鹿児島県屋久島", "屋久町"],
+  "amami": ["奄美", "奄美大島", "鹿児島県奄美", "奄美市"],
+  "ishigaki": ["石垣", "石垣島", "沖縄県石垣"],
+  "miyajima": ["宮島", "厳島"],
+  "itsukushima": ["厳島", "宮島"],
+  "shirakawa-go": ["白川郷", "白川村"],
+  "shirakawago": ["白川郷", "白川村"],
+  "shirakawa": ["白川"],
+  "kamakura": ["鎌倉", "鎌倉市"],
+  "hakone": ["箱根", "箱根町"],
+  "nikko": ["日光", "日光市"],
+  "karuizawa": ["軽井沢", "軽井沢町"],
+  "kanazawa": ["金沢", "金沢市"],
+  "hiroshima": ["広島", "広島県", "広島市"],
+  "fukuoka": ["福岡", "福岡県", "福岡市"],
+  "nagasaki": ["長崎", "長崎県", "長崎市"],
+  "kumamoto": ["熊本", "熊本県", "熊本市"],
+  "yufuin": ["由布院", "湯布院", "由布市"],
+  "beppu": ["別府", "別府市"],
+  "kobe": ["神戸", "神戸市", "兵庫県神戸"],
+  "nara": ["奈良", "奈良県", "奈良市"],
+  "sapporo": ["札幌", "札幌市", "北海道札幌"],
+  "kagoshima": ["鹿児島", "鹿児島県"],
+  "miyazaki": ["宮崎", "宮崎県"],
   "鳥取": ["Tottori"],
   "京都": ["Kyoto"],
   "北海道": ["Hokkaido"],
   "東京": ["Tokyo"],
   "大阪": ["Osaka"],
   "沖縄": ["Okinawa"],
+  "屋久島": ["Yakushima"],
+  "奄美": ["Amami"],
+  "石垣": ["Ishigaki"],
+  "宮島": ["Miyajima", "Itsukushima"],
+  "白川郷": ["Shirakawa-go", "Shirakawago"],
+  "鎌倉": ["Kamakura"],
+  "箱根": ["Hakone"],
+  "日光": ["Nikko"],
+  "軽井沢": ["Karuizawa"],
+  "金沢": ["Kanazawa"],
+  "由布院": ["Yufuin"],
+  "別府": ["Beppu"],
+  "札幌": ["Sapporo"],
+  "鹿児島": ["Kagoshima"],
+  "宮崎": ["Miyazaki"],
 };
 
 function detectNegativeConstraints(q: string): string[] | undefined {
