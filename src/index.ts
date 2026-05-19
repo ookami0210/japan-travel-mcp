@@ -5380,7 +5380,7 @@ async function getHotels(args: {
   // iter149: detect budget intent so the luxury broadcast doesn't pollute
   // budget queries. iter148 r420 batch 10 showed luxury cluster firing on
   // 저예산 (ko budget) / 격안 / cheap / 安い queries — exact opposite of intent.
-  const isBudgetHotelQ = /(budget|cheap|inexpensive|hostel|guest\s*house|guesthouse|backpack|capsule|youth|economy|安い|安価|格安|低価格|低予算|学生|ワンコイン|低料金|저예산|저렴|싸|싼|便宜|实惠|经济|划算|划算|背包|青年旅馆|青年|平价|经济型|murah|hemat|低価|preupuesto|baju|barato|prix\s*bas|pas\s*cher|günstig|saving|رخيص|أقل\s*من|الميزانية|3000\s*円|5000\s*円|under\s*¥?\s*\d000|under\s*3000|under\s*5000|¥\s*3000|¥\s*5000|hostel|youth\s*hostel|日元|日圓|円)/i.test(qHotelLower)
+  const isBudgetHotelQ = /(budget|cheap|inexpensive|hostel|guest\s*house|guesthouse|backpack|capsule|youth|economy|安い|安価|格安|低価格|低予算|学生|ワンコイン|低料金|저예산|저렴|싸|싼|便宜|实惠|经济|划算|划算|背包|青年旅馆|青年|平价|经济型|murah|hemat|低価|preupuesto|baju|barato|prix\s*bas|pas\s*cher|günstig|saving|رخيص|أقل\s*من|الميزانية|3000\s*円|5000\s*円|under\s*¥?\s*\d000|under\s*3000|under\s*5000|¥\s*3000|¥\s*5000|hostel|youth\s*hostel|日元|日圓|円|du\s*lịch\s*bụi|rẻ|nhà\s*nghỉ|ราคาถูก|ราคา\s*ถูก|ที่พัก\s*ราคาถูก|โฮสเทล|kapsel|hostal|barato)/i.test(qHotelLower)
     || requested === "budget" || requested === "hostel";
   // Accessibility intent: wheelchair / barrier-free / step-free / accessible
   // travel queries should surface the curated short-list of major destinations'
@@ -5697,6 +5697,35 @@ async function getHotels(args: {
           })),
           canonical_luxury_ryokan_note:
             "Hand-curated luxury ryokan / honeymoon / exclusive accommodations. The hotel master mixes business hotels with traditional ryokan and OSM apartments; this block surfaces the signature top-tier properties for premium intent queries. Use for 高級旅館 / luxury / honeymoon / 新婚 / アマン / 星のや / 俵屋 queries.",
+        }
+      : {}),
+    // iter171: Izu Peninsula + Atami romantic ryokan clusters
+    ...((prefCode === "22" && (args.hotel_type === "ryokan" || args.hotel_type === "onsen_ryokan") && /(伊豆|izu)/iu.test(String(args.city ?? "").toLowerCase()))
+      ? {
+          canonical_izu_family_ryokan: [
+            { name_ja: "あさば (修善寺)", name_en: "Asaba (Shuzenji)", municipality: "伊豆市", type: "ultra-luxury heritage ryokan (founded 1675)", note_en: "Founded 1675, Asaba is Izu's most-acclaimed luxury ryokan; private rotenburo + classic Japanese architecture + a traditional Noh stage on premises. Relais & Châteaux member. Anniversary/honeymoon flagship." },
+            { name_ja: "石のや (伊豆長岡)", name_en: "Ishi-no-Ya (Izu-Nagaoka)", municipality: "伊豆の国市", type: "luxury contemporary ryokan", note_en: "All-suite luxury ryokan with private outdoor baths on every room balcony. Most rooms have ocean view. Multi-time anniversary-popular ryokan." },
+            { name_ja: "落合楼村上 (修善寺)", name_en: "Ochiairo Murakami (Shuzenji)", municipality: "伊豆市", type: "Tangible Cultural Property heritage ryokan", note_en: "Built 1874; National Tangible Cultural Property registered; chestnut-wood architecture. Kashikiri-buro (貸切風呂 private bath) reservation. Family-friendly with adjacent ryokan staff service." },
+            { name_ja: "湯ヶ島温泉 落合楼 + 谷川温泉郷", name_en: "Yugashima Onsen riverside ryokan cluster", municipality: "伊豆市", type: "river-side onsen village", note_en: "Yugashima riverside ryokan cluster (Karuizawa-of-Izu); 谷川温泉 hot-spring village atmosphere + family-friendly options + private baths." },
+            { name_ja: "下田 黒船ホテル + 河津 (Shimoda + Kawazu)", name_en: "Shimoda + Kawazu coastal couples", municipality: "下田市・河津町", type: "south Izu coastal luxury", note_en: "Black Ships Hotel Shimoda + various Kawazu seaside ryokan; 河津桜 spring sakura peak (Feb-Mar). South Izu = warmer / more exotic feel." },
+            { name_ja: "貸切風呂 (kashikiri-buro) feature note", name_en: "Kashikiri-buro (private-bath) family feature", category: "feature explanation", note_en: "Izu ryokan strongly emphasizes 貸切風呂 (private booked baths for families/couples) — many properties have 4-8 small private baths reserveable in 50-min slots. For family stays with kids, this lets you avoid mixed gender public baths. Look for '貸切風呂' or 'kashikiri-buro' in property amenities." },
+            { name_ja: "Access (Tokaido Shinkansen + Izu Hakone Tetsudo)", name_en: "Access via JR Tokaido + Izu Hakone Tetsudo", category: "transit", note_en: "Tokyo → 三島 (Shinkansen Kodama / Hikari, JR Pass OK, ~50min) + Izu Hakone Tetsudo Sunzu Line to 修善寺 (NOT JR Pass, ¥510, 35min). Or Tokyo → 熱海 + Izu Kyuko Line south coast." },
+          ],
+          canonical_izu_family_ryokan_note: "Hand-curated Izu Peninsula (Shizuoka) family + couple ryokan destinations. **Flagship luxury**: あさば (Asaba 修善寺 1675) + 落合楼村上 (Tangible Cultural Property). **All-suite + private bath**: 石のや 伊豆長岡. **South coast**: Shimoda + Kawazu (河津桜 Feb-Mar peak). **Feature note**: 貸切風呂 (private-bath reservation) is the Izu ryokan family-friendly standard.",
+        }
+      : {}),
+    ...((prefCode === "22" && (args.hotel_type === "ryokan" || args.hotel_type === "onsen_ryokan") && /(熱海|atami|あたみ)/iu.test(String(args.city ?? "").toLowerCase()))
+      ? {
+          canonical_atami_kashikiri_buro: [
+            { name_ja: "古屋旅館 (1806創業)", name_en: "Furuya Ryokan (founded 1806)", municipality: "熱海市", type: "heritage ryokan (1806)", note_en: "Atami's most-storied 1806-founded ryokan. Multiple kashikiri-buro available + ocean-view rooms + tradition kaiseki. Often booked for anniversary by Tokyo-based couples (90min by Shinkansen)." },
+            { name_ja: "ATAMI 海峯楼", name_en: "Kaihourou", municipality: "熱海市", type: "luxury 4-room hidden ryokan", note_en: "Tiny 4-room ultra-luxury ryokan on Atami coastline; private rotenburo with Sagami Bay view in every room. Anniversary/honeymoon flagship. Reserve 6+ months ahead." },
+            { name_ja: "リゾーピア熱海", name_en: "Resorpia Atami", municipality: "熱海市", type: "modern ocean-view resort", note_en: "Modern resort-style stay with private rotenburo rooms; sea-view from every room. Younger-couple alternative to traditional ryokan." },
+            { name_ja: "大江戸温泉物語 あたみ", name_en: "Ooedo Onsen Monogatari Atami", municipality: "熱海市", type: "budget family ryokan", note_en: "Budget-tier (¥10,000-15,000 / night with meals) family ryokan; multiple kashikiri-buro included. Buffet + family-friendly." },
+            { name_ja: "熱海花火大会", name_en: "Atami Fireworks Festival", category: "seasonal couple event", note_en: "Atami hosts ~12 fireworks events per year (Apr-Dec) — most-frequent of any Japan resort. Ryokan stays on event nights are couple-romance flagship." },
+            { name_ja: "貸切風呂 (Atami kashikiri-buro standard)", name_en: "Kashikiri-buro (Atami norm)", category: "feature explanation", note_en: "Atami is heavy on 貸切風呂 (private-booked baths) — most ryokan have 2-6 reserveable kashikiri rooms for couples/families. Reserve at check-in (or pre-book online); typical 50-min slot. The textbook 'romantic onsen with privacy' experience in Atami." },
+            { name_ja: "Access via Tokaido Shinkansen", name_en: "Access via JR Tokaido Shinkansen Kodama/Hikari", category: "transit", note_en: "Tokyo → 熱海 駅 by Shinkansen Kodama / Hikari ~40-50min (JR Pass OK). Atami station has frequent service. Closest Shinkansen onsen town to Tokyo." },
+          ],
+          canonical_atami_kashikiri_buro_note: "Hand-curated Atami romantic / kashikiri-buro (private bath) ryokan. **Heritage flagship**: 古屋旅館 (1806). **Ultra-luxury hidden**: ATAMI 海峯楼 (4-room). **Modern resort**: リゾーピア熱海. **Budget family**: 大江戸温泉物語 あたみ. **Seasonal romance**: 熱海花火大会 ~12 events/year. **Access**: 40-50min from Tokyo by Shinkansen Kodama (JR Pass OK).",
         }
       : {}),
     // iter169: prefecture-keyed romantic/couple ryokan clusters — fire on hotel_type=ryokan/onsen_ryokan + prefcode match.
