@@ -5,8 +5,8 @@ Test set: 100-case
 
 ## KPIs (confirmed 2026-05-02)
 
-- **Satisfaction Accuracy**: 150/420 = **35.7%** (sat. score ≥ 4.0)
-- **Minimum Acceptable Accuracy**: 399/420 = **95.0%** (Safety+Hallucination Pass + avg ≥ 3.0)
+- **Satisfaction Accuracy**: 235/420 = **56.0%** (sat. score ≥ 4.0)
+- **Minimum Acceptable Accuracy**: 403/420 = **96.0%** (Safety+Hallucination Pass + avg ≥ 3.0)
 - **Catastrophic Error Rate**: 0/420 = **0.0%** (Safety Fail or Hallucination Fail)
 
 Targets:
@@ -18,56 +18,56 @@ Targets:
 
 | Dimension | Mean | 0 | 1 | 2 | 3 | 4 | 5 |
 |:----------|-----:|--:|--:|--:|--:|--:|--:|
-| intent_understanding | 3.77 | 0 | 0 | 4 | 175 | 155 | 86 |
-| groundedness | 4.25 | 0 | 0 | 0 | 26 | 263 | 131 |
-| factual_accuracy | 4.25 | 0 | 0 | 0 | 22 | 270 | 128 |
-| practical_usefulness | 3.46 | 0 | 0 | 22 | 221 | 137 | 40 |
-| constraint_handling | 3.36 | 0 | 0 | 69 | 169 | 144 | 38 |
-| travel_feasibility | 3.81 | 0 | 0 | 3 | 164 | 164 | 89 |
-| specificity | 3.74 | 0 | 0 | 15 | 162 | 160 | 83 |
-| expression_quality | 3.39 | 0 | 0 | 16 | 230 | 169 | 5 |
+| intent_understanding | 4.01 | 0 | 0 | 11 | 105 | 174 | 130 |
+| groundedness | 4.54 | 0 | 0 | 0 | 16 | 162 | 242 |
+| factual_accuracy | 4.54 | 0 | 0 | 1 | 16 | 160 | 243 |
+| practical_usefulness | 3.76 | 0 | 0 | 21 | 145 | 168 | 86 |
+| constraint_handling | 3.56 | 0 | 2 | 50 | 135 | 177 | 56 |
+| travel_feasibility | 4.32 | 0 | 0 | 1 | 28 | 227 | 164 |
+| specificity | 3.84 | 0 | 0 | 12 | 142 | 168 | 98 |
+| expression_quality | 3.38 | 0 | 0 | 37 | 202 | 165 | 16 |
 
 ## Per-tool breakdown
 
 | Tool | N | Satisfaction% | Min Acceptable% | Catastrophic% | Avg score |
 |:-----|--:|--------------:|----------------:|--------------:|----------:|
-| get_dmo | 1 | 0.0% | 0.0% | 0.0% | 2.75 |
+| get_dmo | 1 | 0.0% | 100.0% | 0.0% | 3.88 |
 | get_entity_full | 1 | 100.0% | 100.0% | 0.0% | 4.50 |
-| get_festivals | 25 | 60.0% | 100.0% | 0.0% | 4.13 |
-| get_hotels | 56 | 25.0% | 100.0% | 0.0% | 3.60 |
-| get_japan_heritage | 9 | 0.0% | 88.9% | 0.0% | 3.39 |
-| get_local_food | 35 | 25.7% | 100.0% | 0.0% | 3.69 |
-| get_local_specialty | 22 | 36.4% | 95.5% | 0.0% | 3.93 |
-| get_spots | 136 | 31.6% | 99.3% | 0.0% | 3.72 |
-| get_traditional_arts | 1 | 0.0% | 100.0% | 0.0% | 3.12 |
-| get_transport | 34 | 26.5% | 100.0% | 0.0% | 3.69 |
+| get_festivals | 25 | 80.0% | 100.0% | 0.0% | 4.25 |
+| get_hotels | 56 | 50.0% | 92.9% | 0.0% | 3.78 |
+| get_japan_heritage | 9 | 66.7% | 88.9% | 0.0% | 4.12 |
+| get_local_food | 35 | 37.1% | 97.1% | 0.0% | 3.83 |
+| get_local_specialty | 22 | 68.2% | 100.0% | 0.0% | 4.07 |
+| get_spots | 136 | 45.6% | 95.6% | 0.0% | 3.86 |
+| get_traditional_arts | 1 | 0.0% | 100.0% | 0.0% | 3.38 |
+| get_transport | 34 | 79.4% | 100.0% | 0.0% | 4.41 |
 | plan_feasibility_check | 5 | 100.0% | 100.0% | 0.0% | 4.55 |
-| search_area | 30 | 60.0% | 96.7% | 0.0% | 3.96 |
-| search_hybrid | 65 | 43.1% | 75.4% | 0.0% | 3.73 |
+| search_area | 30 | 66.7% | 96.7% | 0.0% | 4.08 |
+| search_hybrid | 65 | 58.5% | 93.8% | 0.0% | 4.09 |
 
 ## Failure Category breakdown
 
 | Category | Description | Count | % |
 |:--------:|:------------|------:|--:|
-| A | Retrieval Failure (needed data not fetched) | 78 | 18.6% |
-| B | Ranking Failure (buried below noise) | 43 | 10.2% |
-| C | Reasoning Failure (synthesised wrong) | 1 | 0.2% |
-| D | Grounding Failure (made up content) | 0 | 0.0% |
-| E | Practicality Failure (correct but unusable) | 20 | 4.8% |
-| F | Constraint Failure (ignored explicit constraints) | 104 | 24.8% |
-| G | Coverage Failure (too few options) | 41 | 9.8% |
+| A | Retrieval Failure (needed data not fetched) | 58 | 13.8% |
+| B | Ranking Failure (buried below noise) | 72 | 17.1% |
+| C | Reasoning Failure (synthesised wrong) | 0 | 0.0% |
+| D | Grounding Failure (made up content) | 4 | 1.0% |
+| E | Practicality Failure (correct but unusable) | 2 | 0.5% |
+| F | Constraint Failure (ignored explicit constraints) | 70 | 16.7% |
+| G | Coverage Failure (too few options) | 36 | 8.6% |
 | H | Safety / Cultural Failure | 0 | 0.0% |
-| — | (no failure category, ≥4 across the board) | 133 | 31.7% |
+| — | (no failure category, ≥4 across the board) | 178 | 42.4% |
 
 ## Top improvement hints (sample of worst 10)
 
-- **R-261** (sat 2.40, fail=B) — search_hybrid: Add curated canonical_scenic_trains block per region with JR/non-JR flag
-- **R-306** (sat 2.65, fail=F) — search_hybrid: Add halal-certification authoritative source (JHA / Muslim Pro listings).
-- **R-307** (sat 2.65, fail=F) — search_hybrid: Index halal-certification authoritative registries.
-- **R-308** (sat 2.65, fail=A) — search_hybrid: Add halal source + proximity-to-landmark spatial join.
-- **R-309** (sat 2.65, fail=F) — search_hybrid: Add halal certification dataset.
-- **R-312** (sat 2.65, fail=F) — search_hybrid: Add halal certification source.
-- **R-313** (sat 2.65, fail=F) — search_hybrid: Ingest OSM opening_hours; add halal source.
-- **R-316** (sat 2.65, fail=A) — search_hybrid: Halal-cert data ingestion.
-- **R-318** (sat 2.65, fail=F) — search_hybrid: Multi-prefecture halal aggregator.
-- **R-320** (sat 2.65, fail=F) — search_hybrid: Add halal certification + multi-pref aggregation.
+- **R-334** (sat 2.35, fail=A) — search_hybrid: Add prefecture filter when prefecture is implied in query; route 全天候/屋内 queries to get_spots with indoor filter.
+- **R-066** (sat 2.35, fail=B) — get_spots: Add hard negative-filter for 詐欺 / 還付 / 届出 / お知らせ keywords; never surface admin notices as tourism spots.
+- **R-350** (sat 2.40, fail=A) — get_spots: Build canonical_genkai_shuraku (limit villages) per prefecture using MLIT/MIC depopulation registry.
+- **R-143** (sat 2.40, fail=A) — get_hotels: Add canonical_shodoshima_romantic block (Angel Road / Olive Park) and improve lodging coverage
+- **R-092** (sat 2.45, fail=B) — get_spots: Suppress regional koyo/sakura clusters when query is family-in-specific-city; surface get_spots Kushimoto items first; h
+- **R-053** (sat 2.50, fail=A) — get_japan_heritage: Detect 神宮 / 大社 / 国宝 queries in the japan_heritage tool and route to a see_also_wikidata_heritage block citing search_are
+- **R-126** (sat 2.50, fail=A) — get_hotels: Add canonical_kurokawa_onsen cluster with 湯巡り手形 metadata
+- **R-261** (sat 2.60, fail=A) — search_hybrid: Tighten prefecture filter or add canonical_scenic_trains_by_region with JR-Pass-covered list.
+- **R-324** (sat 2.65, fail=A) — search_hybrid: Add Hiroshima canonical: Hiroshima Masjid (Funairi area) + Hiroshima University prayer room + Iwakuni mosque as alternat
+- **R-080** (sat 2.65, fail=G) — get_spots: Fan out to multiple Akita municipalities; add 農泊 / グリーンツーリズム network records as canonical block.
