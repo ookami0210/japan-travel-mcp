@@ -5819,6 +5819,21 @@ async function getTransport(args: {
         { destination_ja: "稚内・宗谷岬", destination_en: "Wakkanai / Cape Soya (northernmost coast)", mode: "bus", route_name_ja: "JR宗谷本線「特急宗谷」", route_name_en: "JR Soya Line 'Soya' Ltd Express", operator: "JR Hokkaido", origin_station_ja: "札幌駅", origin_station_en: "Sapporo Station", note_en: "Japan's northernmost city; JR ltd express Sapporo→Wakkanai ~5h (JR Pass OK). Local bus to Cape Soya. Russian-influenced coastal port culture." },
         { destination_ja: "釧路湿原 + 釧路沿岸 (オホーツク海)", destination_en: "Kushiro Wetland + Kushiro coast (Pacific)", mode: "bus", route_name_ja: "JR根室本線「特急おおぞら」+ 釧路バス湿原線", route_name_en: "JR Nemuro Line 'Ozora' Ltd Express + Kushiro Bus", operator: "JR Hokkaido + Akan Bus", origin_station_ja: "札幌駅", origin_station_en: "Sapporo Station", note_en: "Eastern coast; JR Sapporo→Kushiro ~4h (JR Pass OK). Wetland is Japan's largest; spring-summer crane viewing. Kushiro fish market on the harbor (Washo Market)." },
       ],
+      "24": [ // Mie — Kumano + Ise + Iga + Toba
+        { destination_ja: "伊勢神宮 (内宮 + 外宮)", destination_en: "Ise Jingū (Naikū + Gekū)", mode: "bus", route_name_ja: "近鉄+JR + 三重交通バス", route_name_en: "Kintetsu / JR + Mie Kotsu Bus", operator: "Kintetsu / JR Central / Mie Kotsu Bus", origin_station_ja: "宇治山田駅・伊勢市駅", origin_station_en: "Uji-Yamada Station / Ise-Shi Station", note_en: "Most efficient: Kintetsu Limited Express from Nagoya / Osaka (Nagoya ~1h25m, Osaka ~2h, Kintetsu Pass valid; JR Pass NOT valid on Kintetsu Ltd Express). Alternative: JR Sangu Line from Nagoya via Taki (~1h45m, JR Pass OK). From 伊勢市駅 or 宇治山田駅 to 外宮 walking 5 min; 内宮 via Mie Kotsu Bus 15min." },
+        { destination_ja: "熊野古道 (伊勢路)", destination_en: "Kumano Kodo Ise-ji Route", mode: "bus", route_name_ja: "JR紀勢本線 + 熊野市バス", route_name_en: "JR Kisei Main Line + Kumano City Bus", operator: "JR Central + Kumano City Bus", origin_station_ja: "熊野市駅・新宮駅", origin_station_en: "Kumano-shi Station / Shingu Station", note_en: "Mie-side Ise-ji pilgrimage route connects Ise Jingu (Mie) to Kumano Hayatama Taisha (Wakayama). JR Kisei Main Line accessible (JR Pass OK). Hike sections: 馬越峠 (Mago-toge), 八鬼山, 松本峠. Walking trails preserved as UNESCO World Heritage component." },
+        { destination_ja: "鳥羽水族館 + 鳥羽湾", destination_en: "Toba Aquarium + Toba Bay", mode: "ferry", route_name_ja: "近鉄鳥羽線 + 鳥羽湾遊覧船", route_name_en: "Kintetsu Toba Line + Toba Bay Sightseeing Boat", operator: "Kintetsu + Mie Kotsu Ferry", origin_station_ja: "鳥羽駅", origin_station_en: "Toba Station", note_en: "Kintetsu from Ise (~15min) or Nagoya (~1h40m); JR Sangu Line also reaches Toba (JR Pass OK). Toba Aquarium has Japan's longest aquarium with 1,200 species. Mikimoto Pearl Island walking distance." },
+        { destination_ja: "なばなの里 (桑名)", destination_en: "Nabana no Sato (Kuwana)", mode: "bus", route_name_ja: "近鉄名古屋線 + 三重交通バス", route_name_en: "Kintetsu Nagoya Line + Mie Kotsu Bus / Free shuttle", operator: "Kintetsu / Mie Kotsu Bus", origin_station_ja: "近鉄長島駅", origin_station_en: "Kintetsu Nagashima Station", note_en: "Japan's largest LED illumination (October-May, ~8 million LEDs). From 近鉄長島駅 free shuttle bus 10min. Alternative: JR Kansai Main Line to 桑名駅 + Mie Kotsu Bus." },
+        { destination_ja: "伊賀上野城 + 忍者博物館", destination_en: "Iga-Ueno Castle + Ninja Museum", mode: "bus", route_name_ja: "JR関西本線 + 伊賀鉄道", route_name_en: "JR Kansai Main Line + Iga Tetsudo", operator: "JR West + Iga Tetsudo", origin_station_ja: "伊賀上野駅・上野市駅", origin_station_en: "Iga-Ueno Station + Ueno-shi Station", note_en: "JR Kansai Main Line from Nagoya / Osaka (~1h30m); Iga Tetsudo from JR Iga-Ueno to 上野市駅 walking distance to castle + ninja museum. Iga is the textbook ninja heritage town." },
+        { destination_ja: "御在所岳ロープウェイ (鈴鹿山脈)", destination_en: "Mt Gozaisho Ropeway (Suzuka Range)", mode: "ropeway", route_name_ja: "近鉄湯の山線", route_name_en: "Kintetsu Yunoyama Line", operator: "Kintetsu + Mie Kotsu Ropeway", origin_station_ja: "湯の山温泉駅", origin_station_en: "Yunoyama Onsen Station", note_en: "Kintetsu Yunoyama Line from 四日市 (~30min) to 湯の山温泉. Ropeway to summit (1,212m); spring rhododendron, autumn koyo. Hot-spring town at base." },
+      ],
+      "14": [ // Kanagawa — Hakone + Kamakura + Yokohama
+        { destination_ja: "箱根 (湯本/強羅/芦ノ湖)", destination_en: "Hakone (Yumoto / Gora / Lake Ashi)", mode: "cable_car", route_name_ja: "小田急ロマンスカー + 箱根登山鉄道 + 強羅ケーブルカー + 箱根ロープウェイ + 芦ノ湖海賊船", route_name_en: "Odakyu Romancecar + Hakone Tozan Railway + Gora Cable Car + Hakone Ropeway + Lake Ashi Pirate Ship", operator: "Odakyu + Hakone Tozan + Hakone Ropeway", origin_station_ja: "新宿駅 (小田急)", origin_station_en: "Shinjuku Station (Odakyu)", note_en: "Optimal route: 新宿 → Romancecar to 箱根湯本 (~1h25m, ¥2,470) → Hakone Tozan switchback railway to 強羅 → Gora Cable Car to 早雲山 → Hakone Ropeway over 大涌谷 to 桃源台 → Lake Ashi Pirate Ship to 元箱根 → bus back. **Hakone Free Pass (¥6,100 from Shinjuku) covers all this** + unlimited 2 days. NOT JR Pass — Odakyu private rail." },
+        { destination_ja: "鎌倉 (江ノ電 + 鶴岡八幡宮 + 大仏)", destination_en: "Kamakura (Enoden line + Tsurugaoka Hachimangū + Great Buddha)", mode: "tram", route_name_ja: "JR横須賀線 + 江ノ電", route_name_en: "JR Yokosuka Line + Enoden (Enoshima Electric Railway)", operator: "JR East + Enoden", origin_station_ja: "東京駅・新宿駅", origin_station_en: "Tokyo / Shinjuku Stations", note_en: "JR Yokosuka Line direct from Tokyo (~55min, JR Pass OK) to 鎌倉駅. Enoden private rail from 鎌倉 to 江ノ島 along the coast (NOT JR Pass; ¥260/ride, 1-day pass ¥800)." },
+        { destination_ja: "横浜 みなとみらい", destination_en: "Yokohama Minato Mirai", mode: "tram", route_name_ja: "みなとみらい線 + JR京浜東北線", route_name_en: "Minatomirai Line + JR Keihin-Tohoku Line", operator: "Yokohama Minatomirai Railway + JR East", origin_station_ja: "渋谷駅 (東急東横線→みなとみらい線直通)", origin_station_en: "Shibuya Station (via Toyoko Line→Minatomirai through-service)", note_en: "Most efficient: 渋谷 → みなとみらい through-service ~35min. JR alternative: JR Keihin-Tohoku to 桜木町 (~35min from Shinagawa, JR Pass OK)." },
+        { destination_ja: "江ノ島", destination_en: "Enoshima", mode: "tram", route_name_ja: "小田急江ノ島線 + 江ノ電 + 湘南モノレール", route_name_en: "Odakyu Enoshima Line + Enoden + Shōnan Monorail", operator: "Odakyu + Enoden + Shōnan Monorail", origin_station_ja: "新宿駅", origin_station_en: "Shinjuku Station (Odakyu)", note_en: "Odakyu Enoshima Line from Shinjuku to 片瀬江ノ島駅 (~1h15m). Or JR Yokosuka Line to 大船 + Shōnan Monorail to 湘南江の島 (alt scenic route)." },
+        { destination_ja: "横浜中華街", destination_en: "Yokohama Chinatown", mode: "tram", route_name_ja: "みなとみらい線 元町・中華街駅", route_name_en: "Minatomirai Line Motomachi-Chukagai Station", operator: "Yokohama Minatomirai Railway", origin_station_ja: "渋谷駅", origin_station_en: "Shibuya Station (through-service)", note_en: "Direct through-service from Shibuya to 元町・中華街駅 (~45min); the textbook half-day Yokohama food experience. Japan's largest Chinatown." },
+      ],
       "30": [ // Wakayama
         { destination_ja: "高野山", destination_en: "Mt Koya / Koyasan", mode: "cable_car", route_name_ja: "南海高野線 + 南海高野山ケーブルカー", route_name_en: "Nankai Koya Line + Nankai Koyasan Cable Car", operator: "Nankai Electric Railway (NOT JR — JR Pass does NOT cover)", origin_station_ja: "難波駅 (大阪)", origin_station_en: "Namba Station (Osaka)", note_en: "Osaka Namba → Gokurakubashi by Nankai Koya Line limited express 'Koya' (~1h20m, ¥1,680 + ¥780 ltd-exp surcharge) → Nankai Cable Car to Koyasan Station (5min, ~¥390). On Koyasan itself, Nankai Rinkan Bus to Okunoin (奥之院) / Kongobu-ji / Garan area. JR Pass is NOT VALID on this route — purchase 'Koyasan World Heritage Ticket' (¥3,140 from Namba round-trip) for best value. Total Namba→Koyasan ~2h." },
         { destination_ja: "白浜温泉", destination_en: "Shirahama Onsen", mode: "bus", route_name_ja: "JR紀勢本線「特急くろしお」+ 明光バス", route_name_en: "JR Kuroshio Limited Express + Meiko Bus", operator: "JR West / Meiko Bus", origin_station_ja: "新大阪駅・大阪駅・天王寺駅", origin_station_en: "Shin-Osaka / Osaka / Tennoji Stations", note_en: "Limited Express Kuroshio Shin-Osaka → Shirahama Station (~2h30m, JR Pass eligible) + Meiko Bus 15min to central Shirahama Onsen. White sand beach + Adventure World theme park (panda)." },
@@ -5941,9 +5956,64 @@ async function getTransport(args: {
       },
       recommendation: "If you have a JR Pass already, use the JR route (saves cash). Otherwise, the Tobu route is faster and ¥2,500 cheaper. The Tobu Nikko Pass adds Nikko bus coverage at low extra cost.",
     };
+    const HAKONE_OPERATOR_COMPARISON = {
+      destination: "箱根 (Hakone, Kanagawa)",
+      odakyu_route: {
+        line: "小田急ロマンスカー",
+        origin: "新宿駅 (Shinjuku)",
+        time: "1h25m to 箱根湯本駅",
+        fare_jpy: 2470,
+        jr_pass_valid: false,
+        note_en: "Direct Odakyu Romancecar from Shinjuku to 箱根湯本駅 (gateway to Hakone area). **Hakone Free Pass** (¥6,100 from Shinjuku) is the textbook option — includes Shinjuku round-trip + 2-day unlimited use of Hakone Tozan Railway + Cable Car + Ropeway + Lake Ashi pirate ship + Hakone Tozan Bus. Most efficient Hakone route.",
+      },
+      jr_route: {
+        line: "JR東海道線 (or Tokaido Shinkansen Kodama) + 箱根登山鉄道",
+        origin: "東京駅 / 品川駅",
+        time: "1h35m to 箱根湯本 (via 小田原)",
+        fare_jpy: 1520,
+        jr_pass_valid: "Partial — JR Tokaido to 小田原 only; 箱根登山鉄道 + Cable + Ropeway + Pirate Ship NOT JR Pass.",
+        note_en: "JR Tokaido Line (or Tokaido Shinkansen Kodama) Tokyo → 小田原 (35min) + Hakone Tozan local rail to 箱根湯本 (15min). JR Pass valid only to 小田原. From there you pay separately for the Hakone loop (Cable / Ropeway / Pirate Ship). Use this if you have JR Pass already.",
+      },
+      recommendation: "If you have a JR Pass: take JR to 小田原 + Hakone Free Pass (Odawara version, ¥5,000, 2-day) for the in-Hakone loop. Otherwise: Hakone Free Pass from Shinjuku (¥6,100) is the canonical choice — covers Shinjuku-Hakone round-trip + 2-day Hakone loop.",
+      half_day_vs_full_day: "Half-day from Tokyo possible but rushed; full 2-day with overnight at 箱根湯本/強羅/仙石原 onsen ryokan is the textbook itinerary.",
+    };
     const INTER_CITY_ROUTES_BY_PREF: Record<string, Record<string, unknown>> = {
       "09": { // Tochigi destination (Nikko) — same Tokyo↔Nikko block
         tokyo_to_nikko: NIKKO_OPERATOR_COMPARISON,
+      },
+      "14": { // Kanagawa (Hakone destination)
+        tokyo_to_hakone: HAKONE_OPERATOR_COMPARISON,
+        tokyo_to_kamakura: {
+          destination: "鎌倉 (Kamakura)",
+          jr_route: {
+            line: "JR横須賀線 + JR江ノ電 (transfer)",
+            origin: "東京駅 / 品川駅 / 横浜駅",
+            time: "~55min from Tokyo",
+            fare_jpy: 940,
+            jr_pass_valid: true,
+            note_en: "Direct JR Yokosuka Line Tokyo→Kamakura (~55min, JR Pass OK). From 鎌倉駅, transfer to Enoden private rail (NOT JR Pass, ¥260/ride) for 江ノ島 / 長谷大仏 / 七里ガ浜 / 鎌倉高校前 (Slam Dunk) coastal route.",
+          },
+          recommendation: "JR Pass holders → direct JR. Non-JR-Pass: Enoden Free Pass (¥800 1-day) covers the in-Kamakura loop after arrival via JR.",
+        },
+        tokyo_to_yokohama: {
+          destination: "横浜 (Yokohama / Minato Mirai)",
+          jr_route: {
+            line: "JR京浜東北線 / JR東海道線",
+            origin: "東京駅 / 品川駅",
+            time: "25-35min",
+            fare_jpy: 470,
+            jr_pass_valid: true,
+            note_en: "JR Pass valid; 桜木町駅 for Minato Mirai or 横浜駅 for central Yokohama / Chinatown. Easy day-trip.",
+          },
+          minatomirai_route: {
+            line: "東急東横線 → みなとみらい線 through-service",
+            origin: "渋谷駅 (Shibuya)",
+            time: "35min",
+            fare_jpy: 460,
+            jr_pass_valid: false,
+            note_en: "Through-service from Shibuya direct to 元町・中華街駅 (Chinatown) without transfer. Most efficient for Minato Mirai + Chinatown combined visit. NOT JR Pass.",
+          },
+        },
       },
       "13": { // Tokyo origin
         tokyo_to_nikko: NIKKO_OPERATOR_COMPARISON,
@@ -8698,8 +8768,46 @@ async function planFeasibilityCheck(args: {
     stops.push({ qid: it.qid, error: "qid_not_found" });
   }
   const mode = args.travel_mode ?? "car";
-  // Rough average travel speeds (km/h)
-  const SPEED: Record<string, number> = { walk: 4, transit: 30, car: 50 };
+  // iter167: Shinkansen reference table — overrides haversine for known
+  // city-pair Shinkansen routes when mode=transit. R420v5-027 / R-267
+  // returned 727min for Tokyo→Kyoto because haversine + 30km/h flat speed
+  // ignores that the Tokaido Shinkansen averages ~210 km/h station-to-station.
+  // Key format: sorted "QID1|QID2" (both directions resolved to same key).
+  const SHINKANSEN_PAIRS: Record<string, { minutes: number; route: string; note: string }> = {
+    // Tokyo cluster
+    "Q1490|Q34600":  { minutes: 140, route: "Tokaido Shinkansen Nozomi", note: "Tokyo→Kyoto: Nozomi ~2h15m (140min); Hikari ~2h45m; both Tokaido Shinkansen. JR Pass: Nozomi NOT covered, Hikari + Kodama OK." },
+    "Q11509|Q34600": { minutes: 140, route: "Tokaido Shinkansen Nozomi", note: "Tokyo Metropolis (Q11509)→Kyoto: same as Q1490→Q34600." },
+    "Q1490|Q35765":  { minutes: 160, route: "Tokaido Shinkansen Nozomi", note: "Tokyo→Osaka (Shin-Osaka): Nozomi ~2h30m (160min)." },
+    "Q11509|Q35765": { minutes: 160, route: "Tokaido Shinkansen Nozomi", note: "Tokyo Metropolis→Osaka: same as Q1490→Q35765." },
+    "Q1490|Q171120": { minutes: 200, route: "Tokaido Shinkansen + JR Nara Line", note: "Tokyo→Nara: Nozomi to Kyoto + JR Nara Line transfer ~3h20m total." },
+    "Q1490|Q37643":  { minutes: 200, route: "Tokaido Shinkansen + JR Nara Line", note: "Tokyo→Nara city: same as Q1490→Q171120." },
+    "Q11509|Q37643": { minutes: 200, route: "Tokaido Shinkansen + JR Nara Line", note: "Tokyo Metropolis→Nara city: same routing." },
+    "Q1490|Q220887": { minutes: 240, route: "Tokaido + Sanyo Shinkansen Nozomi", note: "Tokyo→Hiroshima: Nozomi ~4h (240min) via Shin-Osaka." },
+    "Q1490|Q193912": { minutes: 305, route: "Tokaido + Sanyo Shinkansen Nozomi", note: "Tokyo→Fukuoka (Hakata): Nozomi ~5h05m (305min)." },
+    "Q1490|Q11751":  { minutes: 100, route: "Tokaido Shinkansen Nozomi", note: "Tokyo→Nagoya: Nozomi ~1h40m (100min)." },
+    "Q1490|Q34948":  { minutes: 240, route: "Hokkaido Shinkansen + Tohoku Shinkansen Hayabusa + transfer", note: "Tokyo→Sapporo: ~4h via Tohoku Shinkansen to Shin-Hakodate + Hokuto Ltd Express to Sapporo. Total ~8h actual incl transfer. **Air travel strongly preferred** for Tokyo↔Sapporo (~1h30m flight)." },
+    "Q1490|Q121154": { minutes: 95, route: "Tohoku Shinkansen Hayabusa", note: "Tokyo→Sendai: Hayabusa ~1h35m (95min)." },
+    "Q1490|Q200598": { minutes: 150, route: "Hokuriku Shinkansen Kagayaki", note: "Tokyo→Kanazawa: Hokuriku Shinkansen Kagayaki ~2h30m (150min)." },
+    "Q1490|Q173377": { minutes: 60, route: "JR Yokosuka Line direct", note: "Tokyo→Kamakura: JR Yokosuka Line ~55-60min." },
+    "Q1490|Q201017": { minutes: 75, route: "Hokuriku Shinkansen", note: "Tokyo→Karuizawa: Hokuriku Shinkansen ~1h15m." },
+    "Q1490|Q1062336":{ minutes: 75, route: "Odakyu Romancecar (NOT JR)", note: "Tokyo (Shinjuku)→Hakone (Hakone-Yumoto): Odakyu Romancecar ~1h25m (75min for the ride; ~1h15m on Limited Express). JR alternative: Tokaido Shinkansen Kodama to Odawara + Hakone Tozan Line." },
+    "Q34948|Q34600": { minutes: 580, route: "Hokkaido + Tohoku + Tokaido Shinkansen", note: "Sapporo→Kyoto: ~10h via multiple Shinkansen transfers. Air strongly preferred." },
+    "Q34948|Q35765": { minutes: 600, route: "Hokkaido + Tohoku + Tokaido Shinkansen", note: "Sapporo→Osaka: ~10h via multiple Shinkansen. Air strongly preferred." },
+    "Q34600|Q220887":{ minutes: 100, route: "Sanyo Shinkansen Hikari/Sakura", note: "Kyoto→Hiroshima: Hikari/Sakura ~1h45m." },
+    "Q34600|Q35765": { minutes: 30, route: "Tokaido Shinkansen Hikari/Kodama", note: "Kyoto→Osaka: Hikari ~15min, Special Rapid ~30min on conventional rail." },
+    "Q35765|Q220887":{ minutes: 90, route: "Sanyo Shinkansen", note: "Osaka→Hiroshima: ~1h30m." },
+    "Q35765|Q193912":{ minutes: 165, route: "Sanyo Shinkansen Nozomi", note: "Osaka→Fukuoka: Nozomi ~2h45m." },
+    "Q137387|Q1490": { minutes: 180, route: "Air travel (Naha→Haneda)", note: "Okinawa→Tokyo: Direct flight ~3h (180min). NO rail option — Okinawa Main Island is not connected to mainland Shinkansen network." },
+    "Q137387|Q34600":{ minutes: 240, route: "Air + Shinkansen (Naha→Kansai Intl + JR)", note: "Okinawa→Kyoto: Flight to Kansai Intl + Haruka express to Kyoto + transfer (~4h total). NO direct rail." },
+  };
+  function pairKey(a: string, b: string): string {
+    return [a, b].sort().join("|");
+  }
+  // Rough average travel speeds (km/h) — used as fallback when Shinkansen
+  // pair table doesn't have the city pair.
+  // Updated for transit: 90 km/h average for long-distance rail (Shinkansen-
+  // equivalent station-to-station including stops), 30 km/h for short urban.
+  const SPEED: Record<string, number> = { walk: 4, transit_short: 30, transit_long: 90, transit: 30, car: 50 };
   const speedKmh = SPEED[mode] ?? 30;
 
   const segments: Record<string, unknown>[] = [];
@@ -8714,15 +8822,32 @@ async function planFeasibilityCheck(args: {
       continue;
     }
     const km = haversineKm(ac, bc);
-    const minutes = Math.round((km / speedKmh) * 60);
+    let minutes: number;
+    let routeNote: string | undefined;
+    // Try Shinkansen pair table first for transit mode
+    if (mode === "transit") {
+      const shinkPair = SHINKANSEN_PAIRS[pairKey(a.qid as string, b.qid as string)];
+      if (shinkPair) {
+        minutes = shinkPair.minutes;
+        routeNote = shinkPair.route + " — " + shinkPair.note;
+      } else if (km > 100) {
+        // Long-distance transit fallback: assume Shinkansen-class 90 km/h average
+        minutes = Math.round((km / 90) * 60);
+      } else {
+        minutes = Math.round((km / speedKmh) * 60);
+      }
+    } else {
+      minutes = Math.round((km / speedKmh) * 60);
+    }
     segments.push({
       from: a.qid,
       to: b.qid,
       distance_km: Math.round(km * 10) / 10,
       estimated_minutes: minutes,
       mode,
+      ...(routeNote ? { route_note: routeNote } : {}),
     });
-    if (km > 300 && mode !== "car") flags.push(`long_distance_${a.qid}_to_${b.qid}: ${Math.round(km)}km — consider air/rail`);
+    if (km > 300 && mode !== "car" && !routeNote) flags.push(`long_distance_${a.qid}_to_${b.qid}: ${Math.round(km)}km — consider air/rail`);
     if (km > 800) flags.push(`infeasible_distance_${a.qid}_to_${b.qid}: ${Math.round(km)}km — likely requires multi-day or air travel`);
   }
   // Total visit time
