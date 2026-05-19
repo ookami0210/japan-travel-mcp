@@ -3788,6 +3788,15 @@ async function getSpots(args: {
       { name_ja: "立山黒部アルペンルート", name_en: "Tateyama Kurobe Alpine Route", municipality: "立山町", qid: "Q11537937", kind: "alpine route", note_en: "37km transit route across the Northern Japan Alps from Toyama (Tateyama Station) to Nagano (Ōgisawa) using 6 transport modes. Mid-Apr to late-Nov open. Yuki-no-Otani spring + 紅葉 autumn peaks." },
       { name_ja: "雨晴海岸", name_en: "Amaharashi Coast", municipality: "高岡市", qid: "Q11651533", kind: "scenic coast", note_en: "Famous coastline view of the Tateyama Range across Toyama Bay; one of Japan's '100 Best Beaches'. Manyo Line train stops at Amaharashi Station." },
     ],
+    "17": [ // Ishikawa
+      { name_ja: "兼六園", name_en: "Kenroku-en Garden", municipality: "金沢市", qid: "Q691213", kind: "Three Great Gardens of Japan / strolling garden", note_en: "One of Japan's Three Great Gardens (with 偕楽園 Mito, 後楽園 Okayama). Year-round destination; iconic 雪吊り winter (Nov to mid-Mar), 紅葉 (late Nov), sakura (early Apr), 早朝無料開園 morning free entry. Kanazawa central." },
+      { name_ja: "金沢城公園", name_en: "Kanazawa Castle Park", municipality: "金沢市", qid: "Q860028", kind: "castle ruins + reconstructed buildings", note_en: "Former Maeda-clan castle; reconstructed 菱櫓 + 五十間長屋 + 橋爪門 visitable. Adjacent to 兼六園 via 石川橋." },
+      { name_ja: "ひがし茶屋街", name_en: "Higashi Chaya District", municipality: "金沢市", qid: "Q11458175", kind: "preserved geisha-quarter district + Important Preservation District", note_en: "Edo-era geisha-quarter preservation district; wooden tea-house facades, gold-leaf shops (金箔), tea-ceremony experiences. Walking distance from 金沢駅 + 兼六園." },
+      { name_ja: "近江町市場", name_en: "Ōmichō Market", municipality: "金沢市", qid: "Q11556488", kind: "market / fresh seafood", note_en: "Kanazawa's '台所' (kitchen) 300-year-old fresh-seafood market; 海鮮丼 lunches + fresh 寒ブリ winter / 加能ガニ Nov-Mar. Central Kanazawa." },
+      { name_ja: "21世紀美術館", name_en: "21st Century Museum of Contemporary Art Kanazawa", municipality: "金沢市", qid: "Q1769144", kind: "contemporary art museum", note_en: "Iconic circular contemporary-art museum; Leandro Erlich's swimming pool + James Turrell light pieces. Walking distance from 兼六園." },
+      { name_ja: "輪島朝市", name_en: "Wajima Morning Market (Noto)", municipality: "輪島市", qid: "Q11633030", kind: "Noto morning market + craft", note_en: "1000-year-old market; 輪島塗 lacquerware + seafood. NOTE: 2024 Noto earthquake damaged area; many vendors at temporary 仮設場 — verify before visiting." },
+      { name_ja: "白米千枚田", name_en: "Shiroyone Senmaida Rice Terraces", municipality: "輪島市", qid: "Q11516683", kind: "Globally Important Agricultural Heritage Site + scenic coast", note_en: "1004 small rice paddies cascading down to the Sea of Japan; GIAHS-designated. Autumn 黄金 (golden rice) + winter '畔の灯' LED illumination iconic. Noto-area." },
+    ],
     "20": [ // Nagano
       { name_ja: "松本城", name_en: "Matsumoto Castle", municipality: "松本市", qid: "Q1010922", kind: "castle / national-treasure", note_en: "Original Edo castle (1593-94); one of Japan's 5 'National Treasure' castles. Black keep ('Crow Castle') with Alps backdrop. Hanami in early-mid April." },
       { name_ja: "善光寺", name_en: "Zenkō-ji", municipality: "長野市", qid: "Q1145935", kind: "temple / non-sectarian", note_en: "7th-c. founded; non-sectarian temple housing the legendary 'Hidden Buddha'. 7-year-cycle 御開帳 viewing event (next 2028). 'Once in your life, go to Zenkoji' Edo-era proverb." },
@@ -3855,6 +3864,8 @@ async function getSpots(args: {
       { name_ja: "錦帯橋", name_en: "Kintaikyō Bridge", municipality: "岩国市", qid: "Q1066451", kind: "iconic bridge / national-monument", note_en: "1673 wooden five-arch bridge; National Treasure of Japan, one of the 'Three Famous Bridges'. Spring sakura + autumn maple along the riverbank." },
       { name_ja: "秋吉台", name_en: "Akiyoshi-dai", municipality: "美祢市", qid: "Q1063620", kind: "karst plateau / national park", note_en: "Japan's largest karst plateau (130km²); Akiyoshi-dō limestone cave is a Special Natural Monument. Pasture grassland with limestone outcrops." },
       { name_ja: "元乃隅神社", name_en: "Motonosumi Shrine", municipality: "長門市", qid: "Q11636089", kind: "shrine / scenic torii", note_en: "123 vermilion torii lining a cliff above the Sea of Japan; CNN-listed as one of '31 most beautiful places in Japan'. Offering box at top of torii." },
+      { name_ja: "萩城下町 + 武家屋敷", name_en: "Hagi Castle Town + Samurai Residences", municipality: "萩市", qid: "Q1145074", kind: "Important Preservation District + UNESCO Meiji Industrial Revolution component", note_en: "Major preserved Edo samurai district. 3 districts (浜崎 + 平安古 + 堀内) of preserved wooden buildings. UNESCO World Heritage Meiji Industrial Revolution component. Free walking. Pair with 松陰神社 / 松下村塾 (Yoshida Shōin heritage)." },
+      { name_ja: "松陰神社 + 松下村塾", name_en: "Shōin Shrine + Shōka-Sonjuku", municipality: "萩市", qid: "Q11653187", kind: "Yoshida Shōin heritage + UNESCO component", note_en: "Yoshida Shōin's private school; birthplace of Meiji Restoration thinkers. UNESCO Meiji Industrial Revolution component. Free entry." },
     ],
     "37": [ // Kagawa
       { name_ja: "栗林公園", name_en: "Ritsurin Kōen", municipality: "高松市", qid: "Q1059920", kind: "garden / Special Place", note_en: "Special Place of Scenic Beauty (highest classification); strolling garden with six ponds and thirteen rock arrangements. Often ranked among Japan's top gardens." },
@@ -4082,6 +4093,17 @@ async function getSpots(args: {
     || /(掛川|kakegawa|金谷|kanaya|島田|shimada|静岡市|shizuoka|由比|yui|蒲原|kanbara|興津|okitsu|新居町|arai)/iu.test(munStrLower)
   );
   const isShodoshimaOliveQ = (prefCodeForBlock === "37") && /(オリーブ|olive|小豆島|shōdoshima|shodoshima)/iu.test(qLowerFull);
+  // iter168 detectors
+  const isOzeHikingQ = (prefCodeForBlock === "10" || prefCodeForBlock === "07" || prefCodeForBlock === "15") && /(尾瀬|oze|水芭蕉|ニッコウキスゲ|湿原|ハイキング|hike|mizubasho)/iu.test(qLowerFull);
+  const isNotoPeninsulaQ = (prefCodeForBlock === "17") && /(能登|noto|輪島|wajima|七尾|nanao|珠洲|suzu|魚介|seafood|fisher)/iu.test(qLowerFull);
+  const isHagiQ = (prefCodeForBlock === "35") && /(萩|hagi|武家屋敷|samurai|preservation)/iu.test(qLowerFull + " " + munStrLower);
+  const isSakurajimaKagoshimaQ = (prefCodeForBlock === "46") && /(桜島|sakurajima|sakura|cherry)/iu.test(qLowerFull);
+  const isOsakaIndoorHotQ = (prefCodeForBlock === "27") && /(屋内|indoor|air[\s-]*conditioned|aircond|涼し|猛暑|hot\s*day|hot\s*summer|escape\s*heat|8月|august|7月|july)/iu.test(qLowerFull);
+  const isOkinawaHoneymoonRemoteQ = (prefCodeForBlock === "47") && /(secluded|remote\s*island|honeymoon|新婚|romantic|couple|ふたり|partner|yaeyama|八重山|kerama|慶良間|isolated)/iu.test(qLowerFull);
+  // iter169: more clusters
+  const isTokyoShitamachiQ = (prefCodeForBlock === "13") && /(下町|shitamachi|散歩|stroll|谷根千|月島|柴又|asakusa|浅草|nezu|根津|yanaka|谷中|sendagi|千駄木|kappabashi|合羽橋)/iu.test(qLowerFull);
+  const isNaraWalkingQ = (prefCodeForBlock === "29") && /(散策|walking|stroll|nara\s*walk|奈良\s*散歩|deer\s*park|奈良公園)/iu.test(qLowerFull);
+  const isNahaKidsActivitiesQ = (prefCodeForBlock === "47") && /(子供|kids|family|アクティビティ|activit|赤ちゃん|baby)/iu.test(qLowerFull) && /(那覇|naha)/iu.test(cityStrLower);
   // iter164: Shimane haikyo / depopulated villages
   const isShimaneHaikyoQ = (prefCodeForBlock === "32") && /(廃村|haikyo|abandoned|déserté|deserted|depopulated|過疎|限界集落|villages?\s*abandonn|abandonn)/iu.test(qLowerFull);
   // iter164: Tokyo kids park (toddler-friendly)
@@ -4501,6 +4523,139 @@ async function getSpots(args: {
             { name_ja: "JR東海道線・各駅停車プラン", name_en: "JR Tokaido Line local-train plan (Shizuoka → Kakegawa loop)", municipality: "Shizuoka Prefecture-wide", category: "transit plan", note_en: "All Tokaido-post-town stations are JR Tokaido Line accessible — Yui / Kanbara / Okitsu / Shizuoka / Yaizu / 金谷 / 掛川 / 新居町. JR Pass valid. Suggested day-trip: Shizuoka Sta → Yui (sakura-ebi lunch) → 興津 → 蒲原 → return Shizuoka. ~5h." },
           ],
           canonical_shizuoka_shukuba_tokaido_note: "Hand-curated 旧東海道 (Old Tokaido Road) post-towns in Shizuoka Prefecture. Shizuoka covers Tokaido post-stations #15-31 (~17 stations); all are JR Tokaido Line-accessible (JR Pass eligible). **Flagship**: 丸子宿 (tororo-jiru lunch at 丁子屋 since 1596). **Walking route**: 由比 → 興津 (~3 km coastal Tokaido walk). **Border checkpoint heritage**: 新居宿 関所跡 (Lake Hamana). **Pine-canopy walk**: 御油の松並木 (Edo-era preserved). Day-trip plan with JR local-train hopping documented.",
+        }
+      : {}),
+    ...(isOzeHikingQ
+      ? {
+          canonical_oze_hiking: [
+            { name_ja: "尾瀬ヶ原 (本州最大の湿原)", name_en: "Ozegahara (largest wetland in Honshu)", municipality: "群馬・福島・新潟県境", category: "wetland + hiking", peak: "5月下旬-6月中旬 水芭蕉 / 7月 ニッコウキスゲ / 9-10月 草紅葉", note_en: "Honshu's largest high-altitude wetland (~700 ha at 1,400m); UNESCO biosphere candidate. Boardwalk-only access protects fragile peat. Three flagship blooming seasons: 水芭蕉 (skunk cabbage, late May-mid Jun), ニッコウキスゲ (day lilies, July), 草紅葉 (grass autumn-color, Sep-Oct)." },
+            { name_ja: "尾瀬沼", name_en: "Ozenuma Lake", municipality: "福島県側 (檜枝岐村)", category: "alpine lake + hike circuit", peak: "5月下旬-10月", note_en: "Alpine lake at 1,665m; circular hike ~3h. Mt Hiuchigatake reflection in still water is the iconic Oze photo." },
+            { name_ja: "鳩待峠 (群馬側入口)", name_en: "Hatomachi Pass (Gunma trailhead)", municipality: "片品村", category: "main trailhead", note_en: "Most-used Oze trailhead from Gunma side; bus access from JR沼田駅 (Numata Station) via Tokyo (Joetsu Shinkansen). Day-hike to 尾瀬ヶ原 ~4-6h round trip including山ノ鼻 boardwalk." },
+            { name_ja: "大清水・三平峠 (新潟側)", name_en: "Ōshimizu / Sanpei Pass (Niigata access)", municipality: "片品村・魚沼市境", category: "alternative trailhead", note_en: "Niigata-side entry; longer route to 尾瀬沼 via 三平峠. Less crowded than 鳩待峠." },
+            { name_ja: "檜枝岐村 (Fukushima trailhead + smallest village)", name_en: "Hinoemata Village (Fukushima trailhead)", municipality: "檜枝岐村", category: "Fukushima access + Japan's smallest village", note_en: "Fukushima-side gateway via 御池駐車場 + shuttle bus to 沼山峠. Combine Oze hike with stay at Japan's smallest village (~500 residents)." },
+            { name_ja: "山小屋・テント場 (尾瀬山荘・燧ヶ岳・尾瀬沼ヒュッテ etc)", name_en: "Mountain huts + tent grounds", category: "overnight lodging", note_en: "Several mountain huts on the boardwalk circuit; reserve ahead. Tent-camping at 山ノ鼻 + 見晴 designated areas only." },
+            { name_ja: "アクセス (no rental car)", name_en: "Public transit access", category: "transit info", note_en: "Main: Tokyo → 上越新幹線 to 上毛高原 → 関越交通バス to 鳩待峠 (~3h total). JR Pass valid to 上毛高原. Bus is non-JR. Mid-May to late October seasonal." },
+            { name_ja: "ハイキング装備 + 注意事項", name_en: "Hiking gear + safety", category: "preparation", note_en: "Boardwalks slippery when wet; non-slip hiking boots required. Bear bells recommended. No food sales in many sections — pack lunch. Closed November to early May (snow)." },
+          ],
+          canonical_oze_hiking_note: "Hand-curated 尾瀬国立公園 (Oze National Park) hiking destinations. Honshu's largest high-altitude wetland; spans Gunma + Fukushima + Niigata border. **Bloom calendar**: 水芭蕉 5月下旬-6月中旬 / ニッコウキスゲ 7月 / 草紅葉 9-10月. **Main access**: Tokyo → 鳩待峠 (Gunma side) via 上越新幹線 + bus, ~3h total. JR Pass to 上毛高原 valid; bus segment non-JR. Mid-May to late Oct seasonal — closed Nov-Apr.",
+        }
+      : {}),
+    ...(isNotoPeninsulaQ
+      ? {
+          canonical_noto_peninsula_seafood: [
+            { name_ja: "輪島朝市", name_en: "Wajima Morning Market", municipality: "輪島市", category: "morning market + seafood + craft", note_en: "1000-year-old market on Asaichi-dōri; ~200 stalls selling Noto seafood (鯛, 鰤, 蟹, 牡蠣) + 輪島塗 lacquerware. Daily 8am-12pm. **Note**: 2024 Noto earthquake damaged the area; many vendors operate at temporary 輪島朝市仮設場. Verify before visiting." },
+            { name_ja: "七尾湾 + 能登島", name_en: "Nanao Bay + Notojima Island", municipality: "七尾市・能登町", category: "bay + island seafood", note_en: "Nanao Bay famous for 牡蠣 (oyster, Nov-Mar peak season). 能登島 has のとじま水族館 (Notojima Aquarium, family-friendly) + Iwane oyster farm tours. Access via JR七尾線 + Noto Tetsudo." },
+            { name_ja: "珠洲市 (奥能登 漁港)", name_en: "Suzu City (deep Noto fishing ports)", municipality: "珠洲市", category: "remote fishing ports", note_en: "Tip of Noto Peninsula; small fishing ports (狼煙, 飯田, 鵜飼). Quiet, deeply rural. Earthquake-affected in 2024 — check operational status." },
+            { name_ja: "ぶり (鰤) 寒鰤", name_en: "Kanburi (Winter Yellowtail)", category: "seasonal seafood", season: "12月-2月", note_en: "Noto's signature winter seafood; 氷見鰤 + 能登鰤 are nationally famous. Ryokan kaiseki centerpiece Dec-Feb." },
+            { name_ja: "能登牡蠣 (ノト・カキ)", name_en: "Noto Oysters", category: "seasonal seafood", season: "11月-3月", note_en: "Nanao Bay rope-cultivated oysters; 七尾市 + 穴水町 oyster huts (牡蠣小屋) operate winter season — grill-yourself ¥3,000-4,000 60min." },
+            { name_ja: "輪島塗 / 能登瓦", name_en: "Wajima Lacquer + Noto Roof Tiles", category: "regional crafts pair-with", note_en: "While in Wajima for seafood, see 輪島塗 (national designated traditional craft) workshops + 輪島塗 museum." },
+            { name_ja: "家族向け宿 + 体験", name_en: "Family-friendly lodging + experience", category: "family programs", note_en: "和倉温泉 (Wakura Onsen, large resort onsen near Nanao) + 能登島水族館 day trip combination is the textbook Noto family itinerary. 加賀屋 (legendary ryokan, may have post-quake adjustments)." },
+            { name_ja: "アクセス (post-2024 earthquake)", name_en: "Access (post-2024 Noto earthquake)", category: "transit + reconstruction note", note_en: "January 2024 Noto Peninsula earthquake damaged roads + infrastructure. JR七尾線 + Noto Tetsudo partial-restored; check official sites before travel. Some popular destinations (輪島朝市 main square, parts of Suzu) still under reconstruction in 2026." },
+          ],
+          canonical_noto_peninsula_seafood_note: "Hand-curated Noto Peninsula seafood + family experiences. **Winter peak**: 寒鰤 (Dec-Feb), 牡蠣 (Nov-Mar oyster huts). **Family-friendly base**: 和倉温泉 + のとじま水族館. **2024 earthquake note**: Wajima + Suzu areas partial-restored; verify operational status with the prefecture's tourism site (https://www.hot-ishikawa.jp/) before booking. Access via JR七尾線 + Noto Tetsudo (JR Pass to 七尾駅 valid; Noto Tetsudo non-JR).",
+        }
+      : {}),
+    ...(isHagiQ
+      ? {
+          canonical_hagi_preservation: [
+            { name_ja: "萩城下町", name_en: "Hagi Castle Town (preserved samurai district)", municipality: "萩市", category: "UNESCO World Heritage Meiji Industrial Revolution component + Important Preservation District", note_en: "Major preserved Edo samurai district + Meiji Industrial Revolution UNESCO WHS site. 浜崎地区 + 平安古地区 + 堀内地区 three districts of preserved wooden buildings. Walking tour ~3-4h." },
+            { name_ja: "萩城跡", name_en: "Hagi Castle Ruins", municipality: "萩市", qid: "Q1140329", category: "castle ruins + waterfront", note_en: "Mōri clan castle ruins (foundation only after Meiji demolition). Adjacent Shizuki Park + Mt Shizuki hike. Spring sakura + autumn koyo." },
+            { name_ja: "松陰神社 + 松下村塾", name_en: "Shōin Shrine + Shōka-Sonjuku", municipality: "萩市", category: "Yoshida Shōin heritage site + UNESCO component", note_en: "Yoshida Shōin's private school (Shōka-Sonjuku); birthplace of Meiji Restoration thinkers. UNESCO Meiji Industrial Revolution component. Free entry." },
+            { name_ja: "萩焼 (Hagi-yaki)", name_en: "Hagi-yaki pottery", category: "traditional craft", note_en: "400-year-old Hagi pottery tradition; multiple working kilns + shops in town. Tea-ceremony grade. METI 伝統的工芸品 designated." },
+            { name_ja: "ロマンチック宿 (萩温泉 + 旅館)", name_en: "Romantic ryokan stays (Hagi Onsen + ryokan)", category: "couple lodging", note_en: "萩温泉郷 (Hagi Onsen) has several romantic ryokan: 萩本陣 (large resort with Mōri-style architecture), 北門屋敷 (historic samurai-residence-style), 萩観光ホテル (sea-view), 萩八景雁嶋別荘 (couple-favorite hidden ryokan)." },
+            { name_ja: "町並み散策コース (武家屋敷エリア)", name_en: "Samurai-District Walking Course", category: "preserved street walking", note_en: "Recommended route: JR東萩駅 → 浜崎地区 → 萩城下町 → 萩城跡 → ferry across Hashi-Higashi area. ~2.5h. Bicycle rental available at 萩観光協会." },
+            { name_ja: "萩のグルメ + 海鮮", name_en: "Hagi cuisine + seafood", category: "dining", note_en: "萩 fugu (blowfish, Oct-Mar season), 見蘭牛 (premium Mishima beef), 夏みかん confections. Famous restaurants: 千春楽 (kaiseki), 萩心海 (kaiten sushi)." },
+            { name_ja: "アクセス + 萩石見空港", name_en: "Access + Hagi-Iwami Airport", category: "transit", note_en: "JR山陰本線 to 東萩駅 (Tokyo→新山口→Yamaguchi line via Shinkansen + transfer ~5h). Hagi-Iwami Airport (萩・石見空港) has direct flights from Haneda (1h25m) — most efficient route." },
+          ],
+          canonical_hagi_preservation_note: "Hand-curated Hagi (萩, Yamaguchi) preservation district + Meiji Industrial Revolution UNESCO WHS heritage. **Three preserved districts** (Hamasaki + Hiyako + Horiuchi) with samurai-residence walking tour. **UNESCO components**: 萩城下町 + 松下村塾 + reverberatory furnace. **Romantic ryokan**: 北門屋敷 (samurai-style heritage), 萩八景雁嶋別荘 (couple-favorite). Access via JR山陰本線 + 萩・石見空港 from Haneda (most efficient).",
+        }
+      : {}),
+    ...(isSakurajimaKagoshimaQ
+      ? {
+          canonical_kagoshima_sakurajima: [
+            { name_ja: "桜島", name_en: "Sakurajima (active volcano + island)", municipality: "鹿児島市", qid: "Q485416", category: "active volcano + iconic landscape", note_en: "Active stratovolcano (still erupts intermittently); 1117m elevation. Kagoshima's iconic backdrop. **Access**: 鹿児島市営フェリー (Kagoshima City Ferry) from Kagoshima Port, 15min, ~¥250. Operates 24/7." },
+            { name_ja: "湯之平展望所", name_en: "Yunohira Observation Deck", municipality: "鹿児島市", category: "Sakurajima viewpoint", note_en: "Highest publicly accessible point on Sakurajima (373m, midway up the volcano). Best panoramic crater view + Kagoshima city across the bay." },
+            { name_ja: "桜島フェリー + 仙巌園", name_en: "Sakurajima Ferry + Sengan-en garden", municipality: "鹿児島市", category: "ferry + garden pair", note_en: "Take the ferry across to Sakurajima, then return to Sengan-en (UNESCO WHS Shimazu-clan villa garden, founded 1658) on the mainland for the volcanic-view classical Japanese garden." },
+            { name_ja: "城山展望台", name_en: "Shiroyama Observatory", municipality: "鹿児島市", category: "Sakurajima view from city side", note_en: "Mainland viewpoint at 107m. Best sunset Sakurajima + bay panorama. Walking distance from central Kagoshima City." },
+            { name_ja: "鹿児島市内 桜の名所", name_en: "Kagoshima City sakura spots (note: 桜 cherry blossom)", municipality: "鹿児島市", category: "spring sakura viewing", peak: "3月下旬", note_en: "**NOTE**: The user query mentions 桜 — clarify: 桜島 (volcano name, year-round destination) vs 桜 (cherry blossoms, spring season). Kagoshima sakura peak: 3月下旬. **Sakura viewing spots in Kagoshima City**: 甲突川河畔 (Kotsuki River, riverside walk), 仙巌園 (garden + sakura), 鹿児島県護国神社. Note: Kagoshima is Japan's earliest sakura prefecture (alongside Okinawa)." },
+            { name_ja: "霧島温泉 + 開聞岳 + 知覧", name_en: "Kirishima Onsen + Mt Kaimon + Chiran", municipality: "霧島市・指宿市・南九州市", category: "Kagoshima broader destinations", note_en: "Beyond Sakurajima: 霧島温泉 (mountain onsen), 開聞岳 (perfect-cone volcano + ohana sakura park), 知覧 武家屋敷 (preserved samurai district)." },
+          ],
+          canonical_kagoshima_sakurajima_note: "Hand-curated Kagoshima 桜島 (Sakurajima active volcano) + spring 桜 (cherry blossom) destinations. **Disambiguation note**: 桜島 = volcano (year-round), 桜 = sakura cherry blossom (peak 3月下旬). **Sakurajima access**: City Ferry from Kagoshima Port (15min, 24/7). **Best viewpoint**: 湯之平展望所. **Sakura viewing**: 甲突川 riverside + 仙巌園. Kagoshima is Japan's earliest sakura prefecture.",
+        }
+      : {}),
+    ...(isOsakaIndoorHotQ
+      ? {
+          canonical_osaka_indoor_summer: [
+            { name_ja: "海遊館", name_en: "Osaka Aquarium Kaiyukan", municipality: "大阪市", category: "indoor aquarium (full day)", note_en: "Japan's largest aquarium; whale shark + Pacific tank. Fully indoor, climate-controlled. Half-day to full-day. Tempozan / Osakako area." },
+            { name_ja: "なんばCITY 地下街 + 心斎橋筋商店街", name_en: "Namba CITY underground + Shinsaibashi arcade", municipality: "大阪市", category: "indoor shopping arcade", note_en: "Long indoor shopping arcade with shops/dining; Shinsaibashi-suji is a covered 600m shopping street. Air-conditioned all-day walking." },
+            { name_ja: "梅田 グランフロント大阪 + 大阪ステーションシティ", name_en: "Umeda Grand Front Osaka + Osaka Station City", municipality: "大阪市", category: "indoor mall complex", note_en: "Multi-tower modern mall + restaurants + Knowledge Capital (interactive exhibits). Fully covered + underground connections to Osaka Station." },
+            { name_ja: "ユニバーサル・スタジオ・ジャパン (USJ)", name_en: "Universal Studios Japan (USJ)", municipality: "大阪市", category: "theme park (mixed indoor/outdoor)", note_en: "Major attractions are indoor air-conditioned (Harry Potter, Mario rides, Jaws). Some outdoor walking unavoidable. Full-day attraction." },
+            { name_ja: "大阪市立科学館 + 国立国際美術館", name_en: "Osaka Science Museum + National Museum of Art", municipality: "大阪市", category: "indoor museums", note_en: "Two large museums in central Osaka adjacent to each other; full-day combination. ¥600 + ¥430. Full air-conditioning." },
+            { name_ja: "大阪歴史博物館 + 大阪城", name_en: "Osaka History Museum (indoor) + Osaka Castle (mixed)", municipality: "大阪市", category: "indoor museum + outdoor castle", note_en: "Osaka History Museum is fully indoor + has views of Osaka Castle. Castle keep itself has elevators + air-conditioning. Castle Park outdoor walking unavoidable." },
+            { name_ja: "大阪城天守閣 (再建天守の中)", name_en: "Osaka Castle Donjon Interior (indoor)", municipality: "大阪市", category: "indoor castle keep + history museum", note_en: "Modern-reconstructed castle keep is fully indoor + air-conditioned; 8 floors of Toyotomi history museum. The castle keep interior is the indoor experience, NOT the outdoor park." },
+            { name_ja: "中之島 + 国立美術館 + フェスティバルホール", name_en: "Nakanoshima cultural island", municipality: "大阪市", category: "museum cluster", note_en: "Nakanoshima Park + 中央公会堂 + 国立国際美術館 + フェスティバルホール (concert hall). Indoor museum-hop day with riverside underground walkways." },
+            { name_ja: "梅田スカイビル 空中庭園展望台 (covered observation)", name_en: "Umeda Sky Building (covered observation deck)", municipality: "大阪市", category: "covered observatory", note_en: "Indoor + outer-ring 173m observation deck. Mostly covered + air-conditioned. Sunset Osaka panorama." },
+            { name_ja: "黒門市場 (covered market)", name_en: "Kuromon Market (covered)", municipality: "大阪市", category: "covered wet market", note_en: "Osaka's main covered food market; eat-as-you-walk; fully covered roof + fan-cooled. Mid-day visit." },
+          ],
+          canonical_osaka_indoor_summer_note: "Hand-curated Osaka indoor / air-conditioned / hot-day-friendly destinations. **Full-day indoor**: 海遊館 (aquarium), USJ (mostly indoor), Osaka 城天守閣 (modern donjon interior). **Museum cluster**: 中之島 国立美術館 + 大阪歴史博物館. **Indoor shopping**: 心斎橋筋 600m covered arcade + 梅田グランフロント. **Covered market**: 黒門市場. For 8月 (August) hot-day visits, prioritize 海遊館 / 大阪城天守閣 / 心斎橋筋 / 梅田 underground complex.",
+        }
+      : {}),
+    ...(isTokyoShitamachiQ
+      ? {
+          canonical_tokyo_shitamachi: [
+            { name_ja: "浅草 + 仲見世通り + 浅草寺", name_en: "Asakusa + Nakamise + Senso-ji", municipality: "台東区", category: "classical Edo shitamachi", note_en: "Edo-era 雷門 (Thunder Gate) + 仲見世商店街 (Nakamise shopping street) + 浅草寺 (Sensoji). Heart of Tokyo shitamachi. Free entry; can walk in 1-2h. Pair with 神谷バー (Edo-era bar) + 牛若伝 sukiyaki for shitamachi dining." },
+            { name_ja: "谷根千 (谷中・根津・千駄木)", name_en: "Yanesen (Yanaka + Nezu + Sendagi)", municipality: "台東区・文京区", category: "preserved shitamachi neighborhood", note_en: "Three connected Edo-era residential neighborhoods that survived WWII firebombing. 谷中商店街 + 谷中銀座 (yanaka ginza dusk-photo classic), 根津神社 + tsutsuji garden, 千駄木 cat-cafes. ~3-4h walking course." },
+            { name_ja: "月島・もんじゃ通り", name_en: "Tsukishima Monjayaki Street", municipality: "中央区", category: "shitamachi local food street", note_en: "Tsukishima's signature shitamachi food = もんじゃ焼き (savory pancake). 70+ monjayaki restaurants on a single street. Pair with 隅田川 evening walk." },
+            { name_ja: "柴又帝釈天 + 寅さん記念館", name_en: "Shibamata Taishakuten + Tora-san Museum", municipality: "葛飾区", category: "shitamachi outer-Tokyo", note_en: "Shitamachi pilgrimage destination from the 'Otoko wa Tsurai yo' Tora-san film series; 帝釈天参道商店街 has 草団子 (mugwort dango) + ramen + senbei shops. JR/Keisei Shibamata Station." },
+            { name_ja: "両国 + 江戸東京博物館", name_en: "Ryōgoku + Edo-Tokyo Museum", municipality: "墨田区", category: "shitamachi history + sumo + indoor museum", note_en: "Ryōgoku Sumo Hall (国技館) + Edo-Tokyo Museum + monjayaki restaurants. Indoor option for rainy-day shitamachi exploration." },
+            { name_ja: "合羽橋道具街", name_en: "Kappabashi Kitchenware Street", municipality: "台東区", category: "shitamachi specialty shopping", note_en: "800m of Edo-era kitchenware-trade district. Knives + sushi tools + plastic-food-display shops. Walking distance from Asakusa." },
+            { name_ja: "深川 (清澄白河 + 深川不動尊)", name_en: "Fukagawa (Kiyosumi-Shirakawa + Fukagawa Fudoson)", municipality: "江東区", category: "shitamachi waterfront + cafe + temple", note_en: "Eastern Tokyo shitamachi; 清澄白河 = third-wave cafe district (Blue Bottle Coffee Japan flagship), 深川不動尊 = Edo-era temple, 木場公園 = green space. Walking course ~2-3h." },
+            { name_ja: "東京下町 walking course", name_en: "Tokyo Shitamachi recommended walking course", category: "itinerary", note_en: "Half-day: Asakusa → 合羽橋 → Yanesen (谷中 → 根津 → 千駄木) ~3h. Full-day: + 月島 + 両国. Family-friendly: all flat paved streets, stroller-passable. JR/subway 1-day pass recommended." },
+          ],
+          canonical_tokyo_shitamachi_note: "Hand-curated Tokyo 下町 (shitamachi / old-town) walking destinations. **Flagship**: 浅草 + 仲見世 + 浅草寺. **Preserved Edo neighborhood**: 谷根千 (谷中銀座 dusk-photo classic). **Shitamachi food**: 月島もんじゃ + 柴又草団子 + 合羽橋 kitchenware shops. **Indoor rainy-day option**: 両国 江戸東京博物館. Family-friendly + stroller-passable.",
+        }
+      : {}),
+    ...(isNaraWalkingQ
+      ? {
+          canonical_nara_walking_couple: [
+            { name_ja: "奈良公園 + 春日大社 + 東大寺", name_en: "Nara Park + Kasuga Taisha + Todai-ji", municipality: "奈良市", category: "UNESCO WHS walking course", note_en: "Half-day walking course through 奈良公園 deer-park + 春日大社 (UNESCO, 3000 lanterns) + 東大寺 大仏 (UNESCO). Flat paved paths; ~3-4h. Most-photographed Nara experience." },
+            { name_ja: "ならまち (奈良町) 散策", name_en: "Naramachi Old Town walk", municipality: "奈良市", category: "Edo-era preserved old town", note_en: "Old Nara merchant district preserved with wooden 町家 facades; cafes + crafts + 庚申堂 red-monkey amulets. Walking distance from 奈良公園 + 興福寺. ~1-2h." },
+            { name_ja: "若草山 (Mt Wakakusa)", name_en: "Mt Wakakusa", municipality: "奈良市", category: "scenic hill walk + night view", note_en: "Grass-covered hill (342m) overlooking Nara; sunset + night-view of Nara basin. Annual 山焼き (mountain-burning festival, January). Walking access from 春日大社." },
+            { name_ja: "奈良ホテル (1909-founded heritage)", name_en: "Nara Hotel (1909 founded)", municipality: "奈良市", category: "heritage couple hotel", note_en: "Founded 1909 by Tatsuno Kingo; the original 'Royal House of Nara' hotel. Imperial-Family-favored heritage rooms with Nara Park view. Walking distance from 興福寺 + 奈良公園." },
+            { name_ja: "古都の宿むさし野 + 飛鳥荘", name_en: "Koto-no-Yado Musashino + Asukasō", municipality: "奈良市", category: "couple ryokan in Naramachi", note_en: "Two preserved-machiya-style couple ryokan in Naramachi area; deep traditional architecture + 大和野菜 kaiseki. Quieter alternative to Nara Hotel." },
+            { name_ja: "夜の奈良 + 春日大社 万灯籠", name_en: "Evening Nara + Kasuga Taisha lantern festival (Feb, Aug)", municipality: "奈良市", category: "evening + special-event", note_en: "Kasuga Taisha lights 3000 lanterns twice yearly (Feb 'Setsubun' + Aug 'Chugen'). Evening Nara is quiet (most visitors leave by 5pm). Couple-romantic option." },
+            { name_ja: "Access via JR / Kintetsu", name_en: "Access via JR Nara Line + Kintetsu Nara Line", category: "transit", note_en: "JR Nara Line from Kyoto (~45min, JR Pass OK) → JR奈良駅 + 10min walk. Kintetsu Nara Line from Kyoto / Osaka-Namba (~35-40min, Kintetsu Pass not JR) → 近鉄奈良駅 (closer to 興福寺 + Naramachi)." },
+          ],
+          canonical_nara_walking_couple_note: "Hand-curated Nara walking + couple/romantic destinations. **Main walking course**: 奈良公園 (deer) + 春日大社 + 東大寺 ~3-4h. **Old-town preservation**: ならまち 町家 walk. **Sunset/night**: 若草山 hill (Nara basin view). **Couple lodging**: 奈良ホテル (1909 heritage), 古都の宿むさし野 (Naramachi machiya). Access via JR Nara Line (Kyoto, JR Pass) or Kintetsu (Osaka/Kyoto).",
+        }
+      : {}),
+    ...(isNahaKidsActivitiesQ
+      ? {
+          canonical_naha_kids_activities: [
+            { name_ja: "首里城公園 + 玉陵 (UNESCO WHS family walk)", name_en: "Shuri Castle Park + Tamaudun Mausoleum", municipality: "那覇市", category: "UNESCO WHS heritage + family walk", note_en: "Reconstructed Shuri Castle precinct + adjacent Tamaudun royal mausoleum. Mostly outdoor walking; suitable for school-age kids. ¥830 castle (some areas under reconstruction post-2019-fire)." },
+            { name_ja: "おきなわワールド (Okinawa World)", name_en: "Okinawa World (玉泉洞)", municipality: "南城市", category: "cave + cultural park + family entertainment", note_en: "Limestone cave (玉泉洞, Japan's largest) + Eisa drum performances + Habu snake show + Ryukyu glass workshop. Full-day family destination. Bus from Naha." },
+            { name_ja: "DMM Kariyushi 水族館 (Iias Toyosaki)", name_en: "DMM Kariyushi Aquarium (in Iias Toyosaki Mall)", municipality: "豊見城市", category: "indoor aquarium in shopping mall", note_en: "Modern indoor aquarium in suburban Naha shopping mall; full air-conditioning. Family rainy-day option. ¥2,400 adult, ¥1,500 child." },
+            { name_ja: "波の上ビーチ + 波の上わくわくランド", name_en: "Naminoue Beach + Naminoue Wakuwaku Land", municipality: "那覇市", category: "central beach + kids playground", note_en: "Only beach within Naha city. Adjacent ferris wheel + game center + indoor play area. Walking distance from 国際通り (yes really)." },
+            { name_ja: "アクアパーク残波 (Zampa)", name_en: "Aquapark Zampa", municipality: "読谷村", category: "outdoor water park", note_en: "Outdoor seaside water park north of Naha; swimming pools + slides + sea-snorkel. Bus access from Naha (~1h)." },
+            { name_ja: "国際通り + ファーマーズマーケット", name_en: "Kokusai-dori + Farmers Market", municipality: "那覇市", category: "shopping street + family food", note_en: "1.6km central tourist street; ice-cream + souvenir + Okinawan kid-friendly food (タコライス, ブルーシール). Walking with kids ~1-2h." },
+            { name_ja: "Family-friendly Naha hotels", name_en: "Family-friendly hotels", category: "lodging", note_en: "DOUBLETREE by Hilton Naha + Sheraton Naha + Hilton Okinawa Sesoko (north) — all with kids' clubs + family rooms. Compact Naha options: ホテル日航那覇 + ハイアットリージェンシー那覇 with pool." },
+          ],
+          canonical_naha_kids_activities_note: "Hand-curated Naha kids / family activity destinations. **UNESCO heritage walk**: 首里城公園 + 玉陵. **All-day family destinations**: おきなわワールド (cave + cultural park) + アクアパーク残波 (outdoor water park). **Indoor rainy-day**: DMM Kariyushi 水族館. **Central kid-spot**: 波の上ビーチ + わくわくランド. Walking distance via Naha Yui Rail monorail.",
+        }
+      : {}),
+    ...(isOkinawaHoneymoonRemoteQ
+      ? {
+          canonical_okinawa_remote_islands_honeymoon: [
+            { name_ja: "八重山諸島 (石垣 + 竹富 + 西表 + 小浜 + 黒島 + 波照間)", name_en: "Yaeyama Islands (Ishigaki + Taketomi + Iriomote + Kohama + Kuro + Hateruma)", municipality: "石垣市・竹富町", category: "secluded island cluster", note_en: "Most remote inhabited islands in Japan; tropical reef + traditional villages. **Taketomi** (water buffalo carriage village, no cars), **Iriomote** (jungle + Iriomote wildcat), **Hateruma** (Japan's southernmost inhabited point + iconic star-sand beach). Access: Ishigaki Airport from Tokyo/Naha + ferry hub at Ishigaki Port." },
+            { name_ja: "竹富島", name_en: "Taketomi Island", municipality: "竹富町", qid: "Q11622611", category: "preservation village + couple romance", note_en: "Traditional preservation village (no cars); ride water-buffalo carriage through coral-walled lanes. Beach access at Kondoi + Aiyaru. Stay in family-run minshuku for full immersion. Day-trip from Ishigaki (10-min ferry)." },
+            { name_ja: "西表島 (Iriomote)", name_en: "Iriomote Island", municipality: "竹富町", qid: "Q1132317", category: "UNESCO Natural Heritage + jungle", note_en: "Yaesan archipelago's largest island; ~90% jungle. UNESCO Natural Heritage (Amami-Okinawa, 2021). Pinaisara Falls kayak, Yubu-jima water-buffalo cross, Urauchi River cruise. La Tida + Iriomote Hotel for couple villa stays. Plan 2-3 nights minimum." },
+            { name_ja: "宮古島 + 伊良部島 + 多良間島", name_en: "Miyako-jima + Irabu + Tarama", municipality: "宮古島市・多良間村", category: "white-sand beach cluster", note_en: "Independent Miyako archipelago. Yonaha Maehama (#1 beach in Japan), 17END turquoise cove, Sunayama arch. Tarama is further-remote (small population)." },
+            { name_ja: "慶良間諸島 (渡嘉敷 + 座間味 + 阿嘉)", name_en: "Kerama Islands (Tokashiki + Zamami + Aka)", municipality: "渡嘉敷村・座間味村", category: "secluded national park + diving", note_en: "Kerama Shoto National Park; 'kerama blue' transparent ocean. Day-trip ferry from Naha Port (~50min to 渡嘉敷, ~1h to 座間味). Whale-watching season Jan-Mar. Less crowded than Okinawa main island but easier access than Yaeyama." },
+            { name_ja: "波照間島", name_en: "Hateruma Island (Japan's southernmost inhabited)", municipality: "竹富町", category: "remote southern outpost", note_en: "Star-sand beach + Niishi-no-hama beach (often cited as Japan's most beautiful beach). Famous awamori-distillery. Access: Ishigaki → Hateruma ferry ~1h (often suspended in rough seas)." },
+            { name_ja: "与那国島", name_en: "Yonaguni Island (Japan's westernmost)", municipality: "与那国町", category: "remote westernmost outpost", note_en: "Yonaguni Monument underwater rock formation; hammerhead shark diving (peak Dec-Mar). Most remote — flights from Ishigaki / Naha." },
+            { name_ja: "アクセス + 航空 + フェリー", name_en: "Access (flights + ferries)", category: "transit info", note_en: "**Yaeyama**: Fly to Ishigaki (3h from Tokyo), ferry hub. **Kerama**: Naha Tomari Port. **Miyako**: Direct flight (3h from Tokyo). **Honeymoon-optimal**: Ishigaki base (3 nights) + Taketomi day trip + Iriomote 2 nights. Total 5-7 days." },
+          ],
+          canonical_okinawa_remote_islands_honeymoon_note: "Hand-curated Okinawa secluded / honeymoon remote-island destinations. **Most secluded couple destination**: 西表島 + 竹富島 + 波照間 (Yaeyama cluster). **Easier access**: 慶良間諸島 (Kerama from Naha). **Beach flagship**: 宮古島. For first-time honeymoon, recommend **Yaeyama (Ishigaki base + Taketomi + Iriomote)** with 5-7 days. For couples wanting maximum seclusion: 波照間 + 与那国.",
         }
       : {}),
     ...(isShodoshimaOliveQ
@@ -5527,6 +5682,61 @@ async function getHotels(args: {
           })),
           canonical_luxury_ryokan_note:
             "Hand-curated luxury ryokan / honeymoon / exclusive accommodations. The hotel master mixes business hotels with traditional ryokan and OSM apartments; this block surfaces the signature top-tier properties for premium intent queries. Use for 高級旅館 / luxury / honeymoon / 新婚 / アマン / 星のや / 俵屋 queries.",
+        }
+      : {}),
+    // iter169: prefecture-keyed romantic/couple ryokan clusters — fire on hotel_type=ryokan/onsen_ryokan + prefcode match.
+    ...((prefCode === "43" && (args.hotel_type === "ryokan" || args.hotel_type === "onsen_ryokan"))
+      ? {
+          canonical_kurokawa_onsen: [
+            { name_ja: "黒川温泉 入湯手形", name_en: "Kurokawa Onsen Yumeguri Tegata (Hot Spring Hopping Pass)", municipality: "南小国町", category: "system / pass", note_en: "¥1,500 wooden pass valid 6 months; lets you bathe at 3 different ryokan rotenburo from the 28 member-ryokan. The textbook Kurokawa onsen experience — village-wide bath-hopping rather than single-ryokan stay." },
+            { name_ja: "山みず木", name_en: "Yamamizuki", municipality: "南小国町", category: "luxury rotenburo ryokan", note_en: "One of Kurokawa's flagship riverside rotenburo ryokan; 8 outdoor baths along the Tanoharu River." },
+            { name_ja: "新明館", name_en: "Shinmeikan", municipality: "南小国町", category: "heritage cave-bath ryokan", note_en: "Founded ~1700s; iconic 洞窟風呂 (cave bath) created by the previous owner. Walking distance from main village." },
+            { name_ja: "ふもと旅館", name_en: "Fumotoryokan", municipality: "南小国町", category: "budget romantic ryokan", note_en: "Mid-price Kurokawa ryokan with private outdoor baths; popular couple choice for first-Kurokawa visit." },
+            { name_ja: "黒川温泉 御客屋", name_en: "Okyakuya", municipality: "南小国町", category: "heritage ryokan", note_en: "One of Kurokawa's oldest active ryokan; preserved 江戸 architecture in some buildings." },
+            { name_ja: "黒川温泉 大丸旅館", name_en: "Daimaru Ryokan", municipality: "南小国町", category: "mid-luxury ryokan", note_en: "Riverside ryokan with private rotenburo + kaiseki dinner. One of the 28 入湯手形 member-ryokan." },
+            { name_ja: "Access (no rail; bus from Hakata or Kumamoto)", name_en: "Access (no train; Sanko bus)", category: "transit", note_en: "Kurokawa has NO rail access. Bus from JR Hakata Bus Terminal (~2h40m, Yamabiko Express) or from Kumamoto (~3h via 阿蘇) — both Sanko Bus. Reserve in advance for peak seasons." },
+          ],
+          canonical_kurokawa_onsen_note: "Hand-curated Kurokawa Onsen (黒川温泉, Kumamoto) destinations. **入湯手形 hot-spring-hopping pass** (¥1,500) is the canonical Kurokawa experience — bathe at 3 different ryokan from 28 member-ryokan. **Flagship ryokan**: 山みず木 (riverside), 新明館 (cave bath, since 1700s), 御客屋 (oldest). Access: Sanko Bus from Hakata or Kumamoto (no rail).",
+        }
+      : {}),
+    ...((prefCode === "37" && /(小豆島|shodoshima|shōdoshima)/iu.test(String(args.city ?? "").toLowerCase()))
+      ? {
+          canonical_shodoshima_romantic: [
+            { name_ja: "エンジェルロード (天使の散歩道)", name_en: "Angel Road (tidal sandbar)", municipality: "土庄町", category: "romance flagship + couple tide-walk", note_en: "Twice-daily exposed tidal sandbar connecting Shōdoshima to three small islets. 'Walk this sandbar with your partner — your love lasts forever' folklore. Couple-photo flagship destination." },
+            { name_ja: "寒霞渓 (Kankakei Gorge)", name_en: "Kankakei Gorge", municipality: "小豆島町", qid: "Q1156175", category: "Japan's top-3 scenic gorges + ropeway", note_en: "Japan's top-3 scenic gorges; ropeway access to summit panorama of Inland Sea. Peak koyo late-October to mid-November is iconic." },
+            { name_ja: "小豆島オリーブ公園 + 廣大さん (Kiki's Delivery Service photo)", name_en: "Olive Park + Kiki's Delivery Service photo broom", municipality: "小豆島町", category: "olive theme park + iconic photo", note_en: "Olive park with Greek windmill + 2,000 olive trees + Kiki's Delivery Service movie-replica building with broom rentals. Iconic couple photo." },
+            { name_ja: "オリーヴの森 + 二十四の瞳 映画村", name_en: "Olive Forest + 'Twenty-Four Eyes' Movie Village", municipality: "小豆島町", category: "olive-themed + classical-film village", note_en: "Combined visit: olive-grove walk + preserved 1920s primary-school filmset of the Tsuboi Sakae novel/film." },
+            { name_ja: "島宿真里 / 小豆島温泉オリビアン", name_en: "Shimayado Mari + Olive Bay Hotel Olivian (couple stays)", municipality: "小豆島町", category: "couple ryokan + sea-view resort", note_en: "島宿真里: small heritage seaside ryokan (12 rooms) with private rotenburo, kaiseki using island produce. Olive Bay Hotel Olivian: larger resort with sea-view rooms + outdoor pool. Both popular couple choices." },
+            { name_ja: "醤の郷 (Marukin Soy Sauce Museum + Yamaroku Shoyu)", name_en: "Hishio-no-Sato Soy Sauce district", municipality: "小豆島町", category: "300-year soy-sauce production + craft", note_en: "Shōdoshima's other heritage food (beyond olive): 醤油 production with 23 traditional kioke (wooden barrel) breweries still active." },
+            { name_ja: "Access (ferry from Takamatsu / Okayama / Himeji)", name_en: "Ferry access from Takamatsu / Okayama / Himeji", category: "ferry transit", note_en: "Multiple ferry routes: Takamatsu↔Tonoshō or Ikeda 70min; Okayama Shin-Okayama↔Tonoshō 70min; Himeji↔Fukuda 100min. Rental car or island bus-loop required for sightseeing." },
+          ],
+          canonical_shodoshima_romantic_note: "Hand-curated Shōdoshima (小豆島, Kagawa) romantic / couple destinations. **Romance flagship**: エンジェルロード tidal sandbar (twice-daily exposure). **Day-trip itinerary**: エンジェルロード → 寒霞渓 ropeway → オリーブ公園 (Kiki's photo) → 二十四の瞳 + 醤の郷. **Couple ryokan**: 島宿真里 (12-room heritage), Hotel Olivian (sea-view resort). Ferry from Takamatsu / Okayama / Himeji.",
+        }
+      : {}),
+    ...((prefCode === "24" && (args.hotel_type === "ryokan" || args.hotel_type === "onsen_ryokan"))
+      ? {
+          canonical_ise_couple_ryokan: [
+            { name_ja: "麻吉旅館 (古市)", name_en: "Asakichi Ryokan (Furuichi)", municipality: "伊勢市", category: "heritage ryokan (1700s)", note_en: "Heritage ryokan in Furuichi old pilgrim's district, dating to the 1700s. Edo-era atmosphere + Ise specialty kaiseki. Walking distance from 内宮 via 古市街道." },
+            { name_ja: "神宮会館", name_en: "Jingu Kaikan", municipality: "伊勢市", category: "Ise Jingu-affiliated hotel", note_en: "Operated by Ise Jingu's pilgrim-service association; closest hotel to 内宮 (Naiku). Couple-friendly for early-morning 神宮参拝." },
+            { name_ja: "五十鈴館", name_en: "Isuzu-kan", municipality: "伊勢市", category: "ryokan near 五十鈴川", note_en: "Riverside Edo-era pilgrim ryokan; couple-friendly kaiseki + private bath options. Walking distance from 五十鈴川駅." },
+            { name_ja: "鳥羽展望宿 (Toba sea-view ryokan: Toba Hotel International + Toba Seaside Hotel)", name_en: "Toba sea-view ryokan options", municipality: "鳥羽市", category: "sea-view couple ryokan", note_en: "Combine Ise Jingu pilgrimage with Toba Bay sea-view ryokan stays. Multiple options with private rotenburo + Mikimoto Pearl Island view." },
+            { name_ja: "賢島 (Kashikojima)", name_en: "Kashikojima Resort Hotels", municipality: "志摩市", category: "G7 summit-venue resort area", note_en: "Site of the 2016 G7 Ise-Shima Summit. Multiple luxury resort hotels including 志摩観光ホテル (G7 venue), Hilton Toba, AMANEMU (Aman group ultra-luxury). Premier couple/honeymoon destination in Mie." },
+            { name_ja: "Access via Kintetsu Limited Express", name_en: "Access via Kintetsu", category: "transit", note_en: "Kintetsu Limited Express from Nagoya (~1h25m) or Osaka-Namba (~2h10m). Direct routes to Ise / Toba / Kashikojima. JR Pass NOT valid on Kintetsu — Kintetsu Free Pass option." },
+          ],
+          canonical_ise_couple_ryokan_note: "Hand-curated Ise-Shima (Mie) couple / pilgrimage ryokan destinations. **Heritage Edo-era ryokan**: 麻吉 (1700s) + 五十鈴館 in central Ise. **Pilgrimage-affiliated**: 神宮会館 (closest to Naiku). **Ultimate honeymoon**: Kashikojima resort cluster — 志摩観光ホテル + Aman AMANEMU. Access via Kintetsu Limited Express (NOT JR Pass).",
+        }
+      : {}),
+    ...((prefCode === "17" && (args.hotel_type === "ryokan" || args.hotel_type === "onsen_ryokan"))
+      ? {
+          canonical_ishikawa_anniversary_ryokan: [
+            { name_ja: "加賀屋", name_en: "Kagaya (Wakura Onsen)", municipality: "七尾市", category: "legendary 36-year top-ranked ryokan", note_en: "Wakura Onsen's flagship; 36 consecutive years ranked #1 in Japanese ryokan service guide. Sea-view rooms, full kaiseki + hospitality program. Booking 6+ months ahead recommended." },
+            { name_ja: "茶屋美人 (片山津温泉)", name_en: "Chaya Bijin (Katayamazu Onsen)", municipality: "加賀市", category: "lake-view boutique ryokan", note_en: "Compact 18-room ryokan on Lake Shibayama; couple-only no-children policy. Private rotenburo + creative kaiseki." },
+            { name_ja: "べにや無何有 (山中温泉)", name_en: "Beniya Mukayu (Yamanaka Onsen)", municipality: "加賀市", category: "luxury contemporary ryokan", note_en: "Anniversary-popular luxury ryokan in Yamanaka Onsen; modern minimalist with private outdoor baths. Multiple-time Relais & Châteaux award." },
+            { name_ja: "界 加賀 (山代温泉)", name_en: "Hoshino Resorts Kai Kaga (Yamashiro Onsen)", municipality: "加賀市", category: "Hoshino Kai luxury", note_en: "Yamashiro Onsen Hoshino Kai brand; renovated heritage ryokan with Kaga craft (lacquer + ceramics) display." },
+            { name_ja: "Wakura / Yamanaka / Yamashiro 加賀温泉郷", name_en: "Kaga Onsen Cluster (Wakura + Yamanaka + Yamashiro + Katayamazu)", category: "Ishikawa anniversary onsen cluster", note_en: "Ishikawa hosts 4 famous onsen towns: 和倉 (sea-view), 山中 (gorge), 山代 (heritage), 片山津 (lake). All have multiple anniversary-tier ryokan + JR Kaga Onsen Station access." },
+            { name_ja: "Access via JR Hokuriku Shinkansen", name_en: "Access via JR Hokuriku Shinkansen + JR Hokuriku Main Line", category: "transit", note_en: "Tokyo → Kanazawa (Hokuriku Shinkansen, ~2h30m, JR Pass OK). For Kaga Onsen cluster: Kanazawa → 加賀温泉駅 (JR Hokuriku Main Line, ~25min). For 七尾 (Wakura): JR 七尾線 to 和倉温泉駅. **Note**: Post-2024 Noto earthquake — verify Wakura Onsen ryokan operational status." },
+          ],
+          canonical_ishikawa_anniversary_ryokan_note: "Hand-curated Ishikawa (Kaga Onsen + Wakura) anniversary ryokan cluster. **Legendary flagship**: 加賀屋 (Wakura Onsen, 36-year #1 ranking — verify post-2024-earthquake status). **Couples-only boutique**: 茶屋美人 (Katayamazu, no children). **Luxury contemporary**: べにや無何有 (Yamanaka). **Hoshino Kai luxury**: 界 加賀 (Yamashiro). Access via Hokuriku Shinkansen.",
         }
       : {}),
     // iter163: Kinosaki Onsen explicit ryokan cluster. R420v5-014 (fr query
@@ -9509,8 +9719,13 @@ function buildHybridIntentCluster(
   const isCoolRetreat = /(避暑|涼し|涼\s|涼を|cool\s*retreat|cool\s*escape|heat\s*relief|escape\s*the\s*heat|escape\s*summer\s*heat|cool\s*destination|summer\s*cool\s*spot|escape\s*summer|涼める|涼める場所|涼しい場所|涼しいスポット|猛暑.*涼|高原|高山|cooler\s*regions|summer\s*highland)/iu.test(qLower);
   // iter164: medical-tourism out-of-scope guard
   const isMedicalTourism = /(医療ツーリズム|medical\s*tourism|surgery|外科手術|knee\s*replacement|hip\s*replacement|cancer\s*treatment|手術|入院|hospital\s*stay|in[\s-]*patient|healthcare\s*travel|medical\s*procedure)/iu.test(qLower);
+  // iter168: Tohoku JR-Pass scenic railway
+  const isTohokuJrPassScenic = (/(tohoku|東北).*(jr\s*pass|jr\s*rail\s*pass|covered\s*by)/iu.test(qLower) || /(scenic\s*rail|観光列車|jr\s*pass.*scenic).*(tohoku|東北)/iu.test(qLower));
   // iter165: search_hybrid Hokkaido all-weather — extension of get_spots detector
-  const isHokkaidoAllWeatherSH = /(全天候|all[\s-]*weather|indoor|屋内|rain\s*or\s*snow|雨.*雪|雨や雪|enjoyable\s*regardless|whatever\s*the\s*weather)/iu.test(qLower) && /(hokkaido|北海道|sapporo|札幌|hakodate|函館|otaru|小樽)/iu.test(qLower);
+  const isHokkaidoAllWeatherSH = (
+    /(全天候|all[\s-]*weather|indoor|屋内|rain\s*or\s*snow|雨.*雪|雨や雪|enjoyable\s*regardless|whatever\s*the\s*weather|planning.*hokkaido.*(october|november|rain|snow|weather))/iu.test(qLower)
+    && /(hokkaido|北海道|sapporo|札幌|hakodate|函館|otaru|小樽)/iu.test(qLower)
+  ) || /(planning.*hokkaido.*(october|rain|snow))/iu.test(qLower);
   // iter166: search_hybrid scope-broadening clusters
   const isLateNovKoyo = /((late|遅い|遅く|終わり|終盤|終わる|past\s*peak|after\s*peak).*(november|11月|十一月|koyo|紅葉|autumn|fall)|(november|11月|十一月).*(late|遅い|遅く|peak|過ぎ))/iu.test(qLower) && !/late\s*august/iu.test(qLower);
   const isNationalKoyoAlt = /((alternative|besides|代わり|別|other\s*than|outside|less\s*crowded|混雑.{0,5}避|穴場).*(koyo|紅葉|autumn\s*foliage|fall\s*color)|(koyo|紅葉|autumn\s*foliage|fall\s*color).*(besides|alternative|別|代わり|less\s*crowded|穴場))/iu.test(qLower);
@@ -9963,6 +10178,20 @@ function buildHybridIntentCluster(
       { name_ja: "函館ハリストス正教会 + 函館元町地区 屋内施設", name_en: "Hakodate Russian Orthodox Church + Motomachi heritage indoor", municipality: "函館市", category: "indoor heritage", note_en: "Heritage churches + Western-style residences + 函館市旧イギリス領事館 in Hakodate Motomachi district; all indoor heritage visits." },
     ];
     result.canonical_hokkaido_indoor_all_weather_note = "Hand-curated Hokkaido all-weather / indoor destinations. For October Hokkaido travel (early-snow / cold-rain unpredictable), these indoor options cover the all-day need. **Central Sapporo underground**: Aurora Town + Pole Town (fully indoor JR Sapporo → Susukino). **Heritage indoor**: 札幌時計台, 北海道庁旧本庁舎, ビール博物館, 白い恋人パーク. **Otaru indoor**: 水族館, オルゴール堂, 北一硝子. **Hakodate indoor**: Motomachi heritage. **Family indoor**: 旭山動物園 indoor pavilions. **Shopping indoor**: サッポロファクトリー atrium, 千歳アウトレット.";
+  }
+  if (isTohokuJrPassScenic) {
+    result.canonical_tohoku_jr_pass_scenic_railways = [
+      { name_ja: "JR五能線 (リゾートしらかみ)", name_en: "JR Gono Line — Resort Shirakami", route: "Aomori → Akita coastal route", jr_pass_valid: true, note_en: "JR Pass-valid scenic railway along the Sea of Japan coast Aomori → Akita; Resort Shirakami sightseeing train (~5h). Three train types (青池/橅/くまげら). Best autumn 紅葉 + winter snow coast. Reserve seat free with JR Pass." },
+      { name_ja: "JR釜石線 (SL銀河跡 + リアス線連携)", name_en: "JR Kamaishi Line", route: "Hanamaki → Kamaishi via Tono", jr_pass_valid: true, note_en: "JR Pass-valid line through Iwate inland; Tono folklore-village + Kamaishi coastal terminus. Pair with Sanriku Railway scenic coast (NOT JR Pass)." },
+      { name_ja: "JR磐越西線 (SLばんえつ物語)", name_en: "JR Banetsu-West Line — SL Banetsu Monogatari", route: "Niigata → Aizu-Wakamatsu (Fukushima)", jr_pass_valid: true, note_en: "JR Pass-valid scenic SL steam-train route from Niitsu through 喜多方 to Aizu-Wakamatsu. Operates weekends Apr-Nov. Reservation required." },
+      { name_ja: "JR山形新幹線 + 米沢-福島 在来線", name_en: "JR Yamagata Shinkansen + Yonezawa-Fukushima local line", route: "Tokyo → Yamagata → Shinjō", jr_pass_valid: true, note_en: "Yamagata Mini-Shinkansen runs on conventional-line gauge from Fukushima; scenic mountain views. JR Pass valid." },
+      { name_ja: "JR陸羽東線 (奥の細道湯けむりライン)", name_en: "JR Rikuu-East Line — Oku-no-Hosomichi Yukemuri Line", route: "Furukawa → Naruko Onsen → Shinjō", jr_pass_valid: true, note_en: "JR Pass-valid line through onsen towns; pair with Naruko Onsen stay + Bashō 'Narrow Road' literary tour." },
+      { name_ja: "JR只見線", name_en: "JR Tadami Line", route: "Aizu-Wakamatsu (Fukushima) → Koide (Niigata)", jr_pass_valid: true, note_en: "JR Pass-valid scenic mountain line; restored fully 2022 after typhoon damage. Iconic 第一只見川橋梁 (Daiichi Tadami River Bridge) photo spot. Snow-country winter scene." },
+      { name_ja: "JR三陸鉄道リアス線 (NOT JR Pass)", name_en: "Sanriku Railway Rias Line (NOT JR Pass)", route: "Morioka → Miyako → Kuji → Hachinohe coast", jr_pass_valid: false, note_en: "Sanriku Railway is a third-sector private line — JR Pass NOT VALID. Pair with JR Kamaishi Line for full Iwate scenic loop." },
+      { name_ja: "リゾートやまどり (JR上越線・吾妻線)", name_en: "Resort Yamadori (JR Joetsu / Agatsuma Lines)", route: "Tokyo (Ueno) → Takasaki → Minakami", jr_pass_valid: true, note_en: "JR Pass-valid sightseeing train; mountain views toward 谷川岳. Limited seasonal operation." },
+      { name_ja: "JR Pass 確認ポイント", name_en: "JR Pass coverage caveats", category: "info", note_en: "JR Pass covers JR-operated trains + JR Shinkansen (except Nozomi/Mizuho), JR ferries. JR Pass does NOT cover: 三陸鉄道 (Sanriku Railway, third-sector), 会津鉄道 (Aizu Tetsudo), 山形鉄道, 由利高原鉄道. For non-JR scenic lines, separate ticket needed." },
+    ];
+    result.canonical_tohoku_jr_pass_scenic_railways_note = "Hand-curated Tohoku scenic railway lines with explicit JR Pass coverage flag. **JR Pass-valid scenic**: JR五能線 (Resort Shirakami coastal), JR釜石線 (Tono folklore), JR磐越西線 (SL Banetsu, weekends only), JR山形新幹線, JR陸羽東線 (onsen towns + Bashō), JR只見線 (snow-country). **NOT JR Pass**: 三陸鉄道リアス線, 会津鉄道. For Tohoku scenic-rail no-extra-pay traveler: prioritize JR五能線 + JR只見線 + JR釜石線.";
   }
   if (isMedicalTourism) {
     result.canonical_medical_tourism_advisory = {
