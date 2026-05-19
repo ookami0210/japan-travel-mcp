@@ -4095,7 +4095,9 @@ async function getSpots(args: {
   const isShodoshimaOliveQ = (prefCodeForBlock === "37") && /(オリーブ|olive|小豆島|shōdoshima|shodoshima)/iu.test(qLowerFull);
   // iter168 detectors
   const isOzeHikingQ = (prefCodeForBlock === "10" || prefCodeForBlock === "07" || prefCodeForBlock === "15") && /(尾瀬|oze|水芭蕉|ニッコウキスゲ|湿原|ハイキング|hike|mizubasho)/iu.test(qLowerFull);
-  const isNotoPeninsulaQ = (prefCodeForBlock === "17") && /(能登|noto|輪島|wajima|七尾|nanao|珠洲|suzu|魚介|seafood|fisher)/iu.test(qLowerFull);
+  const isNotoPeninsulaQ = (prefCodeForBlock === "17") && (/(能登|noto|輪島|wajima|七尾|nanao|珠洲|suzu|魚介|seafood|fisher)/iu.test(qLowerFull) || /(能登|noto|輪島|wajima|七尾|nanao|魚介|seafood)/iu.test(munStrLower));
+  // iter170: Wakayama Kushimoto coastal cluster
+  const isKushimotoQ = (prefCodeForBlock === "30") && (/(串本|kushimoto|橋杭岩|hashigui|潮岬|shionomisaki|本州最南端|southernmost\s*honshu)/iu.test(qLowerFull) || /(串本|kushimoto)/iu.test(String(args.city ?? "").toLowerCase()) || /(串本|kushimoto)/iu.test(munStrLower));
   const isHagiQ = (prefCodeForBlock === "35") && /(萩|hagi|武家屋敷|samurai|preservation)/iu.test(qLowerFull + " " + munStrLower);
   const isSakurajimaKagoshimaQ = (prefCodeForBlock === "46") && /(桜島|sakurajima|sakura|cherry)/iu.test(qLowerFull);
   const isOsakaIndoorHotQ = (prefCodeForBlock === "27") && /(屋内|indoor|air[\s-]*conditioned|aircond|涼し|猛暑|hot\s*day|hot\s*summer|escape\s*heat|8月|august|7月|july)/iu.test(qLowerFull);
@@ -4523,6 +4525,19 @@ async function getSpots(args: {
             { name_ja: "JR東海道線・各駅停車プラン", name_en: "JR Tokaido Line local-train plan (Shizuoka → Kakegawa loop)", municipality: "Shizuoka Prefecture-wide", category: "transit plan", note_en: "All Tokaido-post-town stations are JR Tokaido Line accessible — Yui / Kanbara / Okitsu / Shizuoka / Yaizu / 金谷 / 掛川 / 新居町. JR Pass valid. Suggested day-trip: Shizuoka Sta → Yui (sakura-ebi lunch) → 興津 → 蒲原 → return Shizuoka. ~5h." },
           ],
           canonical_shizuoka_shukuba_tokaido_note: "Hand-curated 旧東海道 (Old Tokaido Road) post-towns in Shizuoka Prefecture. Shizuoka covers Tokaido post-stations #15-31 (~17 stations); all are JR Tokaido Line-accessible (JR Pass eligible). **Flagship**: 丸子宿 (tororo-jiru lunch at 丁子屋 since 1596). **Walking route**: 由比 → 興津 (~3 km coastal Tokaido walk). **Border checkpoint heritage**: 新居宿 関所跡 (Lake Hamana). **Pine-canopy walk**: 御油の松並木 (Edo-era preserved). Day-trip plan with JR local-train hopping documented.",
+        }
+      : {}),
+    ...(isKushimotoQ
+      ? {
+          canonical_kushimoto_coast: [
+            { name_ja: "潮岬", name_en: "Cape Shionomisaki (本州最南端)", municipality: "串本町", category: "Honshu southernmost cape", note_en: "Mainland Honshu's southernmost point. Lighthouse (潮岬灯台) + grassland park + Pacific Ocean panorama. Designated 'Yoshino-Kumano National Park' component." },
+            { name_ja: "橋杭岩", name_en: "Hashigui-iwa (Bridge Pier Rocks)", municipality: "串本町", qid: "Q11589188", category: "natural rock formation + scenic coast", note_en: "850m row of 40 erosion-resistant rock pillars resembling bridge piers; National Place of Scenic Beauty + Natural Monument. Sunrise from beach is iconic. Adjacent 'Michi-no-Eki Kushimoto Hashigui-iwa'." },
+            { name_ja: "串本海中公園", name_en: "Kushimoto Marine Park", municipality: "串本町", category: "northernmost coral reef + aquarium + glass-bottom boat", note_en: "World's northernmost natural coral reef; underwater observation tower + glass-bottom boat tours + aquarium. Family-friendly. Pacific dolphin + sea turtle." },
+            { name_ja: "古座川", name_en: "Kozagawa River + 一枚岩", municipality: "古座川町", category: "scenic river + monolith rock", note_en: "Kozagawa runs north from 串本; Ichimaiiwa (one-slab rock 100m tall × 500m wide) is one of Japan's largest single-slab rocks. Kayaking + canoeing day-trip from Kushimoto." },
+            { name_ja: "潮岬観光タワー", name_en: "Shionomisaki Observation Tower", municipality: "串本町", category: "viewpoint tower", note_en: "Pay observation tower at Cape Shionomisaki for 360° Pacific + mountain panorama; pair with 潮岬灯台 (lighthouse) for full cape experience." },
+            { name_ja: "Access (JR紀勢本線)", name_en: "Access via JR Kisei Main Line", category: "transit", note_en: "JR Kisei Main Line 'Kuroshio Ltd Express' from Shin-Osaka (~3h, JR Pass OK) to JR Kushimoto Station. Rental car recommended for cape + 橋杭岩 + 古座川 day-trip." },
+          ],
+          canonical_kushimoto_coast_note: "Hand-curated Kushimoto (串本, Wakayama) coastal destinations — mainland Honshu's southernmost point. **Iconic spots**: 潮岬 (southernmost cape), 橋杭岩 (40-rock-pillar erosion formation, National Place of Scenic Beauty), 串本海中公園 (northernmost coral reef). **Day-trip add-on**: 古座川 一枚岩 monolith + kayaking. Access via JR Kisei Main Line Kuroshio Ltd Express from Shin-Osaka.",
         }
       : {}),
     ...(isOzeHikingQ
@@ -5365,7 +5380,7 @@ async function getHotels(args: {
   // iter149: detect budget intent so the luxury broadcast doesn't pollute
   // budget queries. iter148 r420 batch 10 showed luxury cluster firing on
   // 저예산 (ko budget) / 격안 / cheap / 安い queries — exact opposite of intent.
-  const isBudgetHotelQ = /(budget|cheap|inexpensive|hostel|guest\s*house|guesthouse|backpack|capsule|youth|economy|安い|安価|格安|低価格|低予算|学生|ワンコイン|低料金|저예산|저렴|싸|싼|便宜|实惠|经济|划算|murah|hemat|低価|preupuesto|baju|barato|prix\s*bas|pas\s*cher|günstig|saving|رخيص|أقل\s*من|الميزانية|3000\s*円|5000\s*円|under\s*¥?\s*\d000|under\s*3000|under\s*5000|¥\s*3000|¥\s*5000|hostel|youth\s*hostel)/i.test(qHotelLower)
+  const isBudgetHotelQ = /(budget|cheap|inexpensive|hostel|guest\s*house|guesthouse|backpack|capsule|youth|economy|安い|安価|格安|低価格|低予算|学生|ワンコイン|低料金|저예산|저렴|싸|싼|便宜|实惠|经济|划算|划算|背包|青年旅馆|青年|平价|经济型|murah|hemat|低価|preupuesto|baju|barato|prix\s*bas|pas\s*cher|günstig|saving|رخيص|أقل\s*من|الميزانية|3000\s*円|5000\s*円|under\s*¥?\s*\d000|under\s*3000|under\s*5000|¥\s*3000|¥\s*5000|hostel|youth\s*hostel|日元|日圓|円)/i.test(qHotelLower)
     || requested === "budget" || requested === "hostel";
   // Accessibility intent: wheelchair / barrier-free / step-free / accessible
   // travel queries should surface the curated short-list of major destinations'
@@ -9719,8 +9734,11 @@ function buildHybridIntentCluster(
   const isCoolRetreat = /(避暑|涼し|涼\s|涼を|cool\s*retreat|cool\s*escape|heat\s*relief|escape\s*the\s*heat|escape\s*summer\s*heat|cool\s*destination|summer\s*cool\s*spot|escape\s*summer|涼める|涼める場所|涼しい場所|涼しいスポット|猛暑.*涼|高原|高山|cooler\s*regions|summer\s*highland)/iu.test(qLower);
   // iter164: medical-tourism out-of-scope guard
   const isMedicalTourism = /(医療ツーリズム|medical\s*tourism|surgery|外科手術|knee\s*replacement|hip\s*replacement|cancer\s*treatment|手術|入院|hospital\s*stay|in[\s-]*patient|healthcare\s*travel|medical\s*procedure)/iu.test(qLower);
-  // iter168: Tohoku JR-Pass scenic railway
-  const isTohokuJrPassScenic = (/(tohoku|東北).*(jr\s*pass|jr\s*rail\s*pass|covered\s*by)/iu.test(qLower) || /(scenic\s*rail|観光列車|jr\s*pass.*scenic).*(tohoku|東北)/iu.test(qLower));
+  // iter168/170: Tohoku JR-Pass scenic railway — relaxed to fire on Tohoku + scenic train tokens alone
+  const isTohokuJrPassScenic = (
+    /(tohoku|東北).*(jr\s*pass|jr\s*rail\s*pass|covered\s*by|scenic|観光列車|ローカル線|local\s*line|sightseeing\s*train)/iu.test(qLower)
+    || /(scenic\s*rail|観光列車|ローカル線|sightseeing\s*train|jr\s*pass.*scenic).*(tohoku|東北)/iu.test(qLower)
+  );
   // iter165: search_hybrid Hokkaido all-weather — extension of get_spots detector
   const isHokkaidoAllWeatherSH = (
     /(全天候|all[\s-]*weather|indoor|屋内|rain\s*or\s*snow|雨.*雪|雨や雪|enjoyable\s*regardless|whatever\s*the\s*weather|planning.*hokkaido.*(october|november|rain|snow|weather))/iu.test(qLower)
@@ -10609,6 +10627,22 @@ async function getLocalFood(args: {
     : {};
   // iter164: Hiroshima oyster cluster — R420v5-012.
   const isHiroshimaOysterLF = (prefCode === "34") && /(牡蠣|oyster|huitre|kaki)/iu.test(kwOrQLowerLF);
+  // iter170: Noto seafood for get_local_food when prefecture=Ishikawa + keyword matches seafood
+  const isNotoSeafoodLF = (prefCode === "17") && /(魚介|seafood|fish|fisher|鯛|tai|鰤|buri|蟹|crab|牡蠣|oyster|寒鰤|kanburi|wajima|輪島|nanao|七尾|noto|能登)/iu.test(kwOrQLowerLF);
+  const notoSeafoodBlock = isNotoSeafoodLF
+    ? {
+        canonical_noto_seafood: [
+          { name_ja: "寒鰤 (Kanburi - Winter Yellowtail)", name_en: "Kanburi (Winter Yellowtail)", region: "Noto Peninsula", season: "12月-2月", note_en: "Noto's signature winter seafood; 氷見鰤 + 能登鰤 are nationally famous. Ryokan kaiseki centerpiece Dec-Feb. Catch via 定置網 traditional set-net fishing." },
+          { name_ja: "能登牡蠣", name_en: "Noto Oysters (Nanao Bay rope-cultivated)", region: "Nanao Bay (七尾・穴水)", season: "11月-3月", note_en: "Nanao Bay's rope-cultivated oysters; 七尾市 + 穴水町 oyster huts (牡蠣小屋) operate winter — grill-yourself ¥3,000-4,000 60min." },
+          { name_ja: "加能ガニ", name_en: "Kano Crab (Ishikawa premium snow crab)", region: "Ishikawa coastal", season: "11月-3月", note_en: "Ishikawa's premium snow-crab brand (Zuwai-gani caught in Ishikawa waters); blue-tag certification. Ryokan kaiseki winter centerpiece." },
+          { name_ja: "輪島朝市 (Wajima Morning Market)", name_en: "Wajima Morning Market", municipality: "輪島市", note_en: "1000-year-old Asaichi-dōri market; seafood + 輪島塗 crafts. NOTE: 2024 Noto earthquake — verify operational status with official site before visiting (https://www.hot-ishikawa.jp/)." },
+          { name_ja: "和倉温泉 (Wakura Onsen)", name_en: "Wakura Onsen + Kagaya ryokan area", municipality: "七尾市", note_en: "Wakura Onsen near Nanao Bay; legendary 加賀屋 ryokan + multiple seafood-kaiseki ryokan. Family-friendly bayside lodging." },
+          { name_ja: "のとじま水族館 (Notojima Aquarium)", name_en: "Notojima Aquarium", municipality: "七尾市能登島", note_en: "Family-friendly aquarium on Notojima (Noto Island); dolphin + jellyfish exhibits. Combine with Iwane oyster farm tours nearby." },
+          { name_ja: "Access (post-2024 earthquake)", name_en: "Access (Noto Tetsudo + JR七尾線)", category: "transit", note_en: "JR七尾線 to 和倉温泉駅 (JR Pass valid) + Noto Tetsudo (non-JR) for Anamizu / Notojima destinations. **2024 earthquake**: roads + rail partially restored; verify before booking via prefecture tourism site." },
+        ],
+        canonical_noto_seafood_note: "Hand-curated Noto Peninsula seafood + family destinations. **Winter peak**: 寒鰤 (Dec-Feb), 牡蠣 (Nov-Mar oyster huts), 加能ガニ snow crab (Nov-Mar). **Family base**: Wakura Onsen + Notojima Aquarium. **2024 earthquake** still affects some areas — verify operational status with the prefecture's tourism site.",
+      }
+    : {};
   // iter165: Yamagata imoni cluster — R420v5-021.
   const isYamagataImoniLF = (prefCode === "06") && /(芋煮|imoni|imo[\s-]*ni|taro\s*soup|芋煮会)/iu.test(kwOrQLowerLF);
   const yamagataImoniBlock = isYamagataImoniLF
@@ -10672,6 +10706,7 @@ async function getLocalFood(args: {
     ...shodoshimaOliveBlockLF,
     ...shojinTofuBlockLF,
     ...hiroshimaOysterBlock,
+    ...notoSeafoodBlock,
     ...yamagataImoniBlock,
     ...(heritageFoodStories.length > 0
       ? {
