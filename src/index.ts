@@ -5210,7 +5210,7 @@ async function getHotels(args: {
   // iter149: detect budget intent so the luxury broadcast doesn't pollute
   // budget queries. iter148 r420 batch 10 showed luxury cluster firing on
   // 저예산 (ko budget) / 격안 / cheap / 安い queries — exact opposite of intent.
-  const isBudgetHotelQ = /(budget|cheap|inexpensive|hostel|guest\s*house|backpacker|capsule|youth|economy|安い|安価|格安|低価格|低予算|学生|ワンコイン|低料金|저예산|저렴|싸|싼|便宜|实惠|经济|划算|murah|hemat|低価|preupuesto|baju|barato|prix\s*bas|pas\s*cher|günstig|saving)/i.test(qHotelLower)
+  const isBudgetHotelQ = /(budget|cheap|inexpensive|hostel|guest\s*house|guesthouse|backpack|capsule|youth|economy|安い|安価|格安|低価格|低予算|学生|ワンコイン|低料金|저예산|저렴|싸|싼|便宜|实惠|经济|划算|murah|hemat|低価|preupuesto|baju|barato|prix\s*bas|pas\s*cher|günstig|saving|رخيص|أقل\s*من|الميزانية|3000\s*円|5000\s*円|under\s*¥?\s*\d000|under\s*3000|under\s*5000|¥\s*3000|¥\s*5000|hostel|youth\s*hostel)/i.test(qHotelLower)
     || requested === "budget" || requested === "hostel";
   // Accessibility intent: wheelchair / barrier-free / step-free / accessible
   // travel queries should surface the curated short-list of major destinations'
@@ -5337,6 +5337,13 @@ async function getHotels(args: {
     ],
     "40": [ // Fukuoka
       { name_ja: "WeBase 博多", name_en: "WeBase Hakata", municipality: "福岡市", type: "hostel", price_band: "~¥3500-5000 / dorm", note_en: "Modern hostel near Hakata Station; design-led common spaces, female-only dorm option." },
+      { name_ja: "Hostel Khaosan Fukuoka", name_en: "Khaosan Fukuoka", municipality: "福岡市", type: "hostel", price_band: "~¥2500-3500 / dorm", note_en: "Khaosan-brand backpacker hostel in central Hakata; dorm + private rooms. Walking distance to Hakata Station + Tenjin shopping." },
+    ],
+    "47": [ // Okinawa
+      { name_ja: "Sora House 那覇", name_en: "Sora House Naha", municipality: "那覇市", type: "guesthouse", price_band: "~¥2500-4000 / dorm or twin", note_en: "Backpacker guesthouse in central Naha; dorm + private rooms; walking distance to Kokusai-dōri + monorail." },
+      { name_ja: "ゲストハウス白くじら 那覇", name_en: "Shiro-Kujira Guesthouse Naha", municipality: "那覇市", type: "guesthouse", price_band: "~¥3000-4500 / private", note_en: "Family-run guesthouse near 県庁前 monorail; common kitchen + free coffee. Owner-operated personal feel." },
+      { name_ja: "石垣島 サフラン ゲストハウス", name_en: "Ishigaki Saffron Guesthouse", municipality: "石垣市", type: "guesthouse", price_band: "~¥3000-4500 / dorm", note_en: "Ishigaki-island budget guesthouse; ferry-pier walking distance for outer-island access. Diving + snorkel rental partners." },
+      { name_ja: "宮古島 ぱいかじ ゲストハウス", name_en: "Miyako-jima Paikaji Guesthouse", municipality: "宮古島市", type: "guesthouse", price_band: "~¥3500-5000 / private", note_en: "Miyako-jima guesthouse; rental scooter on-site for beach hopping. Walking distance to 平良 port." },
     ],
   };
   // Always materialize a short version of budget lodging for prefectures
@@ -9379,6 +9386,16 @@ function buildHybridIntentCluster(
   const isMedicalTourism = /(医療ツーリズム|medical\s*tourism|surgery|外科手術|knee\s*replacement|hip\s*replacement|cancer\s*treatment|手術|入院|hospital\s*stay|in[\s-]*patient|healthcare\s*travel|medical\s*procedure)/iu.test(qLower);
   // iter165: search_hybrid Hokkaido all-weather — extension of get_spots detector
   const isHokkaidoAllWeatherSH = /(全天候|all[\s-]*weather|indoor|屋内|rain\s*or\s*snow|雨.*雪|雨や雪|enjoyable\s*regardless|whatever\s*the\s*weather)/iu.test(qLower) && /(hokkaido|北海道|sapporo|札幌|hakodate|函館|otaru|小樽)/iu.test(qLower);
+  // iter166: search_hybrid scope-broadening clusters
+  const isLateNovKoyo = /((late|遅い|遅く|終わり|終盤|終わる|past\s*peak|after\s*peak).*(november|11月|十一月|koyo|紅葉|autumn|fall)|(november|11月|十一月).*(late|遅い|遅く|peak|過ぎ))/iu.test(qLower) && !/late\s*august/iu.test(qLower);
+  const isNationalKoyoAlt = /((alternative|besides|代わり|別|other\s*than|outside|less\s*crowded|混雑.{0,5}避|穴場).*(koyo|紅葉|autumn\s*foliage|fall\s*color)|(koyo|紅葉|autumn\s*foliage|fall\s*color).*(besides|alternative|別|代わり|less\s*crowded|穴場))/iu.test(qLower);
+  const isShojinSH = /(shojin|精進|精进|buddhist\s*vegetarian|vegan\s*buddhist|temple\s*cuisine|kyoto\s*tofu|monastic.*meal|湯豆腐|yu[\s-]*dofu)/iu.test(qLower);
+  const isFreeParksSH = /((free|無料|gratuit|gratis|gratuito|كنا\s*مجاني|hôi\s*phí|publicly\s*free|no\s*fee|no\s*entry\s*fee).*(park|公園|庭園|garden|outdoor|nature|trail|sanctuary)|(park|公園|nature|outdoor).*(free|無料|no\s*fee))/iu.test(qLower);
+  const isStrollerDistrict = /(stroller|ベビーカー|婴儿车|嬰兒車|유모차|baby\s*carriage|pushchair|kinderwagen|poussette|cochecito|baby\s*friendly|step[\s-]*free|段差なし|スロープ).*(district|エリア|area|town|町|street|通り|district)|(district|street|town|area|エリア).*(stroller|ベビーカー|step[\s-]*free)/iu.test(qLower);
+  const isRemoteVillagesSH = /(秘境.*集落|集落.*秘境|remote\s*villag|isolated\s*villag|villages?\s*abandonn|villages?\s*isolés|قرى\s*معزولة|قرية\s*معزولة|secluded\s*hamlet|traditional\s*hamlet|gassh[oō]|gassho-zukuri|合掌造り|kayabuki|茅葺|kiso\s*post[\s-]*town|nakasendo)/iu.test(qLower);
+  const isSelfContradict = /秘境.*(混雑|人気|crowded|popular).*(温泉|onsen|hot\s*spring)|crowded.{0,10}most\s*famous.{0,10}(off[\s-]?the[\s-]?beaten|hidden|secluded|秘境)|(famous|人気|crowded).*(secluded|isolated|off[\s-]?the[\s-]?beaten|hidden|秘境)/iu.test(qLower);
+  // iter166: search_area toponym-strict — when query contains a clear toponym, ensure cluster prefers it.
+  const isMiyajimaBarrierFree = /(宮島|miyajima|厳島|itsukushima).*(バリアフリー|barrier[\s-]*free|wheelchair|accessible|fauteuil\s*roulant|silla\s*de\s*ruedas|step[\s-]*free|車椅子)/iu.test(qLower);
   // iter164: Kyoto baby-stroller / wheelchair accessible attractions
   const isKyotoAccessibleQ = /(京都|kyoto).{0,15}(ベビーカー|stroller|車椅子|wheelchair|無障|无障|barrier[\s-]*free|バリアフリー|段差|step[\s-]*free|accessible)/iu.test(qLower) || /(ベビーカー|stroller|車椅子|wheelchair|無障|无障|barrier[\s-]*free|バリアフリー|段差).{0,15}(京都|kyoto)/iu.test(qLower);
   // iter162: targeted clusters for fresh v4random100 misses
@@ -9698,6 +9715,116 @@ function buildHybridIntentCluster(
       { name_ja: "見晴台 (碓氷峠)", name_en: "Miharashidai Lookout (Usui Pass)", category: "scenic lookout", note_en: "Mountain pass viewpoint over Mt Asama + Karuizawa basin; sunrise + evening view destinations. Free; bus from old-Karuizawa." },
     ];
     result.canonical_karuizawa_anniversary_note = "Hand-curated Karuizawa anniversary / honeymoon / couple-trip destinations. **Top promenades (couple walks)**: 雲場池 (15-min loop, year-round), 旧軽井沢銀座 (evening atmosphere), 白糸の滝 (volcanic-spring waterfall with light-up). **Premium anniversary stays**: 星のや軽井沢 (luxury onsen ryokan), 軽井沢ホテルブレストンコート (chapel + cottages), 万平ホテル (1894-founded heritage). **Iconic anniversary chapel**: 石の教会・内村鑑三記念堂 (stone-and-glass photogenic chapel). **Couple dining**: ハルニレテラス riverside boutique plaza. Karuizawa is Tokyo's classic anniversary getaway — 1h12m by Hokuriku Shinkansen, ~10°C cooler than Tokyo in summer.";
+  }
+  if (isLateNovKoyo) {
+    result.canonical_late_november_koyo = [
+      { region: "Tokyo (Hibiya / Showa Memorial / 高尾山)", peak: "11月下旬-12月上旬", note_en: "Tokyo's koyo is late: 高尾山 (Mt Takao) peaks late Nov to early Dec; 神宮外苑 銀杏並木 + 昭和記念公園 ginkgo peaks late Nov." },
+      { region: "Kyoto (東福寺 / 永観堂 / 嵐山)", peak: "11月下旬-12月上旬", note_en: "Kyoto's premier momiji peaks late Nov to early Dec — much later than Hokkaido/Tohoku. 東福寺 通天橋, 永観堂 night-illumination, 嵐山 渡月橋 backdrop." },
+      { region: "Nikko (中禅寺湖 + 二荒山神社)", peak: "10月下旬-11月中旬 (lake area, earlier than valley)", note_en: "Nikko's higher-elevation areas peak late Oct early Nov; valley town peaks early-mid Nov; some lingering color late Nov." },
+      { region: "Hakone (芦ノ湖 + 大涌谷)", peak: "11月上旬-中旬", note_en: "Hakone valley koyo peaks early to mid-Nov; mostly past by late Nov but some lingering color in lakeside districts." },
+      { region: "Kyushu (久住高原 + 黒川温泉 + 阿蘇)", peak: "11月中旬-12月上旬", note_en: "Kyushu's koyo is the latest in Japan: Aso + Kuju Highlands + Kurokawa Onsen peak late Nov to early Dec. Best 'late November' destination." },
+      { region: "Mt Yoshino (奈良)", peak: "11月下旬-12月上旬", note_en: "Same Yoshino Mountain famous for spring sakura also has late-Nov momiji on the lower slopes. Less crowded than Kyoto." },
+      { region: "Mt Koya (高野山, Wakayama)", peak: "11月上旬-中旬", note_en: "Mt Koya peaks early-mid Nov; some color lingering into late Nov around 奥の院 and shukubo gardens." },
+      { region: "Yamadera (山形)", peak: "11月上旬-中旬", note_en: "Yamadera Risshakuji + valley peaks early-mid Nov; mostly past by late Nov." },
+      { region: "Awaji-shima + Kobe (兵庫)", peak: "11月下旬-12月上旬", note_en: "Hyogo coastal koyo peaks late Nov — 六甲山 + 神戸市立森林植物園 + 淡路島 garden parks." },
+      { region: "Setouchi region 紅葉 (Tomonoura, Kurashiki Bikan)", peak: "11月下旬-12月上旬", note_en: "Inland Sea coastal koyo is among Japan's latest peaks; pair with Hiroshima onward." },
+    ];
+    result.canonical_late_november_koyo_note = "Hand-curated **late-November koyo** destinations. Peak timing by region: **Hokkaido + Tohoku**: late Oct to early Nov (past by late Nov). **Kanto Mountain**: early-mid Nov peak; coastal Kanto late Nov. **Kansai (Kyoto/Nara)**: late Nov to early Dec — the textbook late-Nov koyo destination. **Kyushu + Setouchi**: late Nov to early Dec (Japan's latest koyo). For late-Nov travelers: prioritize Kyoto/Nara/Hakone-coastal/Kyushu over Hokkaido/Tohoku.";
+  }
+  if (isNationalKoyoAlt) {
+    result.canonical_national_koyo_alternatives = [
+      { region_ja: "東北 (奥入瀬渓流・八幡平・栗駒山)", region_en: "Tohoku (Oirase Gorge / Hachimantai / Mt Kurikoma)", best_period: "10月中旬-下旬", crowd_level: "low-medium", note_en: "Tohoku highlands koyo is 1-2 weeks earlier than Kyoto and much less crowded. Oirase Gorge walk + Hachimantai dragon's-eye + Kurikoma alpine. JR Tohoku Shinkansen access." },
+      { region_ja: "北海道 大雪山・支笏湖", region_en: "Hokkaido (Daisetsuzan + Lake Shikotsu)", best_period: "9月中旬-10月中旬", crowd_level: "very low", note_en: "Japan's earliest koyo (mid-Sept onwards) and least crowded. Daisetsuzan Asahidake Ropeway is the highlight. JR + bus." },
+      { region_ja: "新潟 奥只見湖・苗場ドラゴンドラ", region_en: "Niigata (Oze-Okutadami + Naeba Dragondola)", best_period: "10月中旬-11月上旬", crowd_level: "low-medium", note_en: "Most-photographed Japan koyo lake-reflection scene (Okutadami); also Naeba Dragondola seasonal-only flight. Less famous than Kyoto." },
+      { region_ja: "栃木 中禅寺湖・いろは坂", region_en: "Nikko (Lake Chuzenji + Iroha-zaka)", best_period: "10月中旬-11月上旬", crowd_level: "high but earlier than Kyoto", note_en: "Tochigi Nikko valley koyo peaks before Kyoto; weekday visits beat the crowds. The dramatic Iroha-zaka switchback road is the iconic shot." },
+      { region_ja: "兵庫 香住・餘部・但馬地方", region_en: "Hyogo coastal (Kasumi / Amarube / Tajima area)", best_period: "11月中旬-下旬", crowd_level: "very low", note_en: "Coastal Hyogo + Tajima inland; nearly empty even at peak. JR Sanin Main Line scenic coastal route." },
+      { region_ja: "石川 那谷寺・兼六園", region_en: "Ishikawa (Natadera + Kenrokuen)", best_period: "11月中旬-下旬", crowd_level: "medium", note_en: "Kanazawa Kenrokuen is Japan's 3-great gardens with peak koyo late Nov + 雪吊り setup begins; Natadera mountain temple koyo. Less crowded than Kyoto." },
+      { region_ja: "山形 立石寺 + 銀山温泉", region_en: "Yamagata (Yamadera + Ginzan Onsen)", best_period: "11月上旬-中旬", crowd_level: "low", note_en: "Yamadera 1015-step cliff temple + Ginzan's romantic Taisho-era streetscape with koyo backdrop. Very photogenic, low-crowd." },
+      { region_ja: "高知 仁淀ブルー + UFOライン", region_en: "Kochi (Niyodo Blue + UFO Line)", best_period: "10月中旬-下旬", crowd_level: "very low", note_en: "Shikoku highland koyo route; Niyodo River turquoise water + ridgeline drive. Limited bus access." },
+      { region_ja: "大分 九重連山・耶馬渓", region_en: "Oita (Kuju Highlands + Yabakei)", best_period: "11月中旬-12月上旬", crowd_level: "low-medium", note_en: "Kyushu's premier koyo destination; Kuju Highlands + Yabakei gorge + Aso adjacent. Pair with Kurokawa Onsen overnight." },
+      { region_ja: "京都市内 穴場 (常寂光寺・神護寺・鞍馬寺)", region_en: "Kyoto less-crowded alternatives (Jōjakkō-ji / Jingo-ji / Kurama-dera)", best_period: "11月中旬-12月上旬", crowd_level: "low even in Kyoto", note_en: "Within Kyoto, these mountainside temples have peak koyo without the 東福寺 / 永観堂 crowds. 常寂光寺 (Arashiyama hillside), 神護寺 (Takao), 鞍馬寺 (north Kyoto mountain)." },
+    ];
+    result.canonical_national_koyo_alternatives_note = "Hand-curated Japan koyo destinations **outside Kyoto's main crowded venues**. Sorted by peak timing: **Earliest (mid-Sept to mid-Oct)**: Hokkaido Daisetsuzan. **Mid (mid-Oct to mid-Nov)**: Tohoku highlands, Niigata Oze-Okutadami, Nikko, Yamadera. **Late (mid-Nov to early Dec)**: Hyogo coast, Ishikawa Kenrokuen, Kyoto穴場 (lesser-known temples), Oita Kuju Highlands. Less crowded than Kyoto's headline temples in all cases.";
+  }
+  if (isShojinSH) {
+    result.canonical_shojin_ryori_destinations = [
+      { name_ja: "高野山宿坊 (Wakayama)", name_en: "Mt Kōya Shukubo", municipality: "高野町", prefecture: "Wakayama", category: "Shingon temple stay + shojin meals", note_en: "50+ temple lodgings on Mt Kōya with shojin breakfast + dinner. Premier shojin destination in Japan." },
+      { name_ja: "永平寺 (Fukui)", name_en: "Eihei-ji (Soto Zen head temple)", municipality: "永平寺町", prefecture: "Fukui", category: "Soto Zen training monastery", note_en: "Active Soto Zen monastery (1244); allows lay-person shukubo stays with shojin breakfast/dinner. Strict-but-welcoming Zen experience." },
+      { name_ja: "妙心寺 退蔵院 (Kyoto)", name_en: "Myōshin-ji Taizō-in", municipality: "京都市", prefecture: "Kyoto", category: "Rinzai Zen sub-temple shojin lunch", note_en: "Reservation-only shojin-ryori lunch + tea-ceremony + garden viewing. The classical Kyoto Zen shojin experience." },
+      { name_ja: "天龍寺 篩月 (Kyoto)", name_en: "Tenryū-ji Shigetsu", municipality: "京都市", prefecture: "Kyoto", category: "UNESCO WHS shojin restaurant", note_en: "Tenryū-ji UNESCO WHS on-grounds shojin restaurant; classic Kyoto vegan kaiseki. Reservation recommended." },
+      { name_ja: "南禅寺 順正 (Kyoto)", name_en: "Junsei (Nanzen-ji)", municipality: "京都市", prefecture: "Kyoto", category: "yudofu specialty (200+ years)", note_en: "Nanzen-ji-area yudofu specialist 200+ years; textbook Kyoto hot-tofu shojin dinner. Garden-view dining." },
+      { name_ja: "比叡山延暦寺 (Otsu)", name_en: "Enryaku-ji Mt Hiei", municipality: "大津市", prefecture: "Shiga", category: "Tendai head temple shojin lunch", note_en: "Tendai head temple (UNESCO WHS); public shojin-ryori lunch programs. Reservation required." },
+      { name_ja: "中禅寺金谷ホテル (Nikko)", name_en: "Chuzenji Kanaya Hotel (Nikko)", municipality: "日光市", prefecture: "Tochigi", category: "hotel-style shojin meal program", note_en: "Lake Chuzenji classical hotel; vegetarian/shojin-style course available on request." },
+      { name_ja: "嵯峨豆腐 森嘉 (Kyoto Arashiyama)", name_en: "Saga Tofu Morika", municipality: "京都市", prefecture: "Kyoto", category: "artisan tofu producer", note_en: "Famous Kyoto tofu shop supplying tofu to many Zen temples; retail + sit-down tofu set." },
+    ];
+    result.canonical_shojin_ryori_destinations_note = "Hand-curated Japan shojin-ryori (Buddhist vegetarian temple cuisine) destinations. **Premier shukubo experience**: 高野山 (Wakayama) — 50+ temple lodgings with full shojin meals. **Active monastery stay**: 永平寺 (Fukui) — Soto Zen monastic. **Kyoto temple cuisine**: 妙心寺退蔵院, 天龍寺篩月 (UNESCO WHS), 南禅寺順正 (yudofu 200+ years). All are 100% vegan / vegetarian. Reservation typically required.";
+  }
+  if (isFreeParksSH) {
+    result.canonical_free_parks_nationwide = [
+      { name_ja: "代々木公園 (東京)", name_en: "Yoyogi Park (Tokyo)", municipality: "渋谷区", category: "central Tokyo urban park", entry: "FREE", note_en: "Open grass meadows + bike-rental loop trail + tree-shaded paths. Walking distance from Harajuku Sta." },
+      { name_ja: "上野恩賜公園 (東京)", name_en: "Ueno Park (Tokyo)", municipality: "台東区", category: "Tokyo's flagship public park", entry: "FREE", note_en: "Park itself free; Ueno Zoo + national museums paid separately. JR Ueno direct." },
+      { name_ja: "新宿御苑 (東京) — partial paid", name_en: "Shinjuku Gyoen (Tokyo)", municipality: "新宿区", category: "imperial garden", entry: "¥500 paid", note_en: "Imperial garden is paid (¥500) but surrounding paths are free. Not a free-park option but useful to note." },
+      { name_ja: "井の頭恩賜公園 (東京)", name_en: "Inokashira Park (Tokyo)", municipality: "武蔵野市", category: "large suburban park", entry: "FREE", note_en: "Boat pond + Mitaka Ghibli Museum adjacent (museum paid). JR Chuo Line." },
+      { name_ja: "葛西臨海公園 (東京)", name_en: "Kasai Rinkai Park (Tokyo)", municipality: "江戸川区", category: "seaside park", entry: "FREE (aquarium paid separately)", note_en: "Massive seaside park + bird sanctuary + sandy beach. Free entry; Tokyo Sea Life Park ¥700 separate." },
+      { name_ja: "万博記念公園 (大阪)", name_en: "Expo '70 Commemorative Park (Osaka)", municipality: "吹田市", category: "Osaka's largest public park (1970 Expo site)", entry: "¥260 paid", note_en: "Osaka's flagship public park with Tower of the Sun statue. Mostly paid (¥260); free portions around the Pavilion plaza." },
+      { name_ja: "鴨川 (京都 河川敷)", name_en: "Kamogawa Riverbed (Kyoto)", municipality: "京都市", category: "Kyoto central river park", entry: "FREE", note_en: "Free open riverbed walking + summer 川床 dining venues. Kyoto's most-photographed free park." },
+      { name_ja: "皇居外苑 + 千鳥ヶ淵 (東京)", name_en: "Imperial Palace Outer Garden + Chidorigafuchi (Tokyo)", municipality: "千代田区", category: "free imperial grounds", entry: "FREE", note_en: "Imperial Palace outer grounds + Chidorigafuchi moat walkway (700m sakura walk in spring). Free year-round." },
+      { name_ja: "中央公園 (札幌)", name_en: "Central Park (Sapporo)", municipality: "札幌市", category: "Sapporo central public park", entry: "FREE", note_en: "Sapporo's central public park; 大通公園 is the major Sapporo park (free, hosting Snow Festival in Feb)." },
+      { name_ja: "全国 国営公園", name_en: "National Government Parks (16 across Japan)", category: "national park system", entry: "¥200-450 paid (mostly)", note_en: "Examples: 国営昭和記念公園 (Tachikawa, ¥450), 国営ひたち海浜公園 (Ibaraki, ¥450), 国営海の中道海浜公園 (Fukuoka, ¥450). Mostly paid; not free." },
+      { name_ja: "皆既日陰 都道府県立 自然公園", name_en: "Prefectural / Municipal nature parks (mostly FREE)", category: "general note", entry: "FREE in most cases", note_en: "Most 都道府県立 / 市町村立 nature parks are FREE. Search 'prefecture name 県立公園 / 市立公園' for full lists at the prefectural tourism site." },
+    ];
+    result.canonical_free_parks_nationwide_note = "Hand-curated Japan **free outdoor parks**. Tokyo flagship free parks: 代々木 / 上野 / 井の頭 / 葛西臨海 / 皇居外苑 + 千鳥ヶ淵 / 隅田公園. Sapporo's central 大通公園 is free. Kyoto's 鴨川 riverbed is free. **NOTE**: 新宿御苑 + national-government parks (国営公園) are typically paid (¥260-450). Most 都道府県立 / 市町村立 (prefectural / municipal) parks are free.";
+  }
+  if (isStrollerDistrict) {
+    result.canonical_stroller_friendly_districts = [
+      { name_ja: "浅草 (台東区)", name_en: "Asakusa (Taito-ku, Tokyo)", level: "MOSTLY ACCESSIBLE", note_en: "Sensō-ji approach (Nakamise) is FLAT + PAVED but very crowded (stroller navigation difficult on weekends). Main shopping streets paved; some side alleys have cobblestones. 浅草寺 main hall has step-free side ramp. Avoid weekends if stroller pushability is critical." },
+      { name_ja: "上野 (台東区)", name_en: "Ueno (Taito-ku, Tokyo)", level: "FULLY ACCESSIBLE", note_en: "Ueno Park is fully stroller-passable; museums + zoo all have elevators. JR Ueno Station has full step-free transfer." },
+      { name_ja: "銀座 (中央区)", name_en: "Ginza (Chuo-ku, Tokyo)", level: "FULLY ACCESSIBLE", note_en: "Wide paved boulevards; weekend pedestrianization; all major department stores have elevators + stroller rental. Most stroller-friendly Tokyo district." },
+      { name_ja: "汐留 + 丸の内 (Tokyo)", name_en: "Shiodome + Marunouchi (Tokyo)", level: "FULLY ACCESSIBLE", note_en: "Modern central Tokyo districts; all elevated walkways + flat streets. Tokyo Station fully step-free." },
+      { name_ja: "代官山 (Tokyo)", name_en: "Daikanyama", level: "MOSTLY ACCESSIBLE", note_en: "Boutique cafe district; mostly flat with some moderate slopes. T-Site bookstore complex fully accessible." },
+      { name_ja: "横浜みなとみらい (Yokohama)", name_en: "Yokohama Minato Mirai", level: "FULLY ACCESSIBLE", note_en: "Modern waterfront district; fully flat + elevated walkways. Stroller-friendly throughout." },
+      { name_ja: "京都 嵐山 渡月橋 + 中央エリア", name_en: "Kyoto Arashiyama Togetsukyō + central area", level: "PARTIALLY ACCESSIBLE", note_en: "Togetsukyō bridge fully step-free. Bamboo Grove main path is stroller-passable; some uneven sections. 天龍寺 has step-free entrance; sub-temples vary." },
+      { name_ja: "京都駅周辺 (Kyoto Station area)", name_en: "Kyoto Station district", level: "FULLY ACCESSIBLE", note_en: "Kyoto Station + station building (15 floors) fully step-free. Outer Kyoto temples vary widely." },
+      { name_ja: "札幌大通 (Sapporo Odori)", name_en: "Sapporo Odori district", level: "FULLY ACCESSIBLE", note_en: "Sapporo's central Odori district + underground Aurora Town / Pole Town are all-weather flat. Indoor-warm walking even in winter." },
+      { name_ja: "大阪 グランフロント大阪 + 梅田", name_en: "Osaka Grand Front + Umeda", level: "FULLY ACCESSIBLE", note_en: "Osaka Umeda underground concourse is flat + indoor + climate-controlled. Stroller-friendly all-weather access." },
+    ];
+    result.canonical_stroller_friendly_districts_note = "Hand-curated Japan **stroller-friendly districts**. **FULLY ACCESSIBLE**: 上野 / 銀座 / 汐留 / 横浜みなとみらい / 京都駅 / 札幌大通 / 大阪梅田. **MOSTLY ACCESSIBLE**: 浅草 (flat but crowded), 代官山 (some slopes). **PARTIALLY ACCESSIBLE**: 京都嵐山. Avoid weekend Asakusa for stroller-critical visits. For temples, side-ramp / bypass-route accessibility varies — call ahead.";
+  }
+  if (isRemoteVillagesSH) {
+    result.canonical_remote_traditional_villages = [
+      { name_ja: "白川郷 (UNESCO WHS, Gifu)", name_en: "Shirakawa-go gasshō villages", municipality: "白川村", prefecture: "Gifu", category: "UNESCO WHS gasshō-zukuri villages", note_en: "Japan's most-famous traditional village; UNESCO World Heritage 1995. 113 thatched-roof gasshō farmhouses, some still inhabited. Snow-covered Feb most iconic. Access via Nohi Bus from Takayama (50min)." },
+      { name_ja: "五箇山 (UNESCO WHS, Toyama)", name_en: "Gokayama gasshō villages", municipality: "南砺市", prefecture: "Toyama", category: "UNESCO WHS gasshō-zukuri villages (less-crowded sister)", note_en: "Quieter UNESCO WHS sister to Shirakawa-go (1995). 相倉 + 菅沼 villages preserve gasshō with continuous inhabitation. ~10% of Shirakawa-go visitor density." },
+      { name_ja: "祖谷 (徳島)", name_en: "Iya Valley (Tokushima)", municipality: "三好市", prefecture: "Tokushima", category: "remote mountain valley + vine bridges", note_en: "Tokushima inland mountain valley with かずら橋 (vine bridge); deep-valley terrain. Still has resident families living traditional lifestyle. Limited bus access." },
+      { name_ja: "妻籠宿 + 馬籠宿 (Nakasendo, Nagano/Gifu)", name_en: "Tsumago + Magome (Nakasendo post-towns)", municipality: "南木曽町・中津川市", prefecture: "Nagano / Gifu", category: "preserved Edo post-towns + walking trail", note_en: "Edo-era preserved Nakasendo post-towns; car-free wooden townscape. Paired via 8km Tsumago-Magome walking trail. Some residents still operate inns + shops in original buildings." },
+      { name_ja: "奈良井宿 (Nagano)", name_en: "Narai-juku (Nagano)", municipality: "塩尻市", prefecture: "Nagano", category: "Japan's longest preserved post-town (1km)", note_en: "Less-crowded sister to Tsumago; Japan's longest preserved post-town at 1km. JR Narai Station direct access." },
+      { name_ja: "前沢曲家集落 (Fukushima)", name_en: "Maezawa magariya village (奥会津)", municipality: "南会津町", prefecture: "Fukushima", category: "magariya farmhouse preservation village", note_en: "Cluster of L-shaped 'magariya' (horse-included) traditional Aizu farmhouses; 23 houses preserved. Very quiet, ~50 visitors/day." },
+      { name_ja: "檜枝岐村 (Fukushima)", name_en: "Hinoemata Village (Japan's smallest)", municipality: "檜枝岐村", prefecture: "Fukushima", category: "Japan's smallest village + Oze gateway", note_en: "Japan's smallest village by population (~500 residents); 200-year-old Hinoemata kabuki tradition (国指定 重要無形民俗文化財). Continuous traditional mountain lifestyle." },
+      { name_ja: "椎葉村 + 諸塚村 (Miyazaki)", name_en: "Shiiba Village + Morozuka Village (Miyazaki mountain)", municipality: "椎葉村・諸塚村", prefecture: "Miyazaki", category: "Kyushu mountain isolation", note_en: "Deep-Kyushu mountain villages; 椎葉村 preserves 平家落人 (Heike refugee) folklore + festivals. Limited bus access." },
+      { name_ja: "美山かやぶきの里 (Kyoto)", name_en: "Miyama Kayabuki-no-Sato (Kyoto mountain)", municipality: "南丹市", prefecture: "Kyoto", category: "thatched-roof preservation village", note_en: "50 thatched-roof farmhouses in a remote Kyoto-prefecture mountain valley; less-known than Shirakawa-go. Continued residential use." },
+    ];
+    result.canonical_remote_traditional_villages_note = "Hand-curated Japan remote / traditional mountain villages where residents still live the traditional lifestyle. **UNESCO WHS gasshō-zukuri**: 白川郷 + 五箇山. **Edo post-towns (Nakasendo)**: 妻籠 + 馬籠 + 奈良井. **Mountain valleys**: 祖谷 (Tokushima), 檜枝岐 (Fukushima — Japan's smallest village), 椎葉 (Miyazaki Heike folklore). **Thatched-roof preservation**: 美山かやぶきの里 (Kyoto), 前沢曲家 (Fukushima). All have continuous habitation + traditional craft / festival preservation.";
+  }
+  if (isSelfContradict) {
+    result.canonical_query_contradiction_advisory = {
+      detected_conflict: "Query contains contradictory constraints (e.g. 秘境 [secluded/off-the-beaten] + 人気 [popular] / 混雑 [crowded] for the same destination). These mutually exclusive attributes cannot coexist for a single recommendation.",
+      ask_user_to_clarify: [
+        "Do you want: (A) a TRULY secluded, low-traffic destination? (e.g. 椎葉村 in Miyazaki, 檜枝岐 in Fukushima, 祖谷 in Tokushima — all very remote)",
+        "Or: (B) a FAMOUS, crowded onsen-town experience? (e.g. 草津温泉, 別府温泉, 城崎温泉, 道後温泉 — high-traffic but well-served by transit)",
+      ],
+      no_canonical_destination: "There is no destination that satisfies BOTH 'completely secluded' AND 'most famous + crowded' simultaneously. The user-side agent should ask which dimension takes priority before recommending.",
+      practical_compromise: "If user wants 'famous-but-feels-secluded': try 山形 銀山温泉 (Taisho-era streetscape, well-known but compact + photogenic), 大分 黒川温泉 (famous but car-only access keeps day-trip crowds down), or 草津温泉 weekday off-season. Each compromises one constraint partially.",
+    };
+  }
+  if (isMiyajimaBarrierFree) {
+    result.canonical_miyajima_barrier_free = [
+      { name_ja: "JR西日本宮島フェリー", name_en: "JR West Miyajima Ferry", category: "JR Pass eligible + wheelchair-accessible boarding ramps", note_en: "10-min ferry crossing from 宮島口桟橋. Step-free terminal + accessible deck space + boarding ramps. JR Pass eligible." },
+      { name_ja: "厳島神社 (高潮時の回廊)", name_en: "Itsukushima Shrine (high-tide corridor)", category: "wheelchair-accessible at high tide", note_en: "Wooden shrine corridors are wheelchair-accessible at high tide only — at low tide, the seabed exposes and corridor access requires steps. **Check tide chart before visit**. Floating-torii view depends on tide too." },
+      { name_ja: "宮島ロープウェイ 紅葉谷駅", name_en: "Miyajima Ropeway Momijidani Station", category: "wheelchair-accessible to mid-station only", note_en: "Ropeway from 紅葉谷駅 to 獅子岩駅 is accessible; the further 30-min hike from 獅子岩 to Mt Misen summit is NOT wheelchair-accessible." },
+      { name_ja: "宮島島内 移動 + バリアフリーレンタル車椅子", name_en: "Miyajima island navigation + accessible rental wheelchairs", category: "rental wheelchair + accessible parking", note_en: "Miyajima Tourist Information Center offers free manual-wheelchair loan (limited availability — reserve via 宮島観光協会). Accessible toilets in shrine area + ropeway base + main street." },
+      { name_ja: "公式情報源 (Hatsukaichi City accessibility info)", name_en: "Hatsukaichi City Tourism — official accessibility info", url: "https://www.miyajima.or.jp/access/barrier_free.html", note_en: "Official Miyajima Tourism Association barrier-free access page; tide chart + accessibility map + wheelchair rental contact." },
+      { name_ja: "宮島水中花火大会 (秋) accessible viewing", name_en: "Miyajima Underwater Fireworks accessibility (Oct)", category: "seasonal event accessibility", note_en: "October fireworks festival; ferry-based accessible viewing recommended (limited shore-side wheelchair viewing area)." },
+    ];
+    result.canonical_miyajima_barrier_free_note = "Hand-curated Miyajima (厳島) wheelchair / barrier-free / fauteuil roulant access details. **JR Pass-eligible**: JR West Miyajima Ferry (step-free terminal + boarding ramps + accessible deck). **Tide-dependent**: 厳島神社 corridor is wheelchair-accessible at HIGH TIDE only — check tide chart before visit. **Partial Mt Misen**: ropeway accessible to mid-station; summit hike NOT accessible. **Free wheelchair loan**: Miyajima Tourist Info Center (reserve in advance). **Official resource URL**: https://www.miyajima.or.jp/access/barrier_free.html.";
   }
   if (isHokkaidoAllWeatherSH) {
     result.canonical_hokkaido_indoor_all_weather = [
