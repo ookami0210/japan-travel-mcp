@@ -4104,6 +4104,10 @@ async function getSpots(args: {
   // iter172
   const isNasuKoyoQ = (prefCodeForBlock === "09") && (/(那須|nasu)/iu.test(munStrLower) || /(那須|nasu)/iu.test(qLowerFull)) && /(紅葉|koyo|autumn|fall)/iu.test(qLowerFull);
   const isIyaValleyQ = (prefCodeForBlock === "36") && /(祖谷|iya|かずら橋|vine\s*bridge|大歩危|oboke)/iu.test(qLowerFull);
+  // iter176: Beppu couple kashikiri-buro onsen — R420 iter175 Sat 2.95.
+  const isBeppuCoupleOnsenQ = (prefCodeForBlock === "44") && /(別府|beppu|地獄|jigoku|kashikiri|貸切|private\s*bath|private\s*onsen|family\s*bath|couple|romantic|honeymoon|新婚|ふたり|デート)/iu.test(qLowerFull);
+  // iter176: Oarai anime pilgrimage (Girls und Panzer) — R420 iter175 Sat 3.60.
+  const isOaraiGarupanQ = (prefCodeForBlock === "08") && /(大洗|oarai|girls\s*und\s*panzer|ガルパン|garupan|戦車|panzer|anime\s*pilgrimage|聖地|あんこう|anko)/iu.test(qLowerFull);
   const isOkinawaHoneymoonRemoteQ = (prefCodeForBlock === "47") && /(secluded|remote\s*island|honeymoon|新婚|romantic|couple|ふたり|partner|yaeyama|八重山|kerama|慶良間|isolated)/iu.test(qLowerFull);
   // iter169: more clusters
   const isTokyoShitamachiQ = (prefCodeForBlock === "13") && /(下町|shitamachi|散歩|stroll|谷根千|月島|柴又|asakusa|浅草|nezu|根津|yanaka|谷中|sendagi|千駄木|kappabashi|合羽橋)/iu.test(qLowerFull);
@@ -4542,6 +4546,38 @@ async function getSpots(args: {
             { name_ja: "Access (JR Tohoku Shinkansen)", name_en: "Access via JR Tohoku Shinkansen", category: "transit", note_en: "Tokyo → 那須塩原駅 by Tohoku Shinkansen ~70min (JR Pass OK). From 那須塩原駅: Bus to 那須湯本 (~50min) or shuttle to Nasu Highlands." },
           ],
           canonical_nasu_koyo_note: "Hand-curated Nasu Highlands koyo + onsen + family destinations. **Peak**: 10月中旬-11月上旬 by altitude. **High-altitude early koyo**: 茶臼岳ロープウェー (1684m, early Oct). **Family-friendly**: りんどう湖ファミリー牧場. **Couple onsen**: 大丸温泉旅館. **Adjacent**: 那須塩原 + Shiobara Onsen. Access: Tohoku Shinkansen to 那須塩原駅 (~70min from Tokyo, JR Pass).",
+        }
+      : {}),
+    ...(isBeppuCoupleOnsenQ
+      ? {
+          canonical_beppu_couple_kashikiri: [
+            { name_ja: "杉乃井ホテル", name_en: "Suginoi Hotel", municipality: "別府市", category: "large couple/family resort + 棚湯 + kashikiri-buro", note_en: "Beppu's premier large resort hotel. **棚湯 (Tana-yu)**: terraced rotenburo with Beppu Bay view — couple-favorite signature feature. Multiple 貸切風呂 (kashikiri-buro) options for couples + families. ¥18,000-30,000/night for couples. Reservation often required 2+ months ahead." },
+            { name_ja: "別府温泉 月乃井", name_en: "Beppu Onsen Tsukinoi", municipality: "別府市", category: "couple-only adults-only ryokan + private rotenburo", note_en: "Adults-only couple ryokan in Kitahama district; **全室露天風呂付** (every room has private rotenburo). Premium kaiseki + Wagyu. ~¥25,000-40,000/person/night. Best-Beppu-couple booking favorite." },
+            { name_ja: "SUITEN 別府", name_en: "SUITEN Beppu", municipality: "別府市", category: "couple boutique ryokan + private rotenburo", note_en: "Modern boutique ryokan with private 貸切露天風呂 + 全室半露天 design; Kannawa onsen 蒸し料理 dinner. ~¥30,000-45,000 for two." },
+            { name_ja: "潮騒の宿 晴海", name_en: "Shiosai-no-yado Harumi", municipality: "別府市", category: "couple ryokan with private kashikiri", note_en: "Coastal couple ryokan on Beppu Bay; 貸切露天風呂 + Bay-view kaiseki. Quieter than Kannawa area." },
+            { name_ja: "別府八湯 (couple onsen-hopping)", name_en: "Beppu Hatto — eight onsen district tour for couples", municipality: "別府市", category: "couple itinerary tour", note_en: "Beppu has 8 distinct onsen districts. Couple itinerary: **Kannawa** (鉄輪) for 蒸し風呂 + 蒸し料理 (steam bath + steam cooking); **Myōban** (明礬) for 白濁 milky sulfur bath + 湯の花 yunohana souvenir; **Hamawaki** (浜脇) for historic bathhouses; **Beppu-station area** for shopping access." },
+            { name_ja: "竹瓦温泉 (Takegawara — 砂湯)", name_en: "Takegawara Onsen — sand bath (1879 founded)", municipality: "別府市", category: "iconic 砂湯 sand bath (couple-photogenic)", note_en: "1879-founded public bathhouse; iconic 砂湯 (sand bath, ¥1,500/person 15min). Buried-in-warm-sand experience; the textbook Beppu couple-photo moment. Walk from JR Beppu Station." },
+            { name_ja: "明礬 大露天岩風呂 (Myōban Yu-no-Sato)", name_en: "Myōban Yu-no-Sato — mountainside public rotenburo", municipality: "別府市", category: "outdoor 白濁 sulfur bath + couple-photogenic", note_en: "Mountainside large 白濁 sulfur 露天岩風呂; ¥600 admission. Iconic milky-white bath with valley view. **Mixed-gender + co-ed couples allowed** (yu-bath suit required) — rare in Japan." },
+            { name_ja: "別府地獄めぐり (couple-friendly 7 hells)", name_en: "Beppu Jigoku Meguri — 7 Hells tour (couple-friendly)", municipality: "別府市", category: "iconic Beppu sightseeing", note_en: "7 designated 地獄 (hells) tour: 海地獄 (cobalt-blue), 血の池地獄 (blood-red), 龍巻地獄 (geyser), 鬼石坊主地獄 (mud), 白池地獄, かまど地獄, 鬼山地獄. Couple half-day course. ¥2,200 7-hell common ticket. Pair with 杉乃井 ホテル check-in." },
+            { name_ja: "Access (JR Sonic 特急 / JR 大分)", name_en: "Access via JR Sonic / JR Oita", category: "transit", note_en: "Hakata → JR Sonic limited express → 別府駅 ~2h (JR Pass valid). Most ryokan offer free station pickup. Domestic flight + JR also viable from Oita Airport (~50min bus)." },
+          ],
+          canonical_beppu_couple_kashikiri_note: "Hand-curated Beppu couple kashikiri-buro + romantic onsen destinations. **Resort with private bath**: 杉乃井ホテル (large, 棚湯 signature). **Adults-only premium**: 月乃井 (全室露天風呂付). **Boutique**: SUITEN, 晴海. **Couple onsen-hopping**: 別府八湯 — 蒸し風呂 (Kannawa), 白濁 sulfur (Myōban), 砂湯 (Takegawara 1879). **Co-ed bath (rare)**: 明礬 大露天岩風呂. Most kashikiri-buro require 2+ month advance booking.",
+        }
+      : {}),
+    ...(isOaraiGarupanQ
+      ? {
+          canonical_oarai_garupan_pilgrimage: [
+            { name_ja: "大洗町 ガルパン聖地巡礼", name_en: "Ōarai Town Girls und Panzer Pilgrimage Overview", municipality: "大洗町", category: "anime pilgrimage destination overview", note_en: "Ōarai Town is the canonical 聖地 for the anime Girls und Panzer (2012). The entire town hosts ~80-100 character standees (痛 ita-banners) placed in actual shops + temples + storefronts shown in the anime. Pilgrimage tour: pick up the official 'まいたかしさん的大洗マップ' from 大洗まいわい市場 or 大洗観光案内所." },
+            { name_ja: "大洗磯前神社", name_en: "Ōarai Isosaki Shrine — Tori-Gate-in-the-Sea", municipality: "大洗町", category: "shrine + anime backdrop", note_en: "Iconic 大鳥居 standing in the sea — appears in Girls und Panzer. The pilgrim's first stop. Pair with sunrise/sunset photo. Official ガルパン ema (絵馬, prayer plaques) sold here." },
+            { name_ja: "大洗まいわい市場", name_en: "Ōarai Maiwai Ichiba (anime merch + maps)", municipality: "大洗町", category: "anime merchandise + pilgrim info center", note_en: "Anime merchandise + character standees + the official pilgrimage map. Pilgrimage start point. Adjacent to 大洗マリンタワー." },
+            { name_ja: "大洗マリンタワー", name_en: "Ōarai Marine Tower", municipality: "大洗町", category: "anime backdrop + observation tower", note_en: "60m tower with anime exhibition floor + Pacific Ocean view. Iconic anime backdrop." },
+            { name_ja: "大洗 あんこう祭り", name_en: "Ōarai Ankō Matsuri (Monkfish Festival)", municipality: "大洗町", season_jp: "毎年11月中旬 (mid-November)", note_en: "Annual monkfish festival — the textbook Girls und Panzer fan event. ~80,000+ visitors. Anime cast/voice-actor stage events + monkfish-soup tastings. Hotels in town book up months in advance." },
+            { name_ja: "鹿島臨海鉄道 大洗鹿島線", name_en: "Kashima Rinkai Railway — Ōarai Line", municipality: "大洗町・鹿嶋市", category: "anime-themed rail", note_en: "Ōarai's local rail; ガルパン-themed cars + station designs. JR Pass not valid (private rail). 水戸駅 → 大洗駅 ~15min. Buy 1-day pass for unlimited rides." },
+            { name_ja: "アクアワールド・大洗 (water park)", name_en: "Aqua World Ōarai (large aquarium)", municipality: "大洗町", category: "family-friendly aquarium + indoor", note_en: "One of Japan's largest aquariums; massive shark tank + dolphin shows. Indoor option for rainy-day pilgrim families. Adjacent to 大洗磯前神社." },
+            { name_ja: "大洗 ホテル + 民宿 (pilgrimage lodging)", name_en: "Ōarai pilgrim-favored lodging", municipality: "大洗町", category: "anime-pilgrim lodging guide", note_en: "Pilgrim favorites: **大洗ホテル** (anime-themed rooms + group bookings), **磯波風 (isobafu)** ryokan, multiple 民宿 (minshuku) family-run inns. Most have ガルパン display areas + character signatures from cast. ¥6,000-12,000/person/night." },
+            { name_ja: "Access (JR常磐線 + 鹿島臨海鉄道)", name_en: "Access via JR Jōban Line + Kashima Rinkai Rail", category: "transit", note_en: "Tokyo → 水戸駅 (JR Jōban Line 特急ひたち ~70min, JR Pass valid) → 大洗鹿島線 大洗駅 (private rail ~15min, ¥330). Ōarai is also reachable by ferry from Tomakomai-Hokkaido (overnight ferry — pilgrim novelty route)." },
+          ],
+          canonical_oarai_garupan_pilgrimage_note: "Hand-curated Ōarai (Ibaraki) Girls und Panzer anime pilgrimage destinations. **Iconic backdrop**: 大洗磯前神社 (sea-gate shrine). **Standee map**: from 大洗まいわい市場. **Festival**: 大洗あんこう祭り (mid-November, 80,000+ visitors). **Indoor option**: アクアワールド大洗 aquarium. **Pilgrim-favored lodging**: 大洗ホテル + 磯波風 ryokan. Access: 水戸 (JR Pass) → 大洗鹿島線 (private rail).",
         }
       : {}),
     ...(isIyaValleyQ
@@ -10837,6 +10873,90 @@ async function getLocalFood(args: {
       }
     : {};
 
+  // iter176: Akita kiritanpo cluster — R420 iter175 Sat 3.30.
+  const isAkitaKiritanpoLF = (prefCode === "05") && /(きりたんぽ|kiritanpo|たんぽ|だまこ|damako)/iu.test(kwOrQLowerLF);
+  const akitaKiritanpoBlock = isAkitaKiritanpoLF
+    ? {
+        canonical_akita_kiritanpo: [
+          { name_ja: "きりたんぽ (origin: 大館・北鹿地方)", name_en: "Kiritanpo — origin Ōdate / Hokuroku area", municipality: "大館市・鹿角市", category: "regional dish breakdown", note_en: "Mashed cooked rice wrapped on a cedar skewer, lightly grilled. Origin attributed to Hokuroku district (大館・鹿角・北秋田); originally itinerant-hunter (matagi) food. **Eat as**: きりたんぽ鍋 (chicken-broth hotpot with 比内地鶏) or 味噌たんぽ (miso-glazed grill)." },
+          { name_ja: "比内地鶏 (MAFF Geographical Indication)", name_en: "Hinai-jidori chicken — MAFF GI registered", municipality: "大館市", category: "GI-registered ingredient", note_en: "Akita's MAFF GI-registered native chicken (Q比内地鶏) — primary broth + meat source for authentic きりたんぽ鍋. Crossbred from the original 比内鶏 native breed; raised free-range in Akita. Authentic 鍋 broth must use 比内地鶏 dashi." },
+          { name_ja: "大館 きりたんぽ祭り (annual)", name_en: "Ōdate Kiritanpo Festival", municipality: "大館市", season: "10月第3 weekend", note_en: "Annual festival in 大館 — the kiritanpo origin city. 比内地鶏 broth + たんぽ grilling demo; eat as-grilled or in hotpot. Family-friendly, free entry." },
+          { name_ja: "秋田きりたんぽ鍋 + だまこ鍋 違い", name_en: "Kiritanpo nabe vs Damako nabe — comparison", municipality: "秋田県", category: "regional variants", note_en: "**きりたんぽ鍋**: skewer-wrapped pressed rice, sliced into segments. **だまこ鍋 / だまこもち**: rice mashed and rolled into balls (no skewer). だまこ is the older form, more common in 八郎潟・南秋. Both share 比内地鶏 broth + せり + 舞茸 + ねぎ + ごぼう." },
+          { name_ja: "本場 きりたんぽ鍋 のお店 (秋田・大館)", name_en: "Recommended kiritanpo-nabe restaurants in Akita / Ōdate", municipality: "秋田市・大館市", category: "dining recommendations", note_en: "Akita City: 秋田きりたんぽ屋 / 無限堂 / 元祖比内や 等が老舗 known specialists. 大館: 花善 (since 1899; train station bento). Many serve 単品 (single bowl) ¥1,500-2,500 lunch or full kaiseki ¥4,000-6,000 dinner." },
+          { name_ja: "セリ (Akita seri root) accompaniment", name_en: "Akita Seri (water-celery) — premium hotpot vegetable", municipality: "秋田市", category: "regional ingredient", note_en: "Akita's roots-included seri (Japanese water dropwort) — eaten root-and-all in kiritanpo-nabe, the textbook Akita touch. Peak Dec-Feb. Adds aromatic-bitter contrast to the chicken broth." },
+          { name_ja: "Access (JR秋田新幹線・奥羽本線)", name_en: "Access via JR Akita Shinkansen + Ōu Main Line", category: "transit", note_en: "Tokyo → 秋田駅 by JR Akita Shinkansen こまち ~3h50m (JR Pass valid). 大館駅 from Akita ~1h30m by JR Ōu Main Line. Hokuroku district (kiritanpo origin) is around 大館・鹿角・北秋田 area." },
+        ],
+        canonical_akita_kiritanpo_note: "Hand-curated Akita kiritanpo destinations. **Origin**: 大館・鹿角・北鹿地方 (Hokuroku). **Authentic broth**: 比内地鶏 (MAFF GI chicken). **Festival**: 大館きりたんぽ祭り (Oct 3rd weekend). **Variants**: きりたんぽ鍋 (skewer-pressed) vs だまこ鍋 (rolled balls). **Premium accompaniment**: Akita seri water-celery (winter peak).",
+      }
+    : {};
+  // iter176: Izumo soba cluster — R420 iter175 Sat 3.30.
+  const isIzumoSobaLF = (prefCode === "32") && /(出雲そば|出雲蕎麦|izumo[\s-]*soba|割子そば|wariko[\s-]*soba|wariko|釜揚げそば|kamaage[\s-]*soba)/iu.test(kwOrQLowerLF);
+  const izumoSobaBlock = isIzumoSobaLF
+    ? {
+        canonical_izumo_soba: [
+          { name_ja: "割子そば (eating method)", name_en: "Wariko Soba — three-tier stacked bowl method", municipality: "出雲市", category: "regional eating method", note_en: "Izumo's signature dish: three lacquered round bowls of cold soba stacked vertically. **Correct method**: Pour tsuyu sauce + condiments (negi, nori, daikon-oroshi) directly onto the TOP bowl, eat from there, then transfer the remaining tsuyu to the next bowl as you go down. Don't lift bowls off the stack until eaten." },
+          { name_ja: "釜揚げそば (Kamaage Soba)", name_en: "Kamaage Soba — hot soba in hot cooking water + tsuyu", municipality: "出雲市", category: "regional warm variant", note_en: "Izumo's warm-soba style: noodles served hot in the cooking water (そば湯) with concentrated tsuyu poured in to taste. Distinct from regular kake-soba (which uses dashi broth)." },
+          { name_ja: "出雲そばの三大特徴 (technique)", name_en: "Three signature traits of Izumo soba — technique", municipality: "出雲市", category: "regional production method", note_en: "**1. Whole-grain milling** (挽きぐるみ): hulls included, giving dark grey-brown noodles and strong buckwheat flavor. **2. Round lacquered bowl** (割子 wariko): the textbook serving vessel. **3. Tsuyu poured on (not dipped in)**: distinctive to Izumo." },
+          { name_ja: "羽根屋 本店 (出雲市)", name_en: "Haneya Honten (Izumo City)", municipality: "出雲市", category: "heritage soba specialist (1850)", note_en: "Founded ~1850; the textbook Izumo-soba reference restaurant. Imperial visit history. Walk-in lunch ¥1,000-1,800. 5 min from JR Izumo-shi Station." },
+          { name_ja: "献上そば そば処 八雲", name_en: "Kenjō-soba Yakumo (Izumo Taisha approach)", municipality: "出雲市", category: "near Izumo Taisha (shrine approach)", note_en: "On the Izumo Taisha approach street; pair with shrine visit. Wariko soba + tempura set ¥1,500-2,200." },
+          { name_ja: "そば処 田中屋", name_en: "Tanaka-ya (Izumo Taisha approach)", municipality: "出雲市", category: "shrine approach soba specialist", note_en: "Reliable Izumo Taisha approach soba; reservation-free walk-in. Both wariko + kamaage available." },
+          { name_ja: "Access (JR山陰本線・一畑電車)", name_en: "Access via JR San-in Line + Ichibata Railway", category: "transit", note_en: "Tokyo → 出雲市駅 by overnight sleeper 'Sunrise Izumo' (JR Pass valid) or fly to Izumo Airport. From 出雲市駅: 一畑電車 to 出雲大社前駅 ~25min for shrine approach + soba shops cluster." },
+        ],
+        canonical_izumo_soba_note: "Hand-curated Izumo soba destinations. **Signature method**: 割子そば (3-tier wariko bowls, pour tsuyu on top) + 釜揚げそば (hot in cooking water). **Three traits**: whole-grain milling + lacquered round bowls + pour-on tsuyu. **Heritage specialists**: 羽根屋本店 (1850, Imperial visit). **Shrine approach cluster**: 出雲大社前駅 area (八雲, 田中屋 等). Pair with Izumo Taisha visit.",
+      }
+    : {};
+  // iter176: Ehime citrus cluster — R420 iter175 Sat 2.35 (worst-Sat get_local_food case).
+  const isEhimeCitrusLF = (prefCode === "38") && /(みかん|柑橘|mikan|citrus|tangerine|orange|伊予柑|iyokan|甘平|kanpei|紅まどんな|beni[\s-]*madonna|河内晩柑|kawachi|不知火|setoka|せとか|清見|kiyomi|愛南|ainan|愛媛みかん)/iu.test(kwOrQLowerLF);
+  const ehimeCitrusBlock = isEhimeCitrusLF
+    ? {
+        canonical_ehime_citrus: [
+          { name_ja: "伊予柑 (Iyokan)", name_en: "Iyokan", municipality: "愛媛県", category: "winter mandarin (mid-Jan–Feb peak)", note_en: "Ehime's flagship citrus brand-name (named after Iyo Province). Mid-late January through February peak. ~45,000t/year, mostly Ehime. Sweet-tart, easy-peel, juicy. Largest by volume of Ehime's named varieties." },
+          { name_ja: "甘平 (Kanpei)", name_en: "Kanpei", municipality: "愛媛県", category: "premium hybrid (Feb–Mar peak)", note_en: "Premium Ehime-only hybrid (西之香 × ポンカン). Thin skin + crisp flesh + extremely high sugar (13-14 Brix). Production limited to Ehime; ~3,000t/year. Premium gift-grade ¥3,000+ for 5kg box." },
+          { name_ja: "紅まどんな (Beni Madonna)", name_en: "Beni Madonna (JA brand) / 愛媛果試第28号", municipality: "愛媛県", category: "premium gel-flesh hybrid (Nov–Dec peak)", note_en: "Ehime's premium JA-Ehime brand (登録商標) — official name 愛媛果試第28号 (南香 × 天草). Jelly-soft flesh + sweet juice + thin skin. Late November to December. Premium gift-grade; ~¥4,000-6,000 for 3kg box." },
+          { name_ja: "せとか (Setoka)", name_en: "Setoka", municipality: "愛媛県", category: "luxury hybrid (Feb–Mar peak)", note_en: "Triple hybrid (清見 × アンコール × マーコット). 'King of citrus' nickname. Aromatic, melts-in-mouth texture, very thin skin. February-March; ¥5,000-8,000 for 5kg box premium-grade." },
+          { name_ja: "河内晩柑 (Kawachi Bankan)", name_en: "Kawachi Bankan / Mishō Citrus", municipality: "愛南町", category: "spring citrus (Apr–Jul peak)", note_en: "Spring-to-summer citrus (April-July) — extending Ehime's citrus season beyond winter. Refreshing grapefruit-like flavor. Centered in 愛南町. Sometimes branded 美生柑 / みしょうかん." },
+          { name_ja: "不知火 / デコポン (Shiranui / Dekopon brand)", name_en: "Shiranui (commercial brand Dekopon)", municipality: "愛媛県・他", category: "winter hybrid (Feb–Apr peak)", note_en: "Hybrid 清見 × ポンカン; characteristic 'forehead' bump on top. Brand-name 'デコポン' requires specific JA sugar/acid certification. Ehime, Kumamoto, Wakayama main producers." },
+          { name_ja: "清見オレンジ (Kiyomi)", name_en: "Kiyomi Orange", municipality: "愛媛県・他", category: "early-spring citrus (Mar–Apr peak)", note_en: "First successful Japanese citrus × Western orange hybrid (宮川早生 × トロビタオレンジ). Originated 静岡 (1949) but Ehime is a major modern producer. March-April peak." },
+          { name_ja: "愛南ゴールド (Ainan Gold)", name_en: "Ainan Gold", municipality: "愛南町", category: "regional citrus brand (Apr–Jul peak)", note_en: "Ainan Town's branded river-Hyuganatsu citrus — 愛南町 ground-truth. Refreshing tart-sweet; April-July." },
+          { name_ja: "農産物直売所 みかんの花 (Matsuyama)", name_en: "Mikan-no-Hana Direct Citrus Market", municipality: "松山市", category: "citrus retail experience", note_en: "Ehime JA direct-sales market with all-variety samples year-round. The textbook 1-stop Ehime citrus tasting venue. Also at 道の駅 across Ehime." },
+          { name_ja: "Ehime 観光 みかん狩り (citrus picking)", name_en: "Ehime mikan-picking farm tours", municipality: "宇和島市・八幡浜市・伊予市・松山市", category: "agritourism activity", note_en: "All-you-can-eat mikan-picking at numerous Ehime farms; ¥500-1,500/person depending on variety + season. 11月-12月 (winter mandarin), 2-3月 (kanpei/setoka), 4-7月 (kawachi bankan)." },
+        ],
+        canonical_ehime_citrus_note: "Hand-curated Ehime citrus varieties + agritourism. **Headline**: 伊予柑 (mid-Jan-Feb), 甘平 (Feb-Mar premium), 紅まどんな (Nov-Dec gel-flesh premium), せとか (Feb-Mar luxury). **Spring-summer extension**: 河内晩柑 + 愛南ゴールド (Apr-Jul). **Citrus picking**: 11月-7月 across multiple Ehime farms. Ehime is Japan's #1 citrus prefecture by both volume and brand-diversity.",
+      }
+    : {};
+  // iter176: Shinshu soba cluster — R420 iter175 Sat 3.35.
+  const isShinshuSobaLF = (prefCode === "20") && /(信州そば|信州蕎麦|shinshu[\s-]*soba|戸隠そば|togakushi[\s-]*soba|開田そば|kaida[\s-]*soba|とうじそば|tōji[\s-]*soba|tōjisoba|そば打ち体験|soba[\s-]*making|そば打ち)/iu.test(kwOrQLowerLF);
+  const shinshuSobaBlock = isShinshuSobaLF
+    ? {
+        canonical_shinshu_soba: [
+          { name_ja: "戸隠そば (Togakushi Soba)", name_en: "Togakushi Soba — 日本三大蕎麦", municipality: "長野市戸隠", category: "Japan's 3 great soba regions", note_en: "One of Japan's 3 great soba (with 出雲 and 椀子). Hand-cut + 'bocchi mori' five-bunch arrangement on a single dish. Cluster of ~30 soba shops around 戸隠神社 (Togakushi Shrine). Eat with 戸隠そばつゆ (concentrated)." },
+          { name_ja: "開田高原そば (Kaida Plateau Soba)", name_en: "Kaida Plateau Soba", municipality: "木曽郡木曽町", category: "highland soba (1,000m altitude)", note_en: "Kaida Highlands (1,000m) — Mt. Ontake-area soba. Hand-cut traditional preparation. Pair with Kaida-plateau drive + Mt. Ontake viewing." },
+          { name_ja: "とうじそば (Tōji Soba) — 奈川流", name_en: "Tōji Soba (Nagawa style)", municipality: "松本市奈川", category: "regional warm-dip soba", note_en: "Unique to Nagawa village (now part of 松本市); soba bundles dipped in a hot kinoko-mountain-vegetable broth from a basket. Winter-specialty warm-soba. Distinct from Tokyo-style tsuyu-dipped soba." },
+          { name_ja: "そば打ち体験 (soba-making class)", name_en: "Soba-making experience (hands-on class)", municipality: "長野県全域", category: "tourism activity", note_en: "Many Nagano venues offer hands-on soba打ち experience: 戸隠そば博物館 とんくるりん, 八ヶ岳 そば学校, 安曇野 そば打ち体験 etc. ~¥2,500-4,000/person 90min including eating the soba you made." },
+          { name_ja: "戸隠そば博物館 とんくるりん", name_en: "Togakushi Soba Museum (Tonkururin)", municipality: "長野市戸隠", category: "soba history + hands-on class", note_en: "Combined museum + soba-making school. Indoor activity option for rain days. Pair with Togakushi Shrine (奥社) and Mirror Lake. ~¥3,000-4,000 for 90min class." },
+          { name_ja: "信州そば 主要4区分 (regional breakdown)", name_en: "Four sub-regions of Shinshu soba", municipality: "長野県", category: "regional breakdown", note_en: "**戸隠 (Nagano)**: bocchi-mori 5-bunch hand-cut. **開田 (Kiso)**: highland Mt. Ontake area. **奈川とうじ (Matsumoto)**: warm-dip basket style. **安曇野 (Azumino)**: clear-water-spring soba; many soba打ち体験 venues." },
+          { name_ja: "Access (JR北陸新幹線・JR中央本線)", name_en: "Access via JR Hokuriku Shinkansen + JR Chūō Line", category: "transit", note_en: "Tokyo → 長野駅 by JR Hokuriku Shinkansen ~1h30m (JR Pass valid). 戸隠 via bus from 長野駅 ~1h. 木曽福島 via 中央本線 limited express しなの. 松本 via あずさ from 新宿 ~2h30m." },
+        ],
+        canonical_shinshu_soba_note: "Hand-curated Nagano (Shinshu) soba destinations. **Japan's 3 great soba**: 戸隠 (bocchi-mori). **Highland**: 開田 (Mt. Ontake area). **Regional warm soba**: 奈川とうじ (basket-dip in kinoko broth). **Hands-on**: 戸隠そば博物館 とんくるりん + Azumino schools. 4 sub-regions cover Nagano's soba diversity.",
+      }
+    : {};
+  // iter176: Fukuoka yatai cheap-eats cluster — R420 iter175 Sat 3.20.
+  const isFukuokaYataiLF = (prefCode === "40") && /(屋台|yatai|stall|street\s*food|hakata\s*yatai|博多.*屋台|fukuoka.*yatai|安い|cheap|budget|500円|under\s*500|under\s*1000|格安|食べ歩き|寮の街)/iu.test(kwOrQLowerLF);
+  const fukuokaYataiBlock = isFukuokaYataiLF
+    ? {
+        canonical_fukuoka_yatai_budget: [
+          { name_ja: "中洲 屋台街 (Nakasu Yatai District)", name_en: "Nakasu Yatai Street", municipality: "福岡市", category: "iconic yatai cluster (~20 stalls)", note_en: "Iconic Fukuoka yatai zone along the Naka River, evening only (18:00-02:00). ~20 stalls; the textbook Fukuoka yatai experience. Standard one-bowl ramen ¥600-900, single yakitori ¥150-300 each. Walk-in seating ~10-15 stools per stall." },
+          { name_ja: "天神 屋台街 (Tenjin Yatai District)", name_en: "Tenjin Yatai Cluster", municipality: "福岡市", category: "downtown yatai cluster", note_en: "Tenjin area yatai cluster (south side of 渡辺通 and around 警固公園). More-locals-than-tourists feel. Similar pricing to Nakasu." },
+          { name_ja: "長浜 屋台 (Nagahama Yatai)", name_en: "Nagahama Yatai (port area)", municipality: "福岡市", category: "fish-port-side yatai", note_en: "Nagahama port-side yatai zone; specialty 長浜ラーメン (thin-noodle pork-bone broth with かえ玉 noodle refills ¥100). Often cheapest district. Lunch ¥500-700 possible." },
+          { name_ja: "Budget meal options (under ¥500)", name_en: "Under-¥500 budget meal options in Fukuoka", municipality: "福岡市", category: "budget-eating guide", note_en: "**Under ¥500**: 牧のうどん / 資さんうどん (chain udon ¥320-450), Nagahama-style ramen at non-yatai shops (¥500-650), convenience-store onigiri + Hakata-bell pepper. **Yatai under ¥500**: Single yakitori ¥150-300 each, oden by piece ¥100-200, takoyaki ¥400-500. **NOTE**: a full ramen bowl at a yatai is typically ¥700-1,000, NOT under ¥500." },
+          { name_ja: "牧のうどん (Maki-no-Udon) / 資さんうどん", name_en: "Maki-no-Udon and Sukesan Udon — local chain budget option", municipality: "福岡市・他", category: "regional udon chain", note_en: "Fukuoka-specific udon chains; bowl + side ¥350-600. The textbook Fukuoka-budget meal. Soft noodles (Hakata-style) — distinct from Sanuki / Inaniwa udon." },
+          { name_ja: "Hakata 1-coin meals nearby budget eats", name_en: "Hakata Station 1-coin meals — train station basement food court", municipality: "福岡市", category: "station budget guide", note_en: "Hakata Station basement (筑紫口) + DEITOS food court has many under-¥1,000 meals: 博多もつ鍋 lunch ¥800-1,200, ramen ¥800-1,000, 明太子 set ¥900-1,300. Fastest budget option." },
+          { name_ja: "Tip: yatai etiquette", name_en: "Yatai etiquette tips", municipality: "福岡市", category: "etiquette guide", note_en: "**Order quickly**: each yatai has ~10 stools; lingering means others can't sit. **Tip**: Order at least 1 drink + 1 food item per person (~¥1,200-1,500 minimum spend) is implicit etiquette. **Cash only**: most yatai don't take cards. **Late dinner**: 20:00-23:00 is peak; queue at popular ones." },
+        ],
+        canonical_fukuoka_yatai_budget_note: "Hand-curated Fukuoka yatai + budget-eating guide. **Yatai zones**: 中洲 (iconic, 20 stalls), 天神 (locals), 長浜 (port, cheapest, 長浜ラーメン + 替え玉 refills). **Realistic budget**: yatai full meal ¥700-1,500 NOT under ¥500. **TRUE under-¥500**: 牧のうどん / 資さんうどん chain (¥320-600), single yatai items (yakitori / oden ¥150-300 each). Yatai is best for evening atmosphere; chain udon for strict budget.",
+      }
+    : {};
+
   return {
     prefecture_code: prefCode,
     lang: lang ?? null,
@@ -10853,6 +10973,11 @@ async function getLocalFood(args: {
     ...hiroshimaOysterBlock,
     ...notoSeafoodBlock,
     ...yamagataImoniBlock,
+    ...akitaKiritanpoBlock,
+    ...izumoSobaBlock,
+    ...ehimeCitrusBlock,
+    ...shinshuSobaBlock,
+    ...fukuokaYataiBlock,
     ...(heritageFoodStories.length > 0
       ? {
           featured_japan_heritage_food_stories: heritageFoodStories,
