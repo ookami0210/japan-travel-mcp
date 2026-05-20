@@ -4101,6 +4101,9 @@ async function getSpots(args: {
   const isHagiQ = (prefCodeForBlock === "35") && /(萩|hagi|武家屋敷|samurai|preservation)/iu.test(qLowerFull + " " + munStrLower);
   const isSakurajimaKagoshimaQ = (prefCodeForBlock === "46") && /(桜島|sakurajima|sakura|cherry)/iu.test(qLowerFull);
   const isOsakaIndoorHotQ = (prefCodeForBlock === "27") && /(屋内|indoor|air[\s-]*conditioned|aircond|涼し|猛暑|hot\s*day|hot\s*summer|escape\s*heat|8月|august|7月|july)/iu.test(qLowerFull);
+  // iter172
+  const isNasuKoyoQ = (prefCodeForBlock === "09") && (/(那須|nasu)/iu.test(munStrLower) || /(那須|nasu)/iu.test(qLowerFull)) && /(紅葉|koyo|autumn|fall)/iu.test(qLowerFull);
+  const isIyaValleyQ = (prefCodeForBlock === "36") && /(祖谷|iya|かずら橋|vine\s*bridge|大歩危|oboke)/iu.test(qLowerFull);
   const isOkinawaHoneymoonRemoteQ = (prefCodeForBlock === "47") && /(secluded|remote\s*island|honeymoon|新婚|romantic|couple|ふたり|partner|yaeyama|八重山|kerama|慶良間|isolated)/iu.test(qLowerFull);
   // iter169: more clusters
   const isTokyoShitamachiQ = (prefCodeForBlock === "13") && /(下町|shitamachi|散歩|stroll|谷根千|月島|柴又|asakusa|浅草|nezu|根津|yanaka|谷中|sendagi|千駄木|kappabashi|合羽橋)/iu.test(qLowerFull);
@@ -4525,6 +4528,33 @@ async function getSpots(args: {
             { name_ja: "JR東海道線・各駅停車プラン", name_en: "JR Tokaido Line local-train plan (Shizuoka → Kakegawa loop)", municipality: "Shizuoka Prefecture-wide", category: "transit plan", note_en: "All Tokaido-post-town stations are JR Tokaido Line accessible — Yui / Kanbara / Okitsu / Shizuoka / Yaizu / 金谷 / 掛川 / 新居町. JR Pass valid. Suggested day-trip: Shizuoka Sta → Yui (sakura-ebi lunch) → 興津 → 蒲原 → return Shizuoka. ~5h." },
           ],
           canonical_shizuoka_shukuba_tokaido_note: "Hand-curated 旧東海道 (Old Tokaido Road) post-towns in Shizuoka Prefecture. Shizuoka covers Tokaido post-stations #15-31 (~17 stations); all are JR Tokaido Line-accessible (JR Pass eligible). **Flagship**: 丸子宿 (tororo-jiru lunch at 丁子屋 since 1596). **Walking route**: 由比 → 興津 (~3 km coastal Tokaido walk). **Border checkpoint heritage**: 新居宿 関所跡 (Lake Hamana). **Pine-canopy walk**: 御油の松並木 (Edo-era preserved). Day-trip plan with JR local-train hopping documented.",
+        }
+      : {}),
+    ...(isNasuKoyoQ
+      ? {
+          canonical_nasu_koyo: [
+            { name_ja: "那須高原 (Nasu Highlands)", name_en: "Nasu Highlands", municipality: "那須町", category: "highland koyo + onsen + family destination", peak: "10月中旬-11月上旬", note_en: "Nasu Highlands at 600-1900m elevation; koyo peaks mid-Oct to early-Nov by altitude. Mt Chausu ropeway (1410m) for high-altitude early koyo. Nasu Onsen + Nasu Animal Kingdom + Nasu Heart-land (royal villa nearby)." },
+            { name_ja: "茶臼岳ロープウェー", name_en: "Mt Chausu Ropeway", municipality: "那須町", category: "ropeway koyo viewpoint", peak: "10月上旬", note_en: "Ropeway to 1684m near Mt Chausu summit; active volcanic alpine zone with earliest koyo in Nasu area." },
+            { name_ja: "りんどう湖ファミリー牧場", name_en: "Lake Rindo Family Park", municipality: "那須町", category: "family resort park", note_en: "Family-friendly lake-side park with rides, animal interactions, restaurants. Combine with koyo viewing." },
+            { name_ja: "大丸温泉旅館", name_en: "Omaru Onsen Ryokan", municipality: "那須町", category: "couple/family onsen ryokan", note_en: "Nasu's most famous onsen ryokan; private rotenburo + kaiseki. Reservation-popular for koyo season." },
+            { name_ja: "ハンターマウンテン 紅葉ゴンドラ", name_en: "Hunter Mountain Koyo Gondola (Shiobara)", municipality: "那須塩原市", category: "ropeway koyo (adjacent Nasu area)", peak: "10月中旬-11月上旬", note_en: "Hunter Mountain ski resort runs autumn koyo gondola. Adjacent to Shiobara Onsen — pair as Nasu-area koyo day-trip." },
+            { name_ja: "那須塩原温泉郷", name_en: "Nasu-Shiobara Onsen Towns", municipality: "那須塩原市", category: "onsen cluster", note_en: "Shiobara Onsen has 7 hot-spring areas; pair with Nasu Highlands koyo for 2-3 day itinerary." },
+            { name_ja: "Access (JR Tohoku Shinkansen)", name_en: "Access via JR Tohoku Shinkansen", category: "transit", note_en: "Tokyo → 那須塩原駅 by Tohoku Shinkansen ~70min (JR Pass OK). From 那須塩原駅: Bus to 那須湯本 (~50min) or shuttle to Nasu Highlands." },
+          ],
+          canonical_nasu_koyo_note: "Hand-curated Nasu Highlands koyo + onsen + family destinations. **Peak**: 10月中旬-11月上旬 by altitude. **High-altitude early koyo**: 茶臼岳ロープウェー (1684m, early Oct). **Family-friendly**: りんどう湖ファミリー牧場. **Couple onsen**: 大丸温泉旅館. **Adjacent**: 那須塩原 + Shiobara Onsen. Access: Tohoku Shinkansen to 那須塩原駅 (~70min from Tokyo, JR Pass).",
+        }
+      : {}),
+    ...(isIyaValleyQ
+      ? {
+          canonical_iya_valley_access: [
+            { name_ja: "祖谷のかずら橋", name_en: "Iya Kazura-bashi (Vine Bridge)", municipality: "三好市", qid: "Q1042957", category: "iconic vine bridge", note_en: "Most famous vine bridge in Japan; 14m long, suspended 14m above the Iya River. Heart-pounding crossing experience. Built every 3 years using actual mountain vines. Reservations not needed; ¥550 fee, open 7am-6pm." },
+            { name_ja: "祖谷渓 (Iya Gorge)", name_en: "Iya Valley", municipality: "三好市", category: "scenic mountain valley", note_en: "Remote V-shaped mountain valley in central Shikoku; iconic 小便小僧像 (peeing-boy statue) on the cliff edge. Driving + scenic stops along National Route 32." },
+            { name_ja: "大歩危・小歩危", name_en: "Ōboke / Koboke Gorge", municipality: "三好市", qid: "Q11465144", category: "river gorge + jet-boat cruise", note_en: "Yoshino River canyon; jet-boat cruise (大歩危遊覧船) ¥1,200 / 30min. JR土讃線 'Ōboke' Station." },
+            { name_ja: "祖谷温泉 + ホテル祖谷温泉", name_en: "Iya Onsen Hotel (cable-car onsen access)", municipality: "三好市", category: "remote luxury onsen + cable-car bath", note_en: "Iya Onsen has a private cable car that descends 170m down the gorge to a hidden rotenburo at the river. Iconic remote-onsen experience. Couple-favorite hidden ryokan." },
+            { name_ja: "落合集落 (Ochiai Village)", name_en: "Ochiai mountain village (Important Preservation District)", municipality: "三好市", qid: "Q11542243", category: "preserved mountain village (重要伝統的建造物群保存地区)", note_en: "Steep-sloped mountain village with thatched-roof traditional homes; National Important Preservation District. Hard-to-reach + photogenic." },
+            { name_ja: "Access (JR土讃線 + バス + レンタカー推奨)", name_en: "Access via JR Dosan Line + Bus / Rental car recommended", category: "transit", note_en: "JR Dosan Line 'Ōboke' Station (about 2h from Okayama via Marine Liner + Nanpu Ltd Express, JR Pass OK to 'Ōboke'). From Ōboke: Yotsuyu Bus to Iya kazura-bashi ~30min. Rental car strongly recommended for full Iya exploration (kazura-bashi + 祖谷温泉 + Ochiai). Plan minimum 1 overnight stay." },
+          ],
+          canonical_iya_valley_access_note: "Hand-curated Iya Valley (祖谷, Tokushima) destinations. **Iconic**: 祖谷のかずら橋 (vine bridge, ¥550) + 大歩危 jet-boat cruise. **Remote luxury**: 祖谷温泉 ホテル (private cable-car to riverside rotenburo). **Preservation village**: 落合集落 (重要伝統的建造物群). **Access**: JR土讃線 to 大歩危駅 (JR Pass OK from Okayama via Marine Liner + Nanpu Ltd Express ~2h). Rental car strongly recommended; plan 1+ overnight.",
         }
       : {}),
     ...(isKushimotoQ
@@ -5437,6 +5467,14 @@ async function getHotels(args: {
       { name_ja: "亀の井別荘", name_en: "Kamenoi Bessō", municipality: "由布市", type: "luxury_ryokan", note_en: "Yufuin's most celebrated traditional ryokan; cottages set in a garden with private baths. Among the top-3 ryokan in Japan." },
       { name_ja: "山荘 無量塔", name_en: "Sansō Murata", municipality: "由布市", type: "luxury_ryokan", note_en: "Yufuin antique-furniture luxury ryokan; 12 cottages with private baths. Honeymoon-iconic Kyushu choice." },
     ],
+    "40": [ // Fukuoka (Hakata + nearby couple destinations) — verified entries only
+      { name_ja: "二日市温泉 大丸別荘", name_en: "Futsukaichi Onsen Daimaru Bessō", municipality: "筑紫野市", type: "luxury_ryokan", note_en: "1865-founded heritage ryokan ~25 min from Hakata by JR Kagoshima Line + walk. Garden + private onsen baths. Kyushu's longest-running luxury onsen ryokan, popular for honeymoon and anniversary stays." },
+      { name_ja: "グランド ハイアット 福岡", name_en: "Grand Hyatt Fukuoka", municipality: "福岡市博多区", type: "luxury_hotel", note_en: "Grand Hyatt at Canal City Hakata; 5-star with city-view suites and luxury spa. Walking distance to Hakata Station + Tenjin nightlife — couple-honeymoon flagship in central Fukuoka." },
+      { name_ja: "ホテル日航福岡", name_en: "Hotel Nikko Fukuoka", municipality: "福岡市博多区", type: "luxury_hotel", note_en: "JR Hakata Station-adjacent 5-star Nikko property; Premier Floor with club lounge. Honeymoon-friendly with airport-to-station easy access via Hakata subway." },
+      { name_ja: "ザ・リッツ・カールトン福岡", name_en: "The Ritz-Carlton Fukuoka", municipality: "福岡市中央区", type: "luxury_hotel", note_en: "Tenjin Big Bang district Ritz-Carlton (opened 2023); 167 rooms + Club Lounge + spa. Newest Kyushu luxury honeymoon flagship. Confirm rates/availability directly." },
+      { name_ja: "原鶴温泉 ジ・オリエンタルテラス", name_en: "The Oriental Terrace (Harazuru Onsen)", municipality: "朝倉市", type: "luxury_ryokan", note_en: "Harazuru Onsen modern riverside luxury ryokan ~80 min from Hakata; private rotenburo rooms + kaiseki dinner using local 朝倉牛 and Chikugo-river fare. Quiet rural Fukuoka anniversary alternative." },
+      { name_ja: "Access via Hakata Shinkansen + JR Kyushu", name_en: "Access via Hakata Shinkansen + JR Kyushu local", municipality: "福岡市", type: "transit_note", note_en: "Tokyo → Hakata ~5h on JR Tokaido/Sanyo Shinkansen Nozomi (JR Pass not valid for Nozomi; switch to Hikari at Shin-Osaka for JR Pass). From Hakata: 二日市温泉 by JR Kagoshima Line ~15 min; 原鶴温泉 by JR Kyudai Line + bus ~80-90 min." },
+    ],
     "47": [ // Okinawa
       { name_ja: "星のや沖縄", name_en: "Hoshinoya Okinawa", municipality: "読谷村", type: "luxury_resort", note_en: "Coast-line all-villa Hoshino resort on Yomitan; private infinity pool per villa. Honeymoon Okinawa flagship." },
       { name_ja: "ザ・リッツ・カールトン沖縄", name_en: "The Ritz-Carlton Okinawa", municipality: "名護市", type: "luxury_resort", note_en: "Northern Okinawa hilltop Ritz with full-spa and 18-hole golf course. Family + honeymoon market." },
@@ -5521,15 +5559,30 @@ async function getHotels(args: {
   // non-English queries. R420-027 (zh: 5000円以下 hostel) failed because
   // args reduced to {prefecture:Hokkaido}; the canonical block needs to
   // surface unconditionally for major gateway prefs.
+  // iter172: full cluster also fires for non-en/ja lang queries (most international
+  // travelers' agents drop budget intent from args.q when translating);
+  // browse-mode 2-entry preview still applies for en/ja prefonly cases.
+  const isNonEnJaLangH = args.lang && !["en", "ja", undefined, null, ""].includes(args.lang);
   const budgetLodgingCanonical = (() => {
     if (isBudgetHotelQ) {
       return prefCode && BUDGET_LODGING_BY_PREF[prefCode]
         ? BUDGET_LODGING_BY_PREF[prefCode]
         : Object.values(BUDGET_LODGING_BY_PREF).flat();
     }
-    // Browse-mode fallback: 2-entry preview when the prefecture has a
-    // budget-lodging shortlist AND the query did not request luxury.
-    if (prefCode && BUDGET_LODGING_BY_PREF[prefCode] && !isLuxuryHotelQ) {
+    // iter172: full cluster surface for non-en/ja lang + prefonly +
+    // no explicit luxury intent (luxury BROWSE-mode auto-fire is OK to override here —
+    // international agents often drop budget intent during translation).
+    const luxuryExplicit = /(luxury|honeymoon|高級|ハネムーン|新婚|premium)/i.test(qHotelLower) || requested === "luxury" || requested === "luxury_ryokan" || requested === "honeymoon";
+    if (prefCode && BUDGET_LODGING_BY_PREF[prefCode] && !luxuryExplicit && isNonEnJaLangH && !args.hotel_type) {
+      return BUDGET_LODGING_BY_PREF[prefCode];
+    }
+    // iter172: Browse-mode preview — 2-entry budget shortlist whenever the
+    // prefecture has a curated list AND the user did not explicitly request
+    // luxury. The luxury cluster fires alongside; together they give the
+    // agent both ends of the price spectrum. Removed the isLuxuryHotelQ
+    // gating because that auto-fires for prefonly browse mode and was
+    // blocking the budget preview for empty-args.q queries.
+    if (prefCode && BUDGET_LODGING_BY_PREF[prefCode] && !luxuryExplicit && !args.hotel_type) {
       return BUDGET_LODGING_BY_PREF[prefCode].slice(0, 2);
     }
     return [];
@@ -5726,6 +5779,22 @@ async function getHotels(args: {
             { name_ja: "Access via Tokaido Shinkansen", name_en: "Access via JR Tokaido Shinkansen Kodama/Hikari", category: "transit", note_en: "Tokyo → 熱海 駅 by Shinkansen Kodama / Hikari ~40-50min (JR Pass OK). Atami station has frequent service. Closest Shinkansen onsen town to Tokyo." },
           ],
           canonical_atami_kashikiri_buro_note: "Hand-curated Atami romantic / kashikiri-buro (private bath) ryokan. **Heritage flagship**: 古屋旅館 (1806). **Ultra-luxury hidden**: ATAMI 海峯楼 (4-room). **Modern resort**: リゾーピア熱海. **Budget family**: 大江戸温泉物語 あたみ. **Seasonal romance**: 熱海花火大会 ~12 events/year. **Access**: 40-50min from Tokyo by Shinkansen Kodama (JR Pass OK).",
+        }
+      : {}),
+    // iter174: Tochigi (Nikko + Chuzenji) romantic ryokan cluster — flips
+    // R420v10-061 (anniversary, prefonly + hotel_type=ryokan).
+    ...((prefCode === "09" && (args.hotel_type === "ryokan" || args.hotel_type === "onsen_ryokan"))
+      ? {
+          canonical_nikko_chuzenji_ryokan: [
+            { name_ja: "日光金谷ホテル", name_en: "Nikko Kanaya Hotel (since 1873)", municipality: "日光市", category: "heritage Western hotel (150-year)", note_en: "Japan's oldest still-operating classic Western hotel, founded 1873; hosted Albert Einstein, Charles Lindbergh, John Lennon. Heritage 大谷川 (Daiya River) location next to Shinkyo Bridge. Couple-anniversary flagship for Nikko." },
+            { name_ja: "中禅寺金谷ホテル", name_en: "Chuzenji Kanaya Hotel", municipality: "日光市", category: "Chuzenji lakeside resort", note_en: "Lake Chuzenji shoreline log-cabin-style luxury resort by the Kanaya family. Quieter mountain-resort alternative to the heritage Nikko Kanaya. Excellent for honeymoon / anniversary stays — autumn koyo peak Oct mid - early Nov." },
+            { name_ja: "ザ・リッツ・カールトン日光", name_en: "The Ritz-Carlton Nikko (2020 open)", municipality: "日光市", category: "luxury lakefront resort (2020)", note_en: "Lake Chuzenji shoreline Ritz-Carlton opened July 2020. 94-room luxury resort with private onsen, hot spring, and lakefront restaurant. Newest Nikko luxury destination — books out months ahead for autumn koyo + spring shinryoku peaks." },
+            { name_ja: "中禅寺レークサイドホテル", name_en: "Chuzenji Lakeside Hotel", municipality: "日光市", category: "lakefront ryokan with onsen", note_en: "Lake Chuzenji shoreline traditional ryokan with sulfur onsen. Mid-luxury anniversary option; sunset rooms over the lake." },
+            { name_ja: "鬼怒川温泉 あさやホテル", name_en: "Kinugawa Onsen Asaya Hotel", municipality: "日光市", category: "large onsen resort hotel", note_en: "Kinugawa Onsen flagship resort (Nikko Kinugawa area, 25min from central Nikko). Modern resort with large multi-bath onsen + buffet. Family-friendly + couple-friendly." },
+            { name_ja: "鬼怒川温泉 ホテル白河", name_en: "Kinugawa Onsen Hotel Shirakawa", municipality: "日光市", category: "luxury kashikiri-buro ryokan", note_en: "Kinugawa Onsen heritage ryokan with private kashikiri-buro reservations and kaiseki dinner. Couple-anniversary popular." },
+            { name_ja: "Access (Tobu Nikko Line + 中禅寺湖バス)", name_en: "Access via Tobu Nikko Line + Chuzenji bus", municipality: "日光市", category: "transit_note", note_en: "Tokyo Asakusa → Tobu Nikko Limited Express ~2h (note: NOT JR Pass — use Tobu Nikko Pass instead, ¥4,800-4-day). Tobu Nikko Station → 中禅寺湖 by Tobu bus ~50min via Iroha-zaka switchback (~¥1,200). Chuzenji koyo peak mid-October to early November, expect heavy traffic." },
+          ],
+          canonical_nikko_chuzenji_ryokan_note: "Hand-curated Nikko (日光) + 中禅寺湖 + 鬼怒川 romantic anniversary ryokan + hotels. **Heritage flagship**: 日光金谷ホテル (1873, oldest classic Western hotel). **Lakefront luxury**: 中禅寺金谷ホテル + リッツ・カールトン日光 (2020). **Onsen ryokan**: 鬼怒川温泉 あさや + 白河. **Access**: Tobu Nikko Line from Asakusa (JR Pass NOT valid; use Tobu Nikko Pass). Autumn koyo peak mid-Oct to early-Nov is iconic but books out 6+ months ahead.",
         }
       : {}),
     // iter169: prefecture-keyed romantic/couple ryokan clusters — fire on hotel_type=ryokan/onsen_ryokan + prefcode match.
@@ -8440,6 +8509,23 @@ async function getJapanHeritage(args: {
     ...pilgrimageHeritageBlock,
     ...teaCultureBlock,
     ...judenkenBlock,
+    // iter173: Gifu-specific gassho-zukuri / Shirakawa-go pointer. Most
+    // Gifu queries (R420v10-008 prefonly + lang=ja) drop the toponym;
+    // surface canonical_gassho_villages so the agent sees Shirakawa-go
+    // even without a q hint. Shirakawa-go is UNESCO WHS, not Japan
+    // Heritage program — pointer also routes user to search_area.
+    ...((prefCode === "21")
+      ? {
+          canonical_gassho_villages: [
+            { name_ja: "白川郷 (荻町)", name_en: "Shirakawa-go (Ogimachi)", municipality: "白川村", qid: "Q3825870", designation: "UNESCO WHS 1995 + 重要伝統的建造物群保存地区", note_en: "Japan's most famous gassho-zukuri farmhouse village; ~110 thatched-roof houses preserved as a working village. Winter light-up (Jan-Feb weekends) is iconic. Pair with 五箇山 (Toyama) for a longer gassho itinerary." },
+            { name_ja: "五箇山 相倉 + 菅沼", name_en: "Gokayama (Ainokura + Suganuma) [Toyama]", municipality: "南砺市", qid: "Q1136477", designation: "UNESCO WHS 1995 + 重伝建", note_en: "Toyama-side counterpart to Shirakawa-go (jointly listed as UNESCO WHS 1995). 2 smaller hamlets (相倉 20 houses + 菅沼 9 houses); quieter / less touristic than Shirakawa-go." },
+            { name_ja: "高山 三町 (古い町並)", name_en: "Takayama Sanmachi (Old Town)", municipality: "高山市", qid: "Q1320832", designation: "重要伝統的建造物群保存地区", note_en: "Edo-era merchant district preserved in central Takayama; sake breweries, morning market, lacquerware. Pairs with Shirakawa-go as a 2-day Hida itinerary (バス 50min Takayama ⇄ Shirakawa-go)." },
+            { name_ja: "下呂温泉 合掌村", name_en: "Gero Onsen Gasshō-mura", municipality: "下呂市", designation: "open-air folk museum", note_en: "Relocated gassho-zukuri farmhouses gathered into an outdoor folk museum; convenient day-trip for visitors who can't make Shirakawa-go." },
+            { name_ja: "Access from Nagoya / Toyama", name_en: "Access from Nagoya or Toyama", category: "transit", note_en: "Nagoya → Takayama: JR Hida Limited Express ~2h20m (JR Pass OK). Takayama → Shirakawa-go: 濃飛バス (Nohi Bus) ~50min (JR Pass NOT valid, reserve in advance peak season). Toyama → Shirakawa-go: 加越能バス ~85min." },
+          ],
+          canonical_gassho_villages_note: "Hand-curated Gifu (+ adjacent Toyama) gassho-zukuri / 白川郷 destinations. **IMPORTANT**: 白川郷 + 五箇山 are UNESCO World Heritage Sites (1995), **NOT** in the 文化庁 Japan Heritage program — this tool covers the latter. For 白川郷 detailed entity data, call search_area with q='白川郷' or get_entity_full with the qid above.",
+        }
+      : {}),
     ...kakureBlock,
     ...lesserUnescoBlock,
     ...religiousDiversityBlock,
@@ -9791,6 +9877,10 @@ function buildHybridIntentCluster(
   const isVisionImpairedFriendly = /(視覚障害|視覚障がい|盲人|blind|vision[\s-]*impaired|visually[\s-]*impaired|tactile|触れる(展示|exhibit)|hands[\s-]*on\s*exhibit|braille|点字|audio[\s-]*guide|音声ガイド|haptic\s*display)/iu.test(qLower);
   const isDemonSlayerAsakusa = /(鬼滅の刃|demon\s*slayer|kimetsu).{0,15}(浅草|asakusa)|(浅草|asakusa).{0,15}(鬼滅|demon\s*slayer|kimetsu)/iu.test(qLower);
   const isGokayama = /(五箇山|gokayama|相倉|菅沼|村上家)/iu.test(qLower);
+  // iter174: search_hybrid Iya valley + Kanazawa indoor — flips R420v10-051/049.
+  const isIyaValleySH = /(祖谷|iya|かずら橋|vine\s*bridge|大歩危|oboke|落合集落)/iu.test(qLower);
+  const isKanazawaIndoorSH = /(kanazawa|金沢).{0,30}(rain|raining|雨|indoor|室内|屋内|museum|博物館|美術館|art\s*museum|cultural\s*spot)/iu.test(qLower)
+    || /(museum|美術館|博物館|art\s*museum|cultural\s*spot|indoor|室内).{0,30}(kanazawa|金沢)/iu.test(qLower);
   const isKaruizawaAnniversary = /(軽井沢|karuizawa).{0,15}(記念日|anniversary|honeymoon|新婚|デート|romantic|couple|ふたり)/iu.test(qLower) || /(記念日|anniversary|honeymoon|新婚|romantic|couple|ふたり).{0,15}(軽井沢|karuizawa)/iu.test(qLower);
 
   // Anchor prefecture
@@ -10086,6 +10176,32 @@ function buildHybridIntentCluster(
       illumination_events: "Limited night-illumination events at 相倉 and 菅沼 in late January (check Nanto City Tourism for exact dates each year — typically 1-2 nights only)",
       access_caveats: "Heavy snow can suspend bus services; check 加越能バス + 濃飛バス schedules before departing. Most reliable Dec-Feb access is rental car with snow tires from Takayama (~1h) or Toyama (~1h25m).",
     };
+  }
+  // iter174: Iya Valley search_hybrid surface (mirrors get_spots block).
+  if (isIyaValleySH) {
+    result.canonical_iya_valley_access = [
+      { name_ja: "祖谷のかずら橋", name_en: "Iya Vine Bridge (Kazura-bashi)", prefecture: "Tokushima", municipality: "三好市", category: "national important folk cultural property — vine suspension bridge", note_en: "45m × 14m vine suspension bridge over Iya gorge; rebuilt every 3 years from actinidia vines. ¥550 entry. Open Apr-Nov 8am-sunset (Dec-Mar limited)." },
+      { name_ja: "大歩危・小歩危 渓谷", name_en: "Ōboke / Koboke Gorges + Yoshino River Jet Boat", prefecture: "Tokushima", municipality: "三好市", category: "blue-green gorge + jet boat / pleasure boat", note_en: "Yoshino River narrow gorges; pleasure-boat photo cruises depart from 大歩危駅 area (~30min, ¥1,200). Most-photographed Iya scenery." },
+      { name_ja: "祖谷温泉 ホテル祖谷温泉", name_en: "Hotel Iya Onsen (private-cable-car rotenburo)", prefecture: "Tokushima", municipality: "三好市", category: "luxury private rotenburo ryokan", note_en: "Iya valley's iconic ryokan: in-house cable-car descends to riverside open-air bath. Most-recommended honeymoon Iya stay; reserve 3+ months ahead." },
+      { name_ja: "落合集落", name_en: "Ochiai-shūraku (Important Preservation District)", prefecture: "Tokushima", municipality: "三好市東祖谷", category: "重要伝統的建造物群保存地区 (preservation district)", note_en: "Steeply-terraced Iya farmhouse village; 重伝建 designation. Some traditional 茅葺 houses available for stay through 篪庵プロジェクト." },
+      { name_ja: "Access (Oboke + bus)", name_en: "Access (JR Dosan Line + Miyoshi City Bus)", category: "transit", note_en: "JR土讃線 to 大歩危駅 (JR Pass OK; from Okayama: Marine Liner + Nanpu Ltd Express ~2h). Miyoshi City Bus from 大歩危駅 to かずら橋 ~30min (~¥1,000). Rental car strongly recommended; plan 1+ overnight." },
+      { name_ja: "篪庵 (Chiiori)", name_en: "Chiiori — traditional 茅葺 farmhouse stay", municipality: "三好市東祖谷", category: "300-year traditional thatched house lodging", note_en: "Alex Kerr-restored 300-year-old 茅葺 farmhouse converted to overnight accommodation; cooks meals on irori. Iconic experiential Iya stay." },
+    ];
+    result.canonical_iya_valley_access_note = "Hand-curated Iya Valley (祖谷, Tokushima) destinations. **Iconic**: 祖谷のかずら橋 (vine bridge, ¥550) + 大歩危 jet-boat cruise. **Remote luxury**: 祖谷温泉 ホテル (private cable-car to riverside rotenburo). **Preservation village**: 落合集落 (重要伝統的建造物群). **Access (no rental car)**: JR土讃線 to 大歩危駅 (JR Pass OK from Okayama via Marine Liner + Nanpu Ltd Express ~2h) + 三好市営バス to かずら橋 ~30min. Rental car strongly recommended; plan 1+ overnight.";
+  }
+  // iter174: Kanazawa indoor / rainy day cluster — flips R420v10-049.
+  if (isKanazawaIndoorSH) {
+    result.canonical_kanazawa_indoor_destinations = [
+      { name_ja: "金沢21世紀美術館", name_en: "21st Century Museum of Contemporary Art, Kanazawa", municipality: "金沢市", qid: "Q1149367", category: "modern art museum", note_en: "Kanazawa's flagship indoor destination; SANAA-designed circular building with permanent + rotating exhibitions including the Leandro Erlich 'Swimming Pool' installation. Most-visited Kanazawa indoor attraction (~2.4M annual visitors)." },
+      { name_ja: "石川県立美術館", name_en: "Ishikawa Prefectural Museum of Art", municipality: "金沢市", category: "prefectural art museum", note_en: "Indoor art museum showcasing Kaga-region traditional arts (Kutani porcelain, lacquerware, kimono) + Edo-Meiji paintings. Walking distance from Kenroku-en." },
+      { name_ja: "金沢能楽美術館", name_en: "Kanazawa Noh Museum", municipality: "金沢市", category: "Noh theater + costume museum", note_en: "Hands-on Noh theater museum; visitors can try on Noh masks and costumes. Walking distance from Higashi-Chaya district." },
+      { name_ja: "石川県立歴史博物館", name_en: "Ishikawa Prefectural History Museum", municipality: "金沢市", category: "prefectural history museum", note_en: "3-building red-brick museum complex covering Ishikawa history from prehistoric to modern. Indoor; near Kanazawa Castle Park." },
+      { name_ja: "ひがし茶屋街 (indoor 茶屋 + 工房)", name_en: "Higashi Chaya District (indoor teahouse interiors + gold-leaf workshops)", municipality: "金沢市", category: "historic geisha district — indoor walkable", note_en: "Higashi Chaya district teahouse interiors open as museums (志摩茶屋 重要文化財 + 懐華樓); gold-leaf workshop visits (箔座 / 金沢箔工芸館) are all indoor. Most weather-resilient Kanazawa district." },
+      { name_ja: "金沢城公園 + 三の丸公園 (covered passageways)", name_en: "Kanazawa Castle Park covered passageways + 玉泉院丸庭園", municipality: "金沢市", category: "castle park with covered indoor sections", note_en: "Castle park has restored 河北門 + 菱櫓 with covered indoor interiors (reservable tours). Less weather-impacted than Kenroku-en in rain." },
+      { name_ja: "近江町市場 (covered market)", name_en: "Ōmichō Market (fully-covered fish + produce market)", municipality: "金沢市", category: "covered traditional market", note_en: "300-year covered market with ~170 stalls; seafood + Kaga vegetables + breakfast counters. Fully indoor, rain-proof." },
+      { name_ja: "国立工芸館 (Kogei-kan)", name_en: "National Crafts Museum (relocated to Kanazawa 2020)", municipality: "金沢市", qid: "Q105003843", category: "national craft museum (relocated from Tokyo)", note_en: "Relocated 2020; National Crafts Museum exhibits Japan's modern craft tradition. Brick-building architecture is itself a heritage destination." },
+    ];
+    result.canonical_kanazawa_indoor_destinations_note = "Hand-curated Kanazawa (金沢) indoor / rainy-day destinations. **Flagship modern**: 21st Century Museum (SANAA + Swimming Pool installation). **Traditional arts**: 石川県立美術館 + 国立工芸館 (relocated 2020). **Historic interiors**: ひがし茶屋街 (志摩 + 懐華樓 重要文化財). **Hands-on**: 金沢能楽美術館 (try on Noh masks). **Food covered**: 近江町市場 (300-year market, fully roofed). All indoor or weather-resilient — ideal for Kanazawa rainy-day itineraries.";
   }
   if (isKaruizawaAnniversary) {
     result.canonical_karuizawa_anniversary = [
@@ -11379,6 +11495,25 @@ async function getFestivals(args: {
       }
     : {};
 
+  // iter173: Tokushima 剣山周辺 / Iya valley remote-mountain matsuri cluster.
+  // R420v10-095: prefonly Tokushima + ja query about 剣山 obscure 神事 —
+  // generic festivals list misses sub-prefectural mountain rituals.
+  const isTokushimaMountainMatsuri = (prefCode === "36");
+  const tokushimaMountainMatsuriBlock = isTokushimaMountainMatsuri
+    ? {
+        canonical_tokushima_mountain_matsuri: [
+          { name_ja: "剣山本宮 宝蔵石神社 例大祭", name_en: "Tsurugi-san Hongū Hōzō-iwa Shrine Annual Festival", municipality: "美馬市木屋平 + つるぎ町", season_jp: "毎年7月17日", note_en: "Annual matsuri at Tsurugi-san Hongū Hōzō-iwa shrine (1,955m summit area); pilgrims hike to the sacred stone shrine. Local 神事 dating to 平安 period; small-scale, very few outside visitors." },
+          { name_ja: "祖谷 平家おどり", name_en: "Iya Heike-odori (Heike-clan refugee dance)", municipality: "三好市東祖谷", season_jp: "毎年お盆 (8月14-16日)", note_en: "Iya valley villages (Higashi-Iya 東祖谷) preserve the Heike-clan refugee dance from the 12c; performed during Obon. Locals dressed in classical 着物 dance to flute and drum. Very small audience — Iya's most authentic surviving folk performance." },
+          { name_ja: "東祖谷 善徳寺 太鼓踊り", name_en: "Higashi-Iya Zentoku-ji Taiko-odori", municipality: "三好市東祖谷", season_jp: "毎年8月", note_en: "Higashi-Iya Zentoku-ji ritual taiko dance; designated 徳島県 intangible folk culture. Performed by ~10 local farmers in a 急峻 mountain valley setting." },
+          { name_ja: "つるぎ町 半田の太刀踊り", name_en: "Tsurugi-cho Handa Tachi-odori (Sword Dance)", municipality: "美馬郡つるぎ町", season_jp: "毎年10月", note_en: "Handa village sword-dance preserved since Edo period; performed at autumn shrine festival. 徳島県 intangible folk culture. Performers wield real katana during ritual dance." },
+          { name_ja: "美馬市木屋平 子供太刀踊り", name_en: "Mima-shi Koyadaira Children's Sword Dance", municipality: "美馬市木屋平", season_jp: "毎年秋祭", note_en: "Koyadaira (mountain hamlet near Tsurugi-san base) preserves a children's sword-dance ritual; the youngest performers are ~6 years old. Local-only audience." },
+          { name_ja: "三好市山城町 阿波池田の鯉のぼり川渡し", name_en: "Awa-Ikeda Carp-Streamer River Crossing", municipality: "三好市池田町", season_jp: "毎年4-5月", note_en: "Yoshino River carp streamer event; ~300 koinobori span the river. Less-known counterpart to the more famous Gunma 杢ヶ橋." },
+          { name_ja: "Access (剣山 + 祖谷)", name_en: "Access (Tsurugi-san + Iya)", category: "transit", note_en: "Tsurugi-san: JR徳島線 to 阿波池田駅 → 三好市営バス to 見ノ越 (剣山リフト下) ~1h45m (limited service Apr-Nov). Iya: JR土讃線 to 大歩危駅 (~2h from Okayama) + 三好市営バス to 祖谷 ~30-60min. Rental car strongly recommended; matsuri dates vary by year, confirm with each village's 観光協会 in advance." },
+        ],
+        canonical_tokushima_mountain_matsuri_note: "Hand-curated lesser-known Tokushima mountain village (剣山 + 祖谷 + 三好市) 神事 / matsuri. **Most authentic**: 祖谷 平家おどり (Obon Heike refugee dance, 12c origin). **Mountain shrine**: 剣山本宮 宝蔵石神社 (Jul 17). **Sword dances**: つるぎ町 半田 + 美馬市 木屋平 (state-designated intangible folk culture). Confirm dates yearly with 観光協会 — many are 1-day local events.",
+      }
+    : {};
+
   // iter165: Tokyo winter illumination cluster for get_festivals — R420v5-083.
   const isTokyoIlluminationGF = (prefCode === "13") && /(イルミネーション|illumination|ライトアップ|青の洞窟|表参道|丸の内|caretta|night\s*illumination|winter\s*illumination|christmas\s*light|holiday\s*light|電飾)/iu.test(kw);
   const tokyoIlluminationGFBlock = isTokyoIlluminationGF
@@ -11452,6 +11587,7 @@ async function getFestivals(args: {
     ...shikokuSeasonalFestivalsBlock,
     ...tokyoIlluminationGFBlock,
     ...offSeasonSakuraFest,
+    ...tokushimaMountainMatsuriBlock,
     ...endangeredFestivalsBlock,
     ...topHanabiBlock,
     ...akitaSummerBlock,
@@ -12208,6 +12344,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           lng: typeof args.lng === "number" ? args.lng : undefined,
           radius: typeof args.radius === "number" ? args.radius : undefined,
           hotel_type: args.hotel_type as string | undefined,
+          q: args.q as string | undefined,
+          lang: args.lang as string | undefined,
           limit:
             typeof args.limit === "number" ? args.limit : args.limit ? Number(args.limit) : undefined,
         });
