@@ -1,0 +1,100 @@
+{
+  "id": "db8a99ad8edd",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 80m",
+    "name similarity 0.75 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/13058918680",
+      "source_url": "https://www.openstreetmap.org/node/13058918680",
+      "name": "エビスヤ",
+      "name_en": "Ebisuya",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.8697902,
+        "lng": 138.1782076
+      },
+      "phone": "0255862115",
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "20",
+      "raw": {
+        "osm_id": "node/13058918680",
+        "osm_url": "https://www.openstreetmap.org/node/13058918680",
+        "type": "hotel",
+        "name": "エビスヤ",
+        "name_en": "Ebisuya",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 36.8697902,
+          "lng": 138.1782076
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": "0255862115",
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "エビスヤ",
+          "name:en": "Ebisuya",
+          "phone": "0255862115",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/802370392",
+      "source_url": "https://www.openstreetmap.org/way/802370392",
+      "name": "エビス屋",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.8693103,
+        "lng": 138.1775336
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "guest_house",
+      "prefecture_code": "20",
+      "raw": {
+        "osm_id": "way/802370392",
+        "osm_url": "https://www.openstreetmap.org/way/802370392",
+        "type": "guest_house",
+        "name": "エビス屋",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 36.8693103,
+          "lng": 138.1775336
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "building": "yes",
+          "check_date": "2025-12-07",
+          "name": "エビス屋",
+          "tourism": "guest_house"
+        }
+      }
+    }
+  ]
+}

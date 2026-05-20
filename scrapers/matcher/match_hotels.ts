@@ -259,6 +259,34 @@ async function loadOsm(): Promise<BaseHotel[]> {
   }
 }
 
+// ─── Prefecture proximity helper ──────────────────────────────────────
+
+/**
+ * Map a coordinate to a Japanese prefecture code via the nearest municipality
+ * centroid. Returns null when the nearest centroid is farther than
+ * MAX_NEAREST_PREFECTURE_M metres — used as a "this point is not inside
+ * Japan" signal because the OSM bbox query catches some Korean / Chinese /
+ * Taiwanese border points.
+ */
+export const MAX_NEAREST_PREFECTURE_M = 30_000;
+
+export function nearestPrefecture(
+  coord: { lat: number; lng: number },
+  centroidEntries: [string, { lat: number; lng: number }][],
+): string | null {
+  let bestDist = Infinity;
+  let bestCode: string | null = null;
+  for (const [code, c] of centroidEntries) {
+    const d = haversine(coord, c);
+    if (d < bestDist) {
+      bestDist = d;
+      bestCode = code.slice(0, 2);
+    }
+  }
+  if (bestDist > MAX_NEAREST_PREFECTURE_M) return null;
+  return bestCode;
+}
+
 // ─── Main matcher ─────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -282,35 +310,38 @@ async function main(): Promise<void> {
     /* missing — pref_code derivation will be skipped */
   }
   const centroidEntries = Object.entries(centroids);
-  function nearestPrefecture(
-    coord: { lat: number; lng: number },
-  ): string | null {
-    let bestDist = Infinity;
-    let bestCode: string | null = null;
-    for (const [code, c] of centroidEntries) {
-      const d = haversine(coord, c);
-      if (d < bestDist) {
-        bestDist = d;
-        bestCode = code.slice(0, 2);
-      }
-    }
-    // Sanity check: if no municipality is within 30km, the point is
-    // probably outside Japan (the bbox query catches some Korean/Chinese
-    // border points). Don't assign a Japanese prefecture.
-    if (bestDist > 30_000) return null;
-    return bestCode;
-  }
 
   // Attach prefecture_code to records missing it (typically OSM)
   for (const h of all) {
     if (!h.prefecture_code && h.coordinates) {
-      h.prefecture_code = nearestPrefecture(h.coordinates);
+      h.prefecture_code = nearestPrefecture(h.coordinates, centroidEntries);
     }
+  }
+
+  // Drop records that nearestPrefecture() could not place inside Japan.
+  // These are foreign hotels (Korea / China / Taiwan / Russian Far East)
+  // pulled in by the generous OSM bounding box; without this filter they
+  // pair up with their own neighbours and surface as noise in
+  // data/hotels/review/.
+  const inJapan = all.filter((h) => h.prefecture_code !== null);
+  const droppedForeign = all.length - inJapan.length;
+  console.error(
+    `[matcher] dropped ${droppedForeign} non-Japan records: total=${all.length} -> inJapan=${inJapan.length}`,
+  );
+  // Spot-check log: surface one dropped record so reviewers can verify
+  // the filter is not over-eager.
+  const sample = all.find((h) => h.prefecture_code === null);
+  if (sample) {
+    const c = sample.coordinates;
+    console.error(
+      `[matcher] sample dropped: ${sample.source}/${sample.source_id} ` +
+      `"${sample.name ?? "?"}" @ ${c ? `${c.lat},${c.lng}` : "no coords"}`,
+    );
   }
 
   // Build grid index of records that have coordinates
   const grid = new Map<string, BaseHotel[]>();
-  for (const h of all) {
+  for (const h of inJapan) {
     if (!h.coordinates) continue;
     const key = gridKey(h.coordinates.lat, h.coordinates.lng);
     if (!grid.has(key)) grid.set(key, []);
@@ -320,7 +351,7 @@ async function main(): Promise<void> {
   // Union-find over confirmed pairs
   const idOf = (h: BaseHotel) => `${h.source}/${h.source_id}`;
   const parent = new Map<string, string>();
-  for (const h of all) parent.set(idOf(h), idOf(h));
+  for (const h of inJapan) parent.set(idOf(h), idOf(h));
   const find = (x: string): string => {
     let cur = x;
     while (parent.get(cur) !== cur) {
@@ -398,7 +429,7 @@ async function main(): Promise<void> {
 
   // Group by union-find root
   const clusters = new Map<string, BaseHotel[]>();
-  for (const h of all) {
+  for (const h of inJapan) {
     const root = find(idOf(h));
     if (!clusters.has(root)) clusters.set(root, []);
     clusters.get(root)!.push(h);

@@ -1,0 +1,105 @@
+{
+  "id": "e9a397b853ef",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 82m",
+    "name similarity 0.73 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/3921510962",
+      "source_url": "https://www.openstreetmap.org/node/3921510962",
+      "name": "ホテルヴィアイン心斎橋長堀通",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.6756839,
+        "lng": 135.4972589
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "550-0013",
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "27",
+      "raw": {
+        "osm_id": "node/3921510962",
+        "osm_url": "https://www.openstreetmap.org/node/3921510962",
+        "type": "hotel",
+        "name": "ホテルヴィアイン心斎橋長堀通",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.6756839,
+          "lng": 135.4972589
+        },
+        "postal_code": "550-0013",
+        "full_address": null,
+        "city": "大阪市",
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "4-12",
+          "addr:city": "大阪市",
+          "addr:neighbourhood": "1丁目",
+          "addr:postcode": "550-0013",
+          "addr:province": "大阪府",
+          "addr:quarter": "新町",
+          "addr:suburb": "西区",
+          "name": "ホテルヴィアイン心斎橋長堀通",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/292353954",
+      "source_url": "https://www.openstreetmap.org/way/292353954",
+      "name": "ホテルヴィアイン心斎橋四ツ橋",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.6756949,
+        "lng": 135.4963671
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "27",
+      "raw": {
+        "osm_id": "way/292353954",
+        "osm_url": "https://www.openstreetmap.org/way/292353954",
+        "type": "hotel",
+        "name": "ホテルヴィアイン心斎橋四ツ橋",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.6756949,
+          "lng": 135.4963671
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "building": "hotel",
+          "name": "ホテルヴィアイン心斎橋四ツ橋",
+          "source_ref": "http://wiki.osm.org/wiki/GSI_KIBAN",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}
