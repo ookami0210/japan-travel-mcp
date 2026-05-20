@@ -66,7 +66,7 @@ prefectures/                      # 47 prefecture files: municipal-scrape spots
                                   # + Wikidata attractions per prefecture
 
 hotels/
-  master.json                     # 40,128 accommodations (Wikidata + OSM merged)
+  master.json                     # 19,943 accommodations (Wikidata + OSM merged)
 
 r3/                               # Official designation registries
   maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
