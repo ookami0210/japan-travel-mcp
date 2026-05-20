@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { enrichKindsDefaults } from "../../src/lib/kinds_defaults.js";
+import {
+  enrichKindsDefaults,
+  passesPriceBandCap,
+  passesIndoorFilter,
+  deriveCrowdBand,
+} from "../../src/lib/kinds_defaults.js";
 
 describe("enrichKindsDefaults — empty input", () => {
   it("returns no_signal when kinds is empty", () => {
@@ -8,6 +13,7 @@ describe("enrichKindsDefaults — empty input", () => {
       typical_visit_minutes: null,
       price_band: null,
       suitable_for: null,
+      indoor_capable: null,
       source: "no_signal",
     });
   });
@@ -158,5 +164,133 @@ describe("enrichKindsDefaults — partial information", () => {
     const r = enrichKindsDefaults(["unknown_kind", "museum"]);
     expect(r.typical_visit_minutes).toBe(120);
     expect(r.price_band).toBe("low");
+  });
+});
+
+describe("enrichKindsDefaults — indoor_capable classification", () => {
+  it("museum is indoor", () => {
+    expect(enrichKindsDefaults(["museum"]).indoor_capable).toBe("indoor");
+  });
+
+  it("aquarium is indoor", () => {
+    expect(enrichKindsDefaults(["aquarium"]).indoor_capable).toBe("indoor");
+  });
+
+  it("waterfall is outdoor", () => {
+    expect(enrichKindsDefaults(["waterfall"]).indoor_capable).toBe("outdoor");
+  });
+
+  it("national_park is outdoor", () => {
+    expect(enrichKindsDefaults(["national_park"]).indoor_capable).toBe("outdoor");
+  });
+
+  it("buddhist_temple is mixed (indoor halls + outdoor grounds)", () => {
+    expect(enrichKindsDefaults(["buddhist_temple"]).indoor_capable).toBe("mixed");
+  });
+
+  it("indoor + outdoor in same record resolves to mixed", () => {
+    // museum=indoor, garden=outdoor → mixed
+    expect(enrichKindsDefaults(["museum", "garden"]).indoor_capable).toBe("mixed");
+  });
+
+  it("unknown kinds yield null indoor_capable", () => {
+    expect(enrichKindsDefaults(["unknown_xyz"]).indoor_capable).toBeNull();
+  });
+
+  it("unknown + known indoor still resolves to indoor", () => {
+    expect(enrichKindsDefaults(["unknown_xyz", "museum"]).indoor_capable).toBe("indoor");
+  });
+});
+
+describe("passesPriceBandCap", () => {
+  it("free cap accepts only free", () => {
+    expect(passesPriceBandCap("free", "free")).toBe(true);
+    expect(passesPriceBandCap("low", "free")).toBe(false);
+    expect(passesPriceBandCap("luxury", "free")).toBe(false);
+  });
+  it("low cap accepts free and low", () => {
+    expect(passesPriceBandCap("free", "low")).toBe(true);
+    expect(passesPriceBandCap("low", "low")).toBe(true);
+    expect(passesPriceBandCap("mid", "low")).toBe(false);
+  });
+  it("mid cap accepts free / low / mid", () => {
+    expect(passesPriceBandCap("mid", "mid")).toBe(true);
+    expect(passesPriceBandCap("high", "mid")).toBe(false);
+  });
+  it("null record fails strict caps but passes permissive ones", () => {
+    expect(passesPriceBandCap(null, "free")).toBe(false);
+    expect(passesPriceBandCap(null, "low")).toBe(false);
+    expect(passesPriceBandCap(null, "mid")).toBe(true);
+    expect(passesPriceBandCap(null, "luxury")).toBe(true);
+  });
+});
+
+describe("themed kinds (2026-05-09 multi-judge follow-up)", () => {
+  it("lavender_field has outdoor + low price defaults", () => {
+    const r = enrichKindsDefaults(["lavender_field"]);
+    expect(r.indoor_capable).toBe("outdoor");
+    expect(r.price_band).toBe("low");
+    expect(r.typical_visit_minutes).toBe(90);
+  });
+  it("kabuki_theater is indoor + high price", () => {
+    const r = enrichKindsDefaults(["kabuki_theater"]);
+    expect(r.indoor_capable).toBe("indoor");
+    expect(r.price_band).toBe("high");
+  });
+  it("dark_sky is outdoor + free", () => {
+    const r = enrichKindsDefaults(["dark_sky"]);
+    expect(r.indoor_capable).toBe("outdoor");
+    expect(r.price_band).toBe("free");
+  });
+  it("pilgrimage_route minutes saturate at 480 (multi-day)", () => {
+    expect(enrichKindsDefaults(["pilgrimage_route"]).typical_visit_minutes).toBe(480);
+  });
+  it("chashitsu / tea_ceremony land at indoor + mid", () => {
+    expect(enrichKindsDefaults(["chashitsu"]).indoor_capable).toBe("indoor");
+    expect(enrichKindsDefaults(["tea_ceremony"]).indoor_capable).toBe("mixed");
+    expect(enrichKindsDefaults(["chashitsu"]).price_band).toBe("mid");
+  });
+});
+
+describe("passesIndoorFilter", () => {
+  it("want=indoor accepts indoor + mixed", () => {
+    expect(passesIndoorFilter("indoor", "indoor")).toBe(true);
+    expect(passesIndoorFilter("mixed", "indoor")).toBe(true);
+    expect(passesIndoorFilter("outdoor", "indoor")).toBe(false);
+  });
+  it("want=outdoor accepts outdoor + mixed", () => {
+    expect(passesIndoorFilter("outdoor", "outdoor")).toBe(true);
+    expect(passesIndoorFilter("mixed", "outdoor")).toBe(true);
+    expect(passesIndoorFilter("indoor", "outdoor")).toBe(false);
+  });
+  it("null record fails both", () => {
+    expect(passesIndoorFilter(null, "indoor")).toBe(false);
+    expect(passesIndoorFilter(null, "outdoor")).toBe(false);
+  });
+});
+
+describe("deriveCrowdBand", () => {
+  it("4-language + 2 heritage = high (Himeji/Itsukushima class)", () => {
+    expect(deriveCrowdBand(4, 2, 1)).toBe("high");
+    expect(deriveCrowdBand(4, 3, 0)).toBe("high");
+  });
+  it("3-language only → medium", () => {
+    expect(deriveCrowdBand(3, 0, 0)).toBe("medium");
+  });
+  it("1 heritage designation → medium", () => {
+    expect(deriveCrowdBand(1, 1, 0)).toBe("medium");
+  });
+  it("3+ wikipedia kind tags → medium", () => {
+    expect(deriveCrowdBand(1, 0, 3)).toBe("medium");
+  });
+  it("1-2 lang only, no heritage, ≤2 tags → low", () => {
+    expect(deriveCrowdBand(1, 0, 0)).toBe("low");
+    expect(deriveCrowdBand(2, 0, 2)).toBe("low");
+  });
+  it("zero signals → unknown", () => {
+    expect(deriveCrowdBand(0, 0, 0)).toBe("unknown");
+  });
+  it("4-language + 1 heritage → medium (not yet 'high')", () => {
+    expect(deriveCrowdBand(4, 1, 0)).toBe("medium");
   });
 });

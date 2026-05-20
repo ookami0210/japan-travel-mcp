@@ -132,8 +132,20 @@ class PersistentServer:
 
 
 def main() -> None:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ids", default=None,
+                    help="Comma-separated case ids to run (default: all)")
+    ap.add_argument("--output", default=None,
+                    help="Override output path (default: docs/quality/test_results.jsonl)")
+    cli_args = ap.parse_args()
+
     cases = json.loads(CALLS.read_text())
-    print(f"Running {len(cases)} test cases against ONE persistent server...",
+    if cli_args.ids:
+        wanted = {s.strip() for s in cli_args.ids.split(",") if s.strip()}
+        cases = [c for c in cases if c["id"] in wanted]
+    out_path = Path(cli_args.output) if cli_args.output else RESULTS
+    print(f"Running {len(cases)} test cases against ONE persistent server -> {out_path}",
           file=sys.stderr)
 
     server = PersistentServer()
@@ -144,7 +156,7 @@ def main() -> None:
         sys.exit("[harness] initialize failed")
     print(f"[harness] initialise OK in {time.monotonic() - t0:.1f}s", file=sys.stderr)
 
-    with RESULTS.open("w") as f:
+    with out_path.open("w") as f:
         for i, c in enumerate(cases, 1):
             t1 = time.monotonic()
             print(

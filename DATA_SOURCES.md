@@ -549,6 +549,17 @@ requires either extending an existing channel or creating a new one.
 - **Status**: `active`
 - **Implementation note**: the kunishitei DB form requires a `_csrfToken` (extracted from `/bsys/index`) and a session cookie. POST to `/bsys/searchlist` with `register_sub_id` (designation type) + `pageNumber` (the form's pagination control; the `page_no` field is unused). 5 s per-domain interval per `DATA_POLICY.md`. The script is resumable via `--resume`; per-type partial checkpoints survive process restarts.
 
+#### #38 — Wikidata canonical landmark gap-fill (name → QID resolver)
+- **Authority**: Wikidata (CC0)
+- **URL**: https://www.wikidata.org/w/api.php (wbsearchentities + wbgetentities)
+- **License**: CC0
+- **Fetcher**: `scrapers/sources/fetch_landmark_by_name.ts`
+- **Output**: `data/_state/landmark_by_name.json` (intermediate, fed into `scripts/inject_landmark_by_name.py` which writes back to `data/_state/wikidata_attractions.json` and the per-prefecture files)
+- **Cadence**: monthly+ (manual; canonical landmark list grows slowly)
+- **Channel**: WD-FOUNDATION
+- **Coverage**: a curated list of high-traffic Japanese landmarks (JNTO top-100, MICHELIN Green Guide canon, common itinerary anchors) that the v2 SPARQL fetcher missed because its P31 type set didn't reach them — the resolver searches Wikidata by name in ja/en, fetches up to 5 candidate entities, and picks the first whose P17=Q17 (Japan) and P625 coordinates fall inside the JP bbox. Per-name JSON checkpoint in `data/_state/landmark_by_name.partial/` so a Ctrl-C / timeout retains progress (`RESUME=1`). Custom name list: pass `LANDMARK_NAMES=<file>`. The default list resolved 172 / 177 names on its first run; injection enriches 149 existing master records with descriptions / sitelinks and inserts 23 new canonical entities.
+- **Status**: `active`
+
 #### #37 — Kyoto sect-affiliated shukubo (per-temple operator pages)
 - **Authority**: 各宗派 公式 (per-temple operator pages — 浄土宗, 天台宗, 黄檗宗, 真言宗御室派, 真言宗智山派, 浄土真宗本願寺派, 真宗大谷派, 臨済宗妙心寺派, 臨済宗大徳寺派)
 - **URL**: per-facility (e.g. https://www.wajun-kaikan.jp/, https://syukubo.jp/)

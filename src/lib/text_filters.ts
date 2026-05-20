@@ -243,6 +243,15 @@ const NAV_EXACT_EXTRA: readonly string[] = [
   "閉じる", "戻る", "次のページ", "前のページ",
   "詳細を見る", "もっと見る", "see more", "view more", "read more",
   "予約する", "Book now", "申込み", "申し込み",
+  // 2026-05-09 multi-judge feedback: portal closure / closed-for-now
+  // notices and listicle / DMO blog-page hits that surface above
+  // canonical attractions when query is broad.
+  "立入禁止", "立ち入り禁止", "営業終了", "閉鎖中", "工事中",
+  "工事のお知らせ", "改装中", "リニューアル中", "閉店", "閉館",
+  "中止のお知らせ", "中止について", "delayed", "cancelled", "canceled",
+  "観光スポット検索", "スポット検索", "条件検索", "目的別検索",
+  "新型コロナウイルス", "covid-19", "感染症対策",
+  "観光特集", "観光ガイド", "tourist guide",
 ];
 
 const NAV_CONTAINS: readonly string[] = [

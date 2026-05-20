@@ -121,7 +121,7 @@ def main() -> None:
     else:
         results_path = REPO / "docs" / "quality" / "test_results.jsonl"
     test_results = {}
-    for line in results_path.read_text().splitlines():
+    for line in results_path.read_text().split("\n"):
         if not line.strip():
             continue
         r = json.loads(line)
@@ -130,15 +130,27 @@ def main() -> None:
     # Read each batch's scored output (subagent must write to batch_<n>_scored.jsonl)
     scored_records: list[dict] = []
     for batch_path in sorted(batch_dir.glob("batch_*_scored.jsonl")):
+        raw = batch_path.read_text()
         records = []
-        for line in batch_path.read_text().splitlines():
-            line = line.strip()
-            if not line or not line.startswith("{"):
-                continue
+        # Fix common subagent malformations: comma-separated JSON objects
+        # (`},\n{` instead of `}\n{`) and JSON array wrapper. iter150 batch 4
+        # surfaced this — silently dropped 25 cases at aggregate time.
+        if raw.strip().startswith("["):
             try:
-                records.append(json.loads(line))
+                records = json.loads(raw)
             except Exception:
-                continue
+                records = []
+        if not records:
+            # Normalise `},\n{` → `}\n{` and try again line-by-line
+            normalised = raw.replace("},\n{", "}\n{").replace("}, \n{", "}\n{").replace("},  \n{", "}\n{")
+            for line in normalised.split("\n"):
+                line = line.strip().rstrip(",")
+                if not line or not line.startswith("{"):
+                    continue
+                try:
+                    records.append(json.loads(line))
+                except Exception:
+                    continue
         if not records:
             # Fallback: try parsing the raw batch_<n>_scored.txt format (subagent dumped text)
             txt_path = batch_path.with_suffix(".txt")

@@ -1,0 +1,1439 @@
+[
+  {
+    "id": "R420v8-001",
+    "original_random_id": "R-280",
+    "source_class": "min",
+    "level": null,
+    "lang": "zh",
+    "topic": "免费景点 京都",
+    "query": "京都有哪些免费参观的神社或寺庙？希望节省入场费。",
+    "tool": "search_area",
+    "args": {
+      "q": "京都 無料 神社",
+      "lang": "zh"
+    }
+  },
+  {
+    "id": "R420v8-002",
+    "original_random_id": "R-324",
+    "source_class": "min",
+    "level": null,
+    "lang": "id",
+    "topic": "tempat ibadah Islam Hiroshima",
+    "query": "Apakah ada masjid atau tempat shalat bagi wisatawan Muslim di Hiroshima atau sekitarnya?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "mosque prayer room Hiroshima Muslim",
+      "lang": "id"
+    }
+  },
+  {
+    "id": "R420v8-003",
+    "original_random_id": "R-330",
+    "source_class": "min",
+    "level": null,
+    "lang": "en",
+    "topic": "rainy day Kanazawa",
+    "query": "It's raining in Kanazawa. Which museums or indoor cultural spots should I visit?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "博物館 美術館 Kanazawa",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-004",
+    "original_random_id": "R-334",
+    "source_class": "min",
+    "level": null,
+    "lang": "en",
+    "topic": "all-weather venue Hokkaido",
+    "query": "Planning Hokkaido in October — which spots are enjoyable regardless of rain or snow?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "全天候 屋内",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-005",
+    "original_random_id": "R-350",
+    "source_class": "min",
+    "level": null,
+    "lang": "fr",
+    "topic": "village fantôme Shimane",
+    "query": "Y a-t-il des villages abandonnés ou presque déserts dans la préfecture de Shimane qu'on peut visiter ?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Shimane",
+      "lang": "fr"
+    }
+  },
+  {
+    "id": "R420v8-006",
+    "original_random_id": "R-053",
+    "source_class": "min",
+    "level": null,
+    "lang": "ja",
+    "topic": "伊勢神宮",
+    "query": "三重県の伊勢神宮について詳しく教えて",
+    "tool": "get_japan_heritage",
+    "args": {
+      "prefecture": "Mie",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-007",
+    "original_random_id": "R-066",
+    "source_class": "min",
+    "level": null,
+    "lang": "en",
+    "topic": "京都 家族 観光",
+    "query": "What are the best family-friendly sightseeing spots in Kyoto for a group with elderly grandparents?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kyoto",
+      "q": "家族",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-008",
+    "original_random_id": "R-080",
+    "source_class": "min",
+    "level": null,
+    "lang": "ja",
+    "topic": "秋田 家族 農業体験",
+    "query": "秋田県で家族が農業体験できる観光スポット",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Akita",
+      "q": "農業体験",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-009",
+    "original_random_id": "R-085",
+    "source_class": "min",
+    "level": null,
+    "lang": "ja",
+    "topic": "新潟 佐渡 家族",
+    "query": "新潟の佐渡島での家族旅行プラン",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Niigata",
+      "city": "佐渡",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-010",
+    "original_random_id": "R-092",
+    "source_class": "min",
+    "level": null,
+    "lang": "en",
+    "topic": "和歌山 串本 家族",
+    "query": "Wakayama's Kushimoto area — what to do with family at the southern tip of Honshu?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Wakayama",
+      "city": "串本",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-011",
+    "original_random_id": "R-094",
+    "source_class": "min",
+    "level": null,
+    "lang": "ja",
+    "topic": "石川 能登 家族 海の幸",
+    "query": "能登半島で家族が楽しめる海の幸グルメ",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Ishikawa",
+      "keyword": "魚介",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-012",
+    "original_random_id": "R-120",
+    "source_class": "min",
+    "level": null,
+    "lang": null,
+    "topic": "Noto Peninsula anniversary",
+    "query": "Looking for a secluded ryokan on the Noto Peninsula for our anniversary. Preferably with ocean views.",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Ishikawa",
+      "hotel_type": "ryokan"
+    }
+  },
+  {
+    "id": "R420v8-013",
+    "original_random_id": "R-126",
+    "source_class": "min",
+    "level": null,
+    "lang": null,
+    "topic": "黒川温泉 カップル",
+    "query": "熊本の黒川温泉に彼女と行きたい。湯巡り手形が使えてカップルに人気の宿を教えて。",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Kumamoto",
+      "hotel_type": "onsen_ryokan"
+    }
+  },
+  {
+    "id": "R420v8-014",
+    "original_random_id": "R-143",
+    "source_class": "min",
+    "level": null,
+    "lang": null,
+    "topic": "小豆島 ロマンチック",
+    "query": "小豆島でカップルにおすすめのロマンチックな景色と、泊まれる旅館を教えて。",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Kagawa",
+      "city": "小豆島"
+    }
+  },
+  {
+    "id": "R420v8-015",
+    "original_random_id": "R-227",
+    "source_class": "min",
+    "level": null,
+    "lang": null,
+    "topic": "尾瀬 夏の湿原",
+    "query": "尾瀬の水芭蕉が咲く季節と、夏の湿原ハイキングの見どころを教えて。",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Gunma",
+      "q": "尾瀬"
+    }
+  },
+  {
+    "id": "R420v8-016",
+    "original_random_id": "R-261",
+    "source_class": "min",
+    "level": null,
+    "lang": "en",
+    "topic": "JR pass Tohoku scenic rail",
+    "query": "Which scenic railways in Tohoku are covered by the JR Rail Pass? I don't want to pay extra.",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "ローカル線 東北 観光列車",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-017",
+    "original_random_id": "R-270",
+    "source_class": "min",
+    "level": null,
+    "lang": "zh",
+    "topic": "低预算住宿 北海道",
+    "query": "北海道背包旅行，想找一晚5000日元以下的住宿，有推荐的青年旅馆吗？",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Hokkaido",
+      "lang": "zh"
+    }
+  },
+  {
+    "id": "R420v8-018",
+    "original_random_id": "R-106",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "子連れ 仙台 体験",
+    "query": "仙台で子供連れが楽しめる自然体験スポット",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Miyagi",
+      "city": "仙台",
+      "q": "自然体験 子供",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-019",
+    "original_random_id": "R-213",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "羊蹄山 秋 紅葉",
+    "query": "北海道の羊蹄山やニセコ周辺の紅葉を楽しみたい。見頃の時期と展望スポットを教えて。",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Hokkaido",
+      "q": "紅葉"
+    }
+  },
+  {
+    "id": "R420v8-020",
+    "original_random_id": "R-045",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "四万十川",
+    "query": "高知県の四万十川について教えてください",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kochi",
+      "q": "四万十川",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-021",
+    "original_random_id": "R-200",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "Fleurs de cerisier Tohoku",
+    "query": "Je voudrais voir les cerisiers au printemps dans le Tohoku. Quels sont les meilleurs endroits?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Iwate",
+      "q": "桜"
+    }
+  },
+  {
+    "id": "R420v8-022",
+    "original_random_id": "R-059",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "嵐山 竹林",
+    "query": "京都嵐山の竹林の小径について",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kyoto",
+      "city": "京都市",
+      "q": "竹林 嵐山",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-023",
+    "original_random_id": "R-271",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "저예산 규슈 여행",
+    "query": "규슈를 저예산으로 여행하고 싶어요. 하루 5000엔 이내로 식사와 관광이 가능한가요?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kagoshima",
+      "limit": 30
+    }
+  },
+  {
+    "id": "R420v8-024",
+    "original_random_id": "R-329",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ko",
+    "topic": "더위 피서 홋카이도",
+    "query": "일본 여름 폭염 피서지로 홋카이도의 실내 명소를 알려주세요.",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Hokkaido",
+      "lang": "ko"
+    }
+  },
+  {
+    "id": "R420v8-025",
+    "original_random_id": "R-043",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "十和田湖",
+    "query": "What is Lake Towada in Aomori and Akita?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Akita",
+      "q": "十和田湖",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-026",
+    "original_random_id": "R-301",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "学生旅 低予算 北陸",
+    "query": "大学生で予算が厳しい。北陸を1日5000円以内で観光できるプランはある？",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Toyama",
+      "limit": 30
+    }
+  },
+  {
+    "id": "R420v8-027",
+    "original_random_id": "R-073",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "宮崎 家族 海",
+    "query": "宮崎県のきれいな海辺で家族で過ごせる場所",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Miyazaki",
+      "q": "海 ビーチ",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-028",
+    "original_random_id": "R-332",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "大雨 沖縄 観光",
+    "query": "沖縄で大雨が降っても楽しめる水族館や室内施設は？",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Okinawa",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-029",
+    "original_random_id": "R-269",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "free sightseeing Nara",
+    "query": "What free things can I do in Nara besides feeding deer? Looking for zero-cost sightseeing.",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Nara",
+      "limit": 30
+    }
+  },
+  {
+    "id": "R420v8-030",
+    "original_random_id": "R-376",
+    "source_class": "sat",
+    "level": null,
+    "lang": "vi",
+    "topic": "xe lăn tham quan Hokkaido",
+    "query": "Du lịch Hokkaido bằng xe lăn có thuận tiện không? Các điểm như Shiretoko có đường đi phù hợp không?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Hokkaido",
+      "lang": "vi"
+    }
+  },
+  {
+    "id": "R420v8-031",
+    "original_random_id": "R-056",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "宮古島 ビーチ",
+    "query": "宮古島の透明度が高いビーチを教えて",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Okinawa",
+      "city": "宮古島",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-032",
+    "original_random_id": "R-104",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "子連れ 那覇 アクティビティ",
+    "query": "那覇で小さな子供が楽しめるアクティビティ",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Okinawa",
+      "city": "那覇",
+      "q": "子供 アクティビティ",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-033",
+    "original_random_id": "R-081",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "熊本 家族 城",
+    "query": "What family activities are available at Kumamoto Castle and the surrounding area?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kumamoto",
+      "city": "熊本市",
+      "q": "城 観光",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-034",
+    "original_random_id": "R-331",
+    "source_class": "sat",
+    "level": null,
+    "lang": "fr",
+    "topic": "pluie Nara",
+    "query": "Il pleut à Nara. Quels endroits couverts peut-on visiter en dehors des cerfs ?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Nara",
+      "lang": "fr"
+    }
+  },
+  {
+    "id": "R420v8-035",
+    "original_random_id": "R-340",
+    "source_class": "sat",
+    "level": null,
+    "lang": "vi",
+    "topic": "trời mưa Sapporo",
+    "query": "Trời mưa ở Sapporo. Có những điểm tham quan trong nhà nào phù hợp không?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Hokkaido",
+      "municipality": "札幌",
+      "lang": "vi"
+    }
+  },
+  {
+    "id": "R420v8-036",
+    "original_random_id": "R-031",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "五稜郭 函館",
+    "query": "函館の五稜郭について教えてください",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Hokkaido",
+      "city": "函館",
+      "q": "五稜郭",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-037",
+    "original_random_id": "R-223",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "桜島 桜 春",
+    "query": "鹿児島の桜島や市内の桜の名所を教えて。活火山と桜の絶景スポットが知りたい。",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kagoshima",
+      "q": "桜"
+    }
+  },
+  {
+    "id": "R420v8-038",
+    "original_random_id": "R-327",
+    "source_class": "sat",
+    "level": null,
+    "lang": "zh",
+    "topic": "梅雨 室内 京都",
+    "query": "梅雨季节在京都下雨，有哪些室内景点可以游览？",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kyoto",
+      "lang": "zh"
+    }
+  },
+  {
+    "id": "R420v8-039",
+    "original_random_id": "R-303",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "cheap temples Hiroshima",
+    "query": "What are the free or cheap temples and shrines in Hiroshima? I'm on a shoestring budget.",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Hiroshima",
+      "limit": 30
+    }
+  },
+  {
+    "id": "R420v8-040",
+    "original_random_id": "R-129",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "Okinawa honeymoon beach",
+    "query": "Planning a honeymoon on Okinawa's remote islands. Which island has the most secluded beaches?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Okinawa",
+      "q": "ビーチ"
+    }
+  },
+  {
+    "id": "R420v8-041",
+    "original_random_id": "R-083",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "山梨 河口湖 富士山",
+    "query": "山梨県の河口湖周辺で家族が楽しめる観光スポット",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Yamanashi",
+      "city": "富士河口湖",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-042",
+    "original_random_id": "R-012",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ko",
+    "topic": "兼六園",
+    "query": "이시카와현 켄로쿠엔 정원에 대해 알려주세요.",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Ishikawa",
+      "city": "金沢",
+      "q": "兼六園",
+      "lang": "ko"
+    }
+  },
+  {
+    "id": "R420v8-043",
+    "original_random_id": "R-141",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "萩 カップル旅行",
+    "query": "萩市の歴史的な街並みをふたりで散策したい。武家屋敷エリアの見どころとロマンチックな宿を教えて。",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Yamaguchi",
+      "municipality": "萩"
+    }
+  },
+  {
+    "id": "R420v8-044",
+    "original_random_id": "R-067",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "東京 家族 下町",
+    "query": "東京の下町を家族で散歩するならどこがいい？",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Tokyo",
+      "q": "下町 散歩",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-045",
+    "original_random_id": "R-144",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "Beppu romantic onsen",
+    "query": "What are the best romantic onsen experiences in Beppu for a couple? Private baths preferred.",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Oita",
+      "municipality": "別府",
+      "q": "温泉"
+    }
+  },
+  {
+    "id": "R420v8-046",
+    "original_random_id": "R-128",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "奈良 二人旅",
+    "query": "パートナーと奈良を旅行したい。春日大社や東大寺まわりでゆっくり歩けるロマンチックなコースを教えて。",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Nara",
+      "q": "散策"
+    }
+  },
+  {
+    "id": "R420v8-047",
+    "original_random_id": "R-326",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "typhoon indoor Kyushu",
+    "query": "Typhoon is coming to Kyushu. What are indoor attractions I can still visit in Kagoshima?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Kagoshima",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-048",
+    "original_random_id": "R-337",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "heat relief indoor Osaka",
+    "query": "Osaka in August heat — what are the best air-conditioned indoor attractions for a full day?",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Osaka",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-049",
+    "original_random_id": "R-054",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "飛騨高山 古い町並み",
+    "query": "飛騨高山の古い町並みを観光したい",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Gifu",
+      "city": "高山",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-050",
+    "original_random_id": "R-282",
+    "source_class": "sat",
+    "level": null,
+    "lang": "id",
+    "topic": "hostel murah Osaka",
+    "query": "Saya mencari hostel murah di Osaka, maksimal 3000 yen per malam. Ada rekomendasi?",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Osaka",
+      "lang": "id"
+    }
+  },
+  {
+    "id": "R420v8-051",
+    "original_random_id": "R-146",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "热海 蜜月温泉",
+    "query": "打算去热海度蜜月，有推荐的海景温泉旅馆吗？两人可以享受私人浴池更好。",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Shizuoka",
+      "city": "熱海",
+      "hotel_type": "onsen_ryokan"
+    }
+  },
+  {
+    "id": "R420v8-052",
+    "original_random_id": "R-137",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "伊勢 カップル",
+    "query": "伊勢神宮へ二人でお参り旅行。おかげ横丁と周辺で泊まれるおすすめ旅館を教えて。",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Mie",
+      "hotel_type": "ryokan"
+    }
+  },
+  {
+    "id": "R420v8-053",
+    "original_random_id": "R-121",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "伊豆 温泉 カップル",
+    "query": "ふたりで伊豆の温泉旅行を計画中。海が見える露天風呂のある旅館と周辺の観光地を教えて。",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Shizuoka",
+      "hotel_type": "onsen_ryokan"
+    }
+  },
+  {
+    "id": "R420v8-054",
+    "original_random_id": "R-082",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "鹿児島 家族 温泉",
+    "query": "Kagoshima family hot spring resort options for multi-generational travel.",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Kagoshima",
+      "hotel_type": "onsen_ryokan"
+    }
+  },
+  {
+    "id": "R420v8-055",
+    "original_random_id": "R-304",
+    "source_class": "sat",
+    "level": null,
+    "lang": "th",
+    "topic": "ฮันนีมูนหรูหรา ฮากาตะ",
+    "query": "มีที่พักหรูหราระดับแพงสำหรับฮันนีมูนในฟุกุโอกะไหม? ต้องการห้องน้ำออนเซนส่วนตัว",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Fukuoka",
+      "lang": "th"
+    }
+  },
+  {
+    "id": "R420v8-056",
+    "original_random_id": "R-117",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "Kyoto romantic ryokan",
+    "query": "Planning a honeymoon in Kyoto. Which ryokan near Higashiyama have private outdoor baths?",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Kyoto",
+      "hotel_type": "ryokan"
+    }
+  },
+  {
+    "id": "R420v8-057",
+    "original_random_id": "R-124",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "草津温泉 旅館",
+    "query": "草津温泉でふたりきりでゆっくりできる旅館を探している。記念日プランがあるところがいい。",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Gunma",
+      "hotel_type": "onsen_ryokan"
+    }
+  },
+  {
+    "id": "R420v8-058",
+    "original_random_id": "R-147",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "Aso volcanic romantic",
+    "query": "Want to visit Mount Aso with my partner. Any romantic ryokan with views of the crater?",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Kumamoto",
+      "city": "阿蘇"
+    }
+  },
+  {
+    "id": "R420v8-059",
+    "original_random_id": "R-290",
+    "source_class": "sat",
+    "level": null,
+    "lang": "fr",
+    "topic": "voyage luxe Kyoto Nara",
+    "query": "Je cherche un séjour luxe à Kyoto et Nara pour notre lune de miel. Budget illimité, haute qualité.",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Nara",
+      "lang": "fr"
+    }
+  },
+  {
+    "id": "R420v8-060",
+    "original_random_id": "R-134",
+    "source_class": "sat",
+    "level": null,
+    "lang": null,
+    "topic": "Kanazawa cặp đôi",
+    "query": "Tôi và bạn gái muốn đi du lịch Kanazawa theo phong cách lãng mạn. Có ryokan hoặc địa điểm đẹp nào không?",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Ishikawa",
+      "hotel_type": "ryokan"
+    }
+  },
+  {
+    "id": "R420v8-061",
+    "original_random_id": "R-204",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "Yoshino sakura peak bloom",
+    "query": "When is peak cherry blossom season at Mount Yoshino in Nara? What makes Yoshino's sakura historically significant?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "吉野山 桜",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-062",
+    "original_random_id": "R-322",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ar",
+    "topic": "مطاعم حلال في ناغويا",
+    "query": "هل توجد مطاعم حلال في مدينة ناغويا؟ أبحث عن خيارات حلال معتمدة للسياح المسلمين.",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "halal Nagoya certified restaurant Muslim",
+      "lang": "ar"
+    }
+  },
+  {
+    "id": "R420v8-063",
+    "original_random_id": "R-318",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ar",
+    "topic": "حلال في كيوتو وأوساكا",
+    "query": "ما هي خيارات الطعام الحلال المتاحة في كيوتو وأوساكا؟ مطاعم ذات شهادة حلال معترف بها.",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "halal certified Kyoto Osaka restaurant",
+      "lang": "ar"
+    }
+  },
+  {
+    "id": "R420v8-064",
+    "original_random_id": "R-306",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ar",
+    "topic": "أماكن الحلال في طوكيو",
+    "query": "أبحث عن مطاعم حلال معتمدة في طوكيو. أين يمكنني إيجاد طعام حلال في المناطق السياحية؟",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "halal certified Tokyo restaurant",
+      "lang": "ar"
+    }
+  },
+  {
+    "id": "R420v8-065",
+    "original_random_id": "R-345",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "hidden village Tono",
+    "query": "Tell me about Tono in Iwate — the village of Japanese folk legends and kappa. Is it truly off the beaten path?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "遠野 民話 かっぱ",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-066",
+    "original_random_id": "R-373",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "stroller friendly Asakusa",
+    "query": "Is Asakusa in Tokyo stroller-friendly? Which streets and temple areas are paved and flat?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "浅草 ベビーカー",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-067",
+    "original_random_id": "R-312",
+    "source_class": "sat",
+    "level": null,
+    "lang": "id",
+    "topic": "halal Kyushu",
+    "query": "Saya traveling ke Kyushu dan butuh informasi tentang restoran halal. Di kota Fukuoka ada yang certified?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "halal Fukuoka certified restaurant",
+      "lang": "id"
+    }
+  },
+  {
+    "id": "R420v8-068",
+    "original_random_id": "R-125",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "Hiroshima Miyajima romantic",
+    "query": "Romantic spots in Hiroshima and Miyajima for a couple. Any ryokan on the island?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "宮島 ロマンチック カップル",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-069",
+    "original_random_id": "R-295",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "無料 博物館 東京",
+    "query": "東京の無料または安い博物館・美術館を教えて。国立施設で入場無料のところは？",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "東京 博物館 無料",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-070",
+    "original_random_id": "R-220",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ko",
+    "topic": "가을 단풍 닛코",
+    "query": "닛코의 가을 단풍 시즌은 언제인가요? 특히 신교와 도쇼구 주변 단풍이 궁금합니다.",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "日光 紅葉 秋",
+      "lang": "ko"
+    }
+  },
+  {
+    "id": "R420v8-071",
+    "original_random_id": "R-308",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "halal food Kyoto",
+    "query": "Where can I find halal-certified restaurants near Kyoto's main tourist sites like Fushimi Inari and Kinkakuji?",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "halal Kyoto restaurant certified",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-072",
+    "original_random_id": "R-064",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "小豆島 オリーブ",
+    "query": "香川県小豆島のオリーブ畑について教えて",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Kagawa",
+      "keyword": "オリーブ",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-073",
+    "original_random_id": "R-279",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "格安飯 福岡 屋台",
+    "query": "福岡の屋台で安く食べたい。1食500円以下で食べられる屋台はある？",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Fukuoka",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-074",
+    "original_random_id": "R-157",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "山形 地酒",
+    "query": "山形の地酒について教えて。有名な酒蔵や日本酒の特徴を知りたい。",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Yamagata",
+      "keyword": "日本酒",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-075",
+    "original_random_id": "R-178",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "富山 白エビ",
+    "query": "富山湾の白エビや富山ブラックラーメンなど、富山の食文化について知りたい。",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Toyama",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-076",
+    "original_random_id": "R-162",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "長崎 卓袱料理",
+    "query": "長崎の卓袱料理について教えて。和洋中が融合した独特の食文化の特徴は何？",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Nagasaki",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-077",
+    "original_random_id": "R-281",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "cheap food Sapporo local market",
+    "query": "Best cheap eats in Sapporo — local markets and affordable restaurants under ¥1,500.",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Hokkaido",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-078",
+    "original_random_id": "R-172",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "高知 鰹のたたき",
+    "query": "高知のカツオのたたきについて教えて。本場の食べ方と、使われるわらの藁焼きの特徴は？",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Kochi",
+      "keyword": "カツオ",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-079",
+    "original_random_id": "R-174",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "石川 加賀料理",
+    "query": "金沢の加賀料理の特徴を教えて。治部煮や蟹料理など正式な石川の郷土食を知りたい。",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Ishikawa",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-080",
+    "original_random_id": "R-154",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "新潟 郷土料理",
+    "query": "新潟の郷土料理を知りたい。のっぺや笹団子など地元で昔から食べられてきた料理を教えて。",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Niigata",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-081",
+    "original_random_id": "R-164",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "秋田 きりたんぽ",
+    "query": "秋田のきりたんぽ鍋について詳しく教えて。本場の味の特徴や食べられる場所を知りたい。",
+    "tool": "get_local_food",
+    "args": {
+      "prefecture": "Akita",
+      "keyword": "きりたんぽ",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-082",
+    "original_random_id": "R-395",
+    "source_class": "sat",
+    "level": null,
+    "lang": "de",
+    "topic": "Anime-Heimat Oarai Ibaraki",
+    "query": "Wie ist die Stadt Oarai in Ibaraki mit dem Anime Girls und Panzer verbunden? Was kann ich dort sehen?",
+    "tool": "search_area",
+    "args": {
+      "q": "大洗 ガールズ&パンツァー 聖地",
+      "lang": "de"
+    }
+  },
+  {
+    "id": "R420v8-083",
+    "original_random_id": "R-070",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "広島 家族 平和教育",
+    "query": "Hiroshima peace education sites for families visiting with older children and grandparents.",
+    "tool": "search_area",
+    "args": {
+      "q": "広島 平和",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-084",
+    "original_random_id": "R-346",
+    "source_class": "sat",
+    "level": null,
+    "lang": "zh",
+    "topic": "隐世村落 白神山地",
+    "query": "青森和秋田交界的白神山地里有什么隐秘的村落和徒步路线？",
+    "tool": "search_area",
+    "args": {
+      "q": "白神山地",
+      "lang": "zh"
+    }
+  },
+  {
+    "id": "R420v8-085",
+    "original_random_id": "R-037",
+    "source_class": "sat",
+    "level": null,
+    "lang": "es",
+    "topic": "長崎 グラバー園",
+    "query": "Cuéntame sobre el Jardín de Glover en Nagasaki.",
+    "tool": "search_area",
+    "args": {
+      "q": "グラバー園",
+      "lang": "es"
+    }
+  },
+  {
+    "id": "R420v8-086",
+    "original_random_id": "R-173",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "Miso varieties Japan",
+    "query": "What are the regional miso varieties of Japan? Looking for officially designated ones from different prefectures.",
+    "tool": "get_local_specialty",
+    "args": {
+      "category": "food",
+      "q": "味噌",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-087",
+    "original_random_id": "R-283",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "100円ショップ 旅土産",
+    "query": "旅のお土産を安く買えるところを教えて。100均やスーパーで買えるおすすめ土産は？",
+    "tool": "get_local_specialty",
+    "args": {
+      "prefecture": "Aichi",
+      "lang": "ja",
+      "category": "food"
+    }
+  },
+  {
+    "id": "R420v8-088",
+    "original_random_id": "R-191",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "Wagashi seasonal sweets",
+    "query": "I want to learn about regional Japanese confectionery traditions. Where can I find officially designated wagashi across Japan?",
+    "tool": "get_local_specialty",
+    "args": {
+      "category": "food",
+      "q": "菓子",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-089",
+    "original_random_id": "R-263",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ja",
+    "topic": "フリーきっぷ 山形 米沢",
+    "query": "山形・米沢エリアを鉄道フリーきっぷで効率よく回りたい。米沢から上杉神社へのアクセスは？",
+    "tool": "get_transport",
+    "args": {
+      "prefecture": "Yamagata",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-090",
+    "original_random_id": "R-237",
+    "source_class": "sat",
+    "level": null,
+    "lang": "ko",
+    "topic": "JR 패스 시코쿠",
+    "query": "JR 패스로 시코쿠 4현을 일주할 수 있나요? 열차만 이용하는 루트를 알려주세요.",
+    "tool": "get_transport",
+    "args": {
+      "prefecture": "Kochi",
+      "lang": "ko"
+    }
+  },
+  {
+    "id": "R420v8-091",
+    "original_random_id": "R-240",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "train-only trip Kyushu",
+    "query": "Traveling Kyushu train-only for a week. What's the best base city to avoid needing a car?",
+    "tool": "get_transport",
+    "args": {
+      "prefecture": "Kumamoto",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-092",
+    "original_random_id": "R-202",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "Kyushu summer fireworks",
+    "query": "What are the major summer fireworks festivals in Kyushu? Looking for ones with traditional significance.",
+    "tool": "get_festivals",
+    "args": {
+      "prefecture": "Kumamoto",
+      "keyword": "花火",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-093",
+    "original_random_id": "R-380",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "accessible festival Awa Odori",
+    "query": "Is the Awa Odori festival in Tokushima accessible for wheelchair users? Any designated viewing areas?",
+    "tool": "get_festivals",
+    "args": {
+      "prefecture": "Tokushima",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-094",
+    "original_random_id": "R-341",
+    "source_class": "sat",
+    "level": null,
+    "lang": "en",
+    "topic": "rainy-day heritage indoor",
+    "query": "I'm in Fukushima on a rainy day. Are there Japan Heritage or museum sites I can visit indoors?",
+    "tool": "get_japan_heritage",
+    "args": {
+      "prefecture": "Fukushima",
+      "lang": "en"
+    }
+  },
+  {
+    "id": "R420v8-095",
+    "original_random_id": "R-353",
+    "source_class": "sat",
+    "level": null,
+    "lang": "de",
+    "topic": "sterbende Handwerkskunst Tonepfer",
+    "query": "Wo gibt es in Japan noch Töpfer, die traditionelle Techniken beherrschen, die fast verschwunden sind?",
+    "tool": "get_traditional_arts",
+    "args": {
+      "lang": "de"
+    }
+  },
+  {
+    "id": "R420v8-096",
+    "original_random_id": "R-244",
+    "source_class": "no_fail",
+    "level": null,
+    "lang": "id",
+    "topic": "tanpa mobil ke Nikko",
+    "query": "Apakah bisa mengunjungi Nikko tanpa mobil sewaan? Saya hanya pakai JR Pass dan bus.",
+    "tool": "get_transport",
+    "args": {
+      "prefecture": "Tochigi",
+      "lang": "id"
+    }
+  },
+  {
+    "id": "R420v8-097",
+    "original_random_id": "R-112",
+    "source_class": "no_fail",
+    "level": null,
+    "lang": "ja",
+    "topic": "子連れ 石川 のとじま水族館",
+    "query": "石川県ののとじま水族館など子供が喜ぶ観光スポット",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Ishikawa",
+      "q": "水族館 子供",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-098",
+    "original_random_id": "R-017",
+    "source_class": "no_fail",
+    "level": null,
+    "lang": "ja",
+    "topic": "奈良 大仏",
+    "query": "奈良の東大寺と大仏について教えてください",
+    "tool": "get_spots",
+    "args": {
+      "prefecture": "Nara",
+      "city": "奈良市",
+      "q": "東大寺 大仏",
+      "lang": "ja"
+    }
+  },
+  {
+    "id": "R420v8-099",
+    "original_random_id": "R-132",
+    "source_class": "no_fail",
+    "level": null,
+    "lang": null,
+    "topic": "Aomori Tohoku romantic",
+    "query": "We want a romantic overnight trip in Aomori with onsen. Any recommended ryokan near Towada Lake?",
+    "tool": "get_hotels",
+    "args": {
+      "prefecture": "Aomori",
+      "hotel_type": "onsen_ryokan"
+    }
+  },
+  {
+    "id": "R420v8-100",
+    "original_random_id": "R-382",
+    "source_class": "no_fail",
+    "level": null,
+    "lang": "ja",
+    "topic": "鬼滅の刃 聖地 竈門神社",
+    "query": "鬼滅の刃の聖地として有名な竈門神社の場所と行き方を教えて。",
+    "tool": "search_hybrid",
+    "args": {
+      "q": "竈門神社 鬼滅の刃",
+      "lang": "ja"
+    }
+  }
+]
