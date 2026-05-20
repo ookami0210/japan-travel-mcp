@@ -20,7 +20,11 @@ import {
 // ──────────────────────────────────────────────────────────────────────
 // Suite
 
-const ENV_KEYS = ["JAPAN_TRAVEL_MCP_CACHE", "HF_TOKEN"] as const;
+const ENV_KEYS = [
+  "JAPAN_TRAVEL_MCP_CACHE",
+  "JAPAN_TRAVEL_MCP_SKIP_LOCAL",
+  "HF_TOKEN",
+] as const;
 
 let cacheDir: string;
 let client: Client;
@@ -79,6 +83,7 @@ beforeAll(async () => {
   // getCacheDir() reads it at call time and the server caches DATA_ROOT
   // once initDataRoot() resolves.
   process.env.JAPAN_TRAVEL_MCP_CACHE = cacheDir;
+  process.env.JAPAN_TRAVEL_MCP_SKIP_LOCAL = "1";
   delete process.env.HF_TOKEN;
 
   const serverModule = await import("../src/index.js");

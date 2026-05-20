@@ -22,7 +22,12 @@ import {
 // ──────────────────────────────────────────────────────────────────────
 // Suite
 
-const ENV_KEYS = ["JAPAN_TRAVEL_MCP_CACHE", "HF_TOKEN", "PORT"] as const;
+const ENV_KEYS = [
+  "JAPAN_TRAVEL_MCP_CACHE",
+  "JAPAN_TRAVEL_MCP_SKIP_LOCAL",
+  "HF_TOKEN",
+  "PORT",
+] as const;
 
 let cacheDir: string;
 let httpServer: HttpServer;
@@ -78,6 +83,7 @@ beforeAll(async () => {
   // Same constraint as the stdio smoke: env must be set before the server
   // module is imported, because getCacheDir() reads it at call time.
   process.env.JAPAN_TRAVEL_MCP_CACHE = cacheDir;
+  process.env.JAPAN_TRAVEL_MCP_SKIP_LOCAL = "1";
   delete process.env.HF_TOKEN;
 
   const stdioModule = await import("../src/index.js");
