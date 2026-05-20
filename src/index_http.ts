@@ -17,25 +17,31 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { randomUUID } from "node:crypto";
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import {
+  createServer,
+  type IncomingMessage,
+  type Server as HttpServer,
+  type ServerResponse,
+} from "node:http";
 // Re-use the exact tool registry + handler from the stdio entrypoint.
 // `src/index.ts` exports buildServer() + initDataRoot(); when imported (as
 // opposed to invoked via `node dist/src/index.js`), the stdio main() does
 // not run — that branch is gated by `import.meta.url === file://argv[1]`.
 import { buildServer, initDataRoot } from "./index.js";
 
-const PORT = Number(process.env.PORT ?? 7860);
-
-async function main(): Promise<void> {
-  // Block until the data is available (cold start downloads from HF if needed).
-  await initDataRoot();
-  const server = buildServer();
-
-  // One transport instance is created per HTTP request handler invocation
-  // (stateless mode) so multiple concurrent clients don't share a session.
-  // For very high traffic, switch to stateful mode with a session map.
-  const httpServer = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+/**
+ * Build the HTTP request handler that routes /healthz, /, and /mcp.
+ *
+ * `mcpServerFactory` is a thunk that returns a fresh MCP `Server` for each
+ * /mcp request. We need a fresh pair (server + transport) per request because
+ * an MCP `Server` can only be `connect()`ed to a single transport in its
+ * lifetime, and `StreamableHTTPServerTransport` is created per request in
+ * stateless mode.
+ */
+export function createHttpHandler(
+  mcpServerFactory: () => Server,
+): (req: IncomingMessage, res: ServerResponse) => Promise<void> {
+  return async (req, res) => {
     // Liveness probe (HF Spaces health check).
     if (req.method === "GET" && req.url === "/healthz") {
       res.writeHead(200, { "Content-Type": "text/plain" });
@@ -53,21 +59,40 @@ async function main(): Promise<void> {
       res.end("not found — try /mcp");
       return;
     }
+    // Stateless mode: sessionIdGenerator: undefined disables session
+    // tracking, so multiple concurrent clients don't share state. For high
+    // traffic with session continuity, switch to stateful mode + a
+    // sessionId → transport map.
     const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
+      sessionIdGenerator: undefined,
+    });
+    const server = mcpServerFactory();
+    res.on("close", () => {
+      transport.close().catch(() => undefined);
+      server.close().catch(() => undefined);
     });
     await server.connect(transport);
     await transport.handleRequest(req, res);
-  });
+  };
+}
 
-  httpServer.listen(PORT, () => {
+export async function main(): Promise<HttpServer> {
+  // Block until the data is available (cold start downloads from HF if needed).
+  await initDataRoot();
+  const port = Number(process.env.PORT ?? 7860);
+
+  const httpServer = createServer(createHttpHandler(buildServer));
+
+  httpServer.listen(port, () => {
     console.error(
-      `[japan-travel-mcp] HTTP MCP server listening on :${PORT}\n` +
-      `  POST /mcp        — Streamable HTTP MCP endpoint\n` +
-      `  GET  /healthz    — liveness probe\n` +
-      `  GET  /           — landing page`,
+      `[japan-travel-mcp] HTTP MCP server listening on :${port}\n` +
+        `  POST /mcp        — Streamable HTTP MCP endpoint\n` +
+        `  GET  /healthz    — liveness probe\n` +
+        `  GET  /           — landing page`,
     );
   });
+
+  return httpServer;
 }
 
 const LANDING_HTML = `<!doctype html>
@@ -108,7 +133,12 @@ const LANDING_HTML = `<!doctype html>
 </body>
 </html>`;
 
-main().catch((err) => {
-  console.error("[japan-travel-mcp/http] FATAL:", err);
-  process.exit(1);
-});
+// Top-level entrypoint — only runs when this file is executed directly,
+// not when imported by the integration suite.
+const isMain = import.meta.url === `file://${process.argv[1]}`;
+if (isMain) {
+  main().catch((err) => {
+    console.error("[japan-travel-mcp/http] FATAL:", err);
+    process.exit(1);
+  });
+}
