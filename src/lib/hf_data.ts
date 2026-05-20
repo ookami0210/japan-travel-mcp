@@ -198,6 +198,13 @@ export function findLocalDataIfPresent(repoRoot: string): string | null {
  *   - Otherwise                              → HF cache (download if missing)
  */
 export async function resolveDataRoot(repoRoot: string): Promise<string> {
+  // Smoke-test escape hatch: when JAPAN_TRAVEL_MCP_SKIP_LOCAL is set, skip
+  // the local-checkout fallback and route through the HF cache resolver so
+  // tests that ship fixtures into a temp JAPAN_TRAVEL_MCP_CACHE dir aren't
+  // shadowed by the developer's populated working copy.
+  if (process.env.JAPAN_TRAVEL_MCP_SKIP_LOCAL) {
+    return ensureDataFromHf();
+  }
   const local = findLocalDataIfPresent(repoRoot);
   if (local) {
     process.stderr.write(

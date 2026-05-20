@@ -74,14 +74,22 @@ corresponding workflow flips ON.
 
 | Channel | Workflow (steady) | Cadence | Current venue | Sources |
 |:---|:---|:---|:---|:---|
-| **MUNI** | `scrape.yml` (legacy) / `steady-scrape.yml` (next) | daily cron 03:00 JST, 65-130 munis/day, 30-day SLA | gh-actions (legacy ON) | #23 |
-| **R3** | `r3_refresh.ts` (chained after MUNI) | weekly per-source rotation (Mon/Tue/Wed/Thu) | gh-actions (chained) | #5–9 |
-| **DMO** | `scrape_dmo_websites` (chained) | bi-weekly | gh-actions (chained) | #10–13 |
-| **WD-FOUNDATION** | (no workflow yet — planned) | monthly+ | local (cold-start) | #1–4, #15–19 |
-| **GLOSSARY** | (no workflow yet — planned) | monthly+ | local (cold-start) | #20–22 |
-| **WIKIPEDIA-ABSTRACT** | (planned) | monthly+ | local (cold-start, planned) | #P1 |
+| **MUNI** | `steady-scrape.yml` | daily cron 03:00 JST, 65–130 munis/day, 30-day SLA | gh-actions (cron OFF until launch) | #23 |
+| **R3** | `steady-scrape.yml` (chained `r3_refresh.ts`) | weekly per-source rotation (Mon/Tue/Wed/Thu) | gh-actions (chained) | #5–9 |
+| **DMO** | `dmo-refresh.yml` | bi-weekly (1st + 15th) 04:00 JST | gh-actions (cron OFF until launch) | #10–13 |
+| **WD-FOUNDATION** | `wd-foundation.yml` (matrix legs) | monthly (1st) 05:00 JST | gh-actions (cron OFF until launch) | #1–4, #15–19, #24, #25, #29–38 |
+| **GLOSSARY** | `wd-foundation.yml` (leg `glossary`) | monthly | gh-actions (cron OFF until launch) | #20–22 |
+| **WIKIPEDIA-ABSTRACT** | `wd-foundation.yml` (leg `wikipedia-summaries`) | monthly | gh-actions (cron OFF until launch) | #34 / #35 / #36 (live) / #P1 (planned alias) |
 | **EVENTS** | (planned) | weekly during seasons | local (cold-start, planned) | #P4, #P10, #P14 |
 | **SEASONAL** | (planned) | weekly during seasons | gh-actions (planned) | #P9 |
+
+Additionally, the corpus is refreshed end-to-end on demand via
+`burst-scrape.yml` (manual `workflow_dispatch` + PR-label `burst-required`)
+and the embedding index is rebuilt automatically by
+`embeddings-rebuild.yml` on each successful `wd-foundation.yml` run.
+See [`docs/automation/AUTOMATION_DESIGN.md`](docs/automation/AUTOMATION_DESIGN.md)
+for the launch-grade design including the budget calculation and the single
+launch switch.
 
 If a source has no channel yet, it is `planned`. Implementing a fetcher
 requires either extending an existing channel or creating a new one.
@@ -582,7 +590,7 @@ requires either extending an existing channel or creating a new one.
 - **Cadence**: 30-day rolling SLA (steady-scrape picker)
 - **Channel**: MUNI
 - **Coverage**: **1,912 / 1,938 munis (98.6%)** — current status
-- **Status**: `active` — running on `scrape.yml` legacy path; migration to `steady-scrape.yml` pending operator switchover
+- **Status**: `active` — running on `steady-scrape.yml` (legacy `scrape.yml` was removed 2026-05-21; cron disabled until launch per AUTOMATION_DESIGN.md)
 
 > **Important — coverage rule per project principle**:
 > No "top-N selection". **Every municipality is covered at the same
@@ -781,6 +789,13 @@ contract.
 
 ## Change log
 
+- 2026-05-21 — launch-grade automation. Legacy `scrape.yml` removed; MUNI +
+  R3 now run via `steady-scrape.yml`. New workflows `dmo-refresh.yml`,
+  `wd-foundation.yml`, `embeddings-rebuild.yml` provide cron paths for the
+  DMO, Wikidata/OSM/Wikipedia, and embedding-rebuild channels respectively.
+  Every steady workflow ships with `schedule:` commented until launch; the
+  launch switch is documented in `docs/automation/AUTOMATION_DESIGN.md`.
+  The rotation contract table above reflects the new venue assignments.
 - 2026-05-04 — initial creation. Inventoried 23 active fetchers and 14
   planned sources. Established the drift-prevention contract (PR template
   + CI validator + reflection table).

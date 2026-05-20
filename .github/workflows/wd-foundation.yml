@@ -1,0 +1,208 @@
+# WD-FOUNDATION + GLOSSARY + WIKIPEDIA-SUMMARY refresh — monthly.
+#
+# Refreshes everything that doesn't sit on the municipal-pages crawler:
+# Wikidata SPARQL queries, OSM Overpass, Wikipedia REST extracts, and
+# the supporting glossary / industry-association registries.
+#
+# Each leg is its own matrix job so a failing fetcher (network blip,
+# upstream schema drift) cannot take down its siblings.
+#
+# Design: docs/automation/AUTOMATION_DESIGN.md
+# Concurrency: own group `wd-foundation` (independent of MUNI / DMO).
+#
+# Pre-launch: schedule block is commented. Enable at launch by uncommenting.
+
+name: wd-foundation
+
+on:
+  # Launch switch: uncomment the next two lines when ready to ship.
+  # schedule:
+  #   - cron: "0 20 1 * *"   # 05:00 JST on the 1st of each month
+  workflow_dispatch:
+    inputs:
+      legs:
+        description: "Comma-separated leg names to run (empty = all)"
+        required: false
+        default: ""
+
+concurrency:
+  group: wd-foundation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350   # ~5.8 h, just under GH Actions 6 h hard limit per job
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        leg:
+          - municipalities
+          - tourism-orgs
+          - wikidata-attractions
+          - hotels
+          - osm-poi-tags
+          - wikidata-anchors
+          - wikidata-descriptions
+          - wikipedia-summaries
+          - wikipedia-lists
+          - glossary
+          - kunishitei
+          - industry-shukubo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Skip if leg not in selected set
+        id: gate
+        env:
+          REQUESTED: ${{ github.event.inputs.legs }}
+          THIS: ${{ matrix.leg }}
+        run: |
+          if [ -z "$REQUESTED" ] || echo "$REQUESTED" | tr ',' '\n' | grep -Fxq "$THIS"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping leg=$THIS (not in requested set: $REQUESTED)"
+          fi
+
+      - name: Install Node dependencies
+        if: steps.gate.outputs.run == 'true'
+        run: npm ci
+
+      - name: Install Python dependencies
+        if: steps.gate.outputs.run == 'true'
+        run: python3 -m pip install --quiet huggingface_hub requests beautifulsoup4
+
+      - name: Prefetch foundation state from HF
+        if: steps.gate.outputs.run == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+        run: python3 scrapers/hf/prefetch_state.py --preset wd-foundation
+
+      - name: Run leg = municipalities (#1 / #2 / #3)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'municipalities'
+        run: |
+          npx tsx scrapers/sources/fetch_municipalities.ts
+          npx tsx scrapers/sources/fetch_municipality_centroids.ts
+          npx tsx scrapers/sources/fetch_official_urls.ts
+
+      - name: Run leg = tourism-orgs (#4)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'tourism-orgs'
+        run: npx tsx scrapers/sources/discover_tourism_orgs.ts
+
+      - name: Run leg = wikidata-attractions (#15 / #16)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikidata-attractions'
+        run: |
+          npx tsx scrapers/sources/fetch_wikidata_attractions_v2.ts
+          npx tsx scrapers/sources/fetch_wikidata_p1435.ts
+          npx tsx scrapers/merge_wikidata_p1435_into_master.ts
+
+      - name: Run leg = hotels (#17 / #18 / #19)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'hotels'
+        run: |
+          npx tsx scrapers/sources/fetch_wikidata_hotels.ts
+          npx tsx scrapers/sources/fetch_osm_hotels.ts
+          npx tsx scrapers/matcher/match_hotels.ts
+
+      - name: Run leg = osm-poi-tags (#24)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'osm-poi-tags'
+        run: |
+          npx tsx scrapers/sources/fetch_osm_attraction_tags.ts
+          npx tsx scrapers/merge_osm_tags_into_master.ts
+
+      - name: Run leg = wikidata-anchors (#30 / #31 / #32 / #38)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikidata-anchors'
+        env:
+          RESUME: "1"
+        run: |
+          npx tsx scrapers/sources/fetch_temple_lodgings.ts
+          npx tsx scrapers/sources/fetch_national_parks.ts
+          npx tsx scrapers/sources/fetch_railway_stations.ts
+          npx tsx scrapers/sources/fetch_landmark_by_name.ts
+          python3 scripts/inject_temple_lodgings.py || true
+          python3 scripts/inject_national_parks.py || true
+          python3 scripts/inject_nearest_transit.py || true
+          python3 scripts/inject_landmark_by_name.py || true
+
+      - name: Run leg = wikidata-descriptions (#33 / #36)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikidata-descriptions'
+        env:
+          RESUME: "1"
+        run: |
+          npx tsx scrapers/sources/fetch_enwiki_sitelinks.ts
+          npx tsx scrapers/sources/fetch_wikidata_descriptions.ts
+          python3 scripts/inject_wikidata_descriptions.py || true
+
+      - name: Run leg = wikipedia-summaries (#34 / #35)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikipedia-summaries'
+        env:
+          RESUME: "1"
+        run: |
+          npx tsx scrapers/sources/fetch_wikipedia_ja_summaries.ts
+          npx tsx scrapers/sources/fetch_wikipedia_en_summaries.ts
+          python3 scripts/inject_wikipedia_ja_summaries.py || true
+          python3 scripts/inject_wikipedia_en_summaries.py || true
+
+      - name: Run leg = wikipedia-lists (#29)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikipedia-lists'
+        run: |
+          npx tsx scrapers/sources/fetch_wikipedia_lists.ts
+          python3 scripts/inject_wikipedia_lists.py || true
+
+      - name: Run leg = glossary (#20 / #21 / #22)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'glossary'
+        run: |
+          npx tsx scrapers/glossary/fetch_wikipedia_multilingual.ts
+          npx tsx scrapers/glossary/fetch_wikipedia_pairs.ts
+
+      - name: Run leg = kunishitei (#25)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'kunishitei'
+        env:
+          RESUME: "1"
+        run: |
+          python3 scrapers/sources/fetch_bunka_kunishitei.py --resume
+          python3 scripts/inject_bunka_kunishitei.py || true
+
+      - name: Run leg = industry-shukubo (#26 / #27 / #37)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'industry-shukubo'
+        run: |
+          npx tsx scrapers/sources/fetch_hito_yu_kai.ts
+          npx tsx scrapers/sources/fetch_koyasan_shukubo.ts
+          python3 scrapers/sources/fetch_kyoto_sect_shukubo.py
+
+      - name: Sync this leg's outputs to HF
+        if: steps.gate.outputs.run == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: open-travel/japan-travel-mcp-data
+        continue-on-error: true
+        run: |
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "wd-foundation ${{ matrix.leg }} $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — leg summary
+        if: always() && steps.gate.outputs.run == 'true'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          STATUS="${{ job.status }}"
+          ICON="✅"
+          [ "$STATUS" != "success" ] && ICON="🚨"
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$ICON wd-foundation leg=${{ matrix.leg }} → $STATUS\"}" \
+            "$SLACK_WEBHOOK_URL" || true

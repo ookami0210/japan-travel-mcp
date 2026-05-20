@@ -1,0 +1,83 @@
+# Embeddings rebuild — fires automatically after a successful wd-foundation
+# refresh, or on demand via workflow_dispatch.
+#
+# Pulls the full master corpus from HF, runs scrapers/embed/build_embeddings.ts,
+# and pushes the regenerated spots.{f16.bin,index.json} back to HF.
+#
+# Design: docs/automation/AUTOMATION_DESIGN.md
+# Concurrency: own group `embeddings` — only one rebuild at a time.
+
+name: embeddings-rebuild
+
+on:
+  workflow_run:
+    workflows: ["wd-foundation"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: embeddings
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # Only fire after a successful upstream wd-foundation run.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          python3 -m pip install --quiet huggingface_hub
+
+      - name: Prefetch state + all 47 prefecture files from HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+        run: |
+          python3 scrapers/hf/prefetch_state.py --preset embeddings --prefectures
+
+      - name: Rebuild embeddings (full corpus)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: npx tsx scrapers/embed/build_embeddings.ts
+
+      - name: Sync embeddings index to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: open-travel/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        run: |
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Embeddings rebuild $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — summary
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          STATUS="${{ job.status }}"
+          ICON="✅"
+          [ "$STATUS" != "success" ] && ICON="🚨"
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$ICON embeddings-rebuild → $STATUS\"}" \
+            "$SLACK_WEBHOOK_URL" || true

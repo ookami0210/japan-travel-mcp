@@ -1,0 +1,104 @@
+# DMO refresh — bi-weekly. Owns the DMO channel (DATA_SOURCES.md #10–#13).
+#
+#   #10  scrapers/sources/fetch_dmo.py          monthly cadence (skip if recent)
+#   #11  scrapers/sources/fetch_dmo_plans.py    quarterly cadence (skip if recent)
+#   #12  scrapers/sources/find_dmo_websites.py  quarterly cadence (skip if recent)
+#   #13  scrapers/sources/scrape_dmo_websites.ts  bi-weekly (runs every invocation)
+#
+# Independent of MUNI (different domains, no shared rate-limit budget).
+# Concurrency group `dmo` so two DMO runs cannot overlap.
+#
+# Pre-launch: schedule block is commented. Enable at launch by uncommenting.
+
+name: dmo-refresh
+
+on:
+  # Launch switch: uncomment the next two lines when ready to ship.
+  # schedule:
+  #   - cron: "0 19 1,15 * *"   # 04:00 JST on the 1st and 15th of each month
+  workflow_dispatch:
+
+concurrency:
+  group: dmo
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  dmo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --quiet huggingface_hub requests beautifulsoup4
+
+      - name: Prefetch DMO state from HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+        run: python3 scrapers/hf/prefetch_state.py --preset dmo
+
+      - name: DMO registry refresh (#10 — 観光庁 official registry)
+        # Per-script "skip if recent" cadence guards are inside each fetcher.
+        continue-on-error: true
+        run: python3 scrapers/sources/fetch_dmo.py
+
+      - name: DMO plan PDFs (#11)
+        continue-on-error: true
+        run: python3 scrapers/sources/fetch_dmo_plans.py
+
+      - name: DMO website discovery (#12)
+        continue-on-error: true
+        run: python3 scrapers/sources/find_dmo_websites.py
+
+      - name: DMO website scrape (#13)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: npx tsx scrapers/sources/scrape_dmo_websites.ts
+
+      - name: Commit operational state
+        run: |
+          git config user.name "japan-travel-mcp-bot"
+          git config user.email "noreply@github.com"
+          git add data/_logs data/_state
+          if git diff --cached --quiet; then
+            echo "No state changes to commit"
+          else
+            git commit -m "data: dmo refresh $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Sync DMO outputs to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: open-travel/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        continue-on-error: true
+        run: |
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "DMO refresh $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — failure summary
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🚨 dmo-refresh FAILED on ${GITHUB_REF##*/} ($(date -u +%Y-%m-%dT%H:%M:%SZ))\"}" \
+            "$SLACK_WEBHOOK_URL" || true

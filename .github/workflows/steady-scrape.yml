@@ -1,20 +1,21 @@
-# Steady scrape — daily refresh of municipalities under a 30-day SLA.
+# Steady scrape — daily MUNI refresh + chained R3 weekly rotation.
 #
-# Replaces the legacy scrape.yml hardcoded "70 munis/day" with a dynamic
-# picker that prioritises overdue (>=30 day) municipalities and smooths
-# daily load.
+# Replaces the legacy scrape.yml. Same surface area, but starts with an
+# explicit HF prefetch step so the runner has the gitignored state files
+# (municipalities.json / official_urls.json / centroids / scrape_state /
+# tourism_org_urls / wikidata_attractions) before daily.ts runs.
 #
 # Design: docs/automation/AUTOMATION_DESIGN.md
 # Concurrency: shares group `scrape` with burst-scrape.yml — they cannot
-# overlap, the steady cron will be skipped while a burst is running.
+# overlap; the steady cron is skipped while a burst is running.
 #
-# Schedule disabled by default. Enable after the launch-prep burst
-# completes and the new daily.ts picker lands.
+# Pre-launch: the schedule block is commented. Enable at launch by
+# uncommenting the cron lines below.
 
 name: steady-scrape
 
 on:
-  # Schedule disabled. Uncomment to activate:
+  # Launch switch: uncomment the next two lines when ready to ship.
   # schedule:
   #   - cron: "0 18 * * *"   # 03:00 JST = 18:00 UTC (previous day)
   workflow_dispatch:
@@ -43,23 +44,41 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Run steady scrape
+      - name: Prefetch state from HF (municipalities, urls, centroids, scrape_state)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+        run: |
+          python3 -m pip install --quiet huggingface_hub
+          python3 scrapers/hf/prefetch_state.py --preset steady
+
+      - name: Run daily MUNI scrape
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
         run: npx tsx scrapers/daily.ts
 
-      - name: R-3 weekly rotation (errors don't block)
+      - name: R-3 weekly rotation (chain; errors isolated)
+        # R-3 sources (MAFF GI, METI traditional crafts, Japan Heritage,
+        # 文化庁 intangible registry, UNESCO ICH) refresh on a day-of-week
+        # rotation. A failing R-3 source MUST NOT block the MUNI commit.
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         continue-on-error: true
         run: npx tsx scrapers/r3_refresh.ts
 
-      - name: Commit operational state
+      - name: Commit operational state (logs + scrape_state)
+        # Only lightweight files committed in git get added here. Bulk data
+        # (prefectures/*, hotels/master.json, translations/, embeddings/)
+        # is gitignored — the next step pushes those to HF.
         run: |
           git config user.name "japan-travel-mcp-bot"
           git config user.email "noreply@github.com"
