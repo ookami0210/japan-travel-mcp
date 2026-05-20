@@ -1,7 +1,7 @@
 # Japan Travel MCP
 
 > **Open Japanese tourism dataset + Model Context Protocol (MCP) server** —
-> 13,394 tourist spots × 17 languages, 40,128 accommodations, 690
+> 13,394 tourist spots × 17 languages, 19,943 accommodations, 690
 > officially-designated cultural records (MAFF GI, METI traditional crafts,
 > Japan Heritage, UNESCO ICH). **Free, no API key, no account.** All data is
 > downloadable as JSON/JSONL from [Hugging Face](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data).
@@ -133,7 +133,7 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 |------|-------------|
 | `search_area` | Search across prefectures, municipalities, and 41,000+ Wikidata attractions by name or keyword |
 | `get_spots` | Tourist spots by prefecture or municipality (combines municipal scrape + Wikidata) |
-| `get_hotels` | 40,000+ accommodations (Wikidata + OpenStreetMap merged) — filter by area or lat/lng/radius |
+| `get_hotels` | 19,943 accommodations (Wikidata + OpenStreetMap merged) — filter by area or lat/lng/radius |
 | `get_transport` | Spot coordinates, prefecture, municipality, and the official URL where access is documented |
 | `get_events` | Festivals registered in Wikidata for a given prefecture, with optional month filter (live SPARQL, in-memory cache) |
 | `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |
@@ -316,7 +316,7 @@ japan-travel-mcp/                          # this repo — code + lightweight me
 ```
 data/translations/    # 17-language names + 200-300 char descriptions
 data/prefectures/     # 47 prefectures of municipal-scrape + Wikidata spots
-data/hotels/master    # 40,128 unified hotels & ryokan
+data/hotels/master    # 19,943 unified hotels & ryokan
 data/hotels/raw/      # OSM + Wikidata pre-merge sources
 data/glossary/        # canonical terms used at translation time
 data/_state/wikidata_attractions.json + 3 muni files

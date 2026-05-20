@@ -1,0 +1,106 @@
+{
+  "id": "a93fb4fb589a",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 69m",
+    "name similarity 0.72 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/4830242624",
+      "source_url": "https://www.openstreetmap.org/node/4830242624",
+      "name": null,
+      "name_en": "Toyoko Inn Toyoko Inn Nihombashi Mitsukoshi",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.6876069,
+        "lng": 139.7789466
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "node/4830242624",
+        "osm_url": "https://www.openstreetmap.org/node/4830242624",
+        "type": "hotel",
+        "name": null,
+        "name_en": "Toyoko Inn Toyoko Inn Nihombashi Mitsukoshi",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.6876069,
+          "lng": 139.7789466
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name:en": "Toyoko Inn Toyoko Inn Nihombashi Mitsukoshi",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/229034315",
+      "source_url": "https://www.openstreetmap.org/way/229034315",
+      "name": "Toyoko Inn Nihombashi Mitsukoshi Mae",
+      "name_en": "Toyoko Inn",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.6870638,
+        "lng": 139.778575
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "13",
+      "raw": {
+        "osm_id": "way/229034315",
+        "osm_url": "https://www.openstreetmap.org/way/229034315",
+        "type": "hotel",
+        "name": "Toyoko Inn Nihombashi Mitsukoshi Mae",
+        "name_en": "Toyoko Inn",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.6870638,
+          "lng": 139.778575
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "brand": "東横イン",
+          "brand:en": "Toyoko Inn",
+          "brand:ja": "東横イン",
+          "brand:wikidata": "Q1320541",
+          "building": "yes",
+          "designation": "Hotel",
+          "name": "Toyoko Inn Nihombashi Mitsukoshi Mae",
+          "name:en": "Toyoko Inn",
+          "name:ja": "東横イン",
+          "source": "Bing;GSI/KIBAN 25000; NARO",
+          "source_ref": "http://wiki.osm.org/wiki/GSI_KIBAN",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}
