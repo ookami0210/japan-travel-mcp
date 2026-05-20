@@ -1,0 +1,120 @@
+{
+  "id": "ebcd27c4bffc",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 34m",
+    "name similarity 0.70 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/10285605018",
+      "source_url": "https://www.openstreetmap.org/node/10285605018",
+      "name": "ホリディパールホテル 2号館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.6393143,
+        "lng": 135.4728681
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "551-0012",
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "27",
+      "raw": {
+        "osm_id": "node/10285605018",
+        "osm_url": "https://www.openstreetmap.org/node/10285605018",
+        "type": "hotel",
+        "name": "ホリディパールホテル 2号館",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.6393143,
+          "lng": 135.4728681
+        },
+        "postal_code": "551-0012",
+        "full_address": null,
+        "city": "大阪市",
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "21",
+          "addr:city": "大阪市",
+          "addr:housenumber": "6",
+          "addr:neighbourhood": "3丁目",
+          "addr:postcode": "551-0012",
+          "addr:province": "大阪府",
+          "addr:quarter": "平尾",
+          "addr:suburb": "大正区",
+          "name": "ホリディパールホテル 2号館",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/1124757662",
+      "source_url": "https://www.openstreetmap.org/way/1124757662",
+      "name": "ホリディパールホテル",
+      "name_en": "Holiday Pearl Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.6396141,
+        "lng": 135.4728189
+      },
+      "phone": "+81-6-6563-9318",
+      "street": null,
+      "postal_code": "551-0012",
+      "website": "http://www.holidaypearlhotel.com/",
+      "type": "hotel",
+      "prefecture_code": "27",
+      "raw": {
+        "osm_id": "way/1124757662",
+        "osm_url": "https://www.openstreetmap.org/way/1124757662",
+        "type": "hotel",
+        "name": "ホリディパールホテル",
+        "name_en": "Holiday Pearl Hotel",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.6396141,
+          "lng": 135.4728189
+        },
+        "postal_code": "551-0012",
+        "full_address": null,
+        "city": "大阪市",
+        "street": null,
+        "phone": "+81-6-6563-9318",
+        "website": "http://www.holidaypearlhotel.com/",
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "22",
+          "addr:city": "大阪市",
+          "addr:housenumber": "14",
+          "addr:neighbourhood": "平尾三丁目",
+          "addr:postcode": "551-0012",
+          "addr:province": "大阪府",
+          "addr:suburb": "大正区",
+          "air_conditioning": "yes",
+          "building": "hotel",
+          "internet_access": "wlan",
+          "internet_access:fee": "customers",
+          "name": "ホリディパールホテル",
+          "name:en": "Holiday Pearl Hotel",
+          "name:ja": "ホリディパールホテル",
+          "phone": "+81-6-6563-9318",
+          "start_date": "2018-12",
+          "tourism": "hotel",
+          "website": "http://www.holidaypearlhotel.com/"
+        }
+      }
+    }
+  ]
+}

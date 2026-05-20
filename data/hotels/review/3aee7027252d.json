@@ -1,0 +1,105 @@
+{
+  "id": "3aee7027252d",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 13m",
+    "name similarity 0.86 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/4459691995",
+      "source_url": "https://www.openstreetmap.org/node/4459691995",
+      "name": "松江シティホテル本館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.4689174,
+        "lng": 133.0548296
+      },
+      "phone": "+81-852-25-4100",
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "32",
+      "raw": {
+        "osm_id": "node/4459691995",
+        "osm_url": "https://www.openstreetmap.org/node/4459691995",
+        "type": "hotel",
+        "name": "松江シティホテル本館",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.4689174,
+          "lng": 133.0548296
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": "松江市",
+        "street": null,
+        "phone": "+81-852-25-4100",
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:city": "松江市",
+          "atm": "no",
+          "description": "門限は午前2時",
+          "internet_access": "no",
+          "name": "松江シティホテル本館",
+          "opening_hours": "10:00-2:00",
+          "phone": "+81-852-25-4100",
+          "source": "survey",
+          "tourism": "hotel",
+          "wheelchair": "limited"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/762786448",
+      "source_url": "https://www.openstreetmap.org/way/762786448",
+      "name": "松江シティホテル別館",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.4690109,
+        "lng": 133.0549094
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "32",
+      "raw": {
+        "osm_id": "way/762786448",
+        "osm_url": "https://www.openstreetmap.org/way/762786448",
+        "type": "hotel",
+        "name": "松江シティホテル別館",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.4690109,
+          "lng": 133.0549094
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "building": "yes",
+          "name": "松江シティホテル別館",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}
