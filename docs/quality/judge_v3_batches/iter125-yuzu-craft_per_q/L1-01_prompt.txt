@@ -1,0 +1,143 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+# CRITICAL RULES (read before scoring — these eliminate inter-judge variance)
+
+**RULE A — score the response, not the tool choice.**
+The agent decided the tool + args; the response is what the server returned. If the wrong tool was called (e.g. get_japan_heritage for a tea-ceremony query), you may note it in `improvement_hint`, but the dim scores must reflect the actual data returned, not what would have come from a different tool. A wrong-tool response with authoritative data is still partly useful — score 3, not 2.
+
+**RULE B — single root cause, single dim hit.**
+If one shortfall affects multiple dims (e.g. "wrong tool" → could affect intent / specificity / constraint), pick the ONE worst-affected dim and score that strictly; the other affected dims drop by AT MOST 1 from their otherwise-deserved score. Do NOT compound the same defect across 3-4 dims — that produces unstable inter-judge medians.
+
+**RULE C — authoritative-source-but-incomplete = 3, not 2.**
+If the response returns real, authoritative data (R-3 designations, Wikidata heritage entities, MAFF GI records, official scrapes) but the scope or filtering is incomplete (e.g. only Akita instead of all-Tohoku, or only food when craft was also requested), the affected dims are **3 (acceptable but weak)**, not 2. Score 2 only when the data is actively misleading or the relevant entity class is entirely absent.
+
+**RULE D — language mismatch is constraint failure, not hallucination.**
+If the user query is in fr / de / ko / vi / etc but the response is in en / ja, score `constraint_handling` -1 from its otherwise-deserved value. Do NOT also drop intent / specificity / expression on the same grounds — that is double-counting per Rule B.
+
+**RULE E — featured_cluster present and relevant = boost intent / specificity by 1.**
+If the response includes a `featured_cluster` block whose entries match the query toponym, the cluster delivers canonical sub-spots regardless of ranking. Add +1 to intent and specificity (capped at 5), unless the cluster items are wrong/stale.
+
+# DIMENSION SCALE (fixed anchors — do not deviate)
+
+For every numeric dimension below, use:
+  **5** = exact match for the dim's question, no caveats needed
+  **4** = match with ONE notable caveat (mention it in reasoning)
+  **3** = partial match — authoritative data with scope/filter gap (RULE C)
+  **2** = wrong scope OR major gap OR misleading
+  **1** = wrong tool, no useful data, or off-topic
+  **0** = empty / error response
+
+# DIMENSIONS
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent? (Apply RULE E if cluster fired.)
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility / language per RULE D)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic? (Apply RULE E if cluster fired.)
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ALL numeric dims are ≥4. Otherwise pick the SINGLE worst per RULE B:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints (incl. language per RULE D)
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+# OUTPUT FORMAT
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification, citing which RULE (A-E) applied if any
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score the following case:
+
+=== Case L1-01 ===
+Topic / intent: 但馬牛
+Query: Tell me about Tajima beef from Hyogo, the origin of Kobe beef.
+Tool: get_local_food({"prefecture": "Hyogo", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "ok": true,
+  "response": {
+    "prefecture_code": "28",
+    "lang": "en",
+    "count": 195,
+    "total_matching": 195,
+    "truncated": false,
+    "truncation_note": null,
+    "featured_japan_heritage_food_stories": [
+      {
+        "story_id": "010",
+        "title_ja": "丹波篠山デカンショ節",
+        "themes": [
+          "城",
+          "森・木",
+          "祭礼",
+          "食文化・酒",
+          "鉱石・鉱物"
+        ],
+        "related_areas_text": "兵庫県（丹波篠山市）",
+        "body_excerpt": "かつて城下町として栄えた丹波篠山の地は、江戸時代の民謡を起源とするデカンショ節によって、地域のその時代ごとの風土や人情、名所、名産品が歌い継がれている。地元の人々はこぞってこれを愛唱し、民謡の世界そのままにふるさとの景色を守り伝え、地域への愛着を育んできた。その流れは、今日においても、新たな歌詞を生み出し新たな丹波篠山を更に後世に歌い継ぐ取組として脈々と生き続けており、今や300番にも上る「デカンショ節」を通じ、丹波篠山の街並みや伝統をそこかしこで体験できる世界が展開している。\n\n大阪から電車に乗り北へ約1時間、さらに篠山口駅からバスで東へ5キロ、逞しい緑の山々に囲まれた盆地、これがデカンショ節の発祥地丹波篠山である。中央に天下普請で築かれた篠山城があり、天守台に立てば、去り難い情懐を誘う町並みと山並みを一望することができる。城下町を中心に、宿場町、農村集落、窯業集落などの町や集落の景観、",
+        "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story010/"
+      },
+      {
+        "story_id": "030",
+        "title_ja": "『古事記』の冒頭を飾る「国生みの島・淡路」",
+        "themes": [
+          "古墳",
+          "海・水辺",
+          "食文化・酒"
+        ],
+        "related_areas_text": "兵庫県（淡路市，洲本市，南あわじ市）",
+        "body_excerpt": "わが国最古の歴史書『古事記』の冒頭を飾る「国生み神話」。この壮大な天地創造の神話の中で最初に誕生する“特別な島”が淡路島である。その背景には、新たな時代の幕開けを告げる金属器文化をもたらし、後に塩づくりや巧みな航海術で畿内の王権や都の暮らしを支えた\" 海人（あ ま）\" と呼ばれる海の民の存在があった。畿内の前面に浮かぶ瀬戸内最大の島は、古代国家形成期の中枢を支えた“海人”の歴史を今に伝える島である。\n\n現存するわが国最古の歴史書『古事記』に描かれた「神話の世界」。そこには「国生み」「天岩戸」「八俣遠呂智」「大國主命」など、日本人ならだれもが一度は耳にした神話が並ぶ。それは、古代日本人の宇宙観や世界観を背景に、天地が形づくられ国家が誕生する過程を、幾多の神々の姿になぞらえ描いた壮大な天地創造の物語である。その冒頭を飾るのが「国生み神話」。イザナギ・イザナミの二柱の神様が、生まれたばかりの混沌",
+        "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story030/"
+      },
+      {
+        "story_id": "039",
+        "title_ja": "荒波を越えた男たちの夢が紡いだ異空間",
+        "themes": [
+          "海・水辺",
+          "祭礼",
+          "食文化・酒"
+        ],
+        "related_areas_text": "北海道（函館市，松前町，小樽市，石狩市）・青森県（鰺ヶ沢町，深浦町，野辺地町）・秋田県（秋田市，にかほ市，男鹿市，能代市，由利本荘市）・山形県（酒田市，鶴岡市）・新潟県（新潟市，長岡市，佐渡市，上越市，出雲崎町，村上市）・富山県（富山市，高岡市）・石川県（加賀市，輪島市，小松市，金沢市，白山市，志賀町）・福井県（敦賀市，南越前町，坂井市，小浜市，美浜町）・京都府（宮津市）・大阪府（大阪市，泉佐野市）・兵庫県（神戸市，高砂市，新温泉町，赤穂市，洲本市，姫路市，たつの市）・鳥取県（鳥取市）・島根県（浜田市）・岡山県（倉敷市，備前市）・広島県（尾道市，呉市、竹原市）・香川県（多度津町）",
+        "body_excerpt": "日本海や瀬戸内海沿岸には、山を風景の一部に取り込む港町が点々とみられます。そこには、港に通じる小路が随所に走り、通りには広大な商家や豪壮な船主屋敷が建っています。また、社寺には奉納された船の絵馬や模型が残り、京など遠方に起源がある祭礼が行われ、節回しの似た民謡が唄われています。これらの港町は、荒波を越え、動く総合商社として巨万の富を生み、各地に繁栄をもたらした北前船の寄港地・船主集落で、時を重ねて彩られた異空間として今も人々を惹きつけてやみません。\n\n江戸時代、北海道・東北・北陸と西日本を結んだ西廻り航路は経済の大動脈であり、この航路を利用した商船は北前船と呼ばれました。北前船は、米をはじめとした物資の輸送から発展し、船主自身が寄港地で仕入れた多種多様な商品を、別の寄港地で販売する買い積み方式により利益をあげたことから「動く総合商社」と形容されています。日本海や瀬戸内海沿岸に残る数多くの寄",
+        "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story039/"
+      },
+      {
+        "story_id": "050",
+        "title_ja": "きっと恋する六古窯",
+        "themes": [
+          "食文化・酒",
+          "鉱石・鉱物"
+        ],
+        "related_areas_text": "岡山県（備前市）・福井県（越前町）・愛知県（瀬戸市, 常滑市）・滋賀県（甲賀市）・兵庫県（丹波篠山市）",
+        "body_excerpt": "瀬戸、越前、常滑、信楽、丹波、備前のやきものは「日本六古窯」と呼ばれ、縄文から続いた世界に誇る日本古来の技術を継承している、日本生まれ日本育ちの、生粋のやきもの産地である。中世から今も連綿とやきものづくりが続くまちは、丘陵地に残る大小様々の窯跡や工房へ続く細い坂道が迷路のように入り組んでいる。恋しい人を探すように煙突の煙を目印に陶片や窯道具を利用した塀沿いに進めば、「わび・さび」の世界へと自然と誘い込まれ、時空を超えてセピア調の日本の原風景に出合うことができる。\n\n数百年から千年を超える六古窯。すなわち、施釉陶器の瀬戸と焼締陶器の越前・常滑・信楽・丹波・備前である。中世は平安時代の公家政権から武家政治へと段階的に移行したことに加え、民衆の力が台頭した時代である。そのため、東は静岡県から南は三重県、北は岐阜県高山市近くまで山茶碗窯ができていく。その一大勢力が常滑焼である。常滑の影響を大きく受",
+        "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story050/"
+      },
+      {
+        "story_id": "052",
+        "title_ja": "関門“ノスタルジック”海峡",
+        "themes": [
+          "城",
+          "海・水辺",
+          "食文化・酒"
+        ],
+        "related_areas_text": "福岡県（北九州市）・山口県（下関市）",
+        "body_excerpt": "古来より陸上・海上交通の要衝であった関門地域は、幕末の下関戦争を契機とした下関・門司両港の開港以降、海峡の出入口には双子の洋式灯台が設置され、沿岸部には重厚な近代建築が続々と建設された。狭隘な海峡を外国船が行き交う景観の中、日本が近代国家建設へ向け躍動した時代のレトロな建造物群が、時が停止したかのように現在も残されている。渡船や海底トンネルを使って両岸を巡れば、まるで映画のワンシーンに紛れ込んだような、ノスタルジックな街並みに出会うことができる。\n\n関門地域を空から見下ろすと、本州と九州とが互いに手を伸ばし、今にも陸続きになりそうな地形が目に入ります。海峡を挟んだ両岸からは、山々が海にせり出すように対峙し、そこからは大型
+... (truncated)
+```

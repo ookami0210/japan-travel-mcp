@@ -1,0 +1,2848 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+For each numeric dimension, use 0-5:
+  5 = excellent — agent can use as-is
+  4 = good — minor gap, mostly useful
+  3 = acceptable — works but weak
+  2 = problematic — intent matches but practically thin
+  1 = bad — incorrect, off-target, or unsafe
+
+DIMENSIONS:
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent?
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic?
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ≥4 across the board. Otherwise pick the SINGLE worst:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification of your scoring
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score each of the following cases:
+
+=== Case R-051 ===
+Topic / intent: 立山黒部アルペンルート
+Query: Tell me about the Tateyama Kurobe Alpine Route.
+Tool: get_spots({"prefecture": "Toyama", "q": "アルペンルート", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "713ee4553b36169c",
+      "name": "立山黒部アルペンルート",
+      "description": "立山黒部アルペンルートの乗り物（ケーブルカーや高原バス等）については、立山黒部貫光株式会社へお問い合わせください。【立山黒部総合案内センター】電話:076-481-1500（受付時間 8：30〜16：30 ※12/1〜4/14は土日祝休み）立山黒部アルペンルートホームページ（よくある質問）",
+      "coordinates": {
+        "lat": 36.663387,
+        "lng": 137.313721
+      },
+      "address": "〒930-0292 富山県中新川郡立山町前沢2440番地",
+      "url": "https://www.town.tateyama.toyama.jp/soshikikarasagasu/shokokankoka/kankokoryugakari/1/1529.html",
+      "municipality": "立山町",
+      "municipality_code": "163236",
+      "prefecture": "富山県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "b28fd326c664e693",
+      "name": "【受付中！】立山町へのふるさと納税",
+      "description": "ふるさと納税とは、ふるさとや応援したい自治体に寄附ができる制度のことです。手続きをすると所得税や住民税の還付・控除が受けられ、多くの自治体では、地域の名産品などのお礼の品も用意されています。寄附金の「使い道」が指定でき、お礼の品もいただける魅力的な仕組みになっています。立山町では・立山黒部アルペンルート沿線の宿泊施設（山小屋等）の宿泊券・立山黒部アルペンルート（立山駅から室堂・黒部湖・扇沢）優待券・電動アシスト付きマウンテンバイク（E-BIKE）体験チケット等、立山黒部アルペンルートに関するお礼の品を多数ご用意しております。立山町のふるさと納税返礼品については、以下をご覧ください。（一例）【ふるさとチョイス】【楽天ふるさと納税】立山町のふるさと納税全般については、こちらをご覧ください。",
+      "coordinates": {
+        "lat": 36.663387,
+        "lng": 137.313721
+      },
+      "address": "〒930-0292 富山県中新川郡立山町前沢2440番地",
+      "url": "https://www.town.tateyama.toyama.jp/soshikikarasagasu/shokokankoka/kankokoryugakari/1/11751.html",
+      "municipality": "立山町",
+      "municipality_code": "163236",
+      "prefecture": "富山県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "01f1d744ab475919",
+      "name": "登山や観光で千寿ケ原1号公園駐車場を利用される方へ協力金のお願い",
+      "description": "国際的観光地である「立山黒部アルペンルート」、世紀の大事業と言われる「黒部ダム」や日本一の落差を誇る「称名滝」等、立山町の観光地にご来訪いただきありがとうございます。立山町では、立山黒部アルペンルートの拠点である立山駅に近接した千寿ケ原1号公園駐車場を利用される方に協力金をお願いすることとしています。趣旨・協力金の使途（立山黒部アルペンルートの拠点駅である地鉄立山駅周辺の活性化や環境整備に活用）にご賛同いただける皆さまのご協力をお願いします。【期間（令和8年度）】令和8年4月1日（水曜日）から令和8年10月31日（土曜日）【徴収方法】スマートフォンによるQRコード決済※支払方法についてはこちら(PNG:131.5KB)をご覧ください。【協力金額】3時間を超えた場合、その超えた1時間ごと200円駐車開始から24時間まで最大1,000円（24時間以降1時間200円 ※24時間最大1,000円）",
+      "coordinates": {
+        "lat": 36.663387,
+        "lng": 137.313721
+      },
+      "address": "〒930-0292 富山県中新川郡立山町前沢2440番地",
+      "url": "https://www.town.tateyama.toyama.jp/soshikikarasagasu/shokokankoka/kankokoryugakari/1/oshirase/11470.html",
+      "municipality": "立山町",
+      "municipality_code": "163236",
+      "prefecture": "富山県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "4735c3e8ab4e3da0",
+      "name": "登山・トレッキング情報",
+      "description": "立山は3,000メートル級の高山です。散策中と休憩中では体温がかなり変化するため、ジャンパー等の防寒具は必需品です。また、山の強い日差しを防ぐためにはサングラスも有効です。帽子・日焼け止め、突然の雨にも備えて雨具もお忘れなく。木道散策は濡れていると滑りやすく危険ですので、雨の日などは注意が必要です。 また、立山一帯は中部山岳国立公園です。高山植物や湿原を保護するために、歩道（木道）以外は立ち入らないようにしましょう。もちろんゴミは持ち帰り、みんなで美しい自然を保つよう心がけましょう。",
+      "coordinates": {
+        "lat": 36.663387,
+        "lng": 137.313721
+      },
+      "address": "〒930-0292 富山県中新川郡立山町前沢2440番地",
+      "url": "https://www.town.tateyama.toyama.jp/soshikikarasagasu/shokokankoka/kankokoryugakari/1/1534.html",
+      "municipality": "立山町",
+      "municipality_code": "163236",
+      "prefecture": "富山県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "90ee4b69aad0edd3",
+      "name": "宿泊施設",
+      "description": "営業期間や料金、予約方法等については各宿泊施設までお問い合わせください。",
+      "coordinates": {
+        "lat": 36.663387,
+        "lng": 137.313721
+      },
+      "address": "〒930-0292 富山県中新川郡立山町前沢2440番地",
+      "url": "https://www.town.tateyama.toyama.jp/soshikikarasagasu/shokokankoka/kankokoryugakari/1/1531.html",
+      "municipality": "立山町",
+      "municipality_code": "163236",
+      "prefecture": "富山県",
+      "langu
+```
+
+
+=== Case R-052 ===
+Topic / intent: 角島大橋
+Query: 山口県の角島大橋について
+Tool: get_spots({"prefecture": "Yamaguchi", "q": "角島", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "7ba461c8580286b5",
+      "name": "おいでませ山口へー山口県観光サイト",
+      "description": "岩国基地の開放イベント 。米軍基地を一般開放して、航空ショーや軍用機の地上展示、アメリカンフード屋台などの楽しめるイベントが盛りだくさん！子どもから大人まで毎年多くの人で賑わいます。岩国フレンドシップデーの目玉といえば、迫力いっぱいの航空シ…",
+      "coordinates": {
+        "lat": 34.151779,
+        "lng": 132.231415
+      },
+      "address": "〒740-8555 山口県岩国市三角町２丁目",
+      "url": "https://yamaguchi-tourism.jp/event/detail_18967.html",
+      "municipality": "下関市",
+      "municipality_code": "352012",
+      "prefecture": "山口県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7ba461c8580286b5",
+      "name": "おいでませ山口へー山口県観光サイト",
+      "description": "岩国基地の開放イベント 。米軍基地を一般開放して、航空ショーや軍用機の地上展示、アメリカンフード屋台などの楽しめるイベントが盛りだくさん！子どもから大人まで毎年多くの人で賑わいます。岩国フレンドシップデーの目玉といえば、迫力いっぱいの航空シ…",
+      "coordinates": {
+        "lat": 34.151779,
+        "lng": 132.231415
+      },
+      "address": "〒740-8555 山口県岩国市三角町２丁目",
+      "url": "https://yamaguchi-tourism.jp/event/detail_18967.html",
+      "municipality": "山口市",
+      "municipality_code": "352039",
+      "prefecture": "山口県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7ba461c8580286b5",
+      "name": "おいでませ山口へー山口県観光サイト",
+      "description": "岩国基地の開放イベント 。米軍基地を一般開放して、航空ショーや軍用機の地上展示、アメリカンフード屋台などの楽しめるイベントが盛りだくさん！子どもから大人まで毎年多くの人で賑わいます。岩国フレンドシップデーの目玉といえば、迫力いっぱいの航空シ…",
+      "coordinates": {
+        "lat": 34.151779,
+        "lng": 132.231415
+      },
+      "address": "〒740-8555 山口県岩国市三角町２丁目",
+      "url": "https://yamaguchi-tourism.jp/event/detail_18967.html",
+      "municipality": "萩市",
+      "municipality_code": "352047",
+      "prefecture": "山口県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7ba461c8580286b5",
+      "name": "おいでませ山口へー山口県観光サイト",
+      "description": "岩国基地の開放イベント 。米軍基地を一般開放して、航空ショーや軍用機の地上展示、アメリカンフード屋台などの楽しめるイベントが盛りだくさん！子どもから大人まで毎年多くの人で賑わいます。岩国フレンドシップデーの目玉といえば、迫力いっぱいの航空シ…",
+      "coordinates": {
+        "lat": 34.151779,
+        "lng": 132.231415
+      },
+      "address": "〒740-8555 山口県岩国市三角町２丁目",
+      "url": "https://yamaguchi-tourism.jp/event/detail_18967.html",
+      "municipality": "防府市",
+      "municipality_code": "352063",
+      "prefecture": "山口県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7ba461c8580286b5",
+      "name": "おいでませ山口へー山口県観光サイト",
+      "description": "岩国基地の開放イベント 。米軍基地を一般開放して、航空ショーや軍用機の地上展示、アメリカンフード屋台などの楽しめるイベントが盛りだくさん！子どもから大人まで毎年多くの人で賑わいます。岩国フレンドシップデーの目玉といえば、迫力いっぱいの航空シ…",
+      "coordinates": {
+        "lat": 34.151779,
+        "lng": 132.231415
+      },
+      "address": "〒740-8555 山口県岩国市三角町２丁目",
+      "url": "https://yamaguchi-tourism.jp/event/detail_18967.html",
+      "municipality": "岩国市",
+      "municipality_code": "352080",
+      "prefecture": "山口県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7ba461c8580286b5",
+      "name": "おいでませ山口へー山口県観光サイト",
+      "description": "岩国基地の開放イベント 。米軍基地を一般開放して、航空ショーや軍用機の地上展示、アメリカンフード屋台などの楽しめるイベントが盛りだくさん！子どもから大人まで毎年多くの人で賑わいます。岩国フレンドシップデーの目玉といえば、迫力いっぱいの航空シ…",
+      "coordinates": {
+        "lat": 34.151779,
+        "lng": 132.231415
+      },
+      "address": "〒740-8555 山口県岩国市三角町２丁目",
+      "url": "https://yamaguchi-tourism.jp/event/detail_18967.html",
+      "municipality": "長門市",
+      "municipality_code": "352110",
+      "prefecture": "山口県",
+      "language": "ja",
+      "quality_score": 0.97,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "7ba461c
+```
+
+
+=== Case R-053 ===
+Topic / intent: 伊勢神宮
+Query: 三重県の伊勢神宮について詳しく教えて
+Tool: get_japan_heritage({"prefecture": "Mie", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "24",
+  "region": null,
+  "region_prefecture_codes": null,
+  "theme_filter": null,
+  "q": null,
+  "lang": "ja",
+  "count": 7,
+  "tool_scope_note": "IMPORTANT: 日本遺産 (this tool) and UNESCO WHS / 国宝 / 特別史跡 are DIFFERENT programs. If the user asked about UNESCO World Heritage Sites, 国宝, hidden christian heritage, pilgrimage routes (Kumano Kodo / Henro / Saigoku), or specific famous landmarks — see `see_also_wikidata_heritage` below OR call search_area / get_traditional_arts.",
+  "top_canonical_heritage": [
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q11566281",
+      "name_ja": "瀞八丁",
+      "name_en": "Doro-Hatchō",
+      "description_en": null,
+      "coordinates": {
+        "lat": 33.90722222,
+        "lng": 135.87944444
+      },
+      "prefecture": "三重県",
+      "municipality": "三重県",
+      "heritage_designations": [
+        "Q11414752",
+        "Q122904442",
+        "Q94987823"
+      ],
+      "heritage_designations_labels": [
+        "Place of Scenic Beauty (Japan)",
+        "Nationally-designated Natural Monument",
+        "Special Place of Scenic Beauty"
+      ],
+      "kinds": [
+        "valley"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11566281"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q611345",
+      "name_ja": "紀伊山地の霊場と参詣道",
+      "name_en": "Sacred Sites and Pilgrimage Routes in the Kii Mountain Range",
+      "description_en": "UNESCO World Heritage Site in Japan",
+      "coordinates": {
+        "lat": 33.83694,
+        "lng": 135.77639
+      },
+      "prefecture": "三重県",
+      "municipality": "三重県",
+      "heritage_designations": [
+        "Q9259"
+      ],
+      "heritage_designations_labels": [
+        "UNESCO World Heritage Site"
+      ],
+      "kinds": [
+        "pilgrimage_site",
+        "buddhist_temple"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q611345"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q687168",
+      "name_ja": "伊勢神宮",
+      "name_en": "Ise Jingū",
+      "description_en": "Shinto shrine in Mie Prefecture, Japan",
+      "coordinates": {
+        "lat": 34.455,
+        "lng": 136.725833333
+      },
+      "prefecture": "三重県",
+      "municipality": "三重県",
+      "heritage_designations": [
+        "Q1139795"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan"
+      ],
+      "kinds": [
+        "shinto_shrine",
+        "religious_building",
+        "saigoku_33",
+        "hanabi_top3"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q687168",
+      "opening_hours": "Jan-Apr,Sep Mo-Su 05:00-18:00; May-Aug Mo-Su 05:00-19:00; Oct-Dec Mo-Su 05:00-17:00",
+      "website": "https://www.isejingu.or.jp/",
+      "fee": "no"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q107020358",
+      "name_ja": "専修寺如来堂",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.76245,
+        "lng": 136.5029
+      },
+      "prefecture": "三重県",
+      "municipality": "三重県",
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622",
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of Japan",
+        "Registered Tangible Cultural Property of Japan"
+      ],
+      "kinds": [
+        "shinto_shrine",
+        "buddhist_temple",
+        "religious_building",
+        "temple_main_hall"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q107020358"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q107020359",
+      "name_ja": "専修寺御影堂",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 34.76221,
+        "lng": 136.5035
+      },
+      "prefecture": "三重県",
+      "municipality": "三重県",
+      "heritage_designations": [
+        "Q1139795",
+        "Q1188622",
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Important Cultural Property of J
+```
+
+
+=== Case R-054 ===
+Topic / intent: 飛騨高山 古い町並み
+Query: 飛騨高山の古い町並みを観光したい
+Tool: get_spots({"prefecture": "Gifu", "city": "高山", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "139e7df404c3796c",
+      "name": "飛騨高山旅ガイド",
+      "description": "雄大な山々に囲まれた飛騨高山は、豊かな自然が息づく美しいエリア。ここでは、1年を通してさまざまな花が咲き誇り、訪れるたびに違った表情を見せてくれます。春には町を彩る桜が満開になり、歴史ある町並みと見事なコントラストを描きます。夏には、清流に…",
+      "coordinates": {
+        "lat": 36.140526,
+        "lng": 137.258835
+      },
+      "address": "〒506-0011 岐阜県高山市本町1丁目2番地",
+      "url": "https://www.hidatakayama.or.jp/special/detail_354.html",
+      "municipality": "高山市",
+      "municipality_code": "212032",
+      "prefecture": "岐阜県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "ea40aecadefb5c9a",
+      "name": "飛騨高山旅ガイド",
+      "description": "「四十八滝山野草花園花の森」は、飛騨高山の観光に訪れる方々にとって、手軽に大自然を満喫できる魅力的なスポットです。有名な観光地である飛騨高山から車でわずか30分というアクセスしやすい場所にありながら、日常の喧騒を忘れさせる美しい自然が広がっ…",
+      "coordinates": {
+        "lat": 36.140526,
+        "lng": 137.258835
+      },
+      "address": "〒506-0011 岐阜県高山市本町1丁目2番地",
+      "url": "https://www.hidatakayama.or.jp/spot/detail_1604.html",
+      "municipality": "高山市",
+      "municipality_code": "212032",
+      "prefecture": "岐阜県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "63d251ceec75a444",
+      "name": "飛騨高山旅ガイド",
+      "description": "ひんやり真っ暗なトンネルや、高架橋の上という非日常の空間、そして春の桜や秋の紅葉といった田舎町のかつて地域を支えた旧神岡鉄道の跡地。そこには、時が止まったかのような「ロストライン」の退廃美と、瑞々しい飛騨の自然が共存する特別な空間が広がっ…",
+      "coordinates": {
+        "lat": 36.140526,
+        "lng": 137.258835
+      },
+      "address": "〒506-0011 岐阜県高山市本町1丁目2番地",
+      "url": "https://www.hidatakayama.or.jp/spot/detail_1297.html",
+      "municipality": "高山市",
+      "municipality_code": "212032",
+      "prefecture": "岐阜県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "2c24c24764caf137",
+      "name": "飛騨高山旅ガイド",
+      "description": "千光寺は「お大師さま」として親しまれている弘法大師を宗祖とし、高野山金剛峰寺を総本山とする、高野山真言宗のお寺です。1,600年前、仁徳天皇の時代の飛騨の豪族 両面宿儺（りょうめんすくな）*が開創したと伝わります。仏教の寺院としては1,200年前に真…",
+      "coordinates": {
+        "lat": 36.140526,
+        "lng": 137.258835
+      },
+      "address": "〒506-0011 岐阜県高山市本町1丁目2番地",
+      "url": "https://www.hidatakayama.or.jp/spot/detail_1653.html",
+      "municipality": "高山市",
+      "municipality_code": "212032",
+      "prefecture": "岐阜県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "f66a709a0e287a40",
+      "name": "飛騨高山旅ガイド",
+      "description": "岐阜県高山市にある「飛騨の里」は、飛騨地方の古い民家を移築復元した屋外博物館です。合掌造りをはじめとする貴重な建物群が立ち並び、まるでタイムスリップしたかのような懐かしい風景が広がります。単に古い建物を見るだけでなく、当時の人々の暮らしや…",
+      "coordinates": {
+        "lat": 36.140526,
+        "lng": 137.258835
+      },
+      "address": "〒506-0011 岐阜県高山市本町1丁目2番地",
+      "url": "https://www.hidatakayama.or.jp/spot/detail_1104.html",
+      "municipality": "高山市",
+      "municipality_code": "212032",
+      "prefecture": "岐阜県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c74926a8acff0696",
+      "name": "飛騨高山旅ガイド",
+      "description": "飛騨高山は気候や水、お米に恵まれ、良質な地酒を生み出しました。古い町並みに残る歴史ある酒蔵では今も酒造りが営まれています。飛騨高山酒蔵のん兵衛まつりは、試飲をしながら酒蔵をめぐるスタンプラリー。飛騨高山御酒飲帳を買って6つの酒蔵を制覇しよう…",
+      "coordinates": {
+        "lat": 36.140526,
+        "lng": 137.258835
+      },
+      "address": "〒506-0011 岐阜県高山市本町1丁目2番地",
+      "url": "https://www.hidatakayama.or.jp/event/detail_2010.html",
+      "municipality": "高山市",
+      "municipality_code": "212032",
+      "prefecture": "岐阜県",
+      "language": "ja",
+      "quality_score": 0.82,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "454983b7f68adcb5",
+      "name": "飛騨高山旅ガイド",
+      "description": "乗鞍岳 &ndash; 大自然と親しめる3,000mの名峰岐阜県と長野県の県境にそびえる乗鞍岳は、日本百名山のひとつ。最高峰「剣ヶ峰（3,026m）」をはじめ、23の峰と7つの湖、8つの平原からなる雄大な山です。標高2,702mの畳平まではバスでアク
+```
+
+
+=== Case R-055 ===
+Topic / intent: 箱根 温泉 富士山
+Query: Hakone hot springs with views of Mt. Fuji.
+Tool: get_hotels({"prefecture": "Kanagawa", "city": "箱根", "hotel_type": "onsen_ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "326013488f93",
+      "confidence": "singleton",
+      "name": "Onsen hostel K's House Hakone",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hostel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2283843,
+        "lng": 139.0978393
+      },
+      "phone": "+81460859111",
+      "website": "https://kshouse.jp/hakone-j/index.html",
+      "postal_code": "Ashigarashimo District, Kanagawa Prefecture 250-0312, Japon",
+      "street": "箱根町湯本茶屋",
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/931868525",
+          "url": "https://www.openstreetmap.org/way/931868525"
+        }
+      ]
+    },
+    {
+      "id": "5dc24fa784b8",
+      "confidence": "singleton",
+      "name": "箱根強羅温泉 紬 -TSUMUGI-",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2486947,
+        "lng": 139.0292338
+      },
+      "phone": "+81-460-85-0036",
+      "website": "https://jp-tsumugi.com/",
+      "postal_code": "250-0408",
+      "street": null,
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/13524228915",
+          "url": "https://www.openstreetmap.org/node/13524228915"
+        }
+      ]
+    },
+    {
+      "id": "2d1abdfefb0e",
+      "confidence": "singleton",
+      "name": "箱根湯本大平台温泉 満天の星",
+      "name_en": "Manten No Hoshi Hotel",
+      "name_zh": "滿天之星飯店",
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2376209,
+        "lng": 139.0734386
+      },
+      "phone": "050-3000-0859",
+      "website": null,
+      "postal_code": "250-0405",
+      "street": "Ohhiradai Hakonemachi Ashigarashimogun",
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/4775546780",
+          "url": "https://www.openstreetmap.org/node/4775546780"
+        }
+      ]
+    },
+    {
+      "id": "e1746afbf8c5",
+      "confidence": "singleton",
+      "name": "箱根湯本温泉　天成園",
+      "name_en": "Onsen Tenseien",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.2287455,
+        "lng": 139.094652
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "14",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/463258305",
+          "url": "https://www.openstreetmap.org/way/463258305"
+        }
+      ]
+    }
+  ],
+  "count": 4,
+  "truncated": false,
+  "total_matching": 4,
+  "r3_official_count": 0,
+  "hotel_type_filter": "onsen_ryokan",
+  "lodging_types_note": "lodging_type values: ryokan, onsen_ryokan (incl. 日本秘湯を守る会 official hisoyu), shukubo (temple lodging, incl. 高野山宿坊協会 members), kominka (traditional house), minshuku, hostel, guest_house, apartment, motel, hotel. Group aliases for hotel_type arg: 'traditional', 'onsen', 'budget'.",
+  "note": "Information only — does NOT include availability or pricing. For bookings, visit the hotel's official website. Records prefixed with 'koyasan_shukubo:' / 'hito_yu_kai:' are sourced from official-org membership lists with designation_jp/en attribution.",
+  "data_as_of": "2026-04-25T23:06:14.287Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-056 ===
+Topic / intent: 宮古島 ビーチ
+Query: 宮古島の透明度が高いビーチを教えて
+Tool: get_spots({"prefecture": "Okinawa", "city": "宮古島", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q700946",
+      "name": "宮古島",
+      "name_en": "Miyako Island",
+      "name_zh": "宮古島",
+      "name_ko": "미야코섬",
+      "description_en": "island in Okinawa, Japan",
+      "coordinates": {
+        "lat": 24.779444444444444,
+        "lng": 125.31888888888889
+      },
+      "url": "https://www.wikidata.org/wiki/Q700946",
+      "municipality": null,
+      "municipality_code": null,
+      "prefecture": "沖縄県",
+      "quality_score": 0.65,
+      "kinds": [
+        "island",
+        "walking_road_500"
+      ],
+      "prominence_score": 0.9,
+      "crowd_band": "medium",
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11433407",
+      "name": "大和井",
+      "name_en": "Yamato Gā",
+      "name_zh": "大和井",
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 24.810833,
+        "lng": 125.285639
+      },
+      "url": "https://www.wikidata.org/wiki/Q11433407",
+      "municipality": "宮古島市",
+      "municipality_code": "472140",
+      "prefecture": "沖縄県",
+      "quality_score": 0.65,
+      "prominence_score": 0.9,
+      "crowd_band": "medium",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "4f0c399339e0b1b4",
+      "name": "「令和8年度宮古島市観光危機管理計画推進業務」に係る公募型プロポーザルについて",
+      "description": "宮古島市役所のホームページです。暮らしの情報や市政に関する情報、宮古島の観光案内・イベント情報などをお知らせします。",
+      "coordinates": {
+        "lat": 24.790602,
+        "lng": 125.294182
+      },
+      "address": "〒906-8501 沖縄県宮古島市平良字西里1140番地",
+      "url": "https://www.city.miyakojima.lg.jp/soshiki/shityo/kankosyoukou/kankou/oshirase/2026-0501-1006-30.html",
+      "municipality": "宮古島市",
+      "municipality_code": "472140",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.74,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "30ccff327956e4c3",
+      "name": "宮古島市観光振興ビジョン",
+      "description": "宮古島市役所のホームページです。暮らしの情報や市政に関する情報、宮古島の観光案内・イベント情報などをお知らせします。",
+      "coordinates": {
+        "lat": 24.790602,
+        "lng": 125.294182
+      },
+      "address": "〒906-8501 沖縄県宮古島市平良字西里1140番地",
+      "url": "https://www.city.miyakojima.lg.jp/soshiki/shityo/kankosyoukou/kankou/vision.html",
+      "municipality": "宮古島市",
+      "municipality_code": "472140",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.74,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "57bab514cb0d367e",
+      "name": "2022年 宮古島市勢要覧 -City Guide of Miyakojima-",
+      "description": "宮古島市役所のホームページです。暮らしの情報や市政に関する情報、宮古島の観光案内・イベント情報などをお知らせします。",
+      "coordinates": {
+        "lat": 24.790602,
+        "lng": 125.294182
+      },
+      "address": "〒906-8501 沖縄県宮古島市平良字西里1140番地",
+      "url": "https://www.city.miyakojima.lg.jp/gyosei/mayor/oshirase/shiseiyouran2022.html",
+      "municipality": "宮古島市",
+      "municipality_code": "472140",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.74,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "611704c568174268",
+      "name": "宮古島市イメージキャラクター「みーや」の部屋",
+      "description": "宮古島市役所のホームページです。暮らしの情報や市政に関する情報、宮古島の観光案内・イベント情報などをお知らせします。",
+      "coordinates": {
+        "lat": 24.790602,
+        "lng": 125.294182
+      },
+      "address": "〒906-8501 沖縄県宮古島市平良字西里1140番地",
+      "url": "https://www.city.miyakojima.lg.jp/soshiki/shityo/kankosyoukou/kankou/miya_profile.html",
+      "municipality": "宮古島市",
+      "municipality_code": "472140",
+      "prefecture": "沖縄県",
+      "language": "ja",
+      "quality_score": 0.74,
+      "tier": 
+```
+
+
+=== Case R-057 ===
+Topic / intent: 釧路湿原
+Query: 북해도 쿠시로 습원에 대해 알려주세요.
+Tool: get_spots({"prefecture": "Hokkaido", "city": "釧路", "q": "湿原", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11648300",
+      "name": "釧路湿原",
+      "name_en": "Kushiro Wetland",
+      "name_zh": "釧路濕地",
+      "name_ko": "구시로 습원",
+      "description_en": null,
+      "coordinates": {
+        "lat": 43.07175,
+        "lng": 144.38856
+      },
+      "url": "https://www.wikidata.org/wiki/Q11648300",
+      "municipality": "釧路市",
+      "municipality_code": "012068",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "walking_road_500"
+      ],
+      "q_relevance": 20,
+      "prominence_score": 1,
+      "crowd_band": "high",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q19683138",
+        "Q122904442"
+      ],
+      "heritage_designations_labels": [
+        "Ramsar Wetland (Japan)",
+        "Nationally-designated Natural Monument"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1156690",
+      "name": "釧路湿原国立公園",
+      "name_en": "Kushiro-shitsugen National Park",
+      "name_zh": "釧路濕原國立公園",
+      "name_ko": "구시로 습원 국립공원",
+      "description_en": "national park of Japan",
+      "coordinates": {
+        "lat": 43.108,
+        "lng": 144.401
+      },
+      "url": "https://www.wikidata.org/wiki/Q1156690",
+      "municipality": "釧路市",
+      "municipality_code": "012068",
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "national_park"
+      ],
+      "q_relevance": 20,
+      "prominence_score": 0.9,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 240,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q19683138"
+      ],
+      "heritage_designations_labels": [
+        "Ramsar Wetland (Japan)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "4f4da7dec17ab8f1",
+      "name": "【博物館】市指定文化財50周年記念パネル展「釧路市の文化財・天然記念物」",
+      "description": "釧路市ホームページ",
+      "coordinates": {
+        "lat": 42.976624,
+        "lng": 144.401962
+      },
+      "address": "〒085-0822 北海道釧路市春湖台1番7号",
+      "url": "https://www.city.kushiro.lg.jp/museum/tenji/kikaku/2025/bunkazai.html",
+      "municipality": "釧路市",
+      "municipality_code": "012068",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.68,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "BUNKA-40",
+      "name": "釧路湿原",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 43.12906068,
+        "lng": 144.42209765
+      },
+      "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/40",
+      "municipality": null,
+      "municipality_code": null,
+      "prefecture": "北海道",
+      "quality_score": 0.65,
+      "q_relevance": 20,
+      "prominence_score": 0.7,
+      "crowd_band": "medium",
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "89df54ffe66a1724",
+      "name": "目的別で探す",
+      "description": "釧路市ホームページ",
+      "coordinates": {
+        "lat": 42.984932,
+        "lng": 144.381714
+      },
+      "address": "〒085-8505 北海道釧路市黒金町7丁目5番地",
+      "url": "https://www.city.kushiro.lg.jp/sangyou",
+      "municipality": "釧路市",
+      "municipality_code": "012068",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.68,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "da60189b2dbf3da9",
+      "name": "目的別で探す",
+      "descrip
+```
+
+
+=== Case R-058 ===
+Topic / intent: 城崎温泉
+Query: Décris Kinosaki Onsen dans la préfecture de Hyogo.
+Tool: get_hotels({"prefecture": "Hyogo", "city": "城崎", "hotel_type": "onsen_ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [],
+  "count": 0,
+  "truncated": false,
+  "total_matching": 0,
+  "r3_official_count": 0,
+  "hotel_type_filter": "onsen_ryokan",
+  "lodging_types_note": "lodging_type values: ryokan, onsen_ryokan (incl. 日本秘湯を守る会 official hisoyu), shukubo (temple lodging, incl. 高野山宿坊協会 members), kominka (traditional house), minshuku, hostel, guest_house, apartment, motel, hotel. Group aliases for hotel_type arg: 'traditional', 'onsen', 'budget'.",
+  "note": "Information only — does NOT include availability or pricing. For bookings, visit the hotel's official website. Records prefixed with 'koyasan_shukubo:' / 'hito_yu_kai:' are sourced from official-org membership lists with designation_jp/en attribution.",
+  "data_as_of": "2026-04-25T23:06:14.287Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-059 ===
+Topic / intent: 嵐山 竹林
+Query: 京都嵐山の竹林の小径について
+Tool: get_spots({"prefecture": "Kyoto", "city": "京都市", "q": "竹林 嵐山", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-060 ===
+Topic / intent: 山形 山寺
+Query: What is the Yamadera temple in Yamagata?
+Tool: search_area({"q": "山寺", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "山寺",
+  "match_count": 78,
+  "results": [
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "BUNKA-293",
+      "name_ja": "山寺",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 38.31375274,
+        "lng": 140.43511313
+      },
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.7000000000000001,
+      "crowd_band": "medium",
+      "kinds": [
+        "buddhist_temple"
+      ],
+      "heritage_designations": [
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Historic Site of Japan",
+        "Place of Scenic Beauty (Japan)",
+        "Natural Monument of Japan"
+      ],
+      "typical_visit_minutes": 30,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q135708725",
+      "name_ja": "山寺",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": {
+        "lat": 37.787121,
+        "lng": 140.443573
+      },
+      "prefecture_code": "07",
+      "prefecture": "福島県",
+      "prominence_score": 0.55,
+      "crowd_band": "low",
+      "kinds": [
+        "shinto_shrine",
+        "buddhist_temple",
+        "religious_building"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "typical_visit_minutes": 30,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11467772",
+      "name_ja": "山寺芭蕉記念館",
+      "name_en": "Yamadera Basho Memorial Museum",
+      "description_en": "museum in Yamagata, Japan",
+      "coordinates": {
+        "lat": 38.309527777,
+        "lng": 140.438972222
+      },
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.75,
+      "crowd_band": "medium",
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "phone": "+81 23 695 2221",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "indoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q11467765",
+      "name_ja": "山寺 後藤美術館",
+      "name_en": "Yamadera Gotō Museum of Art",
+      "description_en": "art museum in Yamagata, Japan",
+      "coordinates": {
+        "lat": 38.308666666,
+        "lng": 140.4395
+      },
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.65,
+      "crowd_band": "low",
+      "kinds": [
+        "museum"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "indoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "type": "attraction",
+      "source": "wikidata",
+      "qid": "Q8047609",
+      "name_ja": "山寺駅",
+      "name_en": null,
+      "description_en": null,
+      "coordinates": null,
+      "prefecture_code": "06",
+      "prefecture": "山形県",
+      "prominence_score": 0.55,
+      "crowd_band": "low",
+      "kinds": [
+        "tohoku_eki_100"
+      ],
+      "heritage_designations": null,
+      "heritage_designations_labels": null,
+      "wheelchair": "no",
+
+```
+
+
+=== Case R-061 ===
+Topic / intent: 平泉 中尊寺
+Query: 岩手县平泉中尊寺的世界遗产。
+Tool: get_japan_heritage({"prefecture": "Iwate", "lang": "zh"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "03",
+  "region": null,
+  "region_prefecture_codes": null,
+  "theme_filter": null,
+  "q": null,
+  "lang": "zh",
+  "count": 2,
+  "tool_scope_note": "IMPORTANT: 日本遺産 (this tool) and UNESCO WHS / 国宝 / 特別史跡 are DIFFERENT programs. If the user asked about UNESCO World Heritage Sites, 国宝, hidden christian heritage, pilgrimage routes (Kumano Kodo / Henro / Saigoku), or specific famous landmarks — see `see_also_wikidata_heritage` below OR call search_area / get_traditional_arts.",
+  "top_canonical_heritage": [
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q2660144",
+      "name_ja": "中尊寺",
+      "name_en": "Chūson-ji Temple",
+      "description_en": "Buddhist temple in Iwate Prefecture, Japan",
+      "coordinates": {
+        "lat": 39.001388888,
+        "lng": 141.099722222
+      },
+      "prefecture": "岩手県",
+      "municipality": "平泉町",
+      "heritage_designations": [
+        "Q43113623",
+        "Q30834580",
+        "Q1139795",
+        "Q26764449"
+      ],
+      "heritage_designations_labels": [
+        "Natural Monument of Japan",
+        "Historic Site of Japan",
+        "National Treasure of Japan",
+        "Special Historic Site of Japan"
+      ],
+      "kinds": [
+        "religious_building",
+        "shinto_shrine",
+        "buddhist_temple",
+        "gairoju_100"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q2660144",
+      "opening_hours": "Mar 01 - Nov 03: 08:30-17:00; Nov 04 - Feb 29: 08:30-16:30",
+      "phone": "+81 191-46-2211",
+      "website": "https://www.chusonji.or.jp/",
+      "fee": "yes"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q11363889",
+      "name_ja": "中尊寺金色堂",
+      "name_en": "Chūson-ji Konjikidō",
+      "description_en": "building in Hiraizumi, Iwate Prefecture, Japan",
+      "coordinates": {
+        "lat": 39.001361,
+        "lng": 141.099889
+      },
+      "prefecture": "岩手県",
+      "municipality": "平泉町",
+      "heritage_designations": [
+        "Q1139795",
+        "Q43113623",
+        "Q1188622",
+        "Q11579194"
+      ],
+      "heritage_designations_labels": [
+        "National Treasure of Japan",
+        "Natural Monument of Japan",
+        "Important Cultural Property of Japan",
+        "Registered Tangible Cultural Property of Japan"
+      ],
+      "kinds": [
+        "monument",
+        "buddhist_temple",
+        "shinto_shrine",
+        "religious_building"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11363889"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q11567538",
+      "name_ja": "無量光院跡",
+      "name_en": "Muryōkō-in Ato",
+      "description_en": "site of a former temple",
+      "coordinates": {
+        "lat": 38.9931,
+        "lng": 141.116
+      },
+      "prefecture": "岩手県",
+      "municipality": "平泉町",
+      "heritage_designations": [
+        "Q26764449",
+        "Q30834580",
+        "Q43113623",
+        "Q11414752"
+      ],
+      "heritage_designations_labels": [
+        "Special Historic Site of Japan",
+        "Historic Site of Japan",
+        "Natural Monument of Japan",
+        "Place of Scenic Beauty (Japan)"
+      ],
+      "kinds": [
+        "archaeological_site",
+        "buddhist_temple",
+        "shinto_shrine",
+        "religious_building",
+        "former_buddhist_temple"
+      ],
+      "url": "https://www.wikidata.org/wiki/Q11567538"
+    },
+    {
+      "type": "wikidata_heritage",
+      "qid": "Q11567680",
+      "name_ja": "焼走り熔岩流",
+      "name_en": "Yakehashiri lava flow",
+      "description_en": "lava flow in Japan",
+      "coordinates": {
+        "lat": 39.869444444,
+        "lng": 141.044444444
+      },
+      "prefecture": "岩手県",
+      "municipality": "八幡平市",
+      "heritage_designations": [
+        "Q96207459",
+        "Q122904442",
+        "Q30834580",
+        "Q11414752",
+        "Q43113623"
+      ],
+      "heritage_designations_labels": [
+        "Special Natural Monument of Japan",
+        "Nationally-designated Natural Monument",
+        "Historic Site of Japan",
+        "Place 
+```
+
+
+=== Case R-062 ===
+Topic / intent: 高尾山
+Query: What makes Mt. Takao near Tokyo a popular day trip?
+Tool: get_spots({"prefecture": "Tokyo", "q": "高尾山", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q1329959",
+      "name": "高尾山",
+      "name_en": "Mount Takao",
+      "name_zh": "高尾山",
+      "name_ko": "다카오산",
+      "description_en": "mountain in Tokyo, Japan",
+      "coordinates": {
+        "lat": 35.625277777,
+        "lng": 139.243611111
+      },
+      "url": "https://www.wikidata.org/wiki/Q1329959",
+      "municipality": "八王子市",
+      "municipality_code": "132012",
+      "prefecture": "東京都",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "religious_building",
+        "walking_road_500",
+        "forest_bathing_100"
+      ],
+      "q_relevance": 100,
+      "prominence_score": 1,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+      "price_band": "free",
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q18382798"
+      ],
+      "heritage_designations_labels": [
+        "Japan Heritage (Bunka-cho program)"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "978778ae7bd5d1ac",
+      "name": "高尾山＆周辺ガイド",
+      "description": "澄んだ空気を吸いに、日帰りで「高尾山」へ行ってみましょう。ハイキングコース、ケーブルカー、チェアリフトなどを利用することができ、山頂まで比較的簡単に登ることができます。その他にも、グルメやミュージアム散策、温泉などを楽しめます。",
+      "coordinates": {
+        "lat": 35.666444444,
+        "lng": 139.316
+      },
+      "address": null,
+      "url": "https://www.gotokyo.org/jp/destinations/outlying-area/mt-takao-and-around",
+      "municipality": "八王子市",
+      "municipality_code": "132012",
+      "prefecture": "東京都",
+      "language": "ja",
+      "quality_score": 0.68,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "978778ae7bd5d1ac",
+      "name": "高尾山＆周辺ガイド",
+      "description": "澄んだ空気を吸いに、日帰りで「高尾山」へ行ってみましょう。ハイキングコース、ケーブルカー、チェアリフトなどを利用することができ、山頂まで比較的簡単に登ることができます。その他にも、グルメやミュージアム散策、温泉などを楽しめます。",
+      "coordinates": {
+        "lat": 35.636944444,
+        "lng": 139.446277777
+      },
+      "address": null,
+      "url": "https://www.gotokyo.org/jp/destinations/outlying-area/mt-takao-and-around",
+      "municipality": "多摩市",
+      "municipality_code": "132241",
+      "prefecture": "東京都",
+      "language": "ja",
+      "quality_score": 0.68,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q8194732",
+      "name": "高尾山薬王院",
+      "name_en": "Takao-san Yakuō-in Temple",
+      "name_zh": "高尾山藥王院",
+      "name_ko": null,
+      "description_en": "Buddhist temple in on the mountain side of Mount Takao in Hachioji, Tokyo",
+      "coordinates": {
+        "lat": 35.625864,
+        "lng": 139.250225
+      },
+      "url": "https://www.wikidata.org/wiki/Q8194732",
+      "municipality": "八王子市",
+      "municipality_code": "132012",
+      "prefecture": "東京都",
+      "quality_score": 0.65,
+      "kinds": [
+        "shinto_shrine",
+        "religious_building",
+        "buddhist_temple"
+      ],
+      "q_relevance": 50,
+      "prominence_score": 0.75,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 30,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "mixed",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "a54457888aeee7b6",
+      "name": "秋の東京",
+      "description": "11月も終わりに近づくと、木々の葉は赤や黄色の魅惑的な色に変わり、東京の公園や庭園は秋の風景を楽しむ人々で賑わいます。とくに日本庭園の紅葉は風情があります。「六義園」や「小石川植物園」の紅葉、その色合いを映し出す池の水面を見ていると、はるか遠い時代を訪れているかのような感覚を覚えます。秋は、ピクニックなどにも最適です。芝生広場が広がる公園や、都内から電車で気軽にアクセスできる近場の山々へ出かけてみるのもよいでしょう。ハイキングや絶景を楽しむことができます。",
+      "coordinates": {
+        "lat": 35.666444444,
+        "lng": 139.316
+      },
+      "address": null,
+      "url": "https://www.gotokyo.org/jp/story/guide/autumn",
+      "municipality": "八王子市",
+      "municipality_code": "132012",
+      "prefecture": "東京都",
+      "language": "ja",
+      "quality_score": 0.69,
+
+```
+
+
+=== Case R-063 ===
+Topic / intent: 信州 乗鞍岳
+Query: 長野県の乗鞍岳登山について教えて
+Tool: get_spots({"prefecture": "Nagano", "q": "乗鞍岳", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11369848",
+      "name": "乗鞍岳",
+      "name_en": "Mount Norikura",
+      "name_zh": "白馬乘鞍岳",
+      "name_ko": null,
+      "description_en": "mountain in Japan; GeoNames ID = 8672977",
+      "coordinates": {
+        "lat": 36.7816,
+        "lng": 137.80132
+      },
+      "url": "https://www.wikidata.org/wiki/Q11369848",
+      "municipality": "長野県",
+      "municipality_code": "200000",
+      "prefecture": "長野県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "active_volcano",
+        "volcano"
+      ],
+      "q_relevance": 100,
+      "prominence_score": 0.75,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q3133588",
+      "name": "乗鞍岳",
+      "name_en": "Mount Norikura",
+      "name_zh": "乘鞍岳",
+      "name_ko": null,
+      "description_en": "mountain in Nagano and Gifu Prefectures, Japan",
+      "coordinates": {
+        "lat": 36.10638889,
+        "lng": 137.55361111
+      },
+      "url": "https://www.wikidata.org/wiki/Q3133588",
+      "municipality": "長野県",
+      "municipality_code": "200000",
+      "prefecture": "長野県",
+      "quality_score": 0.65,
+      "kinds": [
+        "mountain",
+        "active_volcano",
+        "volcano",
+        "shin_nihon_100_meizan"
+      ],
+      "q_relevance": 100,
+      "prominence_score": 0.8,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 180,
+      "price_band": "free",
+      "suitable_for": [
+        "solo",
+        "couple",
+        "group"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9f4317641b88f90e",
+      "name": "特集・ベールを脱いだ『信飛トレイル』と乗鞍高原の夏を遊ぶ。　Vol.3 知れば知るほどおもしろい、“乗鞍麓時間”",
+      "description": "乗鞍岳だけでなく、多彩な魅力を備える乗鞍エリア。その魅力に惹かれ、麓でカフェや宿を営む人々がいます。彼らが思いを込めてつくりあげた場は、新たなファンを呼び込み、地域の魅力をさらに広げています。\n今、乗鞍はとてもおもしろい。山の頂だけではなく、麓にも豊かな物語が息づいています。今回は、そこで活躍するスタッフたちに、乗鞍の楽しみ方や奥深い魅力をうかがいました。",
+      "coordinates": {
+        "lat": 36.851638888,
+        "lng": 138.365527777
+      },
+      "address": null,
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn25-8-3",
+      "municipality": "飯山市",
+      "municipality_code": "202134",
+      "prefecture": "長野県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9f4317641b88f90e",
+      "name": "特集・ベールを脱いだ『信飛トレイル』と乗鞍高原の夏を遊ぶ。　Vol.3 知れば知るほどおもしろい、“乗鞍麓時間”",
+      "description": "乗鞍岳だけでなく、多彩な魅力を備える乗鞍エリア。その魅力に惹かれ、麓でカフェや宿を営む人々がいます。彼らが思いを込めてつくりあげた場は、新たなファンを呼び込み、地域の魅力をさらに広げています。\n今、乗鞍はとてもおもしろい。山の頂だけではなく、麓にも豊かな物語が息づいています。今回は、そこで活躍するスタッフたちに、乗鞍の楽しみ方や奥深い魅力をうかがいました。",
+      "coordinates": {
+        "lat": 36.248805555,
+        "lng": 138.476944444
+      },
+      "address": null,
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn25-8-3",
+      "municipality": "佐久市",
+      "municipality_code": "202177",
+      "prefecture": "長野県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "9f4317641b88f90e",
+      "name": "特集・ベールを脱いだ『信飛トレイル』と乗鞍高原の夏を遊ぶ。　Vol.3 知れば知るほどおもしろい、“乗鞍麓時間”",
+      "description": "乗鞍岳だけでなく、多彩な魅力を備える乗鞍エリア。その魅力に惹かれ、麓でカフェや宿を営む人々がいます。彼らが思いを込めてつくりあげた場は、新たなファンを呼び込み、地域の魅力をさらに広げています。\n今、乗鞍はとてもおもしろい。山の頂だけではなく、麓にも豊かな物語が息づいています。今回は、そこで活躍するスタッフたちに、乗鞍の楽しみ方や奥深い魅力をうかがいました。",
+      "coordinates": {
+        "lat": 36.348416666,
+        "lng": 138.597027777
+      },
+      "address": null,
+      "url": "https://www.go-nagano.net/nature-and-outdoors/gngn25-8-3",
+      "municipality": "軽井沢町",
+      "municipality_code": "203211",
+    
+```
+
+
+=== Case R-064 ===
+Topic / intent: 小豆島 オリーブ
+Query: 香川県小豆島のオリーブ畑について教えて
+Tool: get_local_food({"prefecture": "Kagawa", "keyword": "オリーブ", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "37",
+  "lang": "ja",
+  "count": 39,
+  "total_matching": 39,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "SNS",
+      "name": "SNS",
+      "description_ja": "うどん県、それだけじゃないグルメ大図鑑。骨付鶏、オリーブ、瀬戸内海の海の恵み、ご当地B級グルメ、郷土料理など、さぬきの食を楽しむ絶品グルメをまとめました。香川の美味しさがぎゅっとつまった名物料理の数々、どうぞ本場でご賞味ください。",
+      "description": "うどん県、それだけじゃないグルメ大図鑑。骨付鶏、オリーブ、瀬戸内海の海の恵み、ご当地B級グルメ、郷土料理など、さぬきの食を楽しむ絶品グルメをまとめました。香川の美味しさがぎゅっとつまった名物料理の数々、どうぞ本場でご賞味ください。",
+      "body_paragraphs": [
+        "グルメ うどん県それだけじゃない グルメ大図鑑 ぐるなびでお店を探す ホットペッパーでお店を探す",
+        "うどん県それだけじゃない グルメ大図鑑 ぐるなびでお店を探す ホットペッパーでお店を探す",
+        "鳥の骨付きもも肉を1本まるごとオーブン釜などでふっくらと焼き上げたご当地グルメ。新たな香川のソウルフードとして注目を浴びています。 もっと見る 日本のオリーブ発祥の地・小豆島には、オリーブを使ったヘルシーで美味しいグルメがたくさん。ハーブとのコラボレーションで癒し効果も！ もっと見る 天然の生簀（いけす）と呼ばれるほど水産物が豊富な瀬戸内海。春のサワラ、夏のマナガツオ、秋のチヌ、冬のハマチ、カキと一年を通して新鮮な魚貝料理が楽しめます。 瀬戸内の四季・旬の魚 発見！島グルメ 瀬戸内の恵み！話題の厳選素材 懐かしい味をアレンジしたメニューや香川の味覚が「ギュッ」と詰まった伝統の味。知る人ぞ知る、隠れた地元グルメが香川にはたくさんあります。 必食！ B 級グルメ ソフトクリーム王国かがわ 受け継がれる郷土の味覚 蔵元のこだわり地酒を飲み比べ “さぬきの食”をもっと楽しんでもらいたい！魅力あふれるイベントや、こだわりの商品に出会えるショップをぜひ訪れてみてください。 もっと見る",
+        "鳥の骨付きもも肉を1本まるごとオーブン釜などでふっくらと焼き上げたご当地グルメ。新たな香川のソウルフードとして注目を浴びています。 もっと見る",
+        "鳥の骨付きもも肉を1本まるごとオーブン釜などでふっくらと焼き上げたご当地グルメ。新たな香川のソウルフードとして注目を浴びています。",
+        "日本のオリーブ発祥の地・小豆島には、オリーブを使ったヘルシーで美味しいグルメがたくさん。ハーブとのコラボレーションで癒し効果も！ もっと見る",
+        "日本のオリーブ発祥の地・小豆島には、オリーブを使ったヘルシーで美味しいグルメがたくさん。ハーブとのコラボレーションで癒し効果も！",
+        "天然の生簀（いけす）と呼ばれるほど水産物が豊富な瀬戸内海。春のサワラ、夏のマナガツオ、秋のチヌ、冬のハマチ、カキと一年を通して新鮮な魚貝料理が楽しめます。 瀬戸内の四季・旬の魚 発見！島グルメ 瀬戸内の恵み！話題の厳選素材",
+        "天然の生簀（いけす）と呼ばれるほど水産物が豊富な瀬戸内海。春のサワラ、夏のマナガツオ、秋のチヌ、冬のハマチ、カキと一年を通して新鮮な魚貝料理が楽しめます。",
+        "懐かしい味をアレンジしたメニューや香川の味覚が「ギュッ」と詰まった伝統の味。知る人ぞ知る、隠れた地元グルメが香川にはたくさんあります。 必食！ B 級グルメ ソフトクリーム王国かがわ 受け継がれる郷土の味覚 蔵元のこだわり地酒を飲み比べ",
+        "懐かしい味をアレンジしたメニューや香川の味覚が「ギュッ」と詰まった伝統の味。知る人ぞ知る、隠れた地元グルメが香川にはたくさんあります。",
+        "“さぬきの食”をもっと楽しんでもらいたい！魅力あふれるイベントや、こだわりの商品に出会えるショップをぜひ訪れてみてください。 もっと見る",
+        "“さぬきの食”をもっと楽しんでもらいたい！魅力あふれるイベントや、こだわりの商品に出会えるショップをぜひ訪れてみてください。",
+        "当サイトでは、利便性の向上と利用状況の解析、広告配信のためにCookieを使用しています。サイトを閲覧いただく際には、Cookieの使用に同意いただく必要があります。詳細はクッキーポリシーをご確認ください。",
+        "各スポットページに表示されている「行きたい」ボタンをクリックすることで、「行きたいスポットリスト」を作成できます。 「共有URLを作成」ボタンをクリックすると、固有のURLを発行できます。 友達や家族と共有したり、PCで作成したリストをスマートフォンに送ったり、旅のプランニングにお役立てください。"
+      ],
+      "spot_url": "https://www.my-kagawa.jp/gourmet",
+      "spot_id": "fd895e7a3b72441d",
+      "municipality": "高松市",
+      "prefecture": "香川県",
+      "prefecture_code": "37"
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "SNS",
+      "name": "SNS",
+      "description_ja": "うどん県、それだけじゃないグルメ大図鑑。骨付鶏、オリーブ、瀬戸内海の海の恵み、ご当地B級グルメ、郷土料理など、さぬきの食を楽しむ絶品グルメをまとめました。香川の美味しさがぎゅっとつまった名物料理の数々、どうぞ本場でご賞味ください。",
+      "description": "うどん県、それだけじゃないグルメ大図鑑。骨付鶏、オリーブ、瀬戸内海の海の恵み、ご当地B級グルメ、郷土料理など、さぬきの食を楽しむ絶品グルメをまとめました。香川の美味しさがぎゅっとつまった名物料理の数々、どうぞ本場でご賞味ください。",
+      "body_paragraphs": [
+        "グルメ うどん県それだけじゃない グルメ大図鑑 ぐるなびでお店を探す ホットペッパーでお店を探す",
+        "うどん県それだけじゃない グルメ大図鑑 ぐるなびでお店を探す ホットペッパーでお店を探す",
+        "鳥の骨付きもも肉を1本まるごとオーブン釜などでふっくらと焼き上げたご当地グルメ。新たな香川のソウルフードとして注目を浴びています。 もっと見る 日本のオリーブ発祥の地・小豆島には、オリーブを使ったヘルシーで美味しいグルメがたくさん。ハーブとのコラボレーションで癒し効果も！ もっと見る 天然の生簀（いけす）と呼ばれるほど水産物が豊富な瀬戸内海。春のサワラ、夏のマナガツオ、秋のチヌ、冬のハマチ、カキと一年を通して新鮮な魚貝料理が楽しめます。 瀬戸内の四季・旬の魚 発見！島グルメ 瀬戸内の恵み！話題の厳選素材 懐かしい味をアレンジしたメニューや香川の味覚が「ギュッ」と詰まった伝統の味。知る人ぞ知る、隠れた地元グルメが香川にはたくさんあります。 必食！ B 級グルメ ソフトクリーム王国かがわ 受け継がれる郷土の味覚 蔵元のこだわり地酒を飲み比べ “さぬきの食”をもっと楽しんでもらいたい！魅力あふれるイベントや、こだわりの商品に出会えるショップをぜひ訪れてみてください。 もっと見る",
+        "鳥の骨付きもも肉を1本まるごとオーブン釜などでふっくらと焼き上げたご当地グルメ。新たな香川のソウルフードとして注目を浴びています。 もっと見る",
+        "鳥の骨付きもも肉を1本まるごとオーブン釜などでふっくらと焼き上げたご当地グルメ。新たな香川のソウルフードとして注目を浴びています。",
+        "日本のオリーブ発祥の地・小豆島には、オリーブを使ったヘルシーで美味しいグルメがたくさん。ハーブとのコラボレーションで癒し効果も！ もっと見る",
+        "日本のオリーブ発祥の地・小豆島には、オリーブを使ったヘルシーで美味しいグルメがたくさん。ハーブとのコラボレーションで癒し効果も！",
+        "天然の生簀（いけす）と呼ばれるほど水産物が豊富な瀬戸内海。春のサワラ、夏のマナガツオ、秋のチヌ、冬のハマチ、カキと一年を通して新鮮な魚貝料理が楽しめます。 瀬戸内の四季・旬の魚 発見！島グルメ 瀬戸内の恵み！話題の厳選素材",
+        "天然の生簀（いけす）と呼ばれるほど水産物が豊富な瀬戸内海。春のサワラ、
+```
+
+
+=== Case R-065 ===
+Topic / intent: 家族旅行 北海道 大自然
+Query: 北海道での家族旅行でおすすめの自然体験スポットを教えて
+Tool: get_spots({"prefecture": "Hokkaido", "q": "自然体験", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "99f66152d8c8ac20",
+      "name": "自然体験",
+      "description": "きよさと町を拠点に活躍する東オホーツクガイド協会の自然体験メニューをご紹介。",
+      "coordinates": {
+        "lat": 43.835222222,
+        "lng": 144.594555555
+      },
+      "address": null,
+      "url": "https://www.kiyosatokankou.com/guide.html",
+      "municipality": "清里町",
+      "municipality_code": "015466",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.59,
+      "q_relevance": 100,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "008b724ea797956b",
+      "name": "自然体験予約問合せ",
+      "description": "きよさと町の観光協会でご提供する自然体験ツアーのお申し込みフォームです。",
+      "coordinates": {
+        "lat": 43.835222222,
+        "lng": 144.594555555
+      },
+      "address": "携帯電話番号",
+      "url": "https://www.kiyosatokankou.com/reservation.html?data=5",
+      "municipality": "清里町",
+      "municipality_code": "015466",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "74c4156ad6a2980c",
+      "name": "自然体験予約問合せ",
+      "description": "きよさと町の観光協会でご提供する自然体験ツアーのお申し込みフォームです。",
+      "coordinates": {
+        "lat": 43.835222222,
+        "lng": 144.594555555
+      },
+      "address": "携帯電話番号",
+      "url": "https://www.kiyosatokankou.com/reservation.html?data=6",
+      "municipality": "清里町",
+      "municipality_code": "015466",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "56cf71b62f1efa72",
+      "name": "自然体験予約問合せ",
+      "description": "きよさと町の観光協会でご提供する自然体験ツアーのお申し込みフォームです。",
+      "coordinates": {
+        "lat": 43.835222222,
+        "lng": 144.594555555
+      },
+      "address": "携帯電話番号",
+      "url": "https://www.kiyosatokankou.com/reservation.html?data=7",
+      "municipality": "清里町",
+      "municipality_code": "015466",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "a4e251ba990a542a",
+      "name": "自然体験予約問合せ",
+      "description": "きよさと町の観光協会でご提供する自然体験ツアーのお申し込みフォームです。",
+      "coordinates": {
+        "lat": 43.835222222,
+        "lng": 144.594555555
+      },
+      "address": "携帯電話番号",
+      "url": "https://www.kiyosatokankou.com/reservation.html?data=8",
+      "municipality": "清里町",
+      "municipality_code": "015466",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "fedd8a8cb93fb71d",
+      "name": "自然体験予約問合せ",
+      "description": "きよさと町の観光協会でご提供する自然体験ツアーのお申し込みフォームです。",
+      "coordinates": {
+        "lat": 43.835222222,
+        "lng": 144.594555555
+      },
+      "address": "携帯電話番号",
+      "url": "https://www.kiyosatokankou.com/reservation.html?data=9",
+      "municipality": "清里町",
+      "municipality_code": "015466",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "4a1b4e1e10683821",
+      "name": "美深町観光協会::心やすらぐ大自然 美しく深い町 美深",
+      "description": "美深市街から北へ約８km、国道４０号線沿いに広がる「森林公園びふかアイランド」は、“水と緑”をテーマに自然と触れ合いながらのびのび遊べる自然体験ゾーン。 総面積７６haの広大な敷地内には、天然温泉や物産館などの交流施設をはじめ、オートキャンプ場、コテージ、パークゴルフ場など充実のアウトドアアイテムが揃います。 豊かな緑に包まれて、人と同じリズムで過ごせる「森林公園びふかアイランド」を、一度訪れてみ...",
+      "coordinates": {
+        "lat": 44.481111111,
+        "lng": 142.343027777
+      },
+      "address": "〒098-2238",
+      "url": "https://www.bifuka-kankou.com/attractions/bifukaisland",
+      "municipality": "美深町",
+      "municipality_code": "014699",
+      "prefecture": "北海道",
+      "language": "ja",
+      "quality_score": 0.79,
+  
+```
+
+
+=== Case R-066 ===
+Topic / intent: 京都 家族 観光
+Query: What are the best family-friendly sightseeing spots in Kyoto for a group with elderly grandparents?
+Tool: get_spots({"prefecture": "Kyoto", "q": "家族", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "b14523811ec39478",
+      "name": "けいちゃん・はんちゃん・なぁちゃん",
+      "description": "イラストレーター・まんが家のおおえさきさんによって創作された精華町観光PRキャラクター「けいちゃん・はんちゃん・なぁちゃん」\nけいはんな学研都市の精華町に住む3人とその家族の物語を紹介します。",
+      "coordinates": {
+        "lat": 34.761642,
+        "lng": 135.786133
+      },
+      "address": "〒619-0285京都府相楽郡精華町大字南稲八妻小字北尻70番地電話番号：0774-94-2004（代表）",
+      "url": "https://www.town.seika.kyoto.jp/kanko/keihannachan.html",
+      "municipality": "精華町",
+      "municipality_code": "263664",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.79,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "057fb9986e80888b",
+      "name": "【重要】介護保険料の還付金詐欺にご注意ください！",
+      "description": "介護保険料の還付金が発生していると装い、電話番号や口座番号を聞き出そうとする詐欺が町内でも頻発しています。介護保険料の還付金については、還付に関するお知らせを郵便で送る前に、電話で口座番号を聞いたり、現金をお預かりすることはありません。お知らせが届いていないのに還付金に関する電話がかかってきた。など不審に思われることがありましたら、その場ですぐに対応せず、福祉課介護高齢係（0774-88-6635）に確認してください。",
+      "coordinates": {
+        "lat": 34.853622,
+        "lng": 135.861572
+      },
+      "address": "〒610-0289京都府綴喜郡宇治田原町大字立川小字坂口18-1電話番号：0774-88-6635",
+      "url": "https://www.town.ujitawara.kyoto.jp/soshiki/fukushika/nenkin_hoken/1/1159.html",
+      "municipality": "宇治田原町",
+      "municipality_code": "263443",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "772e97d480d467c7",
+      "name": "水道の使用開始・中止等の届出",
+      "description": "引越しなどで新たに水道を使用される場合は、使用される前日までに上下水道課（役場2階）へ届出が必要です。なお、アパートなど集合住宅では、入居者からの届出が不要な場合があります。事前に家主、不動産会社などに届出が必要かどうか確認してください。",
+      "coordinates": {
+        "lat": 34.853622,
+        "lng": 135.861572
+      },
+      "address": "〒610-0289京都府綴喜郡宇治田原町大字立川小字坂口18-1電話番号：0774-88-3337",
+      "url": "https://www.town.ujitawara.kyoto.jp/soshiki/jogesuidoka/seikatsu_kankyo/1/5/717.html",
+      "municipality": "宇治田原町",
+      "municipality_code": "263443",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.82,
+      "q_relevance": 20,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "5d3151e0bd71f74f",
+      "name": "「春空のむこうフェスタ」が開催されます！",
+      "description": "向日市観光協会ホームページ。向日市の名所・史跡・社寺・名産品・特産品・竹の径（みち）のご紹介や、向日市で開催される各種観光イベントの情報を配信していきます。",
+      "coordinates": {
+        "lat": 34.957207,
+        "lng": 135.708939
+      },
+      "address": "〒617-0002 京都府向日市寺戸町瓜生22-1",
+      "url": "https://muko-kankou.jp/event/detail.html?id=1592",
+      "municipality": "向日市",
+      "municipality_code": "262081",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.77,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "5ac7e9b03a9ba4e2",
+      "name": "自転車のまち精華町",
+      "description": "精華町は、どなたでも自転車を楽しむことができるまちを目指して取り組みを進めています。このページでは関連するホームページ等を紹介します。",
+      "coordinates": {
+        "lat": 34.761642,
+        "lng": 135.786133
+      },
+      "address": "〒619-0285京都府相楽郡精華町大字南稲八妻小字北尻70番地電話番号：0774-94-2004（代表）",
+      "url": "https://www.town.seika.kyoto.jp/kanko/cycling.html",
+      "municipality": "精華町",
+      "municipality_code": "263664",
+      "prefecture": "京都府",
+      "language": "ja",
+      "quality_score": 0.75,
+      "q_relevance": 20,
+      "tier": "notable"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "c0655f6e72ca0548",
+      "name": "転入・転居・転出をされる外国人住民の方へ",
+      "description": "本人・同一世帯の方又は本人から委任を受けた代理人(注意)代理人が手続きをする場合は必ず委任状及び代理人の身分証明書が必要です",
+      "coordinates": {
+        "lat": 34.853622,
+        "lng": 135.861572
+      },
+      "address": "〒610-0289京都府綴喜郡宇治田原町大字立川小字坂口18-1電話番号：0774-88-6634",
+      "url": "https://www.town.ujitawara.kyoto.jp/soshiki/zeijuminka/todokede_shomei/3/985.html",
+      "municipality": "宇治田原町",
+      "municipality_code": "263443",
+      "prefecture": "京都府",
+      "language": "ja",
+   
+```
+
+
+=== Case R-067 ===
+Topic / intent: 東京 家族 下町
+Query: 東京の下町を家族で散歩するならどこがいい？
+Tool: get_spots({"prefecture": "Tokyo", "q": "下町 散歩", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 0,
+    "broader": 0
+  },
+  "count": 0,
+  "total_before_limit": 0,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true)."
+}
+```
+
+
+=== Case R-068 ===
+Topic / intent: 日光 家族 紅葉
+Query: 가족과 함께 도치기현 닛코의 단풍을 즐길 수 있는 곳은?
+Tool: get_spots({"prefecture": "Tochigi", "city": "日光", "q": "紅葉", "lang": "ko"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q11504890",
+      "name": "日光田母沢御用邸記念公園",
+      "name_en": "Nikkō Tamozawa Imperial Villa Memorial Park",
+      "name_zh": "日光田母澤御用邸紀念公園",
+      "name_ko": null,
+      "description_en": "garden in Nikkō, Japan",
+      "coordinates": {
+        "lat": 36.7525,
+        "lng": 139.59138889
+      },
+      "url": "https://www.wikidata.org/wiki/Q11504890",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park",
+        "rekishi_park_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.85,
+      "crowd_band": "medium",
+      "opening_hours": "Tu off; Apr-Oct We-Mo 09:00-17:00, \"Last entry: 16:30\"; Nov-Mar We-Mo 09:00-16:30, \"Last entry: 16:00\"; Dec 29-Jan 01 off",
+      "phone": "+81 288-53-6767",
+      "website": "https://www.park-tochigi.com/tamozawa/",
+      "fee": "yes",
+      "typical_visit_minutes": 90,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "osm_override",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q1188532",
+      "name": "東武ワールドスクウェア",
+      "name_en": "Tobu World Square",
+      "name_zh": "東武世界廣場",
+      "name_ko": "도부 월드스퀘어",
+      "description_en": "theme park in Tochigi Prefecture, Japan",
+      "coordinates": {
+        "lat": 36.8078,
+        "lng": 139.712
+      },
+      "url": "https://www.wikidata.org/wiki/Q1188532",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.85,
+      "crowd_band": "medium",
+      "phone": "+81 288 77 1055",
+      "website": "https://www.tobuws.co.jp/",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11286710",
+      "name": "イタリア大使館別荘記念公園",
+      "name_en": "Italian Embassy Villa Memorial Park",
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": "park in Nikkō, Japan",
+      "coordinates": {
+        "lat": 36.725389,
+        "lng": 139.485194
+      },
+      "url": "https://www.wikidata.org/wiki/Q11286710",
+      "municipality": "日光市",
+      "municipality_code": "092061",
+      "prefecture": "栃木県",
+      "quality_score": 0.65,
+      "kinds": [
+        "park"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.75,
+      "crowd_band": "medium",
+      "typical_visit_minutes": 90,
+      "price_band": "free",
+      "suitable_for": [
+        "family",
+        "couple"
+      ],
+      "indoor_capable": "outdoor",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "heritage_designations": [
+        "Q11579194",
+        "Q11633166"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Q11633166"
+      ],
+      "tier": "notable"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q11504885",
+      "name": "日光江戸村",
+      "name_en": "Edo Wonderland Nikko Edomura",
+      "name_zh": "日光江戶村",
+      "name_ko": null,
+      "description_en": "Edo Wonderland Nikko Edomura (江戸ワンダーランド 日光江戸村, Edo Wandārando Nikkō Edomura) is a Japanese cultural theme park  in the Kinugawa Onsen area of Nikkō, Tochigi. The park resurrects and showcases the life and culture of the Edo period.",
+      "coordinates": {
+        "lat": 36.791,
+        "lng": 139.698
+      },
+ 
+```
+
+
+=== Case R-069 ===
+Topic / intent: 長崎 家族 歴史
+Query: 長崎で家族で楽しめる歴史観光スポット
+Tool: get_spots({"prefecture": "Nagasaki", "q": "歴史", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "municipal_scrape",
+      "id": "9ec273ad432f788a",
+      "name": "「日本遺産」で、ワタシらしさをとりもどす。 ～針尾送信所＆戸尾市場街でチル休み～",
+      "description": "歴史や人々の営みを、そのストーリーとともに伝える「日本遺産」。海軍さんのまち佐世保には、「佐世保鎮守府」が開かれたのを機に急速に発展した物語があちこちに存在します。この記事では、そんなドラマチックな魅力あふれる構成文化財のなかから「針尾送信所」と「戸尾市場街・とんねる横丁」をピックアップ。自然や人のあたたかさにもふれられるこのエリアを、長崎の地方創生型インフルエンサー・美咲さんがゆったり巡りました。",
+      "coordinates": {
+        "lat": 33.18,
+        "lng": 129.715
+      },
+      "address": null,
+      "url": "https://www.sasebo99.com/feature/nihonisan_chiruyasumi",
+      "municipality": "佐世保市",
+      "municipality_code": "422029",
+      "prefecture": "長崎県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "4060b47b869b8a85",
+      "name": "歴史ファン必見！金田城の楽しみ方とは。",
+      "description": "対馬市の中央部に位置する対馬随一の景勝地浅茅湾。その南に位置する城山半島の頂上から尾根線に沿い、谷筋に築かれた山城が金田城です。西暦667年（天智天皇6）『日本書紀』11月の条に「是月築　倭國高安城　讃岐國山田郡ノ屋嶋城 […]",
+      "coordinates": {
+        "lat": 34.202816,
+        "lng": 129.288742
+      },
+      "address": "〒817-0021 長崎県対馬市厳原町今屋敷672番地1",
+      "url": "https://tsushima-kanko.net/history/181",
+      "municipality": "対馬市",
+      "municipality_code": "422096",
+      "prefecture": "長崎県",
+      "language": "ja",
+      "quality_score": 0.81,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "14fd9d6de365c13e",
+      "name": "歴史・神話の世界に触れる",
+      "description": "国生み神話で5番目に生まれたとされる壱岐。島内には150以上の神社、280基を超える古墳があり、歴史ファンなら一度は触れたい歴史ロマン溢れるストーリーが詰まっています。",
+      "coordinates": {
+        "lat": 33.748852,
+        "lng": 129.692322
+      },
+      "address": "〒811-5133 長崎県壱岐市郷ノ浦町本村触620-1",
+      "url": "https://www.ikikankou.com/theme/theme1",
+      "municipality": "壱岐市",
+      "municipality_code": "422100",
+      "prefecture": "長崎県",
+      "language": "ja",
+      "quality_score": 0.78,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "wikidata",
+      "id": "Q73613",
+      "name": "長崎歴史文化博物館",
+      "name_en": "Nagasaki Museum of History and Culture",
+      "name_zh": "長崎歷史文化博物館",
+      "name_ko": "나가사키 역사문화박물관",
+      "description_en": "museum in Nagasaki, Japan",
+      "coordinates": {
+        "lat": 32.752813,
+        "lng": 129.879557
+      },
+      "url": "https://www.wikidata.org/wiki/Q73613",
+      "municipality": "長崎県",
+      "municipality_code": "420000",
+      "prefecture": "長崎県",
+      "quality_score": 0.65,
+      "kinds": [
+        "museum"
+      ],
+      "q_relevance": 20,
+      "prominence_score": 0.95,
+      "crowd_band": "high",
+      "opening_hours": "Mo-Su 08:30-19:00",
+      "phone": "+81 95-818-8366",
+      "website": "http://www.nmhc.jp/",
+      "typical_visit_minutes": 120,
+      "price_band": "low",
+      "suitable_for": [
+        "family",
+        "couple",
+        "solo",
+        "group"
+      ],
+      "indoor_capable": "indoor",
+      "defaults_source": "kinds_default",
+      "heritage_designations": [
+        "Q11579194",
+        "Q1188622"
+      ],
+      "heritage_designations_labels": [
+        "Registered Tangible Cultural Property of Japan",
+        "Important Cultural Property of Japan"
+      ],
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "0e38ac652c619ec6",
+      "name": "目的別で探す",
+      "description": "歴史民俗資料館に隣接しております「明治の民家」を有償にてお貸ししております。",
+      "coordinates": {
+        "lat": 33.036972222,
+        "lng": 129.917138888
+      },
+      "address": "〒859-3807",
+      "url": "https://www.town.higashisonogi.lg.jp/soshiki/sangyoushinkou/2/1/2651.html",
+      "municipality": "東彼杵町",
+      "municipality_code": "423211",
+      "prefecture": "長崎県",
+      "language": "ja",
+      "quality_score": 0.69,
+      "q_relevance": 50,
+      "tier": "must_see"
+    },
+    {
+      "source": "municipal_scrape",
+      "id": "3b41a16adc3eebc8",
+      "name": "旧長崎英国領事館\n                                            （きゅうながさきえいこくりょうじかん
+```
+
+
+=== Case R-070 ===
+Topic / intent: 広島 家族 平和教育
+Query: Hiroshima peace education sites for families visiting with older children and grandparents.
+Tool: search_area({"q": "広島 平和", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "query": "広島 平和",
+  "match_count": 56,
+  "results": [
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "1313b96cc220c90a",
+      "name": "観光・文化・スポーツ",
+      "description": "観光・文化・スポーツ ページ番号1000005 更新日 2025年3月31日 印刷大きな文字で印刷 クイックメニュー 観光サイト Dive!Hiroshima おうちでミュージアム 広島とりっ歩（ぷ） HIROSHIMA PEACE TOURISM ひろしま国際平和文化祭 歴史・文化 広島市公文書館 文化振興 文化施設 中央公園（広島城区域） 音楽・美術・アニメーション 文化表彰 文化財 スポーツ スポーツ振興 スポーツ関連施設 スポーツ施設整備 地元プロスポーツ スポーツ大会・イベント 東京オリンピック・パラリンピック 広島競輪場 観光 観光戦略・MICE 観光情報の発信 観光データ 外国人観光客の誘致・受け入れ 宿泊施設 国際交流・インバウンド 第48回南極条約協議国会議の広島開催 姉妹・友好都市 多文化共生 国際協力事業 2023年G7サミットの広島開催 海外からの賓客訪問実績 外国領事館・二国間協会等 旅の目的別 観る・遊ぶ 食べる・買う 泊まる 世界遺産 ピースツーリズム モデルコース 交流体験型観光 観光サイト Dive! Hiroshima ザ・広島ブランド ひろしまフェニックス賞 イベントカレンダー 広告欄 広告の内容等に関する一切の責任は、広告主等に帰属します。広島市が推奨等をするものではありません。 市の広告事業のご案内 ホームページへの広告掲載のご案内 ページ番号1000005 更新日 2025年3月31日 印刷大きな文字で印刷 クイックメニュー 観光サイト Dive!Hiroshima おうちでミュージアム 広島とりっ歩（ぷ） HIROSHIMA PEACE TOURISM ひろしま国際平和文化祭 歴史・文化 広島市公文書館 文化振興 文化施設 中央公園（広島城区域） 音楽・美術・アニメーション 文化表彰 文化財 スポーツ スポーツ振興 スポーツ関連施設 スポーツ施設整備 地元プロスポーツ スポーツ大会・イベント 東京オリンピック・パラリンピック 広島競輪場 観光 観光戦略・MICE 観光情報の発信 観光データ 外国人観光客の誘致・受け入れ 宿泊施設 国際交流・インバウンド 第48回南極条約協議国会議の広島開催 姉妹・友好都市 多文化共生 国際協力事業 2023年G7サミットの広島開催 海外からの賓客訪問実績 外国領事館・二国間協会等 旅の目的別 観る・遊ぶ 食べる・買う 泊まる 世界遺産 ピースツーリズム モデルコース 交流体験型観光 歴史・文化 広島市公文書館 文化振興 文化施設 中央公園（広島城区域） 音楽・美術・アニメーション 文化表彰 文化財 スポーツ スポーツ振興 スポーツ関連施設 スポーツ施設整備 地元プロスポーツ スポーツ大会・イベント 東京オリンピック・パラリンピック 広島競輪場 観光 観光戦略・MICE 観光情報の発信 観光データ 外国人観光客の誘致・受け入れ 宿泊施設 国際交流・インバウンド 第48回南極条約協議国会議の広島開催 姉妹・友好都市 多文化共生 国際協力事業 2023年G7サミットの広島開催 海外からの賓客訪問実績 外国領事館・二国間協会等",
+      "url": "https://www.city.hiroshima.lg.jp/tourism-culture",
+      "municipality": "広島市安芸区",
+      "prefecture": "広島県",
+      "tier": "notable"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "0aac4000cfc26271",
+      "name": "多文化共生",
+      "description": "多文化共生 ページ番号1021462 印刷大きな文字で印刷 多文化共生に関する講座のご案内 特定技能所属機関の皆様へ 「協力確認書」の提出について 第2次広島市日本語教育推進計画 広島市多文化共生意識調査 広島市多文化共生のまちづくり推進指針 Policy to Promote Multiculturalism in Hiroshima City. 外国人労働者の雇用管理に関する情報 PInformation about the Employment of Foreign Workers 日本語教室を開いています 【募集は終了しました】若者による相互理解・交流促進事業 若者参加者専用ページ 若者による相互理解・交流促進事業 被爆者専用ページ あんしん賃貸住宅 2022年度版『外国人市民のための生活ガイドブック』ができました 広島市外国人市民生活・意識実態調査結果の概要版 外国語対応ができる病院・診療所 大学に 外国人は 入ることが できますか？外国人のための 学校は ありますか？ 「広島市災害通訳等ボランティア」募集のご案内 主な取組実績（令和2年度） ウクライナ人道危機救援のための募金箱の設置 「広島のためのハワイ寄附委員会」から8・20豪雨災害に対する義援金を受領しました 2023年トルコ・シリア地震被災者への寄附・募金 米国ハワイ州マウイ郡火災救援市民募金箱の設置 広島市がメキシコの共生社会ホストタウンとして登録されました 外国人市民のための相談窓口 広島市・安芸郡外国人相談窓口 災害に関する外国人市民への取組",
+      "url": "https://www.city.hiroshima.lg.jp/tourism-culture/global-inbound/1021462",
+      "municipality": "広島市安芸区",
+      "prefecture": "広島県",
+      "tier": "notable"
+    },
+    {
+      "type": "spot",
+      "source": "municipal_scrape",
+      "id": "d98c67404064ec64",
+      "name": "広島市公文書館",
+      "description": "ページ番号1003068 更新日 2025年12月17日 印刷大きな文字で印刷 新着更新情報 4月24日（金曜日） 更新 広島市役所 配席図・職員一覧の閲覧・データ提供等について(令和8年度版の提供を開始しました) 3月2日（月曜日） 新着 令和7年度収集写真展「フィルムのなかの日常～カメラと暮らした昭和の記憶～」を開催します 開館時間 午前9時から午後5時まで休館日 土曜日・日曜日・祝日、12月29日～1月3日、8月6日、その他法令により休日に定められた日アクセス 広島市中区大手町四丁目1番1号 大手町平和ビル 市内電車 紙屋町経由広島港方面行 市役所前下車 バス 市役所前下車 ※車で来館される際には、市役所本庁舎駐車場をご利用ください。 公文書館の概要 収蔵資料の概要 収蔵資料の利用案内 Web展示会一覧 展示会・イベント一覧（広島市公文書館） 広島の歴史 市史・行政資料の販売 「広島市被爆70年史」「図説戦後広島市史」のセット販売 広島市公文書館紀要の発行 新着更新情報 4月24日（金曜日） 更新 広島市役所 配席図・職員一覧の閲覧・データ提供等について(令和8年度版の提供を開始しました) 3月2日（月曜日） 新着 令和7年度収集写真展「フィルムのなかの日常～カメラと暮らした昭和の記憶～」を開催します 開館時間 午前9時から午後5時まで休館日 土曜日・日曜日・祝日、12月29日～1月3日、8月6日、その他法令により休日に定められた日アクセス 広島市中区大手町四丁目1番1号 大手町平和ビル 市内電車 紙屋町経由広島港方面行 市役所前下車 バス 市役所前下車 ※車で来館される際には、市役所本庁舎駐車場をご利用ください。 新着更新情報 4月24日（金曜日） 更新 広島市役所 配席図・職員一覧の閲覧・データ提供等について(令和8年度版の提供を開始しました) 3月2日（月曜日） 新着 令和7年度収集写真展「フィルムのなかの日常～カメラと暮らした昭和の記憶～」を開催します 開館時間 午前9時から午後5時まで休館日 土曜日・日曜日・祝日、12月29日～1月3日、8月6日、その他法令により休日に定められた日アクセス 広島市中区大手町四丁目1番1号 大手町平和ビル 市内電車 紙屋町経由広島港方面行 市役所前下車 バス 市役所前下車 ※車で来館される際には、市役所本庁舎駐車場をご利用ください。",
+      "url": "https://www.city.hiroshima.lg.jp/tourism-culture/history/1003068",
+      "municipality": "広島市安芸区",
+      "prefecture": "広島県",
+      "tier": "notable"
+    },
+ 
+```
+
+
+=== Case R-071 ===
+Topic / intent: 伊豆 家族 温泉
+Query: 静岡の伊豆で家族みんなで楽しめる温泉旅館
+Tool: get_hotels({"prefecture": "Shizuoka", "city": "伊豆", "hotel_type": "onsen_ryokan"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "hotels": [
+    {
+      "id": "hito_yu_kai:720",
+      "confidence": "confirmed",
+      "name": "湯本館",
+      "name_en": null,
+      "type": "onsen_ryokan",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": null,
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": "〒410-3206 静岡県伊豆市湯ヶ島1656-1",
+      "prefecture_code": "22",
+      "municipality": null,
+      "description_ja": "文豪川端康成「伊豆の踊子」執筆の宿",
+      "authority": "日本秘湯を守る会",
+      "designation_jp": "日本秘湯を守る会 加盟",
+      "designation_en": "Member of Nihon Hito-yu wo Mamoru Kai (official hisoyu ryokan association)",
+      "sources": [
+        {
+          "source": "hito_yu_kai",
+          "id": "720",
+          "url": "https://www.hitou.or.jp/provider/detail?providerId=720"
+        }
+      ]
+    },
+    {
+      "id": "c05ad4ea9627",
+      "confidence": "singleton",
+      "name": "伊豆・熱川温泉たかみホテル",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 34.8137312,
+        "lng": 139.0688958
+      },
+      "phone": "0557232255",
+      "website": null,
+      "postal_code": "413-0302",
+      "street": null,
+      "prefecture_code": "22",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/560263375",
+          "url": "https://www.openstreetmap.org/way/560263375"
+        }
+      ]
+    },
+    {
+      "id": "476dfb895f44",
+      "confidence": "singleton",
+      "name": "伊豆網代温泉松風苑",
+      "name_en": "Izu-ajiro-onsen Syoufuen",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.0443932,
+        "lng": 139.0660312
+      },
+      "phone": null,
+      "website": "https://shoufuen.jp/",
+      "postal_code": "413-0102",
+      "street": null,
+      "prefecture_code": "22",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "way/667380906",
+          "url": "https://www.openstreetmap.org/way/667380906"
+        }
+      ]
+    },
+    {
+      "id": "05ea86294fe9",
+      "confidence": "singleton",
+      "name": "伊豆長岡温泉京急ホテル",
+      "name_en": "Izu Nagaoka-Onsen Keikyu Hotel",
+      "name_zh": null,
+      "name_ko": null,
+      "type": "hotel",
+      "lodging_type": "onsen_ryokan",
+      "coordinates": {
+        "lat": 35.0332186,
+        "lng": 138.9411012
+      },
+      "phone": null,
+      "website": null,
+      "postal_code": null,
+      "street": null,
+      "prefecture_code": "22",
+      "sources": [
+        {
+          "source": "osm",
+          "id": "node/7330717248",
+          "url": "https://www.openstreetmap.org/node/7330717248"
+        }
+      ]
+    }
+  ],
+  "count": 4,
+  "truncated": false,
+  "total_matching": 4,
+  "r3_official_count": 1,
+  "hotel_type_filter": "onsen_ryokan",
+  "lodging_types_note": "lodging_type values: ryokan, onsen_ryokan (incl. 日本秘湯を守る会 official hisoyu), shukubo (temple lodging, incl. 高野山宿坊協会 members), kominka (traditional house), minshuku, hostel, guest_house, apartment, motel, hotel. Group aliases for hotel_type arg: 'traditional', 'onsen', 'budget'.",
+  "note": "Information only — does NOT include availability or pricing. For bookings, visit the hotel's official website. Records prefixed with 'koyasan_shukubo:' / 'hito_yu_kai:' are sourced from official-org membership lists with designation_jp/en attribution.",
+  "data_as_of": "2026-04-25T23:06:14.287Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions."
+}
+```
+
+
+=== Case R-072 ===
+Topic / intent: 福岡 家族 グルメ
+Query: 福岡で家族旅行に最適なご当地グルメを教えて
+Tool: get_local_food({"prefecture": "Fukuoka", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "40",
+  "lang": "ja",
+  "count": 500,
+  "total_matching": 1911,
+  "truncated": true,
+  "truncation_note": "Response capped at 500 of 1911 matches. Pass a prefecture or keyword to narrow.",
+  "items": [
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:5",
+      "registration_number": 5,
+      "name_ja": "八女伝統本玉露",
+      "name": "八女伝統本玉露",
+      "description_ja": "茶葉収穫前に稲わら等の天然資材で被覆することにより「覆い香」といわれる香気成分の含有量が高い茶葉が生産される。味は濃厚で非常にうま味が強く、「まろやか」で「こく」がある。",
+      "description": "茶葉収穫前に稲わら等の天然資材で被覆することにより「覆い香」といわれる香気成分の含有量が高い茶葉が生産される。味は濃厚で非常にうま味が強く、「まろやか」で「こく」がある。",
+      "registration_date": "平成27年12月22日",
+      "production_area_text": "福岡県内",
+      "prefecture_codes": [
+        "40"
+      ],
+      "producer_group": "福岡県八女市本村420-1八女伝統本玉露推進協議会",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0005/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.353Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:19",
+      "registration_number": 19,
+      "name_ja": "下関ふく",
+      "name": "下関ふく",
+      "description_ja": "活かし込みにより身質が引き締まり、高い技術により高い鮮度を保ったみがき処理（除毒等）が行われているみがきふぐ（とらふぐ）。全国各地からの集荷と仲卸業者の確かな目利きにより、全国の需要者のニーズに応じた出荷が可能となっている。",
+      "description": "活かし込みにより身質が引き締まり、高い技術により高い鮮度を保ったみがき処理（除毒等）が行われているみがきふぐ（とらふぐ）。全国各地からの集荷と仲卸業者の確かな目利きにより、全国の需要者のニーズに応じた出荷が可能となっている。",
+      "registration_date": "平成28年10月12日",
+      "production_area_text": "山口県下関市及び福岡県北九州市門司区",
+      "prefecture_codes": [
+        "35",
+        "40"
+      ],
+      "producer_group": "山口県下関市唐戸町5番50号下関唐戸魚市場仲卸協同組合公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0019/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "maff_gi",
+      "category": "designated_food",
+      "key": "maff_gi:117",
+      "registration_number": 117,
+      "name_ja": "はかた地どり",
+      "name": "はかた地どり",
+      "description_ja": "うま味成分であるイノシン酸を多く含み、食味が良いうえ、身が締まっていて、程良い弾力と歯ごたえがある。煮炊き料理などで煮崩れが起こりにくいことから、「水炊き」や「がめ煮」などの福岡県の郷土料理に良く合うものとなっている。",
+      "description": "うま味成分であるイノシン酸を多く含み、食味が良いうえ、身が締まっていて、程良い弾力と歯ごたえがある。煮炊き料理などで煮崩れが起こりにくいことから、「水炊き」や「がめ煮」などの福岡県の郷土料理に良く合うものとなっている。",
+      "registration_date": "令和4年3月31日",
+      "production_area_text": "福岡県",
+      "prefecture_codes": [
+        "40"
+      ],
+      "producer_group": "福岡市中央区天神4丁目5番23号福岡県はかた地どり推進協議会公式ページ",
+      "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0117/index.html",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.648Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "scraped_local_food",
+      "category": "regional_dish",
+      "name_ja": "Cherry Blossoms in Fukuoka",
+      "name": "Cherry Blossoms in Fukuoka",
+      "description_ja": "The Official sightseeing and travel guide of Fukuoka Prefecture. Fukuoka is full of popular spots such as Dazaifu, Yanagawa, Mojiko, etc. that fascinate people! Here is full of useful travel information including feature articles, gourmet foods, souvenirs, sightseeing spots, experiences, model courses, events, lodging, access, and more.",
+      "description": "The Official sightseeing and travel guide of Fukuoka Prefecture. Fukuoka is full of popular spots such as Dazaifu, Yanagawa, Mojiko, etc. that fascinate people! Here is full of useful travel information including feature articles, gourmet foods, souvenirs, sightseeing spots, experiences, model courses, events, lodging, access, and more.",
+      "body_paragraphs": [
+        "Discover more of Japan by visiting Fukuoka with Yoka Bus, a hassle-free bus tour",
+        "Fukuoka. Gateway to Kyushu, Japan’s third largest island. Connecting the world to a
+```
+
+
+=== Case R-073 ===
+Topic / intent: 宮崎 家族 海
+Query: 宮崎県のきれいな海辺で家族で過ごせる場所
+Tool: get_spots({"prefecture": "Miyazaki", "q": "海 ビーチ", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "spots": [
+    {
+      "source": "wikidata",
+      "id": "Q845800",
+      "name": "串間市",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "description_en": null,
+      "coordinates": null,
+      "url": "https://www.wikidata.org/wiki/Q845800",
+      "municipality": null,
+      "municipality_code": null,
+      "prefecture": "宮崎県",
+      "quality_score": 0.65,
+      "kinds": [
+        "nagisa_100"
+      ],
+      "q_relevance": 0,
+      "prominence_score": 0.6,
+      "crowd_band": "low",
+      "website": "https://www.city.kushima.lg.jp/",
+      "defaults_source": "kinds_default",
+      "via": "kinds_class_match",
+      "tier": "notable"
+    }
+  ],
+  "spot_tier_counts": {
+    "must_see": 0,
+    "notable": 1,
+    "broader": 0
+  },
+  "count": 1,
+  "total_before_limit": 1,
+  "truncated": false,
+  "min_quality_applied": 0.2,
+  "fallback_used": false,
+  "data_as_of": "2026-05-09T02:00:30.085Z",
+  "disclaimer": "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.",
+  "note": "Spots ranked by completeness + name-match boost. Wikidata curated entities are always included when admin or name matches the city. If everything was below `min_quality`, we drop the floor and return the top-N by raw quality (fallback_used=true).",
+  "query_intent": {
+    "detected_concepts": [
+      {
+        "id": "beach",
+        "matched_text": "ビーチ",
+        "rationale_en": "Beach — Wikidata Q40080 (beach) plus 日本の渚百選 (Nagisa-100). Demotes amusement parks (e.g. 南知多ビーチランド) that share substring.",
+        "polarity": "boost",
+        "target_kinds": [
+          "beach",
+          "nagisa_100"
+        ],
+        "target_heritage_qids": [
+          "Q11414752"
+        ]
+      }
+    ]
+  }
+}
+```
+
+
+=== Case R-074 ===
+Topic / intent: 金沢 家族 工芸体験
+Query: 石川県金沢で家族みんなで伝統工芸体験できる場所
+Tool: get_local_specialty({"prefecture": "Ishikawa", "category": "craft", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "17",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "category_filter": "craft",
+  "q": null,
+  "lang": "ja",
+  "count": 9,
+  "items": [
+    {
+      "key": "meti_densan:0118",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "織物",
+      "craft_id": "0118",
+      "name_ja": "牛首紬",
+      "name": "牛首紬",
+      "description_ja": "2匹の蚕が共同で作る玉繭（たままゆ）から作られる、太くて節のある玉糸を使って織り上げるのが特徴です。玉糸特有の節と独特の光沢は、白生地のままよりも、染め上げることで、野趣に富んだ優雅さと、素朴な民芸調の味わいが表れます。",
+      "description": "2匹の蚕が共同で作る玉繭（たままゆ）から作られる、太くて節のある玉糸を使って織り上げるのが特徴です。玉糸特有の節と独特の光沢は、白生地のままよりも、染め上げることで、野趣に富んだ優雅さと、素朴な民芸調の味わいが表れます。",
+      "designation_date": "昭和63年6月9日",
+      "production_area_text": "白山市",
+      "prefecture_codes": [
+        "17"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0118/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0203",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "染色品",
+      "craft_id": "0203",
+      "name_ja": "加賀友禅",
+      "name": "加賀友禅",
+      "description_ja": "加賀友禅の特徴は、落ち着きのある写実的な草花模様を中心とした絵画調の柄です。加賀百万石と言われた豊かな前田家の文化的な趣味を強く反映して、渋さの中にも武家風の気品を漂わせています。",
+      "description": "加賀友禅の特徴は、落ち着きのある写実的な草花模様を中心とした絵画調の柄です。加賀百万石と言われた豊かな前田家の文化的な趣味を強く反映して、渋さの中にも武家風の気品を漂わせています。",
+      "designation_date": "昭和50年5月10日",
+      "production_area_text": "金沢市",
+      "prefecture_codes": [
+        "17"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0203/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.802Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0301",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "その他繊維製品",
+      "craft_id": "0301",
+      "name_ja": "加賀繍",
+      "name": "加賀繍",
+      "description_ja": "加賀繍の特色は、金糸や銀糸をはじめ多種多様の絹の色糸を、一針一針手で繍い上げて描く模様や絵の美しさにあります。華やかで温かみのある美しさには、加賀百万石の奥ゆかしさと、厳しい風雪に育まれた加賀人の「誇り」と「真心」が繍い込められています。",
+      "description": "加賀繍の特色は、金糸や銀糸をはじめ多種多様の絹の色糸を、一針一針手で繍い上げて描く模様や絵の美しさにあります。華やかで温かみのある美しさには、加賀百万石の奥ゆかしさと、厳しい風雪に育まれた加賀人の「誇り」と「真心」が繍い込められています。",
+      "designation_date": "平成3年5月20日",
+      "production_area_text": "金沢市、能美市、白山市",
+      "prefecture_codes": [
+        "17"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0301/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T22:22:44.805Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0405",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "陶磁器",
+      "craft_id": "0405",
+      "name_ja": "九谷焼",
+      "name": "九谷焼",
+      "description_ja": "九谷焼は多色の絵が描かれる上絵付けに本来の持ち味があります。豪快で濶達な線書きの上に、緑、黄、赤、紫、紺青の五彩で施される和絵具の、重厚な輝きが、九谷焼の特徴です。九谷独特の、やや青みを帯びた素地がその落ち着いた色調で、上絵付けを一層引き立てます。",
+      "description": "九谷焼は多色の絵が描かれる上絵付けに本来の持ち味があります。豪快で濶達な線書きの上に、緑、黄、赤、紫、紺青の五彩で施される和絵具の、重厚な輝きが、九谷焼の特徴です。九谷独特の、やや青みを帯びた素地がその落ち着いた色調で、上絵付けを一層引き立てます。",
+      "designation_date": "昭和50年5月10日",
+      "production_area_text": "金沢市、小松市、加賀市、能美市",
+      "prefecture_codes": [
+        "17"
+      ],
+      "source_url": "https://kougeihin.jp/craft/0405/",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "key": "meti_densan:0513",
+      "category": "craft",
+      "authority": "経済産業省 (METI) — 伝統的工芸品指定制度",
+      "designation": "Traditional Craft (伝統的工芸品)",
+      "industry_category": "漆器",
+      "craft_id": "0513
+```
+
+
+=== Case R-075 ===
+Topic / intent: 青森 家族 祭り
+Query: Family travel to Aomori — which festivals are worth planning a trip around?
+Tool: get_festivals({"prefecture": "Aomori", "lang": "en"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "prefecture_code": "02",
+  "prefecture_codes_expanded": null,
+  "region_fanout_applied": false,
+  "lang": "en",
+  "count": 2,
+  "total_matching": 2,
+  "truncated": false,
+  "truncation_note": null,
+  "items": [
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q5637073",
+      "name_ja": "八戸三社大祭",
+      "name_en": "Hachinohe Sansha Taisai",
+      "name": "Hachinohe Sansha Taisai",
+      "description_ja": "青森県八戸市で行われる祭礼",
+      "description_en": "festival of Hachinohe, Aomori, Japan",
+      "description": "A festival held in Hachinohe City, Aomori Prefecture.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": "1721-01-01T00:00:00Z",
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q5637073",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    },
+    {
+      "source": "bunka_intangible",
+      "key": "bunka_intangible:Q862407",
+      "name_ja": "青森ねぶた",
+      "name_en": "Aomori Nebuta Matsuri",
+      "name": "Aomori Nebuta",
+      "description_ja": "日本の青森県青森市で毎年8月に開催される祭",
+      "description_en": "Japanese summer festival",
+      "description": "A festival held every August in Aomori City, Aomori Prefecture, Japan.",
+      "designation": "重要無形民俗文化財 (Important Intangible Folk Cultural Property)",
+      "date": null,
+      "bunca_id": null,
+      "source_url": "https://www.wikidata.org/wiki/Q862407",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      }
+    }
+  ],
+  "national_heritage": [
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11435617",
+      "name_ja": "大日堂舞楽",
+      "name_en": "Dainichido Bugaku",
+      "name": "Dainichido Bugaku",
+      "description_ja": "秋田県鹿角市の大日霊貴神社に伝わる民俗芸能",
+      "description_en": "yearly set of nine sacred ritual dances and music",
+      "description": "A folk performing art passed down at Dainichireiki Shrine in Kazuno City, Akita Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00275",
+      "source_url": "https://www.wikidata.org/wiki/Q11435617",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11511418",
+      "name_ja": "早池峰神楽",
+      "name_en": "Hayachine Kagura",
+      "name": "Hayachine Kagura",
+      "description_ja": null,
+      "description_en": "type of dance",
+      "description": "A type of dance.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2009,
+      "unesco_id": "RL/00272",
+      "source_url": "https://www.wikidata.org/wiki/Q11511418",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "low"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      "key": "unesco_japan:Q11019445",
+      "name_ja": "川越氷川祭",
+      "name_en": "Kawagoe Hikawa Festival",
+      "name": "Kawagoe Hikawa Festival",
+      "description_ja": "埼玉県川越市の川越氷川神社の祭礼",
+      "description_en": "Japanese traditional dance",
+      "description": "Festival of Kawagoe Hikawa Shrine in Kawagoe City, Saitama Prefecture.",
+      "designation": "UNESCO Intangible Cultural Heritage",
+      "inscription_year": 2016,
+      "unesco_id": "RL/02292",
+      "source_url": "https://www.wikidata.org/wiki/Q11019445",
+      "translation_meta": {
+        "source": "official_translated",
+        "generated_at": "2026-04-26T14:48:29.087Z",
+        "confidence": "high"
+      },
+      "scope": "national_japan"
+    },
+    {
+      "source": "unesco_japan",
+      
+```
+
+
+Return one JSONL line per case in the order above. Each line must include: id, intent_understanding, groundedness, factual_accuracy, practical_usefulness, constraint_handling, travel_feasibility, specificity, expression_quality, safety_pass, hallucination_pass, failure_category, reasoning, missing_data, wrong_data, improvement_hint.

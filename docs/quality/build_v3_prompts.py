@@ -47,7 +47,7 @@ Topic / intent: {topic}
 Query: {query}
 Tool: {tool}({args})
 
-Response (truncated to 4000 chars):
+Response ({budget_label}):
 ```
 {response}
 ```
@@ -62,7 +62,15 @@ def main() -> None:
                         help="Label for output filenames")
     parser.add_argument("--batches", type=int, default=4,
                         help="Number of batches (= subagents)")
+    # Token budget for the response excerpt shown to the judge.
+    # Approximated as chars/3 for JP-mixed content. Default 4000 tokens
+    # ~= 12000 chars, matching what a real LLM client would consume.
+    # See whitepaper_tool_response_token_budget for derivation.
+    parser.add_argument("--max-tokens", type=int, default=4000)
+    parser.add_argument("--max-chars", type=int, default=None,
+                        help="legacy: char-based budget; overrides --max-tokens if set")
     args = parser.parse_args()
+    char_budget = args.max_chars if args.max_chars is not None else args.max_tokens * 3
 
     if args.new_tools:
         results_path = REPO / "docs" / "quality" / "test_results_new_tools.jsonl"
@@ -78,18 +86,30 @@ def main() -> None:
     calls = {c["id"]: c for c in json.loads(calls_path.read_text())}
 
     cases = []
-    for line in results_path.read_text().splitlines():
+    # Use \n-only split (file.readlines / split("\n")) to avoid splitlines'
+    # behaviour of splitting on \r,  ,   etc. — some scraped
+    # body_paragraphs contain those characters inside JSON string values,
+    # which makes splitlines treat one logical record as multiple "lines"
+    # and break json.loads downstream.
+    for line in results_path.read_text().split("\n"):
         if not line.strip():
             continue
         rec = json.loads(line)
         meta = calls.get(rec["id"], {})
         result = rec.get("result", {})
         if result.get("ok") and "response" in result:
-            response_str = json.dumps(result["response"], ensure_ascii=False, indent=2)[:4000]
+            full = json.dumps(result["response"], ensure_ascii=False, indent=2)
         elif "response_raw" in result:
-            response_str = result["response_raw"][:4000]
+            full = result["response_raw"]
         else:
-            response_str = json.dumps(result, ensure_ascii=False)[:4000]
+            full = json.dumps(result, ensure_ascii=False)
+        truncated = len(full) > char_budget
+        response_str = full[:char_budget] + ("\n... (truncated)" if truncated else "")
+        approx_tokens = len(response_str) // 3
+        budget_label = (
+            f"~{approx_tokens} tokens (chars/3 approx; budget {args.max_tokens} tokens / {char_budget} chars)"
+            + (", truncated" if truncated else "")
+        )
         cases.append({
             "id": rec["id"],
             "topic": rec.get("topic") or meta.get("intent") or meta.get("topic", ""),
@@ -97,6 +117,7 @@ def main() -> None:
             "tool": rec.get("tool", "?"),
             "args": json.dumps(rec.get("args", {}), ensure_ascii=False),
             "response": response_str,
+            "budget_label": budget_label,
         })
 
     out_dir.mkdir(parents=True, exist_ok=True)

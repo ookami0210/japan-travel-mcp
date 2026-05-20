@@ -14,6 +14,16 @@ export interface KindsDefaultEnrichment {
   typical_visit_minutes: number | null;
   price_band: "free" | "low" | "mid" | "high" | "luxury" | null;
   suitable_for: string[] | null;
+  /**
+   * Weather adaptability. `indoor` = primary experience is under roof
+   * (museum / aquarium / depachika / castle main keep). `outdoor` = primary
+   * experience is open-air (beach / mountain / waterfall / sand_dune).
+   * `mixed` = both meaningfully present (preservation_district, onsen_resort
+   * with bath houses + outdoor strolling). `null` = unknown / kind list empty.
+   *
+   * Intended for "rainy day alternatives" / "indoor activities" filtering.
+   */
+  indoor_capable: "indoor" | "outdoor" | "mixed" | null;
   /** Source provenance — "kinds_default" or "osm" or "wikidata" or "official". */
   source: "kinds_default" | "osm_override" | "no_signal";
 }
@@ -85,6 +95,22 @@ const KIND_MINUTES: Record<string, number> = {
   // Architectural
   palace: 60,
   religious_building: 30,
+  // Themed kinds added 2026-05-09 from multi-judge feedback
+  lavender_field: 90,
+  flower_garden: 90,
+  dark_sky: 60,
+  kabuki_theater: 180,
+  chashitsu: 60,
+  tea_ceremony: 60,
+  pilgrimage_route: 480,  // multi-day route, top end
+  fishing_village: 60,
+  port_town: 60,
+  cycling_route: 240,
+  fermented_food_site: 45,
+  anime_pilgrimage: 30,
+  farm_experience: 180,
+  agritourism: 180,
+  wildlife_observation: 120,
 };
 
 // Price bands by kind. Most temples/shrines are free, but famous ones
@@ -145,6 +171,21 @@ const KIND_PRICE: Record<string, KindsDefaultEnrichment["price_band"]> = {
   palace: "low",
   religious_building: "free",
   airport: "free",
+  lavender_field: "low",
+  flower_garden: "low",
+  dark_sky: "free",
+  kabuki_theater: "high",
+  chashitsu: "mid",
+  tea_ceremony: "mid",
+  pilgrimage_route: "free",
+  fishing_village: "free",
+  port_town: "free",
+  cycling_route: "free",
+  fermented_food_site: "low",
+  anime_pilgrimage: "free",
+  farm_experience: "low",
+  agritourism: "low",
+  wildlife_observation: "free",
 };
 
 // Suitable-for tags. "all" is shorthand for ["family", "couple", "solo", "group"].
@@ -191,9 +232,149 @@ const KIND_SUITABLE: Record<string, string[]> = {
   aquarium: ["family", "couple"],
   zoo: ["family"],
   preservation_district: ["family", "couple"],
+  lavender_field: ["all"],
+  flower_garden: ["all"],
+  dark_sky: ["couple", "solo", "group"],
+  kabuki_theater: ["couple", "solo", "group"],
+  chashitsu: ["couple", "solo"],
+  tea_ceremony: ["couple", "solo", "group"],
+  pilgrimage_route: ["solo", "couple", "group"],
+  fishing_village: ["family", "couple", "solo"],
+  cycling_route: ["solo", "couple", "group"],
+  fermented_food_site: ["couple", "solo", "group"],
+  anime_pilgrimage: ["solo", "couple"],
+  farm_experience: ["family", "couple", "group"],
+  agritourism: ["family", "couple", "group"],
+  wildlife_observation: ["family", "couple", "solo", "group"],
 };
 
 const ALL_PARTY = ["family", "couple", "solo", "group"];
+
+// Indoor / outdoor classification per kind. Driven by what the visit
+// experience is *primarily* about. A castle counts as indoor (you go inside
+// the main keep / museum); a national park is outdoor; a hot spring resort
+// is "mixed" because the bath buildings shelter from rain but most onsen
+// 街 strolls happen outside. When kind list mixes indoor + outdoor, the
+// result resolves to "mixed" so a "rainy day" filter still keeps it.
+const KIND_INDOOR: Record<string, "indoor" | "outdoor" | "mixed"> = {
+  // Indoor primary
+  museum: "indoor",
+  art_museum: "indoor",
+  biographical_museum: "indoor",
+  aquarium: "indoor",
+  theater: "indoor",
+  depachika: "indoor",
+  buke_yashiki: "indoor",
+  machiya: "indoor",
+  giyofu: "indoor",
+  former_school_building: "indoor",
+  historic_house: "indoor",
+  historic_building: "indoor",
+  kominka: "indoor",
+  temple_main_hall: "indoor",
+  shrine_main_building: "indoor",
+  palace: "indoor",
+  // Castle main keep is indoor; hilltop_castle / mountain_castle remain
+  // mixed because the climb is open-air. Plains castles also have outdoor
+  // moats. Default: castle = mixed (keep accessible, grounds outdoor).
+  // Outdoor primary
+  beach: "outdoor",
+  waterfall: "outdoor",
+  lake: "outdoor",
+  cave: "outdoor",
+  volcano: "outdoor",
+  active_volcano: "outdoor",
+  valley: "outdoor",
+  mountain_range: "outdoor",
+  mountain: "outdoor",
+  sacred_mountain: "outdoor",
+  national_park: "outdoor",
+  quasi_national_park: "outdoor",
+  park: "outdoor",
+  garden: "outdoor",
+  japanese_garden: "outdoor",
+  strolling_garden: "outdoor",
+  daimyo_garden: "outdoor",
+  natural_monument: "outdoor",
+  remarkable_tree: "outdoor",
+  giant_tree: "outdoor",
+  island: "outdoor",
+  tanada: "outdoor",
+  sand_dune: "outdoor",
+  yakei: "outdoor",
+  observation: "outdoor",
+  bridge: "outdoor",
+  road_bridge: "outdoor",
+  dam: "outdoor",
+  archaeological_site: "outdoor",
+  midden: "outdoor",
+  kofun: "outdoor",
+  zenpou_kouenfun: "outdoor",
+  kofungun: "outdoor",
+  circular_kofun: "outdoor",
+  square_kofun: "outdoor",
+  ski_resort: "outdoor",
+  pilgrimage_site: "outdoor",
+  kaido: "outdoor",
+  shukuba: "outdoor",
+  jokamachi: "outdoor",
+  cultural_landscape: "outdoor",
+  plaza: "outdoor",
+  zoo: "outdoor",
+  // Mixed — meaningful indoor and outdoor
+  buddhist_temple: "mixed",
+  buddhist_monastery: "mixed",
+  shinto_shrine: "mixed",
+  hachiman_shrine: "mixed",
+  shikinaisha: "mixed",
+  provincial_temple: "mixed",
+  provincial_nunnery: "mixed",
+  tatchu_subtemple: "mixed",
+  former_buddhist_temple: "mixed",
+  great_buddha: "mixed",
+  buddha_statue: "mixed",
+  chokuganji: "mixed",
+  religious_building: "mixed",
+  shukubo: "indoor",  // overnight stay → primarily indoor experience
+  castle: "mixed",
+  japanese_castle: "mixed",
+  hilltop_castle: "mixed",
+  plains_castle: "mixed",
+  mountain_castle: "mixed",
+  gusuku: "mixed",
+  hot_spring: "mixed",
+  onsen_resort: "mixed",
+  preservation_district: "mixed",
+  yokocho: "mixed",
+  shotengai: "mixed",
+  michi_no_eki: "mixed",
+  resort: "mixed",
+  memorial: "mixed",
+  monument: "mixed",
+  designated_cultural_property_jp: "mixed",
+  historic_site: "mixed",
+  mining_heritage: "mixed",
+  industrial_heritage: "mixed",
+  lighthouse: "mixed",
+  railway_station: "mixed",
+  unmanned_station: "mixed",
+  // Themed kinds (2026-05-09)
+  lavender_field: "outdoor",
+  flower_garden: "outdoor",
+  dark_sky: "outdoor",
+  kabuki_theater: "indoor",
+  chashitsu: "indoor",
+  tea_ceremony: "mixed",
+  pilgrimage_route: "outdoor",
+  fishing_village: "mixed",
+  port_town: "mixed",
+  cycling_route: "outdoor",
+  fermented_food_site: "indoor",
+  anime_pilgrimage: "mixed",
+  farm_experience: "outdoor",
+  agritourism: "outdoor",
+  wildlife_observation: "outdoor",
+};
 
 /**
  * Compute kinds-default enrichment from a list of kinds. Picks the most
@@ -214,6 +395,7 @@ export function enrichKindsDefaults(
       typical_visit_minutes: null,
       price_band: null,
       suitable_for: null,
+      indoor_capable: null,
       source: "no_signal",
     };
   }
@@ -221,6 +403,9 @@ export function enrichKindsDefaults(
   let priceTier: number | null = null;
   const priceTierOrder = ["free", "low", "mid", "high", "luxury"] as const;
   const sufSet = new Set<string>();
+  let sawIndoor = false;
+  let sawOutdoor = false;
+  let sawMixed = false;
 
   for (const k of kinds) {
     const m = KIND_MINUTES[k];
@@ -237,6 +422,10 @@ export function enrichKindsDefaults(
         else sufSet.add(t);
       }
     }
+    const indoor = KIND_INDOOR[k];
+    if (indoor === "indoor") sawIndoor = true;
+    else if (indoor === "outdoor") sawOutdoor = true;
+    else if (indoor === "mixed") sawMixed = true;
   }
 
   let priceBand: KindsDefaultEnrichment["price_band"] =
@@ -251,10 +440,88 @@ export function enrichKindsDefaults(
     }
   }
 
+  let indoorCapable: KindsDefaultEnrichment["indoor_capable"];
+  if (sawMixed || (sawIndoor && sawOutdoor)) indoorCapable = "mixed";
+  else if (sawIndoor) indoorCapable = "indoor";
+  else if (sawOutdoor) indoorCapable = "outdoor";
+  else indoorCapable = null;
+
   return {
     typical_visit_minutes: minutes,
     price_band: priceBand,
     suitable_for: sufSet.size > 0 ? Array.from(sufSet) : null,
+    indoor_capable: indoorCapable,
     source,
   };
+}
+
+/**
+ * Helper for tool boundary filtering. Given the requested cap (`free` →
+ * only free; `low` → free or low; `mid` → free | low | mid; ...) and the
+ * record's price_band, decide whether the record passes the budget filter.
+ * Records with null price_band fail closed when the cap is `free` (we can't
+ * confirm it's free) but pass when the cap is `mid` or higher (no info →
+ * trust the agent has another signal).
+ */
+export function passesPriceBandCap(
+  recordBand: KindsDefaultEnrichment["price_band"],
+  cap: NonNullable<KindsDefaultEnrichment["price_band"]>,
+): boolean {
+  const order = ["free", "low", "mid", "high", "luxury"] as const;
+  const capIdx = order.indexOf(cap);
+  if (recordBand === null) {
+    // Strict caps (free / low) → drop unknowns; permissive caps (mid+) keep.
+    return capIdx >= 2;
+  }
+  return order.indexOf(recordBand) <= capIdx;
+}
+
+/**
+ * Indoor filter for "rainy day" queries. `mixed` records pass both filters
+ * because the indoor portion is meaningful (e.g. preservation_district has
+ * indoor machiya tours; onsen_resort has covered baths).
+ */
+export function passesIndoorFilter(
+  recordIndoor: KindsDefaultEnrichment["indoor_capable"],
+  want: "indoor" | "outdoor",
+): boolean {
+  if (recordIndoor === null) return false;
+  if (want === "indoor") return recordIndoor === "indoor" || recordIndoor === "mixed";
+  return recordIndoor === "outdoor" || recordIndoor === "mixed";
+}
+
+/**
+ * Crowd-band derivation. Bands the entity by tourism prominence using
+ * deterministic public-knowledge signals — multilingual Wikipedia
+ * coverage (a 4-language entity is internationally famous; a 1-language
+ * entity is local-interest), heritage-designation count (UNESCO + 国宝 +
+ * 名勝 stack on must-see entries), and Wikipedia kind-tag richness
+ * (specialty entries with multiple curated kind tags are well-documented).
+ *
+ *   high    = 4-language ja+en+zh+ko AND ≥2 heritage designations (UNESCO
+ *             World Heritage / 国宝 etc) — Himeji Castle / Itsukushima class
+ *   medium  = 3-language OR ≥1 heritage designation OR ≥3 wikipedia kind tags
+ *             — major regional landmark
+ *   low     = 1-2 language only AND no heritage AND ≤2 wikipedia kind tags
+ *             — local-interest entity
+ *   unknown = entity has no multilingual / heritage / kind-tag signals at
+ *             all (typical of BUNKA-only inserts without Wikidata QID)
+ *
+ * Used by 「穴場 / lesser-known / hidden / non-touristy」 query handling
+ * — the demote_popular intent inverts the ranking when query implies
+ * obscurity, and the agent can also filter by band explicitly.
+ */
+export type CrowdBand = "high" | "medium" | "low" | "unknown";
+
+export function deriveCrowdBand(
+  langCount: number,
+  heritageCount: number,
+  wikipediaKindTagsCount: number,
+): CrowdBand {
+  if (langCount >= 4 && heritageCount >= 2) return "high";
+  if (langCount >= 3) return "medium";
+  if (heritageCount >= 1) return "medium";
+  if (wikipediaKindTagsCount >= 3) return "medium";
+  if (langCount === 0 && heritageCount === 0 && wikipediaKindTagsCount === 0) return "unknown";
+  return "low";
 }

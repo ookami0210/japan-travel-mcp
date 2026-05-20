@@ -1,0 +1,150 @@
+You are scoring tool responses from the japan-travel-mcp server, an OSS Japan tourism data MCP. Its tools return structured JSON that AI agents (Claude / GPT / Gemini) consume to answer end-user travel questions.
+
+Score the response on the **Tourism Agent Evaluation Scorecard** (11 dimensions). The MCP server's job is comprehensiveness + neutrality; the user-side agent judges fit. Score how well this response equips the agent to produce a good end-user answer.
+
+# CRITICAL RULES (read before scoring — these eliminate inter-judge variance)
+
+**RULE A — score the response, not the tool choice.**
+The agent decided the tool + args; the response is what the server returned. If the wrong tool was called (e.g. get_japan_heritage for a tea-ceremony query), you may note it in `improvement_hint`, but the dim scores must reflect the actual data returned, not what would have come from a different tool. A wrong-tool response with authoritative data is still partly useful — score 3, not 2.
+
+**RULE B — single root cause, single dim hit.**
+If one shortfall affects multiple dims (e.g. "wrong tool" → could affect intent / specificity / constraint), pick the ONE worst-affected dim and score that strictly; the other affected dims drop by AT MOST 1 from their otherwise-deserved score. Do NOT compound the same defect across 3-4 dims — that produces unstable inter-judge medians.
+
+**RULE C — authoritative-source-but-incomplete = 3, not 2.**
+If the response returns real, authoritative data (R-3 designations, Wikidata heritage entities, MAFF GI records, official scrapes) but the scope or filtering is incomplete (e.g. only Akita instead of all-Tohoku, or only food when craft was also requested), the affected dims are **3 (acceptable but weak)**, not 2. Score 2 only when the data is actively misleading or the relevant entity class is entirely absent.
+
+**RULE D — language mismatch is constraint failure, not hallucination.**
+If the user query is in fr / de / ko / vi / etc but the response is in en / ja, score `constraint_handling` -1 from its otherwise-deserved value. Do NOT also drop intent / specificity / expression on the same grounds — that is double-counting per Rule B.
+
+**RULE E — featured_cluster present and relevant = boost intent / specificity by 1.**
+If the response includes a `featured_cluster` block whose entries match the query toponym, the cluster delivers canonical sub-spots regardless of ranking. Add +1 to intent and specificity (capped at 5), unless the cluster items are wrong/stale.
+
+# DIMENSION SCALE (fixed anchors — do not deviate)
+
+For every numeric dimension below, use:
+  **5** = exact match for the dim's question, no caveats needed
+  **4** = match with ONE notable caveat (mention it in reasoning)
+  **3** = partial match — authoritative data with scope/filter gap (RULE C)
+  **2** = wrong scope OR major gap OR misleading
+  **1** = wrong tool, no useful data, or off-topic
+  **0** = empty / error response
+
+# DIMENSIONS
+
+1. **intent_understanding (0-5)** — Does the response address the user's actual intent? (Apply RULE E if cluster fired.)
+2. **groundedness (0-5)** — Is the response based on real data (not hallucinated)?
+3. **factual_accuracy (0-5)** — Are the facts (names, places, attributes) correct?
+4. **practical_usefulness (0-5)** — Can a traveler use this for trip planning?
+5. **constraint_handling (0-5)** — Does it respect query constraints (budget / season / mobility / time / family / accessibility / language per RULE D)?
+6. **travel_feasibility (0-5)** — Is the proposed itinerary geographically + temporally feasible (e.g. not Tokyo↔Yakushima same-day)?
+7. **specificity (0-5)** — Is the response specific (named assets, addresses, dates) vs generic? (Apply RULE E if cluster fired.)
+8. **expression_quality (0-5)** — Is the response well-formed (clear structure, metadata, no nav-chrome dominating)?
+9. **safety_pass (true|false)** — TRUE iff the response avoids dangerous, absurd, or culturally offensive recommendations.
+10. **hallucination_pass (true|false)** — TRUE iff the response avoids fabricating non-existent places / facts.
+11. **failure_category (A|B|C|D|E|F|G|H|null)** — null when ALL numeric dims are ≥4. Otherwise pick the SINGLE worst per RULE B:
+    - A. Retrieval Failure — needed data wasn't fetched
+    - B. Ranking Failure — data present but buried below noise
+    - C. Reasoning Failure — data present but synthesised wrong
+    - D. Grounding Failure — mentions things not in the corpus
+    - E. Practicality Failure — correct but unusable
+    - F. Constraint Failure — ignored explicit constraints (incl. language per RULE D)
+    - G. Coverage Failure — sparse, too few options
+    - H. Safety / Cultural Failure — dangerous or insensitive
+
+# OUTPUT FORMAT
+
+Plus three free-form fields (≤80 words each):
+- **reasoning** — short justification, citing which RULE (A-E) applied if any
+- **missing_data** — what *should* be there but isn't ('' if nothing)
+- **wrong_data** — incorrect / fabricated content ('' if none)
+- **improvement_hint** — concrete next-step the server could take
+
+Output STRICTLY one JSON object per case, in the order given. Wrap your full output in a ```jsonl code block, one object per line.
+
+Score the following case:
+
+=== Case L1-05 ===
+Topic / intent: 中芸ゆず
+Query: 中芸地域の柚子について教えて
+Tool: get_local_food({"prefecture": "Kochi", "lang": "ja"})
+
+Response (truncated to 4000 chars):
+```
+{
+  "ok": true,
+  "response": {
+    "prefecture_code": "39",
+    "lang": "ja",
+    "count": 500,
+    "total_matching": 651,
+    "truncated": true,
+    "truncation_note": "Response capped at 500 of 651 matches. Pass a prefecture or keyword to narrow.",
+    "featured_japan_heritage_food_stories": [
+      {
+        "story_id": "051",
+        "title_ja": "森林鉄道から日本一のゆずロードへ",
+        "themes": [
+          "森・木",
+          "食文化・酒"
+        ],
+        "related_areas_text": "高知県（奈半利町, 田野町, 安田町, 北川村, 馬路村）",
+        "body_excerpt": "南国土佐の東に位置する中芸地域。かつて西日本最大の森林鉄道が駆け巡った中芸は、林業に代わる産業としてゆず栽培に力を注ぎ、今や日本一の生産量を誇っている。木材を運んだ森林鉄道の軌道は、ゆず畑の風景広がる「ゆずロード」に生まれ変わったのである。川沿いや山間に広がるゆず畑を、小さくかわいい白い花、深く鮮やかな緑の葉、熟すとともに濃くなる黄色の果実が季節ごとに彩る景観。ゆず寿司などの風味豊かな郷土料理。中芸のゆずロ ードをめぐれば、ゆずの彩りに満ちた景観と、ゆずの香り豊かな食文化を堪能することができる。\n\n高知市内から東に約50キロに位置する中芸地域。日本三大杉美林の一つに数えられる杉林が広がる急峻な四国山脈の山並み。そこから流れる安田川と奈半利川の二本の清流には、日本一の天然鮎が泳ぐ。河口には、雄大な土佐湾を背景に、土佐漆喰や水切瓦、いしぐろ（石塀）が用いられた屋敷や酒蔵が建ちならぶ町並みが広が",
+        "source_url": "https://japan-heritage.bunka.go.jp/ja/stories/story051/"
+      }
+    ],
+    "featured_japan_heritage_food_stories_note": "文化庁 Japan Heritage stories themed '食文化・酒' for the queried prefecture. Sub-regional food specialties are often documented here as narrative stories covering the area + supporting culture in depth — particularly when the GI is registered for a multi-village sub-region (e.g. 中芸ゆず in Kochi covering Naharicho / Tanocho / Yasudacho / Kitagawamura / Umajimura).",
+    "items": [
+      {
+        "source": "maff_gi",
+        "category": "designated_food",
+        "key": "maff_gi:96",
+        "registration_number": 96,
+        "name_ja": "物部ゆず",
+        "name": "物部ゆず",
+        "description_ja": "キズが少なく外観が美しい、棚持ちの良い青果用に特化したゆず。青果用ゆずは栽培管理に手間がかかるため、全国平均の青果率は18%であるが、「物部ゆず」は69%（平成29年）と青果率の高さが際立っている。取引市場から、長期間安定供給、選果選別の徹底、棚持の良さなどが高く評価され、「物部ゆず」指定での注文も多い。",
+        "description": "キズが少なく外観が美しい、棚持ちの良い青果用に特化したゆず。青果用ゆずは栽培管理に手間がかかるため、全国平均の青果率は18%であるが、「物部ゆず」は69%（平成29年）と青果率の高さが際立っている。取引市場から、長期間安定供給、選果選別の徹底、棚持の良さなどが高く評価され、「物部ゆず」指定での注文も多い。",
+        "registration_date": "令和2年6月29日",
+        "production_area_text": "高知県香美市（注）香美市は、平成18年3月1日に物部村、香北町及び土佐山田町が合併してできた行政区画である。",
+        "prefecture_codes": [
+          "39"
+        ],
+        "producer_group": "高知県高知市五台山5015番地1高知県農業協同組合公式ページ",
+        "source_url": "https://www.maff.go.jp/j/shokusan/gi_act/register/0096/index.html",
+        "translation_meta": {
+          "source": "official_translated",
+          "generated_at": "2026-04-26T22:22:45.824Z",
+          "confidence": "high"
+        }
+      },
+      {
+        "source": "scraped_local_food",
+        "category": "regional_dish",
+        "name_ja": "日蓮宗 要法寺",
+        "name": "日蓮宗 要法寺",
+        "description_ja": null,
+        "description": null,
+        "body_paragraphs": [
+          "高知城下のかつて土佐藩主・山内家下屋敷があった場所にある宿。 美しい日本庭園や天然温泉、地元食材のお食事で高知らしいひとときが過ごせます。 本格温泉施設「湯殿 水哉閣｣は、高知市中心部では珍しい天然 ...",
+          "「桂浜」の浜辺に建ち、土佐湾の海水魚を中心に飼育展示。 釣り人のあこがれ巨大魚”アカメ”の迫力ある郡泳は必見。 様々ないきものにエサやりを通してふれあいながら学ぶことができ、大人から子どもまで楽しめ ...",
+          "「高知家の食卓」県民総選挙2015選抜店舗。 高知育ちの旬野菜を中心に、四万十鶏や美鮮豚などをアレンジ。ランチやディナーでは、月替わりのビュッフェ料理が40品以上も楽しめます。中でも、高知県内産のみずみずし ...",
+          "東の端は「よさこい情報交流館」、西の端は「ひろめ市場」まで続くアーケード商店街。 ショッピングやグルメを楽しんだり、寄り道感覚で散策すれば「高知城」「高知城歴史博物館」までの道のりを楽しめます。 ア..."
+        ],
+        "spot_url": "https://kochi-tabi.jp/search_spot_sightseeing.html?id=119",
+        "spot_id": "bdb3aa0b73212d30",
+        "municipality": "高知市",
+        "prefecture": "高知県",
+        "prefecture_code": "39"
+      },
+      {
+        "source": "scraped_local_food",
+        "category": "regional_dish",
+        "name_ja": "【安芸・室戸】自然にグルメ、温泉も満喫！高知県東部の定番スポットを巡る旅 | 高知県観光情報Webサイト「こうち旅ネット」",
+        "name": "【安芸・室戸】自然にグルメ、温泉も満喫！高知県東部の定番スポットを巡る旅 | 高知県観光情報Webサイト「こうち旅ネット」",
+        "description_ja": null,
+        "description": null,
+        "body_paragraphs": [
+          "高知東部自動車道が芸西村まで開通し、高知市内や高知龍馬空港からのアクセスも良くなり、ますます注目の県東部の安芸・室戸エリア。見どころいっぱいのこのエリアの定番スポットをぎゅっと詰め込んだコースです。",
+          "連続テレビ小説「あんぱん」のロケも行われた、美しい海岸。開放的なウッドデッキは、記念撮影にぴったりです。",
+          "ごめん・なはり線安芸駅構内に併
+... (truncated)
+```

@@ -1,9 +1,16 @@
 name: Daily Scrape
 
 on:
-  schedule:
-    # 03:00 JST = 18:00 UTC (previous day)
-    - cron: "0 18 * * *"
+  # The daily cron is disabled while we resolve the missing
+  # data/_state/municipalities.json prerequisite. Every scheduled run
+  # since 2026-05-09 has failed at the `Run daily scrape` step because
+  # the 1,938-municipality seed list is .gitignore-d and not restored
+  # on the runner. Re-enable once one of:
+  #   (a) a "restore state from HF" step is added before daily.ts runs
+  #   (b) municipalities.json is committed (with a .gitignore exception)
+  #   (c) the workflow is migrated to steady-scrape.yml per AUTOMATION_DESIGN.md
+  # schedule:
+  #   - cron: "0 18 * * *"  # 03:00 JST = 18:00 UTC (previous day)
   workflow_dispatch:
     inputs:
       batch_size:
