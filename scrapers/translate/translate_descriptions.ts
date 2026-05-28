@@ -383,6 +383,12 @@ async function processResults(
     }
     parsed.qid = r.custom_id;
     if (!parsed.confidence) parsed.confidence = "medium";
+    // Strip any non-language keys the LLM may have leaked into descriptions
+    // (e.g. "confidence" appearing both at the top level and inside the map).
+    const validLangs = new Set<string>(TARGET_LANGUAGES);
+    parsed.descriptions = Object.fromEntries(
+      Object.entries(parsed.descriptions).filter(([k]) => validLangs.has(k)),
+    );
     out.push(parsed);
     succeeded += 1;
   }
