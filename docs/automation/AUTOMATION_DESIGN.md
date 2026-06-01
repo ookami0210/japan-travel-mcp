@@ -55,8 +55,7 @@ until they reach `active`.
 
 ## Launch switch (one-page checklist)
 
-When the pre-launch private review window closes and the repo goes public,
-flip the steady cadences on:
+To flip the steady cadences on once the repo goes public:
 
 1. **Uncomment `schedule:` blocks** in:
    - `.github/workflows/steady-scrape.yml`

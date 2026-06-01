@@ -66,7 +66,7 @@ prefectures/                      # 47 prefecture files: municipal-scrape spots
                                   # + Wikidata attractions per prefecture
 
 hotels/
-  master.json                     # 19,943 accommodations (Wikidata + OSM merged)
+  master.json                     # ~20,000 accommodations (Wikidata + OSM merged)
 
 r3/                               # Official designation registries
   maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
@@ -100,7 +100,7 @@ no AI-curated lists, no UGC.
 | Municipal tourism pages | 1,938 city / town / ward governments of Japan | Public information; per-page robots.txt respected |
 | Wikidata attractions | Wikidata, Wikimedia Foundation | CC0 |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
-| Tourist descriptions (17-lang) | AI-translated from Wikidata + project glossary | CC BY 4.0 (this compilation) |
+| Tourist descriptions (17-lang) | AI-generated from Wikidata-derived structured data + project glossary | CC BY 4.0 (this compilation) |
 | Geographical Indications (GI) | Ministry of Agriculture, Forestry and Fisheries (MAFF) | Government Standard Terms of Use 2.0 (CC BY 4.0 compatible) |
 | Traditional Crafts (Dentō Kōgeihin) | Ministry of Economy, Trade and Industry (METI) / Association for the Promotion of Traditional Craft Industries | Public designation; cited |
 | Japan Heritage (Nihon Isan) | Agency for Cultural Affairs | Public designation; cited |

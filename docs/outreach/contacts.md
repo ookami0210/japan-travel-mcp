@@ -124,7 +124,6 @@ cultural records, all from public Japanese sources (CC BY 4.0):
 
 - Dataset: https://huggingface.co/datasets/open-travel/japan-travel-mcp-data
 - Code: https://github.com/ookami0210/japan-travel-mcp
-- Pre-print: arXiv:[ID once submitted]
 
 Thought it might be useful for multilingual MT evaluation, low-resource
 benchmarks, or domain-specific QA in your group's work. Happy to ship a

@@ -1,7 +1,7 @@
 # Japan Travel MCP
 
 > **Open Japanese tourism dataset + Model Context Protocol (MCP) server** —
-> 13,394 tourist spots × 17 languages, 19,943 accommodations, 690
+> 13,394 tourist spots × 17 languages, about 20,000 accommodations, 690
 > officially-designated cultural records (MAFF GI, METI traditional crafts,
 > Japan Heritage, UNESCO ICH). **Free, no API key, no account.** All data is
 > downloadable as JSON/JSONL from [Hugging Face](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data).
@@ -28,7 +28,7 @@ from huggingface_hub import snapshot_download
 snapshot_download(repo_id="open-travel/japan-travel-mcp-data", repo_type="dataset")
 ```
 
-**See also:** [🤗 Dataset card](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data) · [Live demo (coming soon)](#) · [arXiv preprint (coming soon)](#)
+**See also:** [🤗 Dataset card](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data)
 
 ---
 
@@ -49,25 +49,6 @@ On first run, the server downloads ~270 MB of travel data from
 [huggingface.co/datasets/open-travel/japan-travel-mcp-data](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data)
 to `~/.japan-travel-mcp/data/` (override the cache location with the
 `JAPAN_TRAVEL_MCP_CACHE` env var). Subsequent runs use the local cache.
-
-> ⚠️ **During the pre-launch review period the HF dataset is private**, so
-> the first-run download requires an `HF_TOKEN` env var. Get a read-scope
-> token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
-> after a maintainer has added you as a collaborator. Once the dataset is made public
-> (Phase D, alongside `npm publish`), the token is no longer needed.
-
-```jsonc
-// claude_desktop_config.json (during private-review period)
-{
-  "mcpServers": {
-    "japan-travel": {
-      "command": "npx",
-      "args": ["-y", "japan-travel-mcp"],
-      "env": { "HF_TOKEN": "hf_..." }
-    }
-  }
-}
-```
 
 ---
 
@@ -133,7 +114,7 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 |------|-------------|
 | `search_area` | Search across prefectures, municipalities, and 41,000+ Wikidata attractions by name or keyword |
 | `get_spots` | Tourist spots by prefecture or municipality (combines municipal scrape + Wikidata) |
-| `get_hotels` | 19,943 accommodations (Wikidata + OpenStreetMap merged) — filter by area or lat/lng/radius |
+| `get_hotels` | About 20,000 accommodations (Wikidata + OpenStreetMap merged) — filter by area or lat/lng/radius |
 | `get_transport` | Spot coordinates, prefecture, municipality, and the official URL where access is documented |
 | `get_events` | Festivals registered in Wikidata for a given prefecture, with optional month filter (live SPARQL, in-memory cache) |
 | `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |
@@ -293,7 +274,7 @@ japan-travel-mcp/                          # this repo — code + lightweight me
 ├── CONTRIBUTING.md
 ├── DATA_POLICY.md
 ├── src/
-│   ├── index.ts                           # MCP server (12 tools)
+│   ├── index.ts                           # MCP server (18 tools)
 │   └── lib/hf_data.ts                     # HF dataset bootstrap (first-run download)
 ├── data/                                  # only what readers / contributors need to see
 │   ├── _logs/                             # daily scrape run summaries (transparency)
@@ -320,7 +301,7 @@ japan-travel-mcp/                          # this repo — code + lightweight me
 ```
 data/translations/    # 17-language names + 200-300 char descriptions
 data/prefectures/     # 47 prefectures of municipal-scrape + Wikidata spots
-data/hotels/master    # 19,943 unified hotels & ryokan
+data/hotels/master    # ~20,000 unified hotels & ryokan
 data/hotels/raw/      # OSM + Wikidata pre-merge sources
 data/glossary/        # canonical terms used at translation time
 data/_state/wikidata_attractions.json + 3 muni files
