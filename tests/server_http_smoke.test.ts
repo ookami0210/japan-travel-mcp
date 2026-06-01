@@ -25,6 +25,7 @@ import {
 const ENV_KEYS = [
   "JAPAN_TRAVEL_MCP_CACHE",
   "JAPAN_TRAVEL_MCP_SKIP_LOCAL",
+  "JAPAN_TRAVEL_MCP_NO_REFRESH",
   "HF_TOKEN",
   "PORT",
 ] as const;
@@ -84,6 +85,8 @@ beforeAll(async () => {
   // module is imported, because getCacheDir() reads it at call time.
   process.env.JAPAN_TRAVEL_MCP_CACHE = cacheDir;
   process.env.JAPAN_TRAVEL_MCP_SKIP_LOCAL = "1";
+  // The fixtures are complete, so keep the staleness check offline.
+  process.env.JAPAN_TRAVEL_MCP_NO_REFRESH = "1";
   delete process.env.HF_TOKEN;
 
   const stdioModule = await import("../src/index.js");
