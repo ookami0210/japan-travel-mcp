@@ -1,8 +1,13 @@
 # ADR 0001 — Multi-source tourism data acquisition for the long tail
 
-- **Status**: Accepted
+- **Status**: Accepted (historical record from 2026-04-30; the multi-source pipeline described here has since been implemented and is in production)
 - **Date**: 2026-04-30
 - **Affects**: scrapers/, data/_state/, data/prefectures/, src/index.ts (new tools)
+
+> This document captures the decision and rationale recorded at the time of
+> the data-pipeline redesign. References to "pausing the launch" and to
+> deliverables that were "still pending" reflect the state of the project
+> at the time of writing, not the current status.
 
 ## Context
 

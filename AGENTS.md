@@ -44,9 +44,7 @@ on first server start and cached at `~/.japan-travel-mcp/data/` (override
 with `JAPAN_TRAVEL_MCP_CACHE`). Scrapers write into the local `data/` tree
 at dev time; GitHub Actions cron jobs upload results back to HF.
 
-Code is MIT, dataset is CC BY 4.0. No API keys at runtime once the dataset is public
-(during the pre-launch private-review window an `HF_TOKEN` is required for the
-first download).
+Code is MIT, dataset is CC BY 4.0. No API keys are required at runtime.
 
 ---
 
