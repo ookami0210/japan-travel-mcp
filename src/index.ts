@@ -26,8 +26,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { readdir, readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { existsSync, realpathSync } from "node:fs";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 import { resolveDataRoot } from "./lib/hf_data.js";
 import { matchesMunicipality, stripPrefSuffix } from "./lib/match.js";
@@ -12851,7 +12851,20 @@ async function mainStdio(): Promise<void> {
   console.error("[japan-travel-mcp] MCP server running on stdio");
 }
 
-const isMain = import.meta.url === `file://${process.argv[1]}`;
+// Resolve symlinks before comparing. The published bin is launched through
+// a node_modules/.bin symlink (npx, global install, Claude Desktop), where
+// process.argv[1] is the symlink path while import.meta.url is the realpath.
+// A raw string compare never matches there, so the server would start nothing
+// and exit silently. realpathSync + pathToFileURL normalises both sides.
+const isMain = (() => {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return import.meta.url === pathToFileURL(realpathSync(entry)).href;
+  } catch {
+    return false;
+  }
+})();
 if (isMain) {
   mainStdio().catch((err) => {
     console.error("[japan-travel-mcp] FATAL:", err);
