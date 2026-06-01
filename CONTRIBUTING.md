@@ -19,7 +19,10 @@ The entity matching engine isn't perfect.
 If two different properties got merged into one,  
 or one property got split into two entries —  
 open a PR against `/data/hotels/review/`.  
-That folder exists exactly for this.
+That folder exists exactly for this — each file holds the candidate records
+and the match confidence; see
+[the hotel section in the README](README.md#how-the-hotel-master-list-is-built)
+for the file format and how to record a merge/split decision.
 
 ### Add a scraper for a new municipality
 If your hometown's tourism site isn't covered,  

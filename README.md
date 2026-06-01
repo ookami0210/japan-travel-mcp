@@ -45,10 +45,31 @@ snapshot_download(repo_id="open-travel/japan-travel-mcp-data", repo_type="datase
 }
 ```
 
-On first run, the server downloads ~270 MB of travel data from
+On first run, the server downloads ~685 MB of travel data from
 [huggingface.co/datasets/open-travel/japan-travel-mcp-data](https://huggingface.co/datasets/open-travel/japan-travel-mcp-data)
 to `~/.japan-travel-mcp/data/` (override the cache location with the
 `JAPAN_TRAVEL_MCP_CACHE` env var). Subsequent runs use the local cache.
+
+---
+
+## Remote / HTTP transport (hosted MCP)
+
+Besides stdio, the server ships a **Streamable-HTTP** transport
+(`src/index_http.ts`) for always-on hosts — Hugging Face Spaces, Cloudflare,
+or any server where web / SaaS MCP clients connect over HTTP instead of
+spawning a local process.
+
+```bash
+npm run build && node dist/src/index_http.js
+# POST /mcp      — Streamable-HTTP MCP endpoint
+# GET  /healthz  — liveness probe
+# GET  /         — landing page
+```
+
+It listens on `PORT` (default `7860`, the HF Spaces convention) and honours the
+same `JAPAN_TRAVEL_MCP_CACHE` / `HF_TOKEN` env vars as the stdio entrypoint. The
+transport is stateless — a fresh MCP server is created per request — so
+concurrent clients don't share state.
 
 ---
 
@@ -113,6 +134,8 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 | Tool | Description |
 |------|-------------|
 | `search_area` | Search across prefectures, municipalities, and 41,000+ Wikidata attractions by name or keyword |
+| `search_semantic` | Vector search over the `multilingual-e5` embedding index — semantic similarity, language-agnostic |
+| `search_hybrid` | BM25 lexical + vector + RRF fusion — the preferred general-purpose retriever |
 | `get_spots` | Tourist spots by prefecture or municipality (combines municipal scrape + Wikidata) |
 | `get_hotels` | About 20,000 accommodations (Wikidata + OpenStreetMap merged) — filter by area or lat/lng/radius |
 | `get_transport` | Spot coordinates, prefecture, municipality, and the official URL where access is documented |
@@ -124,6 +147,10 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 | `get_festivals` | Festivals (matsuri, Shinto rites, annual rituals) — UNESCO ICH + Important Intangible Cultural Properties + scraped municipal and tourism-association festival pages, with Schema.org Event metadata where present |
 | `get_traditional_arts` | Intangible cultural assets from the Agency for Cultural Affairs — Important Intangible Cultural Properties + Folk (125 items) + UNESCO ICH inscriptions for Japan (58 items) |
 | `get_japan_heritage` | All 104 Japan Heritage (Nihon Isan) stories from the Agency for Cultural Affairs, with theme / era / prefecture filters |
+| `get_dmo` | 観光庁 (Japan Tourism Agency) registered + candidate Destination Management Organizations (DMOs) |
+| `get_entity_full` | Full denormalised card for a single Wikidata entity, joined across every data layer |
+| `get_entities_bulk` | Batch variant of `get_entity_full` — many QIDs resolved in one call |
+| `plan_feasibility_check` | Sanity-check a multi-stop itinerary against the dataset (distance / travel-time / opening hours) |
 
 **Signature tool: `get_description`**
 This MCP exposes 17-language tourism descriptions — English, Japanese, Chinese, Korean,
@@ -205,9 +232,23 @@ Uncertain matches (similar names, slightly different positions, or one-sided
 metadata) are written to `data/hotels/review/` — open for community resolution.
 
 **This pipeline is fully open source.** The matching engine is in
-`scrapers/matcher/`. Imperfect matches are PRs waiting to happen — drop a
-`{ "id": "...", "decision": "merge" | "split", "rationale": "..." }` next to
-the file you've reviewed.
+`scrapers/matcher/`. Each uncertain match is written as one file in
+`data/hotels/review/<id>.json`, holding the candidate records and why they
+were flagged:
+
+```json
+{
+  "id": "0120570838cb",
+  "confidence": "likely",
+  "match_reasons": ["distance 29m", "name similarity 0.83 (likely)"],
+  "candidates": [ /* the OSM / Wikidata records being compared */ ]
+}
+```
+
+To resolve one, inspect the `candidates`, decide whether they're the same
+property, and open a PR that records your call on the file — add a top-level
+`"decision": "merge" | "split"` (and an optional `"rationale"`) so it can be
+folded back into the matcher. Imperfect matches are PRs waiting to happen.
 
 > **Roadmap.** Adding the prefectural ryokan business-license registries
 > is on the wishlist — those are the authoritative national registry —
