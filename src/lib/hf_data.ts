@@ -16,7 +16,7 @@
  * stripped), we use that and skip the HF download entirely.
  */
 
-import { mkdir, writeFile, stat } from "node:fs/promises";
+import { mkdir, writeFile, readFile, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
@@ -192,6 +192,189 @@ export function findLocalDataIfPresent(repoRoot: string): string | null {
   return null;
 }
 
+// ── Cache-busting / staleness refresh ──────────────────────────────────
+//
+// ensureDataFromHf() only fills in *missing* files; it never notices when
+// the upstream dataset has been updated. The dataset refreshes daily on a
+// rolling 30-day cycle, so a cache can drift indefinitely. We reconcile by
+// reading the headers Hugging Face returns on every `resolve` request:
+//   - `x-repo-commit`  — the repo's current commit, a cheap global signal
+//   - `x-linked-etag`  — a per-file content identity (regular files + LFS)
+// A throttled HEAD on one file answers "did anything change?"; only when the
+// commit moved do we HEAD every runtime file and re-download the ones whose
+// etag differs. Warm starts within the TTL touch the network zero times,
+// preserving the sub-second cold-cache start goal.
+//
+// Env controls:
+//   JAPAN_TRAVEL_MCP_NO_REFRESH        — never check (offline / pinned cache)
+//   JAPAN_TRAVEL_MCP_REFRESH           — force a check now, ignoring the TTL
+//   JAPAN_TRAVEL_MCP_REFRESH_TTL_HOURS — throttle window (default 24)
+
+const SYNC_MANIFEST = ".sync.json";
+const DEFAULT_REFRESH_TTL_HOURS = 24;
+
+interface SyncManifest {
+  repoCommit: string | null;
+  checkedAt: number;
+  etags: Record<string, string>;
+}
+
+function isTruthyEnv(value: string | undefined): boolean {
+  return !!value && value !== "0" && value.toLowerCase() !== "false";
+}
+
+function refreshTtlMs(): number {
+  const hours = Number(process.env.JAPAN_TRAVEL_MCP_REFRESH_TTL_HOURS);
+  const h =
+    Number.isFinite(hours) && hours >= 0 ? hours : DEFAULT_REFRESH_TTL_HOURS;
+  return h * 60 * 60 * 1000;
+}
+
+async function readSyncManifest(cacheDir: string): Promise<SyncManifest | null> {
+  try {
+    const raw = JSON.parse(
+      await readFile(join(cacheDir, SYNC_MANIFEST), "utf8"),
+    );
+    if (
+      raw &&
+      typeof raw.checkedAt === "number" &&
+      raw.etags &&
+      typeof raw.etags === "object"
+    ) {
+      return raw as SyncManifest;
+    }
+  } catch {
+    /* missing or malformed → treat as no manifest */
+  }
+  return null;
+}
+
+async function writeSyncManifest(
+  cacheDir: string,
+  m: SyncManifest,
+): Promise<void> {
+  try {
+    await mkdir(cacheDir, { recursive: true });
+    await writeFile(join(cacheDir, SYNC_MANIFEST), JSON.stringify(m, null, 2));
+  } catch {
+    /* the manifest is an optimisation — failing to persist it is non-fatal */
+  }
+}
+
+async function headMeta(
+  repoPath: string,
+  token: string | undefined,
+): Promise<{ commit: string | null; etag: string | null }> {
+  const headers: Record<string, string> = {
+    "User-Agent":
+      "japan-travel-mcp/1.0 (+https://github.com/ookami0210/japan-travel-mcp)",
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${HF_BASE}/${repoPath}`, {
+    method: "HEAD",
+    redirect: "manual",
+    headers,
+  });
+  return {
+    commit: res.headers.get("x-repo-commit"),
+    etag: res.headers.get("x-linked-etag"),
+  };
+}
+
+async function headAllEtags(
+  token: string | undefined,
+): Promise<Record<string, string>> {
+  const etags: Record<string, string> = {};
+  const queue = [...RUNTIME_FILES];
+  const CONCURRENCY = 8;
+  async function worker(): Promise<void> {
+    while (queue.length > 0) {
+      const rel = queue.shift();
+      if (!rel) return;
+      const { etag } = await headMeta(rel, token);
+      if (etag) etags[rel] = etag;
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+  return etags;
+}
+
+/**
+ * Reconcile the local cache with the upstream dataset when due. No-ops when a
+ * fresh manifest is within the TTL (the common warm-start path) or when
+ * JAPAN_TRAVEL_MCP_NO_REFRESH is set. Any network failure is swallowed — a
+ * stale cache is always preferable to a failed start.
+ */
+export async function refreshFromHfIfStale(): Promise<void> {
+  if (isTruthyEnv(process.env.JAPAN_TRAVEL_MCP_NO_REFRESH)) return;
+
+  const cacheDir = getCacheDir();
+  const manifest = await readSyncManifest(cacheDir);
+  const now = Date.now();
+  const force = isTruthyEnv(process.env.JAPAN_TRAVEL_MCP_REFRESH);
+  const due = force || !manifest || now - manifest.checkedAt >= refreshTtlMs();
+  if (!due) return;
+
+  const token = process.env.HF_TOKEN;
+  try {
+    const { commit: remoteCommit } = await headMeta(RUNTIME_FILES[0], token);
+    if (!remoteCommit) return; // can't determine freshness → keep serving cache
+
+    if (manifest && manifest.repoCommit === remoteCommit) {
+      await writeSyncManifest(cacheDir, { ...manifest, checkedAt: now });
+      return;
+    }
+
+    const remoteEtags = await headAllEtags(token);
+
+    if (!manifest) {
+      // First run against an already-populated cache: trust the files on disk
+      // and record a baseline so future checks can diff against it.
+      await writeSyncManifest(cacheDir, {
+        repoCommit: remoteCommit,
+        checkedAt: now,
+        etags: remoteEtags,
+      });
+      return;
+    }
+
+    const changed = RUNTIME_FILES.filter(
+      (rel) => remoteEtags[rel] && remoteEtags[rel] !== manifest.etags[rel],
+    );
+    if (changed.length > 0) {
+      process.stderr.write(
+        `[japan-travel-mcp] dataset changed upstream (${manifest.repoCommit?.slice(0, 8) ?? "?"} → ${remoteCommit.slice(0, 8)}); refreshing ${changed.length} file(s)\n`,
+      );
+      const queue = [...changed];
+      const CONCURRENCY = Math.min(8, changed.length);
+      async function worker(): Promise<void> {
+        while (queue.length > 0) {
+          const rel = queue.shift();
+          if (!rel) return;
+          await downloadOne(rel, join(cacheDir, rel), token);
+        }
+      }
+      await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+    }
+
+    await writeSyncManifest(cacheDir, {
+      repoCommit: remoteCommit,
+      checkedAt: now,
+      etags: { ...manifest.etags, ...remoteEtags },
+    });
+  } catch (err) {
+    process.stderr.write(
+      `[japan-travel-mcp] dataset refresh check skipped: ${(err as Error).message}\n`,
+    );
+  }
+}
+
+async function ensureDataFromHfWithRefresh(): Promise<string> {
+  const root = await ensureDataFromHf();
+  await refreshFromHfIfStale();
+  return root;
+}
+
 /**
  * Resolve the data root for this run.
  *   - Local checkout with populated data/   → that path
@@ -203,7 +386,7 @@ export async function resolveDataRoot(repoRoot: string): Promise<string> {
   // tests that ship fixtures into a temp JAPAN_TRAVEL_MCP_CACHE dir aren't
   // shadowed by the developer's populated working copy.
   if (process.env.JAPAN_TRAVEL_MCP_SKIP_LOCAL) {
-    return ensureDataFromHf();
+    return ensureDataFromHfWithRefresh();
   }
   const local = findLocalDataIfPresent(repoRoot);
   if (local) {
