@@ -23,6 +23,8 @@ import {
   type Server as HttpServer,
   type ServerResponse,
 } from "node:http";
+import { realpathSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 // Re-use the exact tool registry + handler from the stdio entrypoint.
 // `src/index.ts` exports buildServer() + initDataRoot(); when imported (as
 // opposed to invoked via `node dist/src/index.js`), the stdio main() does
@@ -135,7 +137,18 @@ const LANDING_HTML = `<!doctype html>
 
 // Top-level entrypoint — only runs when this file is executed directly,
 // not when imported by the integration suite.
-const isMain = import.meta.url === `file://${process.argv[1]}`;
+// Resolve symlinks before comparing — see the matching note in src/index.ts.
+// A raw string compare misses any symlinked path component and the server
+// would never start.
+const isMain = (() => {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return import.meta.url === pathToFileURL(realpathSync(entry)).href;
+  } catch {
+    return false;
+  }
+})();
 if (isMain) {
   main().catch((err) => {
     console.error("[japan-travel-mcp/http] FATAL:", err);
