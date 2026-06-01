@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Type-check
+        run: npm run typecheck && npm run typecheck:all
+
       - name: Verify package.json version matches the tag
         if: github.event_name == 'push'
         run: |
@@ -51,6 +54,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Test
+        run: npm test
 
       - name: Sanity-check the tarball contents
         # We never want to ship tests/, scrapers/, or large data/ payloads.
