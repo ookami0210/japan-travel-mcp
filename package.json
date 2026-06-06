@@ -20,6 +20,7 @@
     "dev": "tsx watch src/index.ts",
     "scrape:municipality": "tsx scrapers/municipal/run.ts",
     "scrape:daily": "tsx scrapers/daily.ts",
+    "scrape:coverage": "tsx scrapers/coverage_check.ts",
     "scrape:pilot": "tsx scrapers/pilot.ts",
     "scrape:r3": "tsx scrapers/r3_refresh.ts",
     "translate:r3": "tsx scrapers/translate/translate_r3.ts",

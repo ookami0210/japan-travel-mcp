@@ -111,9 +111,26 @@ remains so a maintainer can smoke-test on demand.
 overlap).
 
 **Picker** (`scrapers/daily.ts` → `lib/state.ts:pickStaleMunicipalities`): selects
-the `DAILY_BATCH_SIZE` (default 70) oldest-by-`last_scraped_at` municipalities
-with a resolved official URL. 70/day × 28 days = 1,960 ≥ 1,938 — the picker
-self-tunes to keep every muni inside the 30-day window.
+the stalest-by-`last_scraped_at` municipalities with a resolved official URL.
+
+**Batch size is dynamic** (volume-adaptive, with a coverage feedback loop):
+
+1. `baselineBatchSize(candidateCount) = ceil(candidateCount / 28)`, clamped to
+   `[30, 130]`. This is purely a function of data volume, so the daily count
+   grows automatically as the dataset grows — no hand-tuning when the candidate
+   set changes. At today's ~1,938 candidates the baseline is ~70/day, which
+   touches every muni within 28 days (2-day grace under the 30-day target).
+2. After each run, `scrapers/coverage_check.ts` measures the *actual* stalest
+   age. If the stalest candidate is past the 33-day SLA (30 + grace) — e.g.
+   because runs were skipped or failed — it writes a scaled-up
+   `recommended_batch_size` into `scrape_state.json.coverage`, and `daily.ts`
+   honours it on the next run until the backlog clears, then relaxes back to
+   the baseline (no permanent ratchet — cost stays minimal once fresh).
+3. `DAILY_BATCH_SIZE` env still works as a manual override for ad-hoc runs.
+
+The 30-day target is a guideline, not a hard deadline: a day or two of slip is
+tolerated by design, and the verifier only spends extra crawl budget when the
+data genuinely falls behind.
 
 **Wall time**: 40–60 min/day (observed historical median = 47 min over the
 last successful run window).

@@ -19,7 +19,12 @@ import pLimit from "p-limit";
 import { scrapeOneMunicipality } from "./municipal/scrape_one.js";
 import { ErrorCounter } from "./lib/fetcher.js";
 import { notify } from "./lib/slack.js";
-import { loadState, saveState, pickStaleMunicipalities } from "./lib/state.js";
+import {
+  loadState,
+  saveState,
+  pickStaleMunicipalities,
+  baselineBatchSize,
+} from "./lib/state.js";
 import {
   DEFAULT_OPTIONS,
   type MunicipalityInput,
@@ -38,10 +43,14 @@ const CENTROIDS_PATH = new URL(
 const PREFECTURES_DIR = new URL("data/prefectures/", ROOT);
 const LOG_DIR = new URL("data/_logs/", ROOT);
 
-const DAILY_BATCH_SIZE = parseInt(
-  process.env.DAILY_BATCH_SIZE ?? "70",
-  10,
-);
+// Manual override only. Empty/unset → the size is derived dynamically from
+// the candidate count and the coverage verifier's recommendation (see main()).
+const DAILY_BATCH_OVERRIDE = (() => {
+  const raw = process.env.DAILY_BATCH_SIZE?.trim();
+  if (!raw) return null;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+})();
 
 const PREFECTURE_SLUGS: Record<string, string> = {
   "01": "hokkaido", "02": "aomori", "03": "iwate", "04": "miyagi",
@@ -144,7 +153,15 @@ async function main(): Promise<void> {
     .filter((m) => urlByCode.has(m.code))
     .map((m) => m.code);
 
-  const todayCodes = pickStaleMunicipalities(state, candidateCodes, DAILY_BATCH_SIZE);
+  // Batch size: explicit override > coverage verifier's recommendation >
+  // volume-derived baseline. The recommendation is refreshed each run by
+  // coverage_check.ts, which scales it up when the refresh falls behind SLA.
+  const batchSize =
+    DAILY_BATCH_OVERRIDE ??
+    state.coverage?.recommended_batch_size ??
+    baselineBatchSize(candidateCodes.length);
+
+  const todayCodes = pickStaleMunicipalities(state, candidateCodes, batchSize);
   const todayMunis = muniFile.municipalities.filter((m) =>
     todayCodes.includes(m.code),
   );
@@ -153,7 +170,9 @@ async function main(): Promise<void> {
   const limit = pLimit(opts.globalConcurrency);
 
   await notify(
-    `🌅 Daily scrape started — ${todayMunis.length} municipalities (batch size ${DAILY_BATCH_SIZE})`,
+    `🌅 Daily scrape started — ${todayMunis.length} municipalities (batch size ${batchSize}${
+      DAILY_BATCH_OVERRIDE ? ", manual override" : ""
+    })`,
   );
 
   const runStart = Date.now();
