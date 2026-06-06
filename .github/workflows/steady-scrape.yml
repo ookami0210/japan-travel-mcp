@@ -9,15 +9,15 @@
 # Concurrency: shares group `scrape` with burst-scrape.yml — they cannot
 # overlap; the steady cron is skipped while a burst is running.
 #
-# Pre-launch: the schedule block is commented. Enable at launch by
-# uncommenting the cron lines below.
+# Launched 2026-06-01: the daily schedule is active. A maintainer can still
+# trigger an ad-hoc run via workflow_dispatch (optionally overriding the muni
+# count).
 
 name: steady-scrape
 
 on:
-  # Launch switch: uncomment the next two lines when ready to ship.
-  # schedule:
-  #   - cron: "0 18 * * *"   # 03:00 JST = 18:00 UTC (previous day)
+  schedule:
+    - cron: "0 18 * * *"   # 03:00 JST = 18:00 UTC (previous day)
   workflow_dispatch:
     inputs:
       munis_per_day:
