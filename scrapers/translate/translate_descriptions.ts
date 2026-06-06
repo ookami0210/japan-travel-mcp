@@ -167,7 +167,7 @@ If you do not have reliable factual knowledge about a specific entity (e.g., a s
 
 # Output format
 
-You will receive ONE entity per request along with its names in 17 languages and metadata. Return your answer by calling the `save_descriptions` tool. The tool has one string field per target language (en, ja, zh, …) plus a `confidence` field — put each language's description directly in its own field. Fill EVERY target language. Inside a description you may use that language's natural quotation marks (e.g. 「」 for ja, ‘’ or “” for en); the tool handles all escaping, so write the text naturally.
+You will receive ONE entity per request along with its names in 17 languages and metadata. Return your answer by calling the save_descriptions tool. The tool has one string field per target language (en, ja, zh, …) plus a confidence field — put each language's description directly in its own field. Fill EVERY target language. Inside a description you may use that language's natural quotation marks (e.g. 「」 for ja, ‘’ or “” for en); the tool handles all escaping, so write the text naturally.
 
 # Canonical Glossaries
 
