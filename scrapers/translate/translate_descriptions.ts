@@ -419,12 +419,21 @@ async function processResults(
   // (max_tokens = truncation) and keep a few raw samples to inspect in the log.
   const stopReasons: Record<string, number> = {};
   const samples: string[] = [];
-  const recordFail = (qid: string, stop: string, text: string): void => {
+  const recordFail = (qid: string, stop: string, text: string, errMsg = ""): void => {
     parseFailed += 1;
     if (samples.length < 6) {
-      const head = text.slice(0, 240).replace(/\s+/g, " ");
-      const tail = text.slice(-120).replace(/\s+/g, " ");
-      samples.push(`    [${qid}] stop=${stop} len=${text.length} head="${head}" … tail="${tail}"`);
+      // Show the exact byte the parser choked on. JSON.parse error messages
+      // include "...at position N"; surface the raw window around N verbatim
+      // (NOT whitespace-collapsed) so the malformation is visible.
+      const posMatch = errMsg.match(/position (\d+)/);
+      let window = "";
+      if (posMatch) {
+        const n = parseInt(posMatch[1], 10);
+        window = JSON.stringify(text.slice(Math.max(0, n - 70), n + 70));
+      } else {
+        window = JSON.stringify(text.slice(0, 160));
+      }
+      samples.push(`    [${qid}] stop=${stop} len=${text.length} err="${errMsg}" window=${window}`);
     }
   };
   for await (const r of await client.messages.batches.results(batchId)) {
@@ -445,8 +454,8 @@ async function processResults(
     let parsed: DescriptionResult | null = null;
     try {
       parsed = extractJsonObject(textBlock.text) as DescriptionResult;
-    } catch {
-      recordFail(r.custom_id, stop, textBlock.text);
+    } catch (e) {
+      recordFail(r.custom_id, stop, textBlock.text, (e as Error).message);
       continue;
     }
     if (
