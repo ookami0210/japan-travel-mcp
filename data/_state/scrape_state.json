@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "last_run_at": "2026-04-27T20:03:34.516Z",
+  "last_run_at": "2026-06-06T07:03:34.825Z",
   "per_municipality": {
     "102016": {
       "last_scraped_at": "2026-04-26T01:00:28.613Z",
@@ -10916,11 +10916,11 @@
       "error_count": 1
     },
     "015504": {
-      "last_scraped_at": "2026-04-25T23:13:06.801Z",
+      "last_scraped_at": "2026-06-06T07:03:34.811Z",
       "last_status": "partial",
-      "pages_fetched": 26,
-      "spots_found": 25,
-      "error_count": 1
+      "pages_fetched": 31,
+      "spots_found": 29,
+      "error_count": 2
     },
     "015521": {
       "last_scraped_at": "2026-04-27T20:00:16.160Z",
@@ -10930,7 +10930,7 @@
       "error_count": 0
     },
     "015555": {
-      "last_scraped_at": "2026-04-25T23:12:46.190Z",
+      "last_scraped_at": "2026-06-06T07:01:10.130Z",
       "last_status": "success",
       "pages_fetched": 1,
       "spots_found": 1,
@@ -10951,11 +10951,11 @@
       "error_count": 1
     },
     "015610": {
-      "last_scraped_at": "2026-04-25T23:12:31.523Z",
+      "last_scraped_at": "2026-06-06T07:00:58.535Z",
       "last_status": "partial",
-      "pages_fetched": 21,
+      "pages_fetched": 25,
       "spots_found": 3,
-      "error_count": 18
+      "error_count": 22
     },
     "015628": {
       "last_scraped_at": "2026-04-25T23:14:14.941Z",
@@ -13433,5 +13433,12 @@
     "triggered": false,
     "reason": null,
     "triggered_at": null
+  },
+  "coverage": {
+    "recommended_batch_size": 102,
+    "last_check_at": "2026-06-06T07:03:36.384Z",
+    "max_age_days": 41.3,
+    "count_over_sla": 1929,
+    "never_scraped": 0
   }
 }
