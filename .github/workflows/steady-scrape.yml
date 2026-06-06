@@ -75,6 +75,15 @@ jobs:
         continue-on-error: true
         run: npx tsx scrapers/r3_refresh.ts
 
+      - name: Coverage verifier (auto-tune next batch; local-only, errors isolated)
+        # Measures dataset freshness against the 30-day SLA and writes a
+        # recommended batch size into scrape_state.json for the next run.
+        # Pure local computation — never fetches, so it cannot block the commit.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+        run: npx tsx scrapers/coverage_check.ts
+
       - name: Commit operational state (logs + scrape_state)
         # Only lightweight files committed in git get added here. Bulk data
         # (prefectures/*, hotels/master.json, translations/, embeddings/)
