@@ -148,7 +148,12 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Only consider municipalities that have a resolved official URL.
+  // Only consider municipalities that have a resolved official URL. A small,
+  // expected set is permanently excluded because no official municipal website
+  // exists to scrape — currently the six villages in the Nemuro Subprefecture
+  // disputed-islands range (codes 0169xx–0170xx). They are not a coverage gap:
+  // there is no site to fetch, so they are simply never candidates and never
+  // count against the refresh SLA.
   const candidateCodes = muniFile.municipalities
     .filter((m) => urlByCode.has(m.code))
     .map((m) => m.code);
