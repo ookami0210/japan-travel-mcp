@@ -242,6 +242,32 @@ async function loadExistingDescriptions(): Promise<Map<string, OutputRow>> {
   return map;
 }
 
+// Forcing the model to return its output as a tool call makes the API return
+// a validated, structurally-correct JSON object — eliminating the parse
+// failures caused by unescaped quotes the model put inside description text
+// (e.g. zh 引号 or de „…" rendered as raw ASCII " inside a string value).
+const DESCRIPTIONS_TOOL: Anthropic.Tool = {
+  name: "save_descriptions",
+  description:
+    "Save the tourism descriptions for the entity, one per target language.",
+  input_schema: {
+    type: "object",
+    properties: {
+      descriptions: {
+        type: "object",
+        description:
+          "Map of BCP-47 language code to a 200-400 character tourism description in that language.",
+        properties: Object.fromEntries(
+          TARGET_LANGUAGES.map((l) => [l, { type: "string" }]),
+        ),
+        required: [...TARGET_LANGUAGES],
+      },
+      confidence: { type: "string", enum: ["high", "medium", "low"] },
+    },
+    required: ["descriptions", "confidence"],
+  },
+};
+
 function buildBatchRequest(
   item: ToWrite,
   systemPrompt: string,
@@ -270,6 +296,8 @@ function buildBatchRequest(
       // generous headroom — you only pay for tokens actually generated, and the
       // prompt bounds each description to ~200-400 chars.
       max_tokens: 16384,
+      tools: [DESCRIPTIONS_TOOL],
+      tool_choice: { type: "tool", name: "save_descriptions" },
       system: [
         {
           type: "text",
@@ -295,7 +323,7 @@ ${namesBlock}
 
 Target languages: ${TARGET_LANGUAGES.join(", ")}
 
-Return JSON only.`,
+Provide every language by calling the save_descriptions tool.`,
         },
       ],
     },
@@ -444,25 +472,36 @@ async function processResults(
     const stop = r.result.message.stop_reason ?? "null";
     stopReasons[stop] = (stopReasons[stop] ?? 0) + 1;
     const content = r.result.message.content;
-    const textBlock = content.find(
-      (b): b is Anthropic.TextBlock => b.type === "text",
+    // The request forces a tool call, so the structured output arrives as a
+    // tool_use block whose `.input` is already a validated JSON object — no
+    // text parsing, no quote-escaping fragility.
+    const toolUse = content.find(
+      (b): b is Anthropic.ToolUseBlock => b.type === "tool_use",
     );
-    if (!textBlock) {
-      recordFail(r.custom_id, stop, "(no text block)");
-      continue;
-    }
     let parsed: DescriptionResult | null = null;
-    try {
-      parsed = extractJsonObject(textBlock.text) as DescriptionResult;
-    } catch (e) {
-      recordFail(r.custom_id, stop, textBlock.text, (e as Error).message);
-      continue;
+    if (toolUse) {
+      parsed = toolUse.input as DescriptionResult;
+    } else {
+      // Fallback for any non-tool response: tolerant text extraction.
+      const textBlock = content.find(
+        (b): b is Anthropic.TextBlock => b.type === "text",
+      );
+      if (!textBlock) {
+        recordFail(r.custom_id, stop, "(no tool_use or text block)");
+        continue;
+      }
+      try {
+        parsed = extractJsonObject(textBlock.text) as DescriptionResult;
+      } catch (e) {
+        recordFail(r.custom_id, stop, textBlock.text, (e as Error).message);
+        continue;
+      }
     }
     if (
       !parsed.descriptions ||
       typeof parsed.descriptions !== "object"
     ) {
-      recordFail(r.custom_id, stop, textBlock.text);
+      recordFail(r.custom_id, stop, JSON.stringify(parsed).slice(0, 200));
       continue;
     }
     parsed.qid = r.custom_id;
