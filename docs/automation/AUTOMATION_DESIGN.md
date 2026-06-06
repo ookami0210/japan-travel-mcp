@@ -43,7 +43,7 @@ until they reach `active`.
 | **R3** | chained inside `steady-scrape.yml` | day-of-week rotation (Mon/Tue/Wed/Thu) | +5–10 min | #5 / #6 / #7 / #8 / #9 |
 | **DMO** | `dmo-refresh.yml` | bi-weekly (1st + 15th) 04:00 JST | 30–60 min | #10 / #11 / #12 / #13 |
 | **WD-FOUNDATION + GLOSSARY + WIKIPEDIA-SUMMARY** | `wd-foundation.yml` (matrix) | monthly (1st of month) 05:00 JST | 30–180 min per matrix leg | #1–4, #15–22, #24, #25, #29–38 |
-| **EMBEDDINGS rebuild** | `embeddings-rebuild.yml` (`workflow_run`) | on successful `wd-foundation.yml` | 30–60 min | n/a (consumes upstream) |
+| **EMBEDDINGS rebuild** | `embeddings-rebuild.yml` (`workflow_run` + weekly cron) | on successful `wd-foundation.yml`, plus weekly (Sun 06:00 JST) | 30–60 min | n/a (consumes upstream) |
 | **BURST** (re-scrape) | `burst-scrape.yml` (manual + PR-label) | on demand | 4–12 h (6-batch matrix) | #23 (all munis) |
 | **TRANSLATE** | `translate.yml` (manual) | as needed | <30 min (submit; Anthropic Batch is async) | — (incremental translate of new R-3 rows) |
 
@@ -209,11 +209,19 @@ on:
     workflows: ["wd-foundation"]
     types: [completed]
     branches: [main]
+  schedule:
+    - cron: "0 21 * * 0"   # 06:00 JST every Sunday
   workflow_dispatch:
 ```
 
-Gated by `if: ${{ github.event.workflow_run.conclusion == 'success' }}` —
-embeddings only rebuild when the upstream refresh actually succeeded.
+Gated by `if` so the `workflow_run` path only rebuilds when the upstream
+refresh actually succeeded; the weekly `schedule` and manual `workflow_dispatch`
+paths always run. The weekly cadence exists because the daily MUNI scrape adds
+new spots that are invisible to semantic / hybrid search until the index is
+rebuilt — the monthly wd-foundation trigger alone would leave a new spot
+unsearchable for up to ~30 days, so the weekly run caps that at ~7 days. The
+rebuild uses a local embedding model (no API cost). A future incremental
+builder (Phase C below) would replace the full weekly rebuild with an append.
 
 **Steps**: prefetch full corpus from HF (state + all 47 prefecture files +
 r3/*), run `scrapers/embed/build_embeddings.ts`, push embeddings index back to HF.

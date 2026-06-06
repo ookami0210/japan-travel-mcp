@@ -1,8 +1,15 @@
 # Embeddings rebuild — fires automatically after a successful wd-foundation
-# refresh, or on demand via workflow_dispatch.
+# refresh, weekly to pick up new daily-scraped spots, or on demand.
 #
 # Pulls the full master corpus from HF, runs scrapers/embed/build_embeddings.ts,
 # and pushes the regenerated spots.{f16.bin,index.json} back to HF.
+#
+# Why weekly in addition to the wd-foundation trigger: the daily MUNI scrape
+# adds new spots continuously, but those are invisible to search_semantic /
+# search_hybrid until the index is rebuilt. The monthly wd-foundation trigger
+# alone would leave a new spot unsearchable for up to ~30 days; the weekly cron
+# caps that staleness at ~7 days. The rebuild uses a local model (no API cost),
+# so the only cost is free public-repo runner minutes.
 #
 # Design: docs/automation/AUTOMATION_DESIGN.md
 # Concurrency: own group `embeddings` — only one rebuild at a time.
@@ -14,6 +21,8 @@ on:
     workflows: ["wd-foundation"]
     types: [completed]
     branches: [main]
+  schedule:
+    - cron: "0 21 * * 0"   # 06:00 JST every Sunday
   workflow_dispatch:
 
 concurrency:
@@ -27,9 +36,11 @@ jobs:
   rebuild:
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    # Only fire after a successful upstream wd-foundation run.
+    # Fire on the weekly cron, on manual dispatch, or after a *successful*
+    # upstream wd-foundation run (skip when wd-foundation failed).
     if: |
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
       github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4

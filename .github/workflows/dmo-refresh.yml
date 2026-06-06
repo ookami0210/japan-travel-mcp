@@ -80,7 +80,19 @@ jobs:
             echo "No state changes to commit"
           else
             git commit -m "data: dmo refresh $(date -u +%Y-%m-%d)"
-            git push
+            # Rebase + retry so a concurrent push to main doesn't fail the run.
+            pushed=""
+            for attempt in 1 2 3; do
+              if git pull --rebase origin main && git push; then
+                pushed="yes"; break
+              fi
+              echo "push attempt $attempt failed — retrying in 5s"
+              sleep 5
+            done
+            if [ -z "$pushed" ]; then
+              echo "::error::failed to push state after 3 attempts"
+              exit 1
+            fi
           fi
 
       - name: Sync DMO outputs to HF
