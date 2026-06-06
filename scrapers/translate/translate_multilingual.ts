@@ -39,6 +39,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { extractJsonObject } from "./lib/parse.js";
 
 const ROOT = new URL("../../", import.meta.url);
 const WP_MULTI_PATH = new URL(
@@ -430,9 +431,7 @@ async function processResults(
     }
     let parsed: TranslationResult | null = null;
     try {
-      const m = textBlock.text.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error("no JSON");
-      parsed = JSON.parse(m[0]) as TranslationResult;
+      parsed = extractJsonObject(textBlock.text) as TranslationResult;
     } catch {
       parseFailed += 1;
       continue;

@@ -45,6 +45,7 @@ import {
   mergeRows,
   type ExistingRow,
 } from "./lib/incremental.js";
+import { extractJsonObject } from "./lib/parse.js";
 
 const ROOT = new URL("../../", import.meta.url);
 const NAMES_PATH = new URL(
@@ -443,9 +444,7 @@ async function processResults(
     }
     let parsed: DescriptionResult | null = null;
     try {
-      const m = textBlock.text.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error("no JSON");
-      parsed = JSON.parse(m[0]) as DescriptionResult;
+      parsed = extractJsonObject(textBlock.text) as DescriptionResult;
     } catch {
       recordFail(r.custom_id, stop, textBlock.text);
       continue;
