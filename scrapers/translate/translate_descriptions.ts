@@ -414,17 +414,31 @@ async function processResults(
   let succeeded = 0,
     errored = 0,
     parseFailed = 0;
+  // Diagnostics: why do results fail to parse? Track the model's stop_reason
+  // (max_tokens = truncation) and keep a few raw samples to inspect in the log.
+  const stopReasons: Record<string, number> = {};
+  const samples: string[] = [];
+  const recordFail = (qid: string, stop: string, text: string): void => {
+    parseFailed += 1;
+    if (samples.length < 6) {
+      const head = text.slice(0, 240).replace(/\s+/g, " ");
+      const tail = text.slice(-120).replace(/\s+/g, " ");
+      samples.push(`    [${qid}] stop=${stop} len=${text.length} head="${head}" … tail="${tail}"`);
+    }
+  };
   for await (const r of await client.messages.batches.results(batchId)) {
     if (r.result.type !== "succeeded") {
       errored += 1;
       continue;
     }
+    const stop = r.result.message.stop_reason ?? "null";
+    stopReasons[stop] = (stopReasons[stop] ?? 0) + 1;
     const content = r.result.message.content;
     const textBlock = content.find(
       (b): b is Anthropic.TextBlock => b.type === "text",
     );
     if (!textBlock) {
-      parseFailed += 1;
+      recordFail(r.custom_id, stop, "(no text block)");
       continue;
     }
     let parsed: DescriptionResult | null = null;
@@ -433,14 +447,14 @@ async function processResults(
       if (!m) throw new Error("no JSON");
       parsed = JSON.parse(m[0]) as DescriptionResult;
     } catch {
-      parseFailed += 1;
+      recordFail(r.custom_id, stop, textBlock.text);
       continue;
     }
     if (
       !parsed.descriptions ||
       typeof parsed.descriptions !== "object"
     ) {
-      parseFailed += 1;
+      recordFail(r.custom_id, stop, textBlock.text);
       continue;
     }
     parsed.qid = r.custom_id;
@@ -455,7 +469,9 @@ async function processResults(
     succeeded += 1;
   }
   process.stderr.write(
-    `[descriptions] results: succeeded=${succeeded}, errored=${errored}, parse_failed=${parseFailed}\n`,
+    `[descriptions] results: succeeded=${succeeded}, errored=${errored}, parse_failed=${parseFailed}\n` +
+      `[descriptions] stop_reasons: ${JSON.stringify(stopReasons)}\n` +
+      (samples.length ? `[descriptions] parse-fail samples:\n${samples.join("\n")}\n` : ""),
   );
   return out;
 }
