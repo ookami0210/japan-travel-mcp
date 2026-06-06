@@ -8,14 +8,14 @@
 # Independent of MUNI (different domains, no shared rate-limit budget).
 # Concurrency group `dmo` so two DMO runs cannot overlap.
 #
-# Pre-launch: schedule block is commented. Enable at launch by uncommenting.
+# Launched 2026-06-01: the bi-weekly schedule is active (workflow_dispatch
+# still available for ad-hoc runs).
 
 name: dmo-refresh
 
 on:
-  # Launch switch: uncomment the next two lines when ready to ship.
-  # schedule:
-  #   - cron: "0 19 1,15 * *"   # 04:00 JST on the 1st and 15th of each month
+  schedule:
+    - cron: "0 19 1,15 * *"   # 04:00 JST on the 1st and 15th of each month
   workflow_dispatch:
 
 concurrency:

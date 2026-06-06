@@ -10,14 +10,14 @@
 # Design: docs/automation/AUTOMATION_DESIGN.md
 # Concurrency: own group `wd-foundation` (independent of MUNI / DMO).
 #
-# Pre-launch: schedule block is commented. Enable at launch by uncommenting.
+# Launched 2026-06-01: the monthly schedule is active (workflow_dispatch
+# still available for ad-hoc runs).
 
 name: wd-foundation
 
 on:
-  # Launch switch: uncomment the next two lines when ready to ship.
-  # schedule:
-  #   - cron: "0 20 1 * *"   # 05:00 JST on the 1st of each month
+  schedule:
+    - cron: "0 20 1 * *"   # 05:00 JST on the 1st of each month
   workflow_dispatch:
     inputs:
       legs:
