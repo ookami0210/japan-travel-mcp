@@ -167,18 +167,7 @@ If you do not have reliable factual knowledge about a specific entity (e.g., a s
 
 # Output format
 
-You will receive ONE entity per request along with its names in 17 languages and metadata. Respond with valid JSON exactly matching:
-{
-  "qid": "<copy from input>",
-  "descriptions": {
-    "en": "<English description>",
-    "ja": "<Japanese description>",
-    ...
-  },
-  "confidence": "high" | "medium" | "low"
-}
-
-Include EXACTLY the requested target languages. JSON only — no preamble, no trailing prose.
+You will receive ONE entity per request along with its names in 17 languages and metadata. Return your answer by calling the `save_descriptions` tool. The tool has one string field per target language (en, ja, zh, …) plus a `confidence` field — put each language's description directly in its own field. Fill EVERY target language. Inside a description you may use that language's natural quotation marks (e.g. 「」 for ja, ‘’ or “” for en); the tool handles all escaping, so write the text naturally.
 
 # Canonical Glossaries
 
@@ -246,25 +235,26 @@ async function loadExistingDescriptions(): Promise<Map<string, OutputRow>> {
 // a validated, structurally-correct JSON object — eliminating the parse
 // failures caused by unescaped quotes the model put inside description text
 // (e.g. zh 引号 or de „…" rendered as raw ASCII " inside a string value).
+// Flat schema (one string field per language) rather than a nested
+// `descriptions` object: with the nested shape the model sometimes serialised
+// the whole object into a single JSON *string*, which then failed our type
+// check. A flat set of string fields removes that temptation.
 const DESCRIPTIONS_TOOL: Anthropic.Tool = {
   name: "save_descriptions",
   description:
-    "Save the tourism descriptions for the entity, one per target language.",
+    "Save the tourism descriptions for the entity — one field per target language.",
   input_schema: {
     type: "object",
     properties: {
-      descriptions: {
-        type: "object",
-        description:
-          "Map of BCP-47 language code to a 200-400 character tourism description in that language.",
-        properties: Object.fromEntries(
-          TARGET_LANGUAGES.map((l) => [l, { type: "string" }]),
-        ),
-        required: [...TARGET_LANGUAGES],
-      },
+      ...Object.fromEntries(
+        TARGET_LANGUAGES.map((l) => [
+          l,
+          { type: "string", description: `Tourism description in ${l} (200-400 chars).` },
+        ]),
+      ),
       confidence: { type: "string", enum: ["high", "medium", "low"] },
     },
-    required: ["descriptions", "confidence"],
+    required: [...TARGET_LANGUAGES, "confidence"],
   },
 };
 
@@ -478,9 +468,9 @@ async function processResults(
     const toolUse = content.find(
       (b): b is Anthropic.ToolUseBlock => b.type === "tool_use",
     );
-    let parsed: DescriptionResult | null = null;
+    let raw: Record<string, unknown> | null = null;
     if (toolUse) {
-      parsed = toolUse.input as DescriptionResult;
+      raw = toolUse.input as Record<string, unknown>;
     } else {
       // Fallback for any non-tool response: tolerant text extraction.
       const textBlock = content.find(
@@ -491,27 +481,42 @@ async function processResults(
         continue;
       }
       try {
-        parsed = extractJsonObject(textBlock.text) as DescriptionResult;
+        raw = extractJsonObject(textBlock.text) as Record<string, unknown>;
       } catch (e) {
         recordFail(r.custom_id, stop, textBlock.text, (e as Error).message);
         continue;
       }
     }
-    if (
-      !parsed.descriptions ||
-      typeof parsed.descriptions !== "object"
-    ) {
-      recordFail(r.custom_id, stop, JSON.stringify(parsed).slice(0, 200));
+    // Normalise into { descriptions: {lang: text}, confidence }. The flat tool
+    // puts each language at the top level; tolerate the older nested shapes too
+    // (object, or a JSON-string the model occasionally emitted).
+    const descriptions: Record<string, string> = {};
+    let nested = raw.descriptions;
+    if (typeof nested === "string") {
+      try { nested = JSON.parse(nested); } catch { /* leave as-is */ }
+    }
+    if (nested && typeof nested === "object") {
+      for (const [k, v] of Object.entries(nested as Record<string, unknown>)) {
+        if (typeof v === "string") descriptions[k] = v;
+      }
+    } else {
+      for (const l of TARGET_LANGUAGES) {
+        if (typeof raw[l] === "string") descriptions[l] = raw[l] as string;
+      }
+    }
+    if (Object.keys(descriptions).length === 0) {
+      recordFail(r.custom_id, stop, JSON.stringify(raw).slice(0, 200));
       continue;
     }
-    parsed.qid = r.custom_id;
-    if (!parsed.confidence) parsed.confidence = "medium";
-    // Strip any non-language keys the LLM may have leaked into descriptions
-    // (e.g. "confidence" appearing both at the top level and inside the map).
+    // Keep only valid language keys (drop any stray fields like "confidence").
     const validLangs = new Set<string>(TARGET_LANGUAGES);
-    parsed.descriptions = Object.fromEntries(
-      Object.entries(parsed.descriptions).filter(([k]) => validLangs.has(k)),
-    );
+    const parsed: DescriptionResult = {
+      qid: r.custom_id,
+      descriptions: Object.fromEntries(
+        Object.entries(descriptions).filter(([k]) => validLangs.has(k)),
+      ),
+      confidence: (raw.confidence as string) ?? "medium",
+    };
     out.push(parsed);
     succeeded += 1;
   }
