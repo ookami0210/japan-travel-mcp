@@ -17,6 +17,12 @@
  *   data/translations/descriptions_complete.jsonl
  *   data/_state/translation_batch_descriptions.json
  *
+ * Incremental by default: only entities that are new, whose source content
+ * changed (detected via a stored content hash), or whose stored output is
+ * missing a target language are (re)translated. Existing rows are preserved
+ * on write — a partial run never truncates the corpus. Set FULL_RETRANSLATE=1
+ * to force the whole corpus (e.g. after a prompt/glossary overhaul).
+ *
  * Run:
  *   ANTHROPIC_API_KEY=... npx tsx scrapers/translate/translate_descriptions.ts
  *
@@ -33,6 +39,12 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  hashSource,
+  isStale,
+  mergeRows,
+  type ExistingRow,
+} from "./lib/incremental.js";
 
 const ROOT = new URL("../../", import.meta.url);
 const NAMES_PATH = new URL(
@@ -181,6 +193,52 @@ interface ToWrite {
   types: string[];
   coordinates: { lat: number; lng: number } | null;
   existing_description_en: string | null;
+}
+
+/**
+ * Fingerprint of the source fields that determine an entity's descriptions.
+ * Mirrors exactly what `buildBatchRequest` feeds the model, so the hash
+ * changes only when the generated output would actually change.
+ */
+function descriptionSourceHash(item: ToWrite): string {
+  return hashSource({
+    names: item.names,
+    prefecture_code: item.prefecture_code,
+    admin_name: item.admin_name,
+    types: item.types,
+    coordinates: item.coordinates,
+    existing_description_en: item.existing_description_en,
+  });
+}
+
+/** A row as persisted in descriptions_complete.jsonl. */
+interface OutputRow extends ExistingRow {
+  qid: string;
+  descriptions: Record<string, string>;
+  confidence?: string;
+  source?: string;
+  model?: string;
+  generated_at?: string;
+  domain?: string;
+  source_hash?: string;
+}
+
+async function loadExistingDescriptions(): Promise<Map<string, OutputRow>> {
+  const map = new Map<string, OutputRow>();
+  const path = fileURLToPath(OUTPUT_JSONL);
+  if (!existsSync(path)) return map;
+  const text = await readFile(path, "utf8");
+  for (const line of text.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const row = JSON.parse(trimmed) as OutputRow;
+      if (row.qid) map.set(row.qid, row);
+    } catch {
+      /* skip malformed line */
+    }
+  }
+  return map;
 }
 
 function buildBatchRequest(
@@ -401,22 +459,33 @@ async function processResults(
 // ──────────────────────────────────────────────────────────────────────
 // Write back
 
-async function writeBack(results: DescriptionResult[]): Promise<void> {
-  const lines = results.map((r) =>
-    JSON.stringify({
-      qid: r.qid,
-      descriptions: r.descriptions,
-      confidence: r.confidence,
-      source: "ai_generated",
-      model: MODEL,
-      generated_at: new Date().toISOString(),
-      domain: "japan_tourism_attraction",
-    }),
-  );
+/**
+ * Merge freshly-translated rows into the existing corpus and write the whole
+ * file. Untouched entries are preserved (the previous implementation truncated
+ * the file to only the rows in the current run, which silently dropped every
+ * entity not re-translated). Legacy rows with no stored hash are backfilled.
+ */
+async function writeBack(
+  results: DescriptionResult[],
+  existing: Map<string, OutputRow>,
+  hashByQid: Map<string, string>,
+): Promise<void> {
+  const freshRows: OutputRow[] = results.map((r) => ({
+    qid: r.qid,
+    descriptions: r.descriptions,
+    confidence: r.confidence,
+    source: "ai_generated",
+    model: MODEL,
+    generated_at: new Date().toISOString(),
+    domain: "japan_tourism_attraction",
+    source_hash: hashByQid.get(r.qid),
+  }));
+  const merged = mergeRows(existing, freshRows, hashByQid);
+  const lines = merged.map((r) => JSON.stringify(r));
   await mkdir(dirname(fileURLToPath(OUTPUT_JSONL)), { recursive: true });
   await writeFile(fileURLToPath(OUTPUT_JSONL), lines.join("\n") + "\n", "utf8");
   process.stderr.write(
-    `[descriptions] descriptions_complete.jsonl: ${lines.length} rows\n`,
+    `[descriptions] descriptions_complete.jsonl: ${lines.length} rows (${freshRows.length} updated this run)\n`,
   );
 }
 
@@ -434,9 +503,26 @@ async function main(): Promise<void> {
   const attractions = await loadAttractions();
   const items = selectForWriting(names, attractions);
 
+  // Incremental selection: translate only entities that are new or whose
+  // source content changed since the stored translation. FULL_RETRANSLATE=1
+  // forces the whole corpus (rarely needed — e.g. a prompt/glossary overhaul).
+  const existing = await loadExistingDescriptions();
+  const hashByQid = new Map(items.map((it) => [it.qid, descriptionSourceHash(it)]));
+  const forceFull = process.env.FULL_RETRANSLATE === "1";
+  const stale = forceFull
+    ? items
+    : items.filter((it) =>
+        isStale(hashByQid.get(it.qid)!, existing.get(it.qid), TARGET_LANGUAGES),
+      );
+  process.stderr.write(
+    `[descriptions] entities: ${items.length}, already current: ${
+      items.length - stale.length
+    }, to (re)translate: ${stale.length}${forceFull ? " (FULL_RETRANSLATE)" : ""}\n`,
+  );
+
   // Cost estimate
   const limit = parseInt(process.env.AI_LIMIT ?? "0", 10);
-  const target = limit > 0 ? items.slice(0, limit) : items;
+  const target = limit > 0 ? stale.slice(0, limit) : stale;
   const estInputPerReq = 5500;
   const estOutputPerReq = 1700;
   const cacheRatio = 0.05;
@@ -451,6 +537,17 @@ async function main(): Promise<void> {
 
   if (isDryRun) {
     process.stderr.write("[descriptions] DRY_RUN=1 — exiting\n");
+    return;
+  }
+
+  // Nothing to translate: still rewrite the file so legacy rows get their
+  // source hash backfilled (no API spend), making the next run a clean no-op.
+  if (target.length === 0 && !isResume) {
+    process.stderr.write(
+      "[descriptions] nothing new or changed — backfilling hashes, no API calls\n",
+    );
+    await writeBack([], existing, hashByQid);
+    process.stderr.write("[descriptions] done\n");
     return;
   }
 
@@ -491,7 +588,7 @@ async function main(): Promise<void> {
   process.stderr.write(
     `[descriptions] aggregated ${allResults.length} description rows across ${batchIds.length} batch(es)\n`,
   );
-  await writeBack(allResults);
+  await writeBack(allResults, existing, hashByQid);
   process.stderr.write("[descriptions] done\n");
 }
 

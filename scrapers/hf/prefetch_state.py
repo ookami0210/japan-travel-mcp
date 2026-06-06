@@ -78,6 +78,18 @@ PRESETS: dict[str, list[str]] = {
         "r3/bunka_intangible.json",
         "r3/unesco_japan.json",
     ],
+    # translations-refresh.yml — incremental 17-language names + descriptions.
+    # Needs the glossary/style inputs, the attractions corpus (entity context),
+    # and the existing outputs so the incremental pass only translates new or
+    # changed entities instead of the whole corpus.
+    "translations": [
+        "_state/wikidata_attractions.json",
+        "glossary/wikipedia_multilingual.json",
+        "glossary/seed_canonical.json",
+        "glossary/mlit_canonical.json",
+        "translations/multilingual_complete.jsonl",
+        "translations/descriptions_complete.jsonl",
+    ],
     # burst-scrape.yml — same as steady, kept here for shared invocation.
     "burst": [
         "_state/municipalities.json",

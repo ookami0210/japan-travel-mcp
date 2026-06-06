@@ -45,7 +45,8 @@ until they reach `active`.
 | **WD-FOUNDATION + GLOSSARY + WIKIPEDIA-SUMMARY** | `wd-foundation.yml` (matrix) | monthly (1st of month) 05:00 JST | 30–180 min per matrix leg | #1–4, #15–22, #24, #25, #29–38 |
 | **EMBEDDINGS rebuild** | `embeddings-rebuild.yml` (`workflow_run` + weekly cron) | on successful `wd-foundation.yml`, plus weekly (Sun 06:00 JST) | 30–60 min | n/a (consumes upstream) |
 | **BURST** (re-scrape) | `burst-scrape.yml` (manual + PR-label) | on demand | 4–12 h (6-batch matrix) | #23 (all munis) |
-| **TRANSLATE** | `translate.yml` (manual) | as needed | <30 min (submit; Anthropic Batch is async) | — (incremental translate of new R-3 rows) |
+| **TRANSLATIONS** (names + descriptions) | `translations-refresh.yml` (`workflow_run` on `wd-foundation` + manual) | monthly (after wd-foundation) | minutes (incremental delta) | — (17-lang names + descriptions for new/changed entities) |
+| **TRANSLATE** (legacy EN names) | `translate.yml` (manual) | as needed | <30 min (submit; Anthropic Batch is async) | — (fills missing EN attraction names) |
 
 > SEASONAL (#P9) and EVENTS (#P4/#P10/#P14) channels remain unscheduled — their
 > fetchers are still `planned` in DATA_SOURCES.md. Add a row to the table here
@@ -232,9 +233,29 @@ Unchanged from v1 design. Manual `workflow_dispatch` (with `mode=shallow|full`,
 `parallelism=1..6`, `resume_from_hf=false|true`) or PR-label `burst-required`.
 6-batch matrix; shares `concurrency: scrape` so it cannot overlap with steady.
 
+### `translations-refresh.yml` — incremental names + descriptions (after WD-FOUNDATION)
+
+**Trigger**: `workflow_run` on a successful `wd-foundation` run (new Wikidata
+attractions are the source of new translatable entities), plus manual dispatch.
+
+**Steps**: prefetch the glossary/style inputs + attractions corpus + the
+existing translation outputs from HF; run `translate_multilingual.ts` (17-lang
+names) then `translate_descriptions.ts` (17-lang descriptions); push the updated
+`translations/` back to HF.
+
+**Incremental**: descriptions are selected by a stored content hash — only new
+entities, entities whose source fields changed, or rows missing a target
+language are sent to the Anthropic Batch API; the rest of the corpus is
+preserved untouched (the writer merges rather than truncating). Names are
+incremental by construction (only missing languages hit the model). So the
+monthly spend tracks the new-entity delta, not the whole dataset.
+`FULL_RETRANSLATE=1` (manual dispatch input) forces the full corpus.
+
+**Concurrency**: own group `translations`.
+
 ### Auxiliary workflows (unchanged)
 
-- `translate.yml` — manual Anthropic Batch translate pass.
+- `translate.yml` — manual Anthropic Batch translate pass (legacy EN names).
 - `validate-data-sources.yml` — PR validator (CI gate).
 - `no-internal-leakage.yml` — voice-policy enforcement on PRs.
 - `publish.yml` — tag-driven npm release.

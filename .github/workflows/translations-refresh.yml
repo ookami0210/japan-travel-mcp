@@ -1,0 +1,104 @@
+# Translations refresh — incremental 17-language names + descriptions.
+#
+# Fires after a successful wd-foundation run (that's when new Wikidata
+# attractions — and therefore new entities needing translation — land), or
+# on demand. Both passes are incremental: they translate only entities that
+# are new, whose source content changed, or whose stored output is missing a
+# language. The bulk of the corpus is untouched, so the Anthropic Batch spend
+# scales with the monthly delta, not the whole dataset.
+#
+# Pass order: names first (descriptions consume multilingual_complete.jsonl),
+# then descriptions.
+#
+# Design: docs/automation/AUTOMATION_DESIGN.md
+# Concurrency: own group `translations`.
+
+name: translations-refresh
+
+on:
+  workflow_run:
+    workflows: ["wd-foundation"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      full_retranslate:
+        description: "Set to 1 to force a full re-translation (rarely needed)"
+        required: false
+        default: ""
+
+concurrency:
+  group: translations
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 720 # Batch API is async; incremental deltas finish fast
+    # Fire on manual dispatch or after a *successful* wd-foundation run.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          python3 -m pip install --quiet huggingface_hub
+
+      - name: Prefetch translation inputs + existing outputs from HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+        run: python3 scrapers/hf/prefetch_state.py --preset translations
+
+      - name: Incremental 17-language names (errors isolated)
+        # translate_multilingual only sends AI requests for languages still
+        # missing per entity (most are filled free from Wikipedia sitelinks),
+        # so it is already incremental on cost. A names-pass outage must not
+        # block the descriptions pass, which can still repair existing names.
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        continue-on-error: true
+        run: npx tsx scrapers/translate/translate_multilingual.ts
+
+      - name: Incremental 17-language descriptions
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FULL_RETRANSLATE: ${{ github.event.inputs.full_retranslate }}
+        run: npx tsx scrapers/translate/translate_descriptions.ts
+
+      - name: Sync translations to Hugging Face dataset
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: open-travel/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        run: |
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Translations refresh $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — summary
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          STATUS="${{ job.status }}"
+          ICON="✅"
+          [ "$STATUS" != "success" ] && ICON="🚨"
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$ICON translations-refresh → $STATUS\"}" \
+            "$SLACK_WEBHOOK_URL" || true
