@@ -264,7 +264,11 @@ function buildBatchRequest(
     custom_id: item.qid,
     params: {
       model: MODEL,
-      max_tokens: 4096,
+      // 17 descriptions in token-dense scripts (ja/zh/ko/th/ar/hi) overflow a
+      // 4096 ceiling; the response truncates mid-JSON and fails to parse. Give
+      // generous headroom — you only pay for tokens actually generated, and the
+      // prompt bounds each description to ~200-400 chars.
+      max_tokens: 16384,
       system: [
         {
           type: "text",
