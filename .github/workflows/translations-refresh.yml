@@ -26,6 +26,10 @@ on:
         description: "Set to 1 to force a full re-translation (rarely needed)"
         required: false
         default: ""
+      ai_limit:
+        description: "Cap the number of entities translated this run (0 = no cap). Use a small value for a cheap diagnostic run."
+        required: false
+        default: "0"
 
 concurrency:
   group: translations
@@ -72,6 +76,7 @@ jobs:
         # block the descriptions pass, which can still repair existing names.
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AI_LIMIT: ${{ github.event.inputs.ai_limit }}
         continue-on-error: true
         run: npx tsx scrapers/translate/translate_multilingual.ts
 
@@ -79,6 +84,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FULL_RETRANSLATE: ${{ github.event.inputs.full_retranslate }}
+          AI_LIMIT: ${{ github.event.inputs.ai_limit }}
         run: npx tsx scrapers/translate/translate_descriptions.ts
 
       - name: Sync translations to Hugging Face dataset
