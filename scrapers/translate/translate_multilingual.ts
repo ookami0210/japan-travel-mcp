@@ -20,6 +20,10 @@
  *   data/translations/multilingual_complete.jsonl (final 17-lang dataset)
  *   data/_state/translation_batch_multilingual.json (batch ID for resume)
  *
+ * Incremental across runs: languages already present from a previous run's
+ * output are reused, so only genuinely-missing (qid, lang) pairs are sent to
+ * the model. On a mature corpus a re-run costs ~$0; cost tracks the delta.
+ *
  * Run:
  *   ANTHROPIC_API_KEY=... npx tsx scrapers/translate/translate_multilingual.ts
  *
@@ -146,28 +150,70 @@ async function loadGlossaries(): Promise<string> {
   return `# Seed Canonical Glossary (project house style)\n\n${seed}\n\n# MLIT Canonical Glossary (Japan Tourism Agency official terms)\n\n${mlit}`;
 }
 
+interface PriorRow {
+  translations: Record<string, string | null>;
+  sources: Record<string, string>;
+}
+
+/**
+ * Load the previous run's output so we don't re-translate languages we already
+ * have. Without this the script re-derives every (qid, lang) pair from scratch
+ * each run, re-spending on names it already filled. Returns an empty map on
+ * first run (file absent).
+ */
+async function loadExistingMultilingual(): Promise<Map<string, PriorRow>> {
+  const map = new Map<string, PriorRow>();
+  const path = fileURLToPath(OUTPUT_JSONL);
+  if (!existsSync(path)) return map;
+  const text = await readFile(path, "utf8");
+  for (const line of text.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const r = JSON.parse(trimmed) as {
+        qid: string;
+        translations?: Record<string, string | null>;
+        sources?: Record<string, string>;
+      };
+      if (r.qid) {
+        map.set(r.qid, {
+          translations: r.translations ?? {},
+          sources: r.sources ?? {},
+        });
+      }
+    } catch {
+      /* skip malformed line */
+    }
+  }
+  return map;
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // Select what to translate
 
 function selectForTranslation(
   pairs: MultilingualPair[],
   attractions: Map<string, Attraction>,
+  prior: Map<string, PriorRow>,
 ): ToTranslate[] {
   const out: ToTranslate[] = [];
   for (const p of pairs) {
     const ja = p.titles.ja;
     if (!ja) continue; // need a Japanese anchor
 
+    const priorRow = prior.get(p.qid);
     const existing: Record<string, string> = { ja };
     const missing: string[] = [];
     for (const lang of TARGET_LANGUAGES) {
       if (p.titles[lang]) {
-        existing[lang] = p.titles[lang]!;
+        existing[lang] = p.titles[lang]!; // from Wikipedia sitelinks
+      } else if (priorRow?.translations?.[lang]) {
+        existing[lang] = priorRow.translations[lang]!; // already filled last run
       } else {
         missing.push(lang);
       }
     }
-    if (missing.length === 0) continue; // fully covered
+    if (missing.length === 0) continue; // fully covered (sitelinks + prior run)
 
     const a = attractions.get(p.qid);
     const context = a
@@ -410,6 +456,7 @@ async function writeBack(
   selectedItems: ToTranslate[],
   pairs: MultilingualPair[],
   results: TranslationResult[],
+  prior: Map<string, PriorRow>,
 ): Promise<void> {
   const aiByQid = new Map<string, TranslationResult>();
   for (const r of results) aiByQid.set(r.qid, r);
@@ -425,6 +472,7 @@ async function writeBack(
   for (const p of pairs) {
     if (!p.titles.ja) continue;
     const ai = aiByQid.get(p.qid);
+    const priorRow = prior.get(p.qid);
     const merged: Record<string, string | null> = { ja: p.titles.ja };
     const sources: Record<string, string> = { ja: "wikipedia_sitelinks" };
     for (const lang of TARGET_LANGUAGES) {
@@ -434,6 +482,11 @@ async function writeBack(
       } else if (ai?.translations?.[lang]) {
         merged[lang] = ai.translations[lang];
         sources[lang] = "ai_translated";
+      } else if (priorRow?.translations?.[lang]) {
+        // Preserve a language filled by an earlier run (else it would be lost
+        // and have to be re-translated, defeating the incremental selection).
+        merged[lang] = priorRow.translations[lang];
+        sources[lang] = priorRow.sources?.[lang] ?? "ai_translated";
       } else {
         merged[lang] = null;
       }
@@ -469,7 +522,8 @@ async function main(): Promise<void> {
 
   const pairs = await loadWikipediaMultilingual();
   const attractions = await loadAttractions();
-  const items = selectForTranslation(pairs, attractions);
+  const prior = await loadExistingMultilingual();
+  const items = selectForTranslation(pairs, attractions, prior);
 
   // Coverage report (pre)
   const totalPairs = pairs.filter((p) => p.titles.ja).length;
@@ -510,7 +564,7 @@ async function main(): Promise<void> {
     process.stderr.write(
       "[translate-multi] nothing to translate — writing pass-through output\n",
     );
-    await writeBack([], pairs, []);
+    await writeBack([], pairs, [], prior);
     return;
   }
 
@@ -558,7 +612,7 @@ async function main(): Promise<void> {
   process.stderr.write(
     `[translate-multi] aggregated ${allResults.length} translation results across ${batchIds.length} batch(es)\n`,
   );
-  await writeBack(items, pairs, allResults);
+  await writeBack(items, pairs, allResults, prior);
   process.stderr.write("[translate-multi] done\n");
 }
 
