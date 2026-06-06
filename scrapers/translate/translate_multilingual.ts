@@ -289,7 +289,9 @@ function buildBatchRequest(
     custom_id: item.qid,
     params: {
       model: MODEL,
-      max_tokens: 1024,
+      // Headroom so a full set of token-dense (ja/zh/ko/th/ar/hi) name
+      // translations can't truncate mid-JSON and fail to parse.
+      max_tokens: 2048,
       system: [
         {
           type: "text",
