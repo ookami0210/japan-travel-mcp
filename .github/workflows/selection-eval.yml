@@ -1,0 +1,49 @@
+# Tool-selection eval — measures whether an LLM picks the right MCP tool for a
+# natural-language travel query (the "A-to-A SEO" layer, separate from answer
+# quality). Manual only. Needs ANTHROPIC_API_KEY; no Hugging Face data.
+
+name: selection-eval
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Model id for the selection step"
+        required: false
+        default: "claude-sonnet-4-6"
+
+concurrency:
+  group: selection-eval
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tool-selection eval
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SELECTION_MODEL: ${{ github.event.inputs.model }}
+        run: npx tsx eval/selection/run.ts
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selection-eval-report
+          path: eval/selection/REPORT.md
+          if-no-files-found: ignore

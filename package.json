@@ -35,6 +35,7 @@
     "scrape:dmo_websites": "tsx scrapers/sources/scrape_dmo_websites.ts",
     "embed:build": "tsx scrapers/embed/build_embeddings.ts",
     "quality:report": "tsx scrapers/quality/quality_report.ts",
+    "eval:selection": "tsx eval/selection/run.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:all": "tsc --project tsconfig.scrapers.json",
     "test": "vitest run",
