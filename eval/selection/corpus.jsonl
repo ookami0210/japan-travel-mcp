@@ -1,0 +1,44 @@
+{"query": "京都でおすすめの観光スポットを教えて", "expected": ["get_spots", "search_hybrid"]}
+{"query": "金沢にある旅館を探しています", "expected": ["get_hotels"]}
+{"query": "高野山の宿坊に泊まりたいんだけど", "expected": ["get_hotels"]}
+{"query": "清水寺へのアクセス方法は？", "expected": ["get_transport"]}
+{"query": "東京から京都までの新幹線の所要時間を知りたい", "expected": ["get_transport"]}
+{"query": "青森のお祭りを教えて", "expected": ["get_festivals", "get_events"]}
+{"query": "ねぶた祭りについて知りたい", "expected": ["get_festivals", "get_events"]}
+{"query": "清水寺の紹介文を英語で書いて", "expected": ["get_description"]}
+{"query": "金閣寺について詳しく説明して", "expected": ["get_description", "search_hybrid"]}
+{"query": "石川県の伝統工芸品には何がありますか", "expected": ["get_local_specialty"]}
+{"query": "岐阜の郷土料理が食べたい", "expected": ["get_local_food"]}
+{"query": "大阪のご当地グルメを教えて", "expected": ["get_local_food"]}
+{"query": "兵庫県の無形文化財を知りたい", "expected": ["get_traditional_arts"]}
+{"query": "日本遺産に登録されているストーリーを教えて", "expected": ["get_japan_heritage"]}
+{"query": "富士山の多言語表記（英語・中国語・韓国語）を教えて", "expected": ["get_multilingual"]}
+{"query": "白川郷という場所を探しています", "expected": ["search_area", "search_hybrid"]}
+{"query": "Q1068755 の詳細情報を教えて", "expected": ["get_entity_full"]}
+{"query": "Q1068755, Q1068756, Q1068757 の情報をまとめて取得して", "expected": ["get_entities_bulk"]}
+{"query": "京都→大阪→姫路→広島の3日間プランが移動時間的に現実的かチェックして", "expected": ["plan_feasibility_check"]}
+{"query": "観光地域づくり法人（DMO）の一覧が見たい", "expected": ["get_dmo"]}
+{"query": "雪景色が美しい山間の温泉地を探している", "expected": ["search_semantic", "search_hybrid"]}
+{"query": "子ども連れでも楽しめる屋内の遊び場のような場所", "expected": ["search_semantic", "search_hybrid"]}
+{"query": "奈良県でシカに会える公園", "expected": ["search_hybrid", "search_area", "get_spots"]}
+{"query": "沖縄のビーチでおすすめは？", "expected": ["get_spots", "search_hybrid"]}
+{"query": "広島県の地酒を知りたい", "expected": ["get_local_food", "get_local_specialty"]}
+{"query": "輪島塗について教えて", "expected": ["get_local_specialty", "get_traditional_arts"]}
+{"query": "What are good places to visit in Hokkaido?", "expected": ["get_spots", "search_hybrid"]}
+{"query": "Find me hotels in Hakone", "expected": ["get_hotels"]}
+{"query": "How do I get to Itsukushima Shrine?", "expected": ["get_transport"]}
+{"query": "Tell me about Himeji Castle in English", "expected": ["get_description", "search_hybrid"]}
+{"query": "What festivals happen in Tokushima?", "expected": ["get_festivals", "get_events"]}
+{"query": "regional specialties of Aomori prefecture", "expected": ["get_local_specialty"]}
+{"query": "Is this 5-day itinerary realistic? Tokyo, Nikko, Sendai, Aomori, Sapporo", "expected": ["plan_feasibility_check"]}
+{"query": "search for a place called Dotonbori", "expected": ["search_area", "search_hybrid"]}
+{"query": "give me the multilingual names for Tokyo Skytree", "expected": ["get_multilingual"]}
+{"query": "京都で泊まれる町家はある？", "expected": ["get_hotels"]}
+{"query": "歴史を感じられる古い宿場町を探している", "expected": ["search_semantic", "search_hybrid"]}
+{"query": "長野県の観光列車について", "expected": ["get_transport", "search_hybrid"]}
+{"query": "熊本の名物料理は何？", "expected": ["get_local_food"]}
+{"query": "祇園祭はいつ、どこで行われる？", "expected": ["get_festivals", "get_events"]}
+{"query": "鎌倉のお寺巡りでおすすめのスポット", "expected": ["get_spots", "search_hybrid"]}
+{"query": "Q42 の構造化データを1件だけ取得", "expected": ["get_entity_full"]}
+{"query": "日本三景について教えて", "expected": ["search_hybrid", "search_area", "get_description"]}
+{"query": "DMOが登録している観光地域を調べたい", "expected": ["get_dmo"]}
