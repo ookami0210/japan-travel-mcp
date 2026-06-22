@@ -1,0 +1,101 @@
+# Auto-fix on workflow failure.
+#
+# Fires when one of the watched workflows ends in `failure`. Pulls the
+# failed step logs + workflow yaml, asks Claude (via the Anthropic SDK)
+# to diagnose the root cause, and — when the diagnosis matches a small
+# whitelist of mechanical fixes — applies the fix, commits to main, and
+# posts a Slack notification.
+#
+# Safety model (read scripts/auto_fix.py for full details):
+#   tier 1 (auto-apply + push to main):
+#     - missing pip / npm dependency       → add to install line
+#     - timeout-minutes too low            → bump (capped at 350)
+#     - missing env var (secret already exists) → add `env:` to step
+#     - cascade-failure guard (graceful skip on missing dir/file)
+#   tier 2 (open PR, do NOT auto-merge):
+#     - anything else with high confidence
+#   tier 3 (Slack notification only, no code change):
+#     - low confidence, ambiguity, or touches secrets / scrape rate /
+#       editorial policy / data scope
+#
+# Hard caps:
+#   - at most 1 auto-fix commit per (workflow, day) — prevents loop storms
+#   - never touches: .githooks/, AGENT_VOICE_POLICY.md, DATA_POLICY.md,
+#     DATA_SOURCES.md, docs/EDITORIAL_POLICY.md, package.json version,
+#     any file under .github/workflows/auto-fix-on-failure.yml itself
+#   - rate limit: skip if the workflow has already auto-fix-attempted in
+#     the last 6 hours (avoid runaway on flaky upstream services)
+
+name: auto-fix-on-failure
+
+on:
+  workflow_run:
+    # Watched workflows. To extend, append to this list.
+    # Do NOT add this workflow itself.
+    workflows:
+      - "steady-scrape"
+      - "dmo-refresh"
+      - "wd-foundation"
+      - "embeddings-rebuild"
+      - "Translate (Sonnet 4.6 Batch)"
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      target_run_id:
+        description: "Workflow run id to analyse (manual replay)"
+        required: true
+
+concurrency:
+  group: auto-fix
+  cancel-in-progress: false
+
+permissions:
+  contents: write       # commit + push fixes to main
+  pull-requests: write  # for tier-2 PRs
+  actions: read         # read other workflow logs
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    # Only fire on actual failure (skip success / cancelled — cancelled is
+    # often human-initiated and re-running diagnosis adds noise).
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'failure'
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need full history so we can compare commits + push back.
+          fetch-depth: 0
+          # Use a token that can push to main and bypass branch protection
+          # only for this workflow's fix commits (signed by the bot).
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --quiet anthropic requests
+
+      - name: Run auto-fix orchestrator
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_RUN_ID: ${{ github.event.inputs.target_run_id || github.event.workflow_run.id }}
+          TARGET_WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          REPO: ${{ github.repository }}
+        run: python3 scripts/auto_fix.py
+
+      - name: Slack — fallback on orchestrator crash
+        # Only fires if the script itself crashed (the script handles its
+        # own Slack notifications when it succeeds or makes a tier-3 decision).
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"⚠️ auto-fix orchestrator crashed analysing run ${{ env.TARGET_RUN_ID }} — manual investigation needed\"}" \
+            "$SLACK_WEBHOOK_URL" || true
