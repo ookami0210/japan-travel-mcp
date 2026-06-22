@@ -377,7 +377,19 @@ async function main(): Promise<void> {
   try {
     ids = (await readdir(fileURLToPath(DMO_DIR))).filter((f) => !f.startsWith("."));
   } catch (e) {
-    throw new Error(`No data/dmo/ — run fetch_dmo_plans.py first. ${(e as Error).message}`);
+    // data/dmo/ is bootstrapped by fetch_dmo_plans.py. On a fresh CI runner
+    // where that step skipped (cadence guard) or failed (missing PDF parser
+    // deps), the directory may not exist. Treat as a no-op rather than
+    // crashing the whole workflow — the upstream step's failure mode is
+    // already surfaced by its own logs / Slack.
+    process.stderr.write(
+      `[dmo_web] data/dmo/ missing; skipping (upstream fetch_dmo_plans.py did not produce it). ${(e as Error).message}\n`,
+    );
+    return;
+  }
+  if (ids.length === 0) {
+    process.stderr.write(`[dmo_web] data/dmo/ is empty; nothing to scrape\n`);
+    return;
   }
   if (limit) ids = ids.slice(0, limit);
   process.stderr.write(`[dmo_web] processing ${ids.length} DMOs\n`);

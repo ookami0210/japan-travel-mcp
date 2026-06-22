@@ -45,7 +45,9 @@ jobs:
         run: npm ci
 
       - name: Install Python dependencies
-        run: python3 -m pip install --quiet huggingface_hub requests beautifulsoup4
+        # pdfplumber + pypdf — DMO 形成確立計画 PDF parsing (fetch_dmo*.py)
+        # anthropic       — Claude API for DMO website discovery (find_dmo_websites.py)
+        run: python3 -m pip install --quiet huggingface_hub requests beautifulsoup4 pdfplumber pypdf anthropic
 
       - name: Prefetch DMO state from HF
         env:
@@ -63,6 +65,9 @@ jobs:
         run: python3 scrapers/sources/fetch_dmo_plans.py
 
       - name: DMO website discovery (#12)
+        # Uses Claude API (Haiku) for the strict 'official' prompt; needs ANTHROPIC_API_KEY.
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         continue-on-error: true
         run: python3 scrapers/sources/find_dmo_websites.py
 
