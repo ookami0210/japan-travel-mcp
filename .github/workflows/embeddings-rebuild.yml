@@ -35,7 +35,11 @@ permissions:
 jobs:
   rebuild:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # ~185k entities × multilingual-e5-small q8 on a 2-core ubuntu runner
+    # does not fit in 90 min including model load + I/O serialization.
+    # 300 min sits comfortably under the GH Actions 6 h per-job hard cap;
+    # the rebuild uses a local model so the only cost is free public-repo runner minutes.
+    timeout-minutes: 300
     # Fire on the weekly cron, on manual dispatch, or after a *successful*
     # upstream wd-foundation run (skip when wd-foundation failed).
     if: |
