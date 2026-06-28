@@ -69,7 +69,12 @@ npm run build && node dist/src/index_http.js
 It listens on `PORT` (default `7860`, the HF Spaces convention) and honours the
 same `JAPAN_TRAVEL_MCP_CACHE` / `HF_TOKEN` env vars as the stdio entrypoint. The
 transport is stateless — a fresh MCP server is created per request — so
-concurrent clients don't share state.
+concurrent clients don't share state. A per-IP rate limit and access log guard
+the public endpoint (`JAPAN_TRAVEL_MCP_RATE_LIMIT`, default `120`/min).
+
+To stand this up on Google Cloud (Cloud Run or a small VM), see
+[`docs/deployment/HTTP_HOSTING.md`](docs/deployment/HTTP_HOSTING.md) — a
+copy-paste deploy walkthrough.
 
 ---
 
