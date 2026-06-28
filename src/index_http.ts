@@ -29,7 +29,7 @@ import { pathToFileURL } from "node:url";
 // `src/index.ts` exports buildServer() + initDataRoot(); when imported (as
 // opposed to invoked via `node dist/src/index.js`), the stdio main() does
 // not run — that branch is gated by `import.meta.url === file://argv[1]`.
-import { buildServer, initDataRoot } from "./index.js";
+import { buildServer, ensureDataReady } from "./index.js";
 
 /**
  * Build the HTTP request handler that routes /healthz, /, and /mcp.
@@ -79,8 +79,10 @@ export function createHttpHandler(
 }
 
 export async function main(): Promise<HttpServer> {
-  // Block until the data is available (cold start downloads from HF if needed).
-  await initDataRoot();
+  // Listen FIRST so /healthz and the MCP handshake answer immediately. The data
+  // bootstrap (a potentially large first-run HF download) runs in the
+  // background; individual tool calls await ensureDataReady() inside the shared
+  // handler, so a cold cache delays the first query rather than the whole boot.
   const port = Number(process.env.PORT ?? 7860);
 
   const httpServer = createServer(createHttpHandler(buildServer));
@@ -91,6 +93,14 @@ export async function main(): Promise<HttpServer> {
         `  POST /mcp        — Streamable HTTP MCP endpoint\n` +
         `  GET  /healthz    — liveness probe\n` +
         `  GET  /           — landing page`,
+    );
+  });
+
+  // Warm the data cache in the background so the first /mcp tool call is fast.
+  void ensureDataReady().catch((err) => {
+    console.error(
+      "[japan-travel-mcp/http] background data bootstrap failed (will retry on first query):",
+      (err as Error).message,
     );
   });
 
