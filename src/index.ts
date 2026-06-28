@@ -232,6 +232,35 @@ async function initDataRoot(): Promise<void> {
   DATA_ROOT = await resolveDataRoot(findPackageRoot());
 }
 
+// Single-flight, memoized data bootstrap.
+//
+// Why this exists: the first-run HF download can be hundreds of MB. If we block
+// `server.connect()` on it (as we used to), the MCP client never receives a
+// response to its `initialize` handshake until the download finishes — which on
+// a cold cache routinely exceeds the client's 60 s request timeout, so the
+// server shows up as "failed to load" even though nothing is actually wrong.
+//
+// Instead, both entrypoints connect/listen FIRST (so `initialize` + `tools/list`
+// answer instantly), kick off `ensureDataReady()` in the background to warm the
+// cache, and gate only *tool invocations* on it. The handshake no longer waits
+// on the network.
+let dataReadyPromise: Promise<void> | null = null;
+function ensureDataReady(): Promise<void> {
+  // Already initialised — e.g. the test suite calls initDataRoot() directly, or
+  // a previous bootstrap completed. Don't download twice.
+  if (DATA_ROOT) return Promise.resolve();
+  if (!dataReadyPromise) {
+    dataReadyPromise = initDataRoot().catch((err) => {
+      // Clear the memo so a later tool call can retry instead of being stuck
+      // with a permanently-rejected promise (e.g. a transient network blip on
+      // the very first request).
+      dataReadyPromise = null;
+      throw err;
+    });
+  }
+  return dataReadyPromise;
+}
+
 function dataRoot(): string {
   if (!DATA_ROOT) {
     throw new Error("data root not initialized — call initDataRoot() first");
@@ -12494,7 +12523,7 @@ const TOOLS = [
 // (src/index_http.ts) can reuse the exact same tool registry without
 // duplicating the switch table or the data-bootstrap logic.
 
-export { initDataRoot };
+export { initDataRoot, ensureDataReady };
 
 export function buildServer(): Server {
   const server = new Server(
@@ -12516,6 +12545,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: rawArgs } = request.params;
   const args = (rawArgs ?? {}) as Record<string, unknown>;
   try {
+    // Lazy data bootstrap: the handshake (initialize / tools/list) already
+    // succeeded without touching the network; only an actual tool call needs
+    // the dataset. On a cold cache the first call awaits the (possibly large)
+    // download here. Any failure surfaces as a normal tool error below rather
+    // than crashing the server.
+    await ensureDataReady();
     let result: unknown;
     switch (name) {
       case "search_area":
@@ -12845,10 +12880,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 // stdio entrypoint — only runs when this file is executed directly,
 // not when it is imported by src/index_http.ts.
 async function mainStdio(): Promise<void> {
-  await initDataRoot();
+  // Connect FIRST so the MCP `initialize` handshake completes immediately —
+  // before any (potentially large) first-run data download. Tool *calls* await
+  // ensureDataReady(); the handshake and tools/list do not.
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("[japan-travel-mcp] MCP server running on stdio");
+  // Warm the data cache in the background so the first query isn't a cold start.
+  void ensureDataReady().catch((err) => {
+    console.error(
+      "[japan-travel-mcp] background data bootstrap failed (will retry on first query):",
+      (err as Error).message,
+    );
+  });
 }
 
 // Resolve symlinks before comparing. The published bin is launched through
