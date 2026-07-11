@@ -17,7 +17,7 @@ name: steady-scrape
 
 on:
   schedule:
-    - cron: "0 18 * * *"   # 03:00 JST = 18:00 UTC (previous day)
+    - cron: "0 16 * * *"   # 01:00 JST = 16:00 UTC (previous day)
   workflow_dispatch:
     inputs:
       munis_per_day:
@@ -35,7 +35,10 @@ permissions:
 jobs:
   steady:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # Public repo → unlimited free Actions minutes. The scrape runs inside a
+    # 01:00–06:00 JST window; daily.ts self-limits to DAILY_SCRAPE_MINUTES and
+    # this job timeout leaves a tail for the commit + HF sync steps.
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
@@ -63,6 +66,9 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
+          # Scrape as many stale municipalities as fit in this budget, then stop
+          # so the R-3 / commit / HF-sync tail runs inside timeout-minutes.
+          DAILY_SCRAPE_MINUTES: "240"
         run: npx tsx scrapers/daily.ts
 
       - name: R-3 weekly rotation (chain; errors isolated)
