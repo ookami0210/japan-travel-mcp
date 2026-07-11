@@ -29,7 +29,94 @@ import { pathToFileURL } from "node:url";
 // `src/index.ts` exports buildServer() + initDataRoot(); when imported (as
 // opposed to invoked via `node dist/src/index.js`), the stdio main() does
 // not run — that branch is gated by `import.meta.url === file://argv[1]`.
-import { buildServer, initDataRoot } from "./index.js";
+import { buildServer, ensureDataReady } from "./index.js";
+
+// ── Operational hardening for a public, unauthenticated endpoint ───────
+//
+// Unlike the stdio transport (one process per user, no network surface), a
+// hosted /mcp endpoint is reachable by anyone. Two lightweight, dependency-free
+// guards make it safe to expose: a per-IP rate limit and a one-line-per-request
+// access log. Both are env-tunable; see docs/deployment/HTTP_HOSTING.md.
+
+export interface RateLimitOptions {
+  /** Max /mcp requests per IP per window. 0 disables limiting. */
+  limit: number;
+  /** Window length in milliseconds. */
+  windowMs: number;
+}
+
+export interface HttpHandlerOptions {
+  rate?: RateLimitOptions;
+  /** Structured access logger. Defaults to a stderr line; pass null to silence. */
+  log?: ((entry: AccessLogEntry) => void) | null;
+}
+
+export interface AccessLogEntry {
+  method: string | undefined;
+  url: string | undefined;
+  status: number;
+  durationMs: number;
+  ip: string;
+}
+
+function rateLimitFromEnv(): RateLimitOptions {
+  const limit = Number(process.env.JAPAN_TRAVEL_MCP_RATE_LIMIT ?? 120);
+  const windowMs = Number(process.env.JAPAN_TRAVEL_MCP_RATE_WINDOW_MS ?? 60_000);
+  return {
+    limit: Number.isFinite(limit) && limit >= 0 ? limit : 120,
+    windowMs: Number.isFinite(windowMs) && windowMs > 0 ? windowMs : 60_000,
+  };
+}
+
+/**
+ * Fixed-window, in-process per-key rate limiter. No external store — fine for a
+ * single instance; for a multi-instance deployment put a shared limiter (Cloud
+ * Armor, an API gateway) in front instead.
+ */
+export function makeRateLimiter(opts: RateLimitOptions) {
+  const hits = new Map<string, { count: number; resetAt: number }>();
+  let checks = 0;
+  return function check(
+    key: string,
+  ): { ok: true } | { ok: false; retryAfterSec: number } {
+    if (opts.limit === 0) return { ok: true }; // disabled
+    const now = Date.now();
+    // Periodically evict expired buckets so the map can't grow without bound.
+    if (++checks % 1000 === 0) {
+      for (const [k, v] of hits) if (now >= v.resetAt) hits.delete(k);
+    }
+    let e = hits.get(key);
+    if (!e || now >= e.resetAt) {
+      e = { count: 0, resetAt: now + opts.windowMs };
+      hits.set(key, e);
+    }
+    e.count += 1;
+    if (e.count > opts.limit) {
+      return {
+        ok: false,
+        retryAfterSec: Math.max(1, Math.ceil((e.resetAt - now) / 1000)),
+      };
+    }
+    return { ok: true };
+  };
+}
+
+/** Best-effort client IP: trust the first X-Forwarded-For hop (set by Cloud
+ *  Run / load balancers), else the socket peer. */
+function clientIp(req: IncomingMessage): string {
+  const xff = req.headers["x-forwarded-for"];
+  const raw = Array.isArray(xff) ? xff[0] : xff;
+  if (raw && raw.length > 0) return raw.split(",")[0].trim();
+  return req.socket.remoteAddress ?? "unknown";
+}
+
+function defaultAccessLog(entry: AccessLogEntry): void {
+  // Skip the health probe — Cloud Run hits it constantly and it's pure noise.
+  if (entry.url === "/healthz") return;
+  process.stderr.write(
+    `[japan-travel-mcp/http] ${entry.ip} ${entry.method} ${entry.url} ${entry.status} ${entry.durationMs}ms\n`,
+  );
+}
 
 /**
  * Build the HTTP request handler that routes /healthz, /, and /mcp.
@@ -39,12 +126,33 @@ import { buildServer, initDataRoot } from "./index.js";
  * an MCP `Server` can only be `connect()`ed to a single transport in its
  * lifetime, and `StreamableHTTPServerTransport` is created per request in
  * stateless mode.
+ *
+ * `opts` tunes the per-IP rate limit and access log; both default from env so
+ * the existing single-argument call sites (and tests) keep working unchanged.
  */
 export function createHttpHandler(
   mcpServerFactory: () => Server,
+  opts: HttpHandlerOptions = {},
 ): (req: IncomingMessage, res: ServerResponse) => Promise<void> {
+  const rateCheck = makeRateLimiter(opts.rate ?? rateLimitFromEnv());
+  const log = opts.log === undefined ? defaultAccessLog : opts.log;
+
   return async (req, res) => {
-    // Liveness probe (HF Spaces health check).
+    const start = Date.now();
+    if (log) {
+      const ipForLog = clientIp(req);
+      res.on("finish", () =>
+        log({
+          method: req.method,
+          url: req.url,
+          status: res.statusCode,
+          durationMs: Date.now() - start,
+          ip: ipForLog,
+        }),
+      );
+    }
+
+    // Liveness probe (HF Spaces / Cloud Run health check). Never rate-limited.
     if (req.method === "GET" && req.url === "/healthz") {
       res.writeHead(200, { "Content-Type": "text/plain" });
       res.end("ok");
@@ -61,6 +169,23 @@ export function createHttpHandler(
       res.end("not found — try /mcp");
       return;
     }
+
+    // Per-IP rate limit on the one route that does real work.
+    const verdict = rateCheck(clientIp(req));
+    if (!verdict.ok) {
+      res.writeHead(429, {
+        "Content-Type": "application/json",
+        "Retry-After": String(verdict.retryAfterSec),
+      });
+      res.end(
+        JSON.stringify({
+          error: "rate_limited",
+          retry_after_seconds: verdict.retryAfterSec,
+        }),
+      );
+      return;
+    }
+
     // Stateless mode: sessionIdGenerator: undefined disables session
     // tracking, so multiple concurrent clients don't share state. For high
     // traffic with session continuity, switch to stateful mode + a
@@ -79,18 +204,34 @@ export function createHttpHandler(
 }
 
 export async function main(): Promise<HttpServer> {
-  // Block until the data is available (cold start downloads from HF if needed).
-  await initDataRoot();
+  // Listen FIRST so /healthz and the MCP handshake answer immediately. The data
+  // bootstrap (a potentially large first-run HF download) runs in the
+  // background; individual tool calls await ensureDataReady() inside the shared
+  // handler, so a cold cache delays the first query rather than the whole boot.
   const port = Number(process.env.PORT ?? 7860);
+  const rate = rateLimitFromEnv();
 
-  const httpServer = createServer(createHttpHandler(buildServer));
+  const httpServer = createServer(createHttpHandler(buildServer, { rate }));
 
   httpServer.listen(port, () => {
+    const rateDesc =
+      rate.limit === 0
+        ? "disabled"
+        : `${rate.limit} req / ${Math.round(rate.windowMs / 1000)}s per IP`;
     console.error(
       `[japan-travel-mcp] HTTP MCP server listening on :${port}\n` +
         `  POST /mcp        — Streamable HTTP MCP endpoint\n` +
         `  GET  /healthz    — liveness probe\n` +
-        `  GET  /           — landing page`,
+        `  GET  /           — landing page\n` +
+        `  rate limit: ${rateDesc}`,
+    );
+  });
+
+  // Warm the data cache in the background so the first /mcp tool call is fast.
+  void ensureDataReady().catch((err) => {
+    console.error(
+      "[japan-travel-mcp/http] background data bootstrap failed (will retry on first query):",
+      (err as Error).message,
     );
   });
 

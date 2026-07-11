@@ -377,8 +377,18 @@ async function ensureDataFromHfWithRefresh(): Promise<string> {
 
 /**
  * Resolve the data root for this run.
- *   - Local checkout with populated data/   → that path
- *   - Otherwise                              → HF cache (download if missing)
+ *   - Local checkout with populated data/   → that path (dev; never auto-refreshed)
+ *   - Otherwise                              → HF cache: download if missing,
+ *                                              then reconcile against upstream
+ *                                              (throttled, incremental etag diff)
+ *
+ * The HF-cache path goes through ensureDataFromHfWithRefresh() so that real
+ * end users (`npx japan-travel-mcp`) keep up with the dataset's rolling daily
+ * updates instead of being frozen at whatever they downloaded on first run.
+ * refreshFromHfIfStale() is throttled (24 h TTL by default) and only re-downloads
+ * the files whose etag changed, so warm starts stay cheap. Both entrypoints run
+ * this off the connect path (see ensureDataReady in src/index.ts), so the refresh
+ * check never blocks the MCP handshake.
  */
 export async function resolveDataRoot(repoRoot: string): Promise<string> {
   // Smoke-test escape hatch: when JAPAN_TRAVEL_MCP_SKIP_LOCAL is set, skip
@@ -395,5 +405,5 @@ export async function resolveDataRoot(repoRoot: string): Promise<string> {
     );
     return local;
   }
-  return ensureDataFromHf();
+  return ensureDataFromHfWithRefresh();
 }
