@@ -39,7 +39,6 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractJsonObject } from "./lib/parse.js";
 
 const ROOT = new URL("../../", import.meta.url);
 const WP_MULTI_PATH = new URL(
@@ -259,22 +258,38 @@ ${Object.entries(LANGUAGE_DESCRIPTIONS)
 
 # Output format
 
-You will receive ONE entity per request along with a list of target languages. Respond with valid JSON matching exactly:
-{
-  "qid": "<copy from input>",
-  "translations": {
-    "<lang>": "<translation>",
-    ...
-  }
-}
-
-Include EXACTLY the target languages requested. Do not add any extra languages. Do not include any prose, preamble, or trailing text — JSON only.
+You will receive ONE entity per request along with a list of target languages.
+Return the translations by calling the save_names tool — one field under
+"translations" per requested target language. Fill ONLY the requested target
+languages; do not add extra languages.
 
 # Canonical Glossaries
 
 ${glossariesJson}
 `;
 }
+
+const SAVE_NAMES_TOOL: Anthropic.Tool = {
+  name: "save_names",
+  description:
+    "Save the translated entity names — one field under translations per requested target language.",
+  input_schema: {
+    type: "object",
+    properties: {
+      translations: {
+        type: "object",
+        description: "Map of language code to translated entity name.",
+        properties: Object.fromEntries(
+          TARGET_LANGUAGES.map((l) => [
+            l,
+            { type: "string", description: `Entity name in ${l}.` },
+          ]),
+        ),
+      },
+    },
+    required: ["translations"],
+  },
+};
 
 function buildBatchRequest(
   item: ToTranslate,
@@ -290,9 +305,13 @@ function buildBatchRequest(
     custom_id: item.qid,
     params: {
       model: MODEL,
-      // Headroom so a full set of token-dense (ja/zh/ko/th/ar/hi) name
-      // translations can't truncate mid-JSON and fail to parse.
-      max_tokens: 2048,
+      // Structured output via forced tool use — the model returns a validated
+      // JSON object in tool_use.input, so there is no free-text JSON to parse
+      // (mirrors translate_descriptions.ts, which never parse-fails). Headroom
+      // for a full set of token-dense (zh/ko/th/ar/hi) names.
+      max_tokens: 4096,
+      tools: [SAVE_NAMES_TOOL],
+      tool_choice: { type: "tool", name: "save_names" },
       system: [
         {
           type: "text",
@@ -315,7 +334,7 @@ ${existingHints || "  (none)"}
 
 Target languages to fill: ${item.missing_langs.join(", ")}
 
-Return JSON only.`,
+Provide the requested languages by calling the save_names tool.`,
         },
       ],
     },
@@ -422,26 +441,24 @@ async function processResults(
       continue;
     }
     const content = r.result.message.content;
-    const textBlock = content.find(
-      (b): b is Anthropic.TextBlock => b.type === "text",
+    const toolUse = content.find(
+      (b): b is Anthropic.ToolUseBlock => b.type === "tool_use",
     );
-    if (!textBlock) {
+    if (!toolUse) {
       parseFailed += 1;
       continue;
     }
-    let parsed: TranslationResult | null = null;
-    try {
-      parsed = extractJsonObject(textBlock.text) as TranslationResult;
-    } catch {
+    const raw = toolUse.input as { translations?: Record<string, unknown> };
+    if (!raw.translations || typeof raw.translations !== "object") {
       parseFailed += 1;
       continue;
     }
-    if (!parsed.translations || typeof parsed.translations !== "object") {
-      parseFailed += 1;
-      continue;
+    // Keep only non-empty string values (drop nulls / stray non-string fields).
+    const translations: Record<string, string> = {};
+    for (const [lang, val] of Object.entries(raw.translations)) {
+      if (typeof val === "string" && val.trim()) translations[lang] = val.trim();
     }
-    parsed.qid = r.custom_id; // trust custom_id over model echo
-    out.push(parsed);
+    out.push({ qid: r.custom_id, translations }); // trust custom_id over model echo
     succeeded += 1;
   }
   process.stderr.write(
