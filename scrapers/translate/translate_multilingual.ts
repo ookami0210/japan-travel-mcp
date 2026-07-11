@@ -259,9 +259,9 @@ ${Object.entries(LANGUAGE_DESCRIPTIONS)
 # Output format
 
 You will receive ONE entity per request along with a list of target languages.
-Return the translations by calling the save_names tool — one field under
-"translations" per requested target language. Fill ONLY the requested target
-languages; do not add extra languages.
+Return the translations by calling the save_names tool — one field per
+requested target language (the language code is the field name). Fill ONLY the
+requested target languages; do not add extra languages.
 
 # Canonical Glossaries
 
@@ -269,25 +269,23 @@ ${glossariesJson}
 `;
 }
 
+// Flat schema (one top-level field per language), mirroring
+// translate_descriptions.ts's save_descriptions tool, which never parse-fails.
+// A nested `translations` object here caused Sonnet 4.6 to leave the nested
+// map unfilled on ~5/6 entities (stop_reason=tool_use, translations invalid).
+// All languages are optional because each entity only fills its missing subset.
 const SAVE_NAMES_TOOL: Anthropic.Tool = {
   name: "save_names",
   description:
-    "Save the translated entity names — one field under translations per requested target language.",
+    "Save the translated entity name — one field per requested target language. Omit languages you were not asked to fill.",
   input_schema: {
     type: "object",
-    properties: {
-      translations: {
-        type: "object",
-        description: "Map of language code to translated entity name.",
-        properties: Object.fromEntries(
-          TARGET_LANGUAGES.map((l) => [
-            l,
-            { type: "string", description: `Entity name in ${l}.` },
-          ]),
-        ),
-      },
-    },
-    required: ["translations"],
+    properties: Object.fromEntries(
+      TARGET_LANGUAGES.map((l) => [
+        l,
+        { type: "string", description: `Entity name in ${l}.` },
+      ]),
+    ),
   },
 };
 
@@ -452,18 +450,18 @@ async function processResults(
       );
       continue;
     }
-    const raw = toolUse.input as { translations?: Record<string, unknown> };
-    if (!raw.translations || typeof raw.translations !== "object") {
+    // Languages are top-level fields on the tool input (flat schema).
+    const raw = toolUse.input as Record<string, unknown>;
+    const translations: Record<string, string> = {};
+    for (const [lang, val] of Object.entries(raw)) {
+      if (typeof val === "string" && val.trim()) translations[lang] = val.trim();
+    }
+    if (Object.keys(translations).length === 0) {
       parseFailed += 1;
       process.stderr.write(
-        `[translate-multi] FAIL ${r.custom_id}: no translations obj; stop=${msg.stop_reason}; input_keys=${Object.keys(toolUse.input as object).join(",")}\n`,
+        `[translate-multi] FAIL ${r.custom_id}: empty names; stop=${msg.stop_reason}; input_keys=${Object.keys(raw).join(",")}\n`,
       );
       continue;
-    }
-    // Keep only non-empty string values (drop nulls / stray non-string fields).
-    const translations: Record<string, string> = {};
-    for (const [lang, val] of Object.entries(raw.translations)) {
-      if (typeof val === "string" && val.trim()) translations[lang] = val.trim();
     }
     out.push({ qid: r.custom_id, translations }); // trust custom_id over model echo
     succeeded += 1;
