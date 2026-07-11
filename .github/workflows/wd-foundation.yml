@@ -179,10 +179,23 @@ jobs:
 
       - name: Run leg = industry-shukubo (#26 / #27 / #37)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'industry-shukubo'
+        # These niche lodging sources sit on slow/occasionally-unreachable hosts
+        # (e.g. www.shukubo.net). Retry each up to 3× so a transient connect
+        # timeout does not fail the whole leg; a source that is down for all
+        # retries still surfaces as a real failure rather than being masked.
         run: |
-          npx tsx scrapers/sources/fetch_hito_yu_kai.ts
-          npx tsx scrapers/sources/fetch_koyasan_shukubo.ts
-          python3 scrapers/sources/fetch_kyoto_sect_shukubo.py
+          retry() {
+            for attempt in 1 2 3; do
+              "$@" && return 0
+              echo "::warning::attempt $attempt failed: $* — retrying in 20s"
+              sleep 20
+            done
+            echo "::error::all retries failed: $*"
+            return 1
+          }
+          retry npx tsx scrapers/sources/fetch_hito_yu_kai.ts
+          retry npx tsx scrapers/sources/fetch_koyasan_shukubo.ts
+          retry python3 scrapers/sources/fetch_kyoto_sect_shukubo.py
 
       - name: Sync this leg's outputs to HF
         if: steps.gate.outputs.run == 'true'

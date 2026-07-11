@@ -59,12 +59,17 @@ PRESETS: dict[str, list[str]] = {
         "_state/dmo_website_overrides.json",
     ],
     # wd-foundation.yml — all upstream Wikidata/OSM/Wikipedia legs read
-    # municipalities + the master Wikidata attractions corpus.
+    # municipalities + the master Wikidata attractions corpus. The
+    # wikipedia-summaries leg additionally reads enwiki_sitelinks.json, which
+    # is produced by the wikidata-descriptions leg; since legs run in parallel
+    # we restore the last published copy from HF so the summaries leg does not
+    # depend on sibling ordering.
     "wd-foundation": [
         "_state/municipalities.json",
         "_state/municipality_centroids.json",
         "_state/official_urls.json",
         "_state/wikidata_attractions.json",
+        "_state/enwiki_sitelinks.json",
     ],
     # embeddings-rebuild.yml — full corpus rebuild needs the entire
     # per-prefecture set + R3 sources to compose the embedding source.
