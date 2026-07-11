@@ -309,7 +309,7 @@ function buildBatchRequest(
       // JSON object in tool_use.input, so there is no free-text JSON to parse
       // (mirrors translate_descriptions.ts, which never parse-fails). Headroom
       // for a full set of token-dense (zh/ko/th/ar/hi) names.
-      max_tokens: 4096,
+      max_tokens: 8192,
       tools: [SAVE_NAMES_TOOL],
       tool_choice: { type: "tool", name: "save_names" },
       system: [
@@ -440,17 +440,24 @@ async function processResults(
       errored += 1;
       continue;
     }
-    const content = r.result.message.content;
+    const msg = r.result.message;
+    const content = msg.content;
     const toolUse = content.find(
       (b): b is Anthropic.ToolUseBlock => b.type === "tool_use",
     );
     if (!toolUse) {
       parseFailed += 1;
+      process.stderr.write(
+        `[translate-multi] FAIL ${r.custom_id}: no tool_use; stop=${msg.stop_reason}; blocks=${content.map((b) => b.type).join(",")}\n`,
+      );
       continue;
     }
     const raw = toolUse.input as { translations?: Record<string, unknown> };
     if (!raw.translations || typeof raw.translations !== "object") {
       parseFailed += 1;
+      process.stderr.write(
+        `[translate-multi] FAIL ${r.custom_id}: no translations obj; stop=${msg.stop_reason}; input_keys=${Object.keys(toolUse.input as object).join(",")}\n`,
+      );
       continue;
     }
     // Keep only non-empty string values (drop nulls / stray non-string fields).
