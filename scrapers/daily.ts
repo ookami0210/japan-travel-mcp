@@ -23,7 +23,6 @@ import {
   loadState,
   saveState,
   pickStaleMunicipalities,
-  baselineBatchSize,
 } from "./lib/state.js";
 import {
   DEFAULT_OPTIONS,
@@ -50,6 +49,18 @@ const DAILY_BATCH_OVERRIDE = (() => {
   if (!raw) return null;
   const n = parseInt(raw, 10);
   return Number.isFinite(n) && n > 0 ? n : null;
+})();
+
+// Wall-clock budget for the scrape phase, in minutes. The run keeps starting
+// stale municipalities until this budget is spent, then stops launching new
+// ones so it can persist progress and push to Hugging Face inside the job's
+// hard timeout. The workflow allots a longer job timeout than this budget so
+// the commit + HF-sync tail always has room. A manual DAILY_BATCH_SIZE
+// override disables the budget and runs a fixed count to completion.
+const DAILY_SCRAPE_MINUTES = (() => {
+  const raw = process.env.DAILY_SCRAPE_MINUTES?.trim();
+  const n = raw ? parseInt(raw, 10) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : 240;
 })();
 
 const PREFECTURE_SLUGS: Record<string, string> = {
@@ -158,15 +169,14 @@ async function main(): Promise<void> {
     .filter((m) => urlByCode.has(m.code))
     .map((m) => m.code);
 
-  // Batch size: explicit override > coverage verifier's recommendation >
-  // volume-derived baseline. The recommendation is refreshed each run by
-  // coverage_check.ts, which scales it up when the refresh falls behind SLA.
-  const batchSize =
-    DAILY_BATCH_OVERRIDE ??
-    state.coverage?.recommended_batch_size ??
-    baselineBatchSize(candidateCodes.length);
+  // Selection is time-bounded by default: consider every stale candidate,
+  // ordered stalest-first, and stop launching new scrapes once the time
+  // budget is spent (see deadlineMs below). A manual DAILY_BATCH_SIZE override
+  // switches back to a fixed count that runs to completion with no deadline.
+  const timeBounded = DAILY_BATCH_OVERRIDE === null;
+  const selectCount = DAILY_BATCH_OVERRIDE ?? candidateCodes.length;
 
-  const todayCodes = pickStaleMunicipalities(state, candidateCodes, batchSize);
+  const todayCodes = pickStaleMunicipalities(state, candidateCodes, selectCount);
   const todayMunis = muniFile.municipalities.filter((m) =>
     todayCodes.includes(m.code),
   );
@@ -174,13 +184,17 @@ async function main(): Promise<void> {
   const counter = new ErrorCounter();
   const limit = pLimit(opts.globalConcurrency);
 
+  const runStart = Date.now();
+  const deadlineMs = timeBounded
+    ? runStart + DAILY_SCRAPE_MINUTES * 60_000
+    : Number.POSITIVE_INFINITY;
+
   await notify(
-    `🌅 Daily scrape started — ${todayMunis.length} municipalities (batch size ${batchSize}${
-      DAILY_BATCH_OVERRIDE ? ", manual override" : ""
-    })`,
+    timeBounded
+      ? `🌅 Daily scrape started — up to ${todayMunis.length} stale municipalities, time budget ${DAILY_SCRAPE_MINUTES} min`
+      : `🌅 Daily scrape started — ${todayMunis.length} municipalities (manual override)`,
   );
 
-  const runStart = Date.now();
   let aborted = false;
   let abortReason = "";
 
@@ -253,6 +267,7 @@ async function main(): Promise<void> {
   }
   await saveState(state);
 
+  const processedCount = Array.from(byPref.values()).flat().length;
   const totalSpots = Array.from(byPref.values())
     .flat()
     .reduce((s, r) => s + r.spots.length, 0);
@@ -272,7 +287,9 @@ async function main(): Promise<void> {
     JSON.stringify(
       {
         run_type: "daily",
-        municipalities_processed: todayMunis.length,
+        municipalities_processed: processedCount,
+        candidates_considered: todayMunis.length,
+        time_budget_min: timeBounded ? DAILY_SCRAPE_MINUTES : null,
         prefectures_touched: Array.from(byPref.keys()),
         total_spots: totalSpots,
         total_errors: totalErrors,
@@ -291,14 +308,14 @@ async function main(): Promise<void> {
 
   if (aborted) {
     await notify(
-      `🚨 Daily aborted: ${abortReason}. ${todayMunis.length - byPref.size} municipalities not processed. Investigate before next run.`,
+      `🚨 Daily aborted: ${abortReason}. ${processedCount} municipalities processed before abort. Investigate before next run.`,
       "error",
     );
     process.exit(2);
   }
 
   await notify(
-    `✅ Daily done in ${elapsedSec}s — ${totalSpots} spots, ${totalErrors} errors across ${byPref.size} prefectures (HTTP ${summary.success}✅/${summary.fivexx}5xx/${summary.fourxx}4xx)`,
+    `✅ Daily done in ${elapsedSec}s — ${processedCount} municipalities, ${totalSpots} spots, ${totalErrors} errors across ${byPref.size} prefectures (HTTP ${summary.success}✅/${summary.fivexx}5xx/${summary.fourxx}4xx)`,
   );
 }
 
