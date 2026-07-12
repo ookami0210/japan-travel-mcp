@@ -68,7 +68,11 @@ jobs:
           DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
           # Scrape as many stale municipalities as fit in this budget, then stop
           # so the R-3 / commit / HF-sync tail runs inside timeout-minutes.
-          DAILY_SCRAPE_MINUTES: "240"
+          # 180 leaves ~2 h of tail: in-flight municipalities can overshoot the
+          # deadline by tens of minutes, and the R-3 + commit + HF sync need
+          # room of their own. ~180 munis/night still laps the corpus well
+          # inside the 30-day freshness target.
+          DAILY_SCRAPE_MINUTES: "180"
         run: npx tsx scrapers/daily.ts
 
       - name: R-3 weekly rotation (chain; errors isolated)

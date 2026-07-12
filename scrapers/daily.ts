@@ -204,6 +204,10 @@ async function main(): Promise<void> {
   const tasks = todayMunis.map((m) =>
     limit(async () => {
       if (aborted) return;
+      // Time budget: once the deadline passes, stop LAUNCHING new
+      // municipalities. In-flight scrapes run to completion; the remaining
+      // job time is reserved for the R-3 refresh, state commit, and HF sync.
+      if (Date.now() >= deadlineMs) return;
       const abortCheck = counter.shouldAbort(opts);
       if (abortCheck.abort) {
         aborted = true;
