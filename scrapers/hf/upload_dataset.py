@@ -139,6 +139,35 @@ def human_size(n: int) -> str:
     return f"{n:6.1f}TB"
 
 
+def stamp_metadata() -> None:
+    """Stamp metadata.json with the upload time (and git commit, if available)
+    so the distributed snapshot carries an honest build timestamp. The git copy
+    keeps built_at=null; only the uploaded copy is stamped. Errors are isolated —
+    a stamping failure must not block the data upload."""
+    import json
+    import subprocess
+    from datetime import datetime, timezone
+
+    meta_path = DATA / "metadata.json"
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        meta["built_at"] = datetime.now(timezone.utc).isoformat()
+        try:
+            sha = subprocess.check_output(
+                ["git", "rev-parse", "--short", "HEAD"], cwd=str(ROOT), text=True
+            ).strip()
+            if sha:
+                meta["source_commit"] = sha
+        except Exception:
+            pass
+        meta_path.write_text(
+            json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"[upload] stamped metadata.json built_at={meta['built_at']}")
+    except Exception as e:
+        print(f"[upload] WARN could not stamp metadata.json: {e}", file=sys.stderr)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="list files only, no upload")
@@ -188,6 +217,9 @@ def main() -> int:
     except Exception as e:
         print(f"ERROR: dataset repo {repo} not accessible: {e}", file=sys.stderr)
         return 3
+
+    # Stamp the distributed metadata with an honest build timestamp.
+    stamp_metadata()
 
     # Build operations: each data/<path> → <path> in repo, plus README.md
     ops = []
