@@ -10,6 +10,9 @@
  *
  * Adds the following fields to each attraction (only when OSM has a value):
  *   - opening_hours          string (OSM opening_hours format, e.g. "Mo-Su 09:00-17:00")
+ *   - opening_hours_structured  minute-granularity weekly windows parsed from
+ *                            opening_hours (see scrapers/lib/opening_hours.ts);
+ *                            only set when confidently parsed
  *   - wheelchair             "yes" | "no" | "limited"
  *   - tactile_paving         "yes" | "no"
  *   - phone                  string
@@ -31,6 +34,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseOpeningHours } from "./lib/opening_hours.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..");
@@ -89,6 +93,7 @@ async function main(): Promise<void> {
   const now = new Date().toISOString();
   let merged = 0;
   let openingHours = 0;
+  let openingHoursStructured = 0;
   let wheelchair = 0;
   let phone = 0;
   let website = 0;
@@ -103,6 +108,18 @@ async function main(): Promise<void> {
       const v = o[k];
       if (v !== undefined && v !== null && v !== "") {
         (a as Record<string, unknown>)[k] = v;
+        touched = true;
+      }
+    }
+    // Structured minute-granularity windows next to the raw string, so
+    // downstream verification engines can check "open at HH:MM on <day>"
+    // without re-parsing OSM syntax. Honest: only set when confidently
+    // parsed; the raw string always remains the source of truth.
+    if (o.opening_hours) {
+      const structured = parseOpeningHours(o.opening_hours);
+      if (structured) {
+        (a as Record<string, unknown>).opening_hours_structured = structured;
+        openingHoursStructured += 1;
         touched = true;
       }
     }
@@ -125,7 +142,7 @@ async function main(): Promise<void> {
     `Merged OSM tags into ${merged} / ${master.attractions.length} attractions.\n`,
   );
   process.stderr.write(
-    `  opening_hours: ${openingHours}\n  wheelchair: ${wheelchair}\n  phone: ${phone}\n  website: ${website}\n  fee: ${fee}\n`,
+    `  opening_hours: ${openingHours} (structured: ${openingHoursStructured})\n  wheelchair: ${wheelchair}\n  phone: ${phone}\n  website: ${website}\n  fee: ${fee}\n`,
   );
 
   const tmp = MASTER_FILE + ".tmp";
