@@ -3097,7 +3097,13 @@ async function getSpots(args: {
           url: s.url,
           municipality: m.municipality.name,
           municipality_code: m.municipality.code,
+          // Canonical area identifier = JIS municipality code (same value as
+          // municipality_code, exposed under the cross-source key so
+          // consumers can cluster/verify by area without caring whether a
+          // record came from the municipal scrape or Wikidata).
+          area_id: m.municipality.code,
           prefecture: p.prefecture.name,
+          prefecture_code: p.prefecture.code,
           language: s.language,
           quality_score: Math.round(q * 100) / 100,
         };
@@ -3217,7 +3223,12 @@ async function getSpots(args: {
         url: a.wikidata_url,
         municipality: a.admin_name,
         municipality_code: a.admin_code,
+        // Canonical area identifier = JIS municipality code. Honest null when
+        // Wikidata carries no admin assignment for the entity — consumers
+        // fall back to prefecture_code (always present).
+        area_id: a.admin_code ?? null,
         prefecture: p.prefecture.name,
+        prefecture_code: a.prefecture_code ?? p.prefecture.code,
         quality_score: 0.65,
       };
       // Iter56.4: expose kinds so agents can distinguish e.g. waterfall vs
@@ -8980,6 +8991,9 @@ async function buildEntityCard(
     prefecture_code: a.prefecture_code,
     municipality: a.admin_name,
     municipality_code: a.admin_code,
+    // Canonical area identifier = JIS municipality code (null when Wikidata
+    // has no admin assignment; fall back to prefecture_code).
+    area_id: a.admin_code ?? null,
     kinds: kinds.length > 0 ? kinds : null,
     types: a.types ?? null,
     heritage_designations: heritageCount > 0 ? a.heritage_designations : null,
