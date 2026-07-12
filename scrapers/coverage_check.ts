@@ -1,19 +1,22 @@
 /**
  * Coverage verifier for the 30-day refresh SLA.
  *
- * Measures how fresh the municipal dataset actually is and auto-tunes the
- * daily batch size so the refresh stays inside the ~30-day window without
- * over-scraping. Chained at the end of steady-scrape.yml (cheap, local-only)
- * and runnable on its own via `npm run scrape:coverage`.
+ * Measures how fresh the municipal dataset actually is and reports it.
+ * Chained at the end of steady-scrape.yml (cheap, local-only) and runnable
+ * on its own via `npm run scrape:coverage`.
  *
  * What it does:
  *   1. Builds the candidate set (municipalities with a resolved official URL).
- *   2. Computes the stalest candidate's age, the count past the SLA, and the
- *      never-scraped count.
- *   3. Writes a recommended batch size into scrape_state.json. daily.ts reads
- *      it on the next run: overdue → scale up to clear the backlog; fresh →
- *      relax to the cost-efficient baseline.
- *   4. Posts a Slack summary and writes a JSON log.
+ *   2. Computes the stalest candidate's age, the count past the SLA, the
+ *      never-scraped count, and the observed nightly pace (municipalities
+ *      scraped in the last 24 h).
+ *   3. Posts a Slack summary (with a measured catch-up projection when the
+ *      SLA is behind) and writes a JSON log.
+ *
+ * Note: daily throughput is governed by the run's TIME BUDGET
+ * (DAILY_SCRAPE_MINUTES in steady-scrape.yml), not by a batch-size knob —
+ * the nightly run simply works stale-first until the budget is spent. This
+ * script is a reporter; it does not tune anything.
  *
  * It NEVER fetches anything — it only reads state already on disk. Safe to run
  * as a `continue-on-error` step; a failure here must not affect the scrape.
@@ -26,8 +29,6 @@ import { notify } from "./lib/slack.js";
 import {
   loadState,
   saveState,
-  recommendBatchSize,
-  baselineBatchSize,
   SLA_DAYS,
   TARGET_CYCLE_DAYS,
   type CoverageState,
@@ -69,6 +70,7 @@ async function main(): Promise<void> {
   let maxAgeDays = 0;
   let neverScraped = 0;
   let countOverSla = 0;
+  let scrapedLast24h = 0;
   for (const code of candidateCodes) {
     const last = state.per_municipality[code]?.last_scraped_at;
     if (!last) {
@@ -79,15 +81,17 @@ async function main(): Promise<void> {
     const ageDays = (now - new Date(last).getTime()) / MS_PER_DAY;
     if (ageDays > maxAgeDays) maxAgeDays = ageDays;
     if (ageDays > SLA_DAYS) countOverSla += 1;
+    if (ageDays <= 1) scrapedLast24h += 1;
   }
 
   const candidateCount = candidateCodes.length;
-  const baseline = baselineBatchSize(candidateCount);
-  const recommended = recommendBatchSize(candidateCount, maxAgeDays);
   const onTrack = neverScraped === 0 && Number.isFinite(maxAgeDays) && maxAgeDays <= SLA_DAYS;
 
   const coverage: CoverageState = {
-    recommended_batch_size: recommended,
+    // Vestigial knob: daily throughput is governed by the run's time budget
+    // (DAILY_SCRAPE_MINUTES), not a batch size. Kept null for state-shape
+    // compatibility.
+    recommended_batch_size: null,
     last_check_at: new Date(now).toISOString(),
     max_age_days: Number.isFinite(maxAgeDays) ? Math.round(maxAgeDays * 10) / 10 : null,
     count_over_sla: countOverSla,
@@ -113,8 +117,7 @@ async function main(): Promise<void> {
         max_age_days: coverage.max_age_days,
         never_scraped: neverScraped,
         count_over_sla: countOverSla,
-        baseline_batch_size: baseline,
-        recommended_batch_size: recommended,
+        scraped_last_24h: scrapedLast24h,
         on_track: onTrack,
       },
       null,
@@ -128,11 +131,19 @@ async function main(): Promise<void> {
     : `${neverScraped} never scraped`;
   if (onTrack) {
     await notify(
-      `📅 Coverage OK — ${ageLabel} ≤ ${SLA_DAYS}d SLA across ${candidateCount} munis. Batch → ${recommended}/day (baseline).`,
+      `📅 Coverage OK — ${ageLabel} ≤ ${SLA_DAYS}d SLA across ${candidateCount} munis.`,
     );
   } else {
+    // Catch-up projection from the observed nightly pace (time-boxed runs
+    // work stale-first, so the backlog clears at roughly this rate).
+    const projection =
+      scrapedLast24h > 0
+        ? ` At the observed pace (~${scrapedLast24h}/night) the backlog clears in ~${Math.ceil(
+            countOverSla / scrapedLast24h,
+          )} nights.`
+        : "";
     await notify(
-      `⚠️ Coverage behind SLA — ${ageLabel}, ${countOverSla} over ${SLA_DAYS}d. Auto-tuning batch ${baseline}→${recommended}/day to catch up.`,
+      `⚠️ Coverage behind SLA — ${ageLabel}, ${countOverSla} over ${SLA_DAYS}d. Nightly time-boxed runs work stale-first.${projection}`,
       "error",
     );
   }
