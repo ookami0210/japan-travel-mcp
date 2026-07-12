@@ -60,17 +60,41 @@ We aim to keep every record fresh within **30 days**.
 That's the freshness target — not a server-load mitigation.
 
 **Implementation:**  
-A GitHub Actions cron job runs daily at 03:00 JST and re-scrapes ~70 entities  
-each run (1,938 entities ÷ ~28 days ≈ 70/day). Over the cycle, every entity  
-is touched once. Concretely:
+A GitHub Actions cron job runs daily in a 01:00–06:00 JST window. Each run is
+**time-boxed**: it re-scrapes the stalest entities (oldest `last_scraped_at`
+first) until a wall-clock budget is spent, then stops launching new work so the
+R-3 refresh, state commit, and Hugging Face sync always complete within the job
+timeout. Concretely:
 
-- 1 daily cron run
-- ~70 entities per run, picked as the 70 oldest by `last_scraped_at`
-- Each domain hit once per cycle, with a 5-second per-domain interval
-- ~28-day full cycle (fits within the 30-day freshness target)
+- 1 daily cron run, stale-first selection
+- Each domain hit at most once per run, with a 5-second per-domain interval
+- The rolling cycle keeps every entity within the 30-day freshness target
 
 The initial dataset is bootstrapped in a single run (a few hours, 2-second  
-per-domain interval) — after that, the rolling 30-day cycle takes over.
+per-domain interval) — after that, the rolling daily cycle takes over.
+
+---
+
+## Consuming the dataset (stability contract)
+
+For downstream consumers (e.g. itinerary or planning engines that gate on
+verified feasibility), the dataset makes these guarantees:
+
+- **Stable IDs.** Entity identifiers are invariant across snapshots.
+  Wikidata-backed entities use their QID; scraped spots use a URL-derived id
+  (sha256 of the source URL), so re-scraping unchanged content keeps the same
+  id. Treat ids as durable keys across snapshots.
+- **Honest nulls.** Absent data is `null`, never an inferred or estimated value
+  presented as measured. A `null` means "not stated by an official source" —
+  treat it as unknown, not as a fact. This lets a consumer safely skip a check
+  rather than verify against a fabricated value.
+- **Additive fields.** Field changes are additive and backward-compatible. New
+  fields may appear; existing field meanings do not change without a
+  `schema_version` bump in `metadata.json`.
+- **Reproducible pinning.** For reproducibility, pin to a Hugging Face dataset
+  commit revision (`snapshot_download(revision=<sha>)`). That revision is the
+  immutable version of the snapshot you verified against. `metadata.json`
+  also carries a `built_at` timestamp on the distributed copy.
 
 ---
 

@@ -1,6 +1,8 @@
 {
   "schema_version": 1,
   "project": "japan-travel-mcp",
+  "built_at": null,
+  "built_at_note": "UTC timestamp stamped at each Hugging Face upload. null in the git copy; populated on the distributed snapshot. For a reproducible pin, use the Hugging Face dataset commit revision (snapshot_download(revision=<sha>)) — that is the immutable per-snapshot version.",
   "license": {
     "data": "CC BY 4.0",
     "code": "MIT"
@@ -39,15 +41,21 @@
     "freshness_target": "30 days",
     "freshness_target_note": "We aim to refresh every record within 30 days. This is the freshness target, not a load mitigation.",
     "implementation": {
-      "cron": "GitHub Actions, 03:00 JST daily",
-      "batch_size": 70,
-      "selection": "70 entities with the oldest last_scraped_at",
-      "full_cycle_days": 28
+      "cron": "GitHub Actions, 01:00 JST daily",
+      "selection": "oldest last_scraped_at first (stale-first rotation)",
+      "budget": "time-boxed: the daily run scrapes stale-first municipalities until a wall-clock budget is spent, then stops launching new work so the R-3 refresh, state commit, and Hugging Face sync complete inside the job timeout",
+      "window": "01:00-06:00 JST"
     },
     "rate_limit": {
       "steady_state": "5 seconds minimum between requests to the same domain",
       "initial_bootstrap": "2 seconds minimum, used only for the first build to complete in hours"
     }
   },
-  "data_freshness_promise": "No record left stale beyond 30 days under steady-state operation."
+  "data_freshness_promise": "No record left stale beyond 30 days under steady-state operation.",
+  "stability_contract": {
+    "stable_ids": "Entity identifiers are invariant across snapshots. Wikidata-backed entities use their QID; scraped spots use a URL-derived id (sha256 of the source URL), so a re-scrape of unchanged content keeps the same id. Consumers may treat ids as durable keys across snapshots.",
+    "honest_nulls": "Absent data is null, never an inferred or estimated value presented as measured. A null means 'not stated by an official source' — treat it as unknown, not as a fact.",
+    "additive_fields": "Field changes are additive and backward-compatible. New fields may appear; existing field meanings do not change without a schema_version bump.",
+    "pinning": "For reproducibility, pin to a Hugging Face dataset commit revision; that revision is the immutable version of the snapshot you verified against."
+  }
 }
