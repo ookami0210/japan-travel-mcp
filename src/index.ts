@@ -158,6 +158,12 @@ interface WikidataAttraction {
   email?: string;
   cuisine?: string;
   fee?: string;
+  // Admission charge from OSM: raw string always kept; charge_parsed only for
+  // unambiguous single-value forms (tiered adult/child lists stay raw-only).
+  charge?: string;
+  charge_parsed?: { amount: number; currency: "JPY"; per?: string };
+  // Stated capacity (clean integers only — freeform notes are not coerced).
+  capacity?: number;
   internet_access?: string;
   smoking?: string;
   osm_ids?: string[];
@@ -677,6 +683,7 @@ async function supplementWikidataAttractions(
   // when missing. Non-destructive: pref-local values win if already set.
   const OSM_PICK = [
     "opening_hours", "opening_hours_structured", "category",
+    "charge", "charge_parsed", "capacity",
     "wheelchair", "tactile_paving",
     "phone", "website", "email", "cuisine", "fee",
     "internet_access", "smoking", "osm_ids", "osm_tags_merged_at",
@@ -3261,6 +3268,9 @@ async function getSpots(args: {
         wkRec.opening_hours_structured = a.opening_hours_structured;
       }
       if (a.category) wkRec.category = a.category;
+      if (a.charge) wkRec.charge = a.charge;
+      if (a.charge_parsed) wkRec.charge_parsed = a.charge_parsed;
+      if (a.capacity !== undefined) wkRec.capacity = a.capacity;
       if (a.wheelchair) wkRec.wheelchair = a.wheelchair;
       if (a.tactile_paving) wkRec.tactile_paving = a.tactile_paving;
       if (a.phone) wkRec.phone = a.phone;
@@ -9018,6 +9028,9 @@ async function buildEntityCard(
     opening_hours: a.opening_hours ?? null,
     opening_hours_structured: a.opening_hours_structured ?? null,
     category: a.category ?? null,
+    charge: a.charge ?? null,
+    charge_parsed: a.charge_parsed ?? null,
+    capacity: a.capacity ?? null,
     wheelchair: a.wheelchair ?? null,
     tactile_paving: a.tactile_paving ?? null,
     phone: a.phone ?? null,

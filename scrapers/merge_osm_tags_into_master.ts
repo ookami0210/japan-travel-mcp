@@ -36,6 +36,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseOpeningHours } from "./lib/opening_hours.js";
 import { categorizeFromOsmTags } from "./lib/osm_category.js";
+import { parseCharge } from "./lib/charge.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..");
@@ -100,6 +101,9 @@ async function main(): Promise<void> {
   let openingHoursStructured = 0;
   let category = 0;
   let categoryFood = 0;
+  let charge = 0;
+  let chargeParsed = 0;
+  let capacity = 0;
   let wheelchair = 0;
   let phone = 0;
   let website = 0;
@@ -140,6 +144,27 @@ async function main(): Promise<void> {
         if (cat === "food") categoryFood += 1;
         touched = true;
       }
+      // Admission charge: raw string always; a parsed {amount, currency}
+      // only for unambiguous single-value forms (tiered lists stay raw —
+      // collapsing tiers would misstate the price).
+      const rawCharge = o.raw_tags.charge;
+      if (rawCharge) {
+        (a as Record<string, unknown>).charge = rawCharge;
+        const parsed = parseCharge(rawCharge);
+        if (parsed) {
+          (a as Record<string, unknown>).charge_parsed = parsed;
+          chargeParsed += 1;
+        }
+        charge += 1;
+        touched = true;
+      }
+      // Capacity: only clean integers (honest — freeform capacity notes stay out).
+      const rawCap = o.raw_tags.capacity;
+      if (rawCap && /^\d+$/.test(rawCap.trim())) {
+        (a as Record<string, unknown>).capacity = parseInt(rawCap.trim(), 10);
+        capacity += 1;
+        touched = true;
+      }
     }
     if (o.osm_ids && o.osm_ids.length > 0) {
       (a as Record<string, unknown>).osm_ids = o.osm_ids;
@@ -160,7 +185,7 @@ async function main(): Promise<void> {
     `Merged OSM tags into ${merged} / ${master.attractions.length} attractions.\n`,
   );
   process.stderr.write(
-    `  opening_hours: ${openingHours} (structured: ${openingHoursStructured})\n  category: ${category} (food: ${categoryFood})\n  wheelchair: ${wheelchair}\n  phone: ${phone}\n  website: ${website}\n  fee: ${fee}\n`,
+    `  opening_hours: ${openingHours} (structured: ${openingHoursStructured})\n  category: ${category} (food: ${categoryFood})\n  charge: ${charge} (parsed: ${chargeParsed})\n  capacity: ${capacity}\n  wheelchair: ${wheelchair}\n  phone: ${phone}\n  website: ${website}\n  fee: ${fee}\n`,
   );
 
   const tmp = MASTER_FILE + ".tmp";
