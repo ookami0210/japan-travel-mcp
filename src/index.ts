@@ -126,6 +126,21 @@ interface WikidataAttraction {
   // for prefecture files where the field hasn't been embedded.
   // Constraint-encodable for downstream Solver / Product 2.
   opening_hours?: string;
+  // Minute-granularity weekly windows parsed from the raw OSM opening_hours
+  // string (scrapers/lib/opening_hours.ts). Present only when the raw value
+  // parsed confidently; `partial: true` marks expressions whose seasonal /
+  // holiday clauses could not be represented. Verification engines can check
+  // "open at HH:MM on <weekday>" directly instead of re-parsing OSM syntax.
+  opening_hours_structured?: {
+    twenty_four_seven: boolean;
+    weekly: Partial<
+      Record<
+        "mo" | "tu" | "we" | "th" | "fr" | "sa" | "su",
+        Array<{ open: number; close: number }>
+      >
+    >;
+    partial: boolean;
+  };
   wheelchair?: string;
   tactile_paving?: string;
   phone?: string;
@@ -651,7 +666,7 @@ async function supplementWikidataAttractions(
   // OSM-derived field names — copy from master to existing pref records
   // when missing. Non-destructive: pref-local values win if already set.
   const OSM_PICK = [
-    "opening_hours", "wheelchair", "tactile_paving",
+    "opening_hours", "opening_hours_structured", "wheelchair", "tactile_paving",
     "phone", "website", "email", "cuisine", "fee",
     "internet_access", "smoking", "osm_ids", "osm_tags_merged_at",
     // Wikipedia category kind_tags
@@ -1080,6 +1095,9 @@ async function searchArea(args: {
         // surface when populated to keep payload tight; absence ≠ closed
         // / inaccessible (just no OSM tag).
         ...(a.opening_hours ? { opening_hours: a.opening_hours } : {}),
+        ...(a.opening_hours_structured
+          ? { opening_hours_structured: a.opening_hours_structured }
+          : {}),
         ...(a.wheelchair ? { wheelchair: a.wheelchair } : {}),
         ...(a.tactile_paving ? { tactile_paving: a.tactile_paving } : {}),
         ...(a.phone ? { phone: a.phone } : {}),
@@ -3215,6 +3233,9 @@ async function getSpots(args: {
       );
       // Iter 58: OSM-derived structured fields (constraint-encodable).
       if (a.opening_hours) wkRec.opening_hours = a.opening_hours;
+      if (a.opening_hours_structured) {
+        wkRec.opening_hours_structured = a.opening_hours_structured;
+      }
       if (a.wheelchair) wkRec.wheelchair = a.wheelchair;
       if (a.tactile_paving) wkRec.tactile_paving = a.tactile_paving;
       if (a.phone) wkRec.phone = a.phone;
@@ -8967,6 +8988,7 @@ async function buildEntityCard(
     source_anchor: a.source_anchor ?? null,
     // OSM-derived structured fields (constraint-encodable)
     opening_hours: a.opening_hours ?? null,
+    opening_hours_structured: a.opening_hours_structured ?? null,
     wheelchair: a.wheelchair ?? null,
     tactile_paving: a.tactile_paving ?? null,
     phone: a.phone ?? null,
