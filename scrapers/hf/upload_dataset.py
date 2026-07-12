@@ -75,6 +75,8 @@ def load_env() -> None:
 #   - _state/*.log       → git (bootstrap activity logs, kept for transparency)
 IGNORE_GLOBS = [
     "knowledge/**",
+    # The git copy of metadata.json keeps built_at=null; a stamped temp copy
+    # (built_at + source_commit) is uploaded explicitly in main() instead.
     "metadata.json",
     "_logs/**",
     "_state/scrape_state.json",
@@ -139,13 +141,15 @@ def human_size(n: int) -> str:
     return f"{n:6.1f}TB"
 
 
-def stamp_metadata() -> None:
-    """Stamp metadata.json with the upload time (and git commit, if available)
-    so the distributed snapshot carries an honest build timestamp. The git copy
-    keeps built_at=null; only the uploaded copy is stamped. Errors are isolated —
-    a stamping failure must not block the data upload."""
+def stamp_metadata() -> str | None:
+    """Write a stamped copy of metadata.json (built_at + source_commit) to a
+    temp file and return its path for upload as `metadata.json` in the repo.
+    The git working copy is never touched — it keeps built_at=null so the
+    repository never carries a misleading static timestamp. Errors are
+    isolated — a stamping failure must not block the data upload."""
     import json
     import subprocess
+    import tempfile
     from datetime import datetime, timezone
 
     meta_path = DATA / "metadata.json"
@@ -160,12 +164,16 @@ def stamp_metadata() -> None:
                 meta["source_commit"] = sha
         except Exception:
             pass
-        meta_path.write_text(
-            json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        tmp = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".metadata.json", delete=False, encoding="utf-8"
         )
+        with tmp:
+            tmp.write(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
         print(f"[upload] stamped metadata.json built_at={meta['built_at']}")
+        return tmp.name
     except Exception as e:
         print(f"[upload] WARN could not stamp metadata.json: {e}", file=sys.stderr)
+        return None
 
 
 def main() -> int:
@@ -218,11 +226,21 @@ def main() -> int:
         print(f"ERROR: dataset repo {repo} not accessible: {e}", file=sys.stderr)
         return 3
 
-    # Stamp the distributed metadata with an honest build timestamp.
-    stamp_metadata()
+    # Stamp the distributed metadata with an honest build timestamp. The git
+    # copy is in IGNORE_GLOBS (kept built_at=null); the stamped temp copy is
+    # what ships on the dataset so consumers can read the snapshot version
+    # without visiting the code repository.
+    stamped_metadata = stamp_metadata()
 
     # Build operations: each data/<path> → <path> in repo, plus README.md
     ops = []
+    if stamped_metadata:
+        ops.append(
+            CommitOperationAdd(
+                path_in_repo="metadata.json",
+                path_or_fileobj=stamped_metadata,
+            )
+        )
     for p in files:
         rel = p.relative_to(DATA).as_posix()
         ops.append(
