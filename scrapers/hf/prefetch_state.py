@@ -50,6 +50,12 @@ PRESETS: dict[str, list[str]] = {
         "_state/tourism_org_urls.json",
         "_state/wikidata_attractions.json",
         "_state/scrape_state.json",
+        # Existing R-3 translations MUST be restored before the r3_refresh
+        # chain runs: translate_r3 is incremental by key against this file.
+        # Without it every rotation re-translates the whole day's source
+        # (real Batch API cost every night) and the nightly HF sync then
+        # clobbers the corpus down to that one source's rows.
+        "r3/translations/r3_translations.jsonl",
     ],
     # dmo-refresh.yml — DMO discover + scrape inputs.
     "dmo": [
