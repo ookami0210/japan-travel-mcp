@@ -78,6 +78,10 @@ interface ScrapedSpot {
   url: string;
   name: string;
   description: string | null;
+  // Category from the scrape pipeline (currently null for most municipal
+  // spots; populated when the source page carries a machine-decidable
+  // signal). Same coarse taxonomy as the OSM-derived attraction category.
+  category?: string | null;
   address: string | null;
   coordinates: { lat: number; lng: number } | null;
   language: string;
@@ -141,6 +145,12 @@ interface WikidataAttraction {
     >;
     partial: boolean;
   };
+  // Deterministic category derived from raw OSM tags by
+  // scrapers/lib/osm_category.ts (food / market / lodging / onsen / worship /
+  // culture / activity / nature / sightseeing). The consumer contract is the
+  // machine-decidable food flag: category === "food" ⇔ a place to eat.
+  // Absent = not decidable from OSM tags (honest), not "not a restaurant".
+  category?: string;
   wheelchair?: string;
   tactile_paving?: string;
   phone?: string;
@@ -666,7 +676,8 @@ async function supplementWikidataAttractions(
   // OSM-derived field names — copy from master to existing pref records
   // when missing. Non-destructive: pref-local values win if already set.
   const OSM_PICK = [
-    "opening_hours", "opening_hours_structured", "wheelchair", "tactile_paving",
+    "opening_hours", "opening_hours_structured", "category",
+    "wheelchair", "tactile_paving",
     "phone", "website", "email", "cuisine", "fee",
     "internet_access", "smoking", "osm_ids", "osm_tags_merged_at",
     // Wikipedia category kind_tags
@@ -1098,6 +1109,7 @@ async function searchArea(args: {
         ...(a.opening_hours_structured
           ? { opening_hours_structured: a.opening_hours_structured }
           : {}),
+        ...(a.category ? { category: a.category } : {}),
         ...(a.wheelchair ? { wheelchair: a.wheelchair } : {}),
         ...(a.tactile_paving ? { tactile_paving: a.tactile_paving } : {}),
         ...(a.phone ? { phone: a.phone } : {}),
@@ -3092,6 +3104,7 @@ async function getSpots(args: {
           id: s.id,
           name: s.name,
           description: s.description,
+          ...(s.category ? { category: s.category } : {}),
           coordinates: s.coordinates,
           address: s.address,
           url: s.url,
@@ -3247,6 +3260,7 @@ async function getSpots(args: {
       if (a.opening_hours_structured) {
         wkRec.opening_hours_structured = a.opening_hours_structured;
       }
+      if (a.category) wkRec.category = a.category;
       if (a.wheelchair) wkRec.wheelchair = a.wheelchair;
       if (a.tactile_paving) wkRec.tactile_paving = a.tactile_paving;
       if (a.phone) wkRec.phone = a.phone;
@@ -9003,6 +9017,7 @@ async function buildEntityCard(
     // OSM-derived structured fields (constraint-encodable)
     opening_hours: a.opening_hours ?? null,
     opening_hours_structured: a.opening_hours_structured ?? null,
+    category: a.category ?? null,
     wheelchair: a.wheelchair ?? null,
     tactile_paving: a.tactile_paving ?? null,
     phone: a.phone ?? null,
