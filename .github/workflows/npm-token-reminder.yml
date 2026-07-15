@@ -1,19 +1,26 @@
-# Annual npm-token renewal reminder.
+# npm-token renewal reminder (quarterly — npm caps write tokens at 90 days).
 #
 # The npm granular access token behind the NPM_TOKEN secret expires on
 # EXPIRY. When it lapses, publish.yml fails at the final `npm publish` step
 # with a masked E404 while every earlier step stays green — easy to miss.
 #
-# This workflow posts a Slack reminder at 30/14/7/3/1/0 days before expiry
-# (and daily once overdue) while the tracking issue is still OPEN. Closing
-# the tracking issue silences it. Renewal steps live in the tracking issue;
-# when renewing, also update EXPIRY + TRACKING_ISSUE below for the next cycle.
+# Design: the cron itself is scoped to the two weeks before expiry (plus the
+# overdue window), so the workflow does not run at all outside that window —
+# no daily no-op runs. Inside the window it posts a daily Slack reminder
+# while the tracking issue is still OPEN; closing the issue (after storing
+# the fresh token) silences it.
+#
+# On each renewal: update EXPIRY + TRACKING_ISSUE below AND re-scope the two
+# cron lines to the new window (14 days before expiry → ~3 weeks after).
 
 name: npm-token-reminder
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # 09:00 JST daily; alerts fire only on milestone days
+    # Current EXPIRY 2026-10-13 → window opens Sep 29 (14 days before) and
+    # the overdue tail runs through October. 09:00 JST daily inside the window.
+    - cron: "0 0 29-30 9 *"
+    - cron: "0 0 * 10 *"
   workflow_dispatch:
 
 permissions:
@@ -24,22 +31,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      EXPIRY: "2026-12-31"
+      EXPIRY: "2026-10-13"
       TRACKING_ISSUE: "21"
     steps:
-      - name: Alert on milestone days while the tracking issue is open
+      - name: Daily alert inside the 14-day window while the tracking issue is open
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           days_left=$(( ( $(date -u -d "$EXPIRY" +%s) - $(date -u +%s) ) / 86400 ))
           echo "days until npm token expiry: $days_left"
-          case "$days_left" in
-            30|14|7|3|1|0) alert=1 ;;
-            *) if [ "$days_left" -lt 0 ]; then alert=1; else alert=0; fi ;;
-          esac
-          if [ "$alert" != "1" ]; then
-            echo "not a milestone day — no alert"
+          # Guard for manual dispatches outside the window; scheduled runs are
+          # already scoped by the cron lines above.
+          if [ "$days_left" -gt 14 ]; then
+            echo "more than 14 days out — no alert"
             exit 0
           fi
           state=$(gh issue view "$TRACKING_ISSUE" --repo "$GITHUB_REPOSITORY" --json state -q .state || echo "UNKNOWN")
