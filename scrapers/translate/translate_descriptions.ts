@@ -39,6 +39,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { enforceSpendGuard } from "../lib/spend_guard.js";
 import {
   hashSource,
   isStale,
@@ -621,6 +622,20 @@ async function main(): Promise<void> {
     await writeBack([], existing, hashByQid);
     process.stderr.write("[descriptions] done\n");
     return;
+  }
+
+  // Circuit breaker: the descriptions corpus is ~14k entities; a large batch
+  // here means the existing-output restore failed, not a genuine surge.
+  // FULL_RETRANSLATE=1 is the explicit full-rebuild consent.
+  if (!isResume) {
+    await enforceSpendGuard({
+      label: "descriptions",
+      planned: target.length,
+      estUsd: usdIn + usdOut,
+      capEnv: "DESC_SPEND_GUARD_MAX",
+      defaultCap: 1000,
+      bypass: forceFull,
+    });
   }
 
   const client = new Anthropic();

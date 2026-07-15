@@ -39,6 +39,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { enforceSpendGuard } from "../lib/spend_guard.js";
 
 const ROOT = new URL("../../", import.meta.url);
 const WP_MULTI_PATH = new URL(
@@ -589,6 +590,22 @@ async function main(): Promise<void> {
     );
     await writeBack([], pairs, [], prior);
     return;
+  }
+
+  // Circuit breaker: the mature corpus needs only a handful of new names per
+  // run — a large AI batch means the prior output was not restored on the
+  // runner, not a genuine surge. Resume runs skip it (spend already made).
+  if (!isResume) {
+    const capLimit = parseInt(process.env.AI_LIMIT ?? "0", 10);
+    const planned =
+      capLimit > 0 ? Math.min(items.length, capLimit) : items.length;
+    await enforceSpendGuard({
+      label: "translate-multi",
+      planned,
+      estUsd: null,
+      capEnv: "NAMES_SPEND_GUARD_MAX",
+      defaultCap: 1000,
+    });
   }
 
   const client = new Anthropic();
