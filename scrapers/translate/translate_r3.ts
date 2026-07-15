@@ -36,6 +36,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { enforceSpendGuard } from "../lib/spend_guard.js";
 
 const ROOT = new URL("../../", import.meta.url);
 const DATA_DIR = new URL("data/r3/", ROOT);
@@ -761,6 +762,21 @@ async function main(): Promise<void> {
   if (isDryRun) {
     process.stderr.write("[r3_translate] DRY_RUN=1 — exiting\n");
     return;
+  }
+
+  // Circuit breaker: a large batch here usually means the incremental
+  // premise broke (existing r3_translations.jsonl not restored on the
+  // runner) — refuse to spend unless explicitly allowed. Resume runs skip
+  // the guard (their spend was already committed at submit time).
+  if (!isResume) {
+    await enforceSpendGuard({
+      label: "r3_translate",
+      planned: target.length,
+      estUsd: usd,
+      capEnv: "R3_SPEND_GUARD_MAX",
+      defaultCap: 100,
+      bypass: process.env.FULL_RETRANSLATE === "1",
+    });
   }
 
   const client = new Anthropic();

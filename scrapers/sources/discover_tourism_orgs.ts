@@ -29,7 +29,7 @@
  *
  * Run:
  *   # full: all 47 prefectures + all 1,938 municipalities (~60-90 min)
- *   ANTHROPIC_API_KEY=... npx tsx scrapers/sources/discover_tourism_orgs.ts
+ *   npx tsx scrapers/sources/discover_tourism_orgs.ts   # no API key needed — makes no LLM calls
  *
  *   # batch 1 of 3 (JIS prefecture codes 01-15):
  *   BATCH=1 npx tsx scrapers/sources/discover_tourism_orgs.ts
