@@ -1,0 +1,56 @@
+# Annual npm-token renewal reminder.
+#
+# The npm granular access token behind the NPM_TOKEN secret expires on
+# EXPIRY. When it lapses, publish.yml fails at the final `npm publish` step
+# with a masked E404 while every earlier step stays green — easy to miss.
+#
+# This workflow posts a Slack reminder at 30/14/7/3/1/0 days before expiry
+# (and daily once overdue) while the tracking issue is still OPEN. Closing
+# the tracking issue silences it. Renewal steps live in the tracking issue;
+# when renewing, also update EXPIRY + TRACKING_ISSUE below for the next cycle.
+
+name: npm-token-reminder
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 09:00 JST daily; alerts fire only on milestone days
+  workflow_dispatch:
+
+permissions:
+  issues: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      EXPIRY: "2026-12-31"
+      TRACKING_ISSUE: "21"
+    steps:
+      - name: Alert on milestone days while the tracking issue is open
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          days_left=$(( ( $(date -u -d "$EXPIRY" +%s) - $(date -u +%s) ) / 86400 ))
+          echo "days until npm token expiry: $days_left"
+          case "$days_left" in
+            30|14|7|3|1|0) alert=1 ;;
+            *) if [ "$days_left" -lt 0 ]; then alert=1; else alert=0; fi ;;
+          esac
+          if [ "$alert" != "1" ]; then
+            echo "not a milestone day — no alert"
+            exit 0
+          fi
+          state=$(gh issue view "$TRACKING_ISSUE" --repo "$GITHUB_REPOSITORY" --json state -q .state || echo "UNKNOWN")
+          if [ "$state" = "CLOSED" ]; then
+            echo "tracking issue #$TRACKING_ISSUE is closed — renewal done, no alert"
+            exit 0
+          fi
+          if [ "$days_left" -lt 0 ]; then
+            text="🔑🚨 npm publish token EXPIRED on $EXPIRY — npm releases are broken until NPM_TOKEN is renewed. See issue #$TRACKING_ISSUE."
+          else
+            text="🔑 npm publish token expires in ${days_left}d ($EXPIRY). Renew it and update the NPM_TOKEN secret, then close issue #$TRACKING_ISSUE to silence this reminder."
+          fi
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$text\"}" "$SLACK_WEBHOOK_URL" || true
