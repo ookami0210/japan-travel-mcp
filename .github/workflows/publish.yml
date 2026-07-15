@@ -40,9 +40,10 @@ jobs:
 
       - name: Upgrade npm for OIDC trusted publishing
         # Node 20 bundles npm 10.x; tokenless trusted publishing needs
-        # npm >= 11.5.
+        # npm >= 11.5. Pin to the npm 11 line — npm@latest is npm 12, which
+        # requires Node >= 22 and EBADENGINEs on this runner.
         run: |
-          npm install -g npm@latest
+          npm install -g npm@11
           npm --version
 
       - name: Install dependencies
