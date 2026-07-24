@@ -53,6 +53,7 @@ jobs:
           - glossary
           - kunishitei
           - industry-shukubo
+          - west-goldenroute
     steps:
       - uses: actions/checkout@v4
 
@@ -196,6 +197,10 @@ jobs:
           retry npx tsx scrapers/sources/fetch_hito_yu_kai.ts
           retry npx tsx scrapers/sources/fetch_koyasan_shukubo.ts
           retry python3 scrapers/sources/fetch_kyoto_sect_shukubo.py
+
+      - name: Run leg = west-goldenroute (#39)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'west-goldenroute'
+        run: npx tsx scrapers/sources/fetch_west_goldenroute.ts
 
       - name: Sync this leg's outputs to HF
         if: steps.gate.outputs.run == 'true'

@@ -77,7 +77,7 @@ corresponding workflow flips ON.
 | **MUNI** | `steady-scrape.yml` | daily cron 03:00 JST, 65–130 munis/day, 30-day SLA | gh-actions (cron OFF until launch) | #23 |
 | **R3** | `steady-scrape.yml` (chained `r3_refresh.ts`) | weekly per-source rotation (Mon/Tue/Wed/Thu) | gh-actions (chained) | #5–9 |
 | **DMO** | `dmo-refresh.yml` | bi-weekly (1st + 15th) 04:00 JST | gh-actions (cron OFF until launch) | #10–13 |
-| **WD-FOUNDATION** | `wd-foundation.yml` (matrix legs) | monthly (1st) 05:00 JST | gh-actions (cron OFF until launch) | #1–4, #15–19, #24, #25, #29–38 |
+| **WD-FOUNDATION** | `wd-foundation.yml` (matrix legs) | monthly (1st) 05:00 JST | gh-actions (cron OFF until launch) | #1–4, #15–19, #24, #25, #29–38, #39 |
 | **GLOSSARY** | `wd-foundation.yml` (leg `glossary`) | monthly | gh-actions (cron OFF until launch) | #20–22 |
 | **WIKIPEDIA-ABSTRACT** | `wd-foundation.yml` (leg `wikipedia-summaries`) | monthly | gh-actions (cron OFF until launch) | #34 / #35 / #36 (live) / #P1 (planned alias) |
 | **EVENTS** | (planned) | weekly during seasons | local (cold-start, planned) | #P4, #P10, #P14 |
@@ -579,6 +579,30 @@ requires either extending an existing channel or creating a new one.
 - **Coverage**: closes the Kyoto-area shukubo gap that #30 (Wikidata shukubo anchor) cannot fill — the per-sect facilities like 和順会館 / 御室会館 / 智積院会館 / 同朋会館 are not indexed in Wikidata. Each record carries the head temple's identity, sect affiliation, facility name, and the operator-published page metadata (title / description / phone / address) when the canonical URL fetches successfully. Entries with `fetch_status="pending_url_confirm"` carry the operator identity for the data layer even when the canonical URL has not yet been confirmed; they are filled in on a future revision.
 - **Status**: `active` (currently 3 facilities fetched + 6 pending URL confirmation)
 
+### Regional alliance official sites (自治体連合)
+
+#### #39 — 西のゴールデンルート (Golden Route to West Japan) 公式英語サイト
+- **Authority**: 西日本・九州ゴールデンルートアライアンス (2023-09 設立、300+ 自治体・団体; 事務局: 福岡市観光マーケティング課)
+- **URL**: https://japan-west-goldenroute.com/ (公式英語版。日本語ポータル https://west-goldenroute.jp/ は福岡市運営で、ヘッダーから本サイトへ公式リンク)
+- **License**: 公式機関の公開情報 (robots.txt が GPTBot / ClaudeBot / CCBot 等 AI クローラーを明示 `Allow: /`; 削除依頼即対応)
+- **Fetcher**: `scrapers/sources/fetch_west_goldenroute.ts`
+- **Output**: `data/r3/west_goldenroute.json`
+- **Cadence**: monthly (1st, wd-foundation leg `west-goldenroute`)
+- **Channel**: WD-FOUNDATION
+- **Coverage**: 4 sitemap-driven page sets — member-destination guides
+  (~19 cities/prefectures with fixed slug → 都道府県コード table), model
+  itineraries (~11 courses), special features (~15 articles), per-spot
+  browse-content pages (~300, category / season / destination tags).
+  English-native content; `name_ja` is populated for member destinations
+  from the alliance's fixed destination list. Records carry
+  `record_type` (destination / itinerary / feature / content),
+  `official_links` (per-city official tourist-guide URLs), and
+  `prefecture_codes` derived from the member-destination table.
+- **Status**: `active`
+- **Consumers**: `search_area` (searchR3Registries — canonical-answer boost
+  when the query mentions the golden route), embedding index
+  (`harvestR3` in `scrapers/embed/build_embeddings.ts`).
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape
@@ -789,6 +813,10 @@ contract.
 
 ## Change log
 
+- 2026-07-24 — added #39 西のゴールデンルート (Golden Route to West Japan
+  Alliance official English site) as a WD-FOUNDATION monthly leg
+  (`west-goldenroute`), output `data/r3/west_goldenroute.json`, wired into
+  search_area + the embedding index.
 - 2026-05-21 — launch-grade automation. Legacy `scrape.yml` removed; MUNI +
   R3 now run via `steady-scrape.yml`. New workflows `dmo-refresh.yml`,
   `wd-foundation.yml`, `embeddings-rebuild.yml` provide cron paths for the

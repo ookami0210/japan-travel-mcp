@@ -470,6 +470,28 @@ interface KoyasanShukuboRecord {
   fetched_at: string;
 }
 
+// 西日本・九州ゴールデンルートアライアンス (Golden Route to West Japan
+// Alliance; secretariat: Fukuoka City) — official English-site content:
+// member-destination guides, model itineraries, per-spot pages.
+// Written by scrapers/sources/fetch_west_goldenroute.ts (monthly).
+interface WestGoldenrouteRecord {
+  source: "west_goldenroute";
+  authority: string;
+  record_id: string; // "<type>:<slug>"
+  record_type: "destination" | "itinerary" | "feature" | "content";
+  name_en: string;
+  name_ja: string | null;
+  description_en: string | null;
+  body_en: string | null;
+  categories: string[];
+  seasons: string[];
+  destinations: string[];
+  prefecture_codes: string[];
+  official_links: string[];
+  url: string;
+  fetched_at: string;
+}
+
 // 観光庁 (Japan Tourism Agency) registered + candidate DMOs.
 // File shape differs from the other R-3 sources because the fetcher writes
 // `entries[]` rather than `records[]` and carries a top-level summary block.
@@ -553,6 +575,7 @@ let cachedUnescoJapan: R3SourceFile<UnescoJapanRecord> | null = null;
 let cachedDmo: DmoFile | null = null;
 let cachedHitoYuKai: R3SourceFile<HitoYuKaiRecord> | null = null;
 let cachedKoyasanShukubo: R3SourceFile<KoyasanShukuboRecord> | null = null;
+let cachedWestGoldenroute: R3SourceFile<WestGoldenrouteRecord> | null = null;
 // Iter83: cache for wikipedia_lists.json (hanabi/yuki_matsuri/etc)
 interface WikiListPage {
   qid: string | null;
@@ -2834,6 +2857,52 @@ async function searchR3Registries(
             lodging_type: "shukubo",
             designation_jp: "高野山宿坊協会 加盟",
             designation_en: "Member of Koyasan Shukubo Association (Mt. Koya temple lodging)",
+          },
+        });
+      }
+    }
+  }
+
+  // Golden Route to West Japan alliance content (destination guides /
+  // model itineraries / per-spot pages, English-native). When the query
+  // explicitly asks about the (western) golden route, the alliance's own
+  // itineraries + destination guides ARE the canonical answer — surface
+  // them at score 200 like the hisoyu / shukubo intent boosts above.
+  const wgrIntentRe =
+    /(golden\s*route|ゴールデン\s*ルート|西のゴールデン)/i;
+  const wgrQueryMatch = wgrIntentRe.test(qOriginal);
+  const wgr = await loadWestGoldenroute();
+  if (wgr) {
+    for (const r of wgr.records) {
+      let s = scoreOne({
+        name_ja: r.name_ja,
+        name_en: r.name_en,
+        description_en: r.description_en ?? r.body_en,
+      });
+      if (
+        wgrQueryMatch &&
+        (r.record_type === "itinerary" || r.record_type === "destination") &&
+        s < 200
+      ) {
+        s = 200;
+      }
+      if (s > 0) {
+        out.push({
+          score: s,
+          record: {
+            type: "official_guide",
+            source: "west_goldenroute",
+            key: `west_goldenroute:${r.record_id}`,
+            record_type: r.record_type,
+            name_en: r.name_en,
+            name_ja: r.name_ja,
+            description_en: r.description_en,
+            categories: r.categories,
+            seasons: r.seasons,
+            destinations: r.destinations,
+            prefecture_codes: r.prefecture_codes,
+            authority: r.authority,
+            source_url: r.url,
           },
         });
       }
@@ -7241,6 +7310,15 @@ async function loadKoyasanShukubo(): Promise<R3SourceFile<KoyasanShukuboRecord> 
     cachedKoyasanShukubo = null;
   }
   return cachedKoyasanShukubo;
+}
+
+async function loadWestGoldenroute(): Promise<
+  R3SourceFile<WestGoldenrouteRecord> | null
+> {
+  if (cachedWestGoldenroute) return cachedWestGoldenroute;
+  cachedWestGoldenroute =
+    await loadR3Json<WestGoldenrouteRecord>("west_goldenroute.json");
+  return cachedWestGoldenroute;
 }
 
 async function loadDmo(): Promise<DmoFile | null> {

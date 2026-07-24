@@ -288,6 +288,9 @@ async function harvestR3(limit: number | null): Promise<IndexEntry[]> {
     story_id?: string;
     title_ja?: string;
     summary_ja?: string | null;
+    record_id?: string;
+    body_en?: string | null;
+    url?: string | null;
   };
   const sources: { rel: string; sourceId: string; key: (r: R3) => string }[] = [
     { rel: "r3/maff_gi.json", sourceId: "maff_gi", key: (r) => `maff_gi:${r.registration_number}` },
@@ -295,6 +298,7 @@ async function harvestR3(limit: number | null): Promise<IndexEntry[]> {
     { rel: "r3/japan_heritage.json", sourceId: "japan_heritage", key: (r) => `japan_heritage:${r.story_id}` },
     { rel: "r3/bunka_intangible.json", sourceId: "bunka_intangible", key: (r) => `bunka_intangible:${r.qid}` },
     { rel: "r3/unesco_japan.json", sourceId: "unesco_japan", key: (r) => `unesco_japan:${r.qid}` },
+    { rel: "r3/west_goldenroute.json", sourceId: "west_goldenroute", key: (r) => `west_goldenroute:${r.record_id}` },
   ];
   for (const src of sources) {
     if (limit !== null && out.length >= limit) break;
@@ -310,8 +314,8 @@ async function harvestR3(limit: number | null): Promise<IndexEntry[]> {
         source: src.sourceId,
         name,
         description:
-          r.summary_ja || r.description_ja || r.characteristics_ja || r.description_en || null,
-        url: r.detail_url || r.wikidata_url || r.story_url || null,
+          r.summary_ja || r.description_ja || r.characteristics_ja || r.description_en || r.body_en || null,
+        url: r.detail_url || r.wikidata_url || r.story_url || r.url || null,
       });
     }
   }
