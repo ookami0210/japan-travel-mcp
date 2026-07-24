@@ -121,6 +121,54 @@ export function pickFixtureContent(rel: string): string {
   if (rel === "r3/translations/r3_translations.jsonl") {
     return `${JSON.stringify({ id: "fixture", lang: "en", text: "test" })}\n`;
   }
+  if (rel === "r3/west_goldenroute.json") {
+    return JSON.stringify({
+      source: {
+        name: "GOLDEN ROUTE to WEST JAPAN (fixture)",
+        authority: "test",
+        url: "https://japan-west-goldenroute.com/",
+        license: "test",
+      },
+      fetched_at: "2026-01-01",
+      total: 2,
+      records: [
+        {
+          source: "west_goldenroute",
+          authority: "test",
+          record_id: "destination:beppu-city",
+          record_type: "destination",
+          name_en: "Beppu City",
+          name_ja: "別府市",
+          description_en: "Fixture destination guide.",
+          body_en: null,
+          categories: ["Wellness"],
+          seasons: ["Winter"],
+          destinations: [],
+          prefecture_codes: ["44"],
+          official_links: [],
+          url: "https://japan-west-goldenroute.com/destinations/beppu-city/",
+          fetched_at: "2026-01-01",
+        },
+        {
+          source: "west_goldenroute",
+          authority: "test",
+          record_id: "itinerary:short01",
+          record_type: "itinerary",
+          name_en: "Fixture Model Course",
+          name_ja: null,
+          description_en: "Fixture itinerary crossing western Japan.",
+          body_en: null,
+          categories: [],
+          seasons: [],
+          destinations: [],
+          prefecture_codes: ["28", "44"],
+          official_links: [],
+          url: "https://japan-west-goldenroute.com/itineraries/short01/",
+          fetched_at: "2026-01-01",
+        },
+      ],
+    });
+  }
   if (rel.startsWith("r3/")) {
     return JSON.stringify({
       source: { name: "test", authority: "test", url: "", license: "" },

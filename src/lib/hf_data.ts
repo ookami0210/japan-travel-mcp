@@ -50,6 +50,7 @@ export const RUNTIME_FILES: readonly string[] = [
   "r3/japan_heritage.json",
   "r3/bunka_intangible.json",
   "r3/unesco_japan.json",
+  "r3/west_goldenroute.json",
   "r3/translations/r3_translations.jsonl",
   "glossary/seed_canonical.json",
   "glossary/mlit_canonical.json",
