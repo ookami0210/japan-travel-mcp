@@ -35,13 +35,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Trusted publishing requires Node >= 22.14 in addition to
+          # npm >= 11.5.1 (https://docs.npmjs.com/trusted-publishers/).
+          # npm 11.18 started enforcing this — Node 20 now fails the OIDC
+          # exchange with a misleading ENEEDAUTH (npm/cli#9088).
+          node-version: "22"
           cache: "npm"
 
       - name: Upgrade npm for OIDC trusted publishing
-        # Node 20 bundles npm 10.x; tokenless trusted publishing needs
-        # npm >= 11.5. Pin to the npm 11 line — npm@latest is npm 12, which
-        # requires Node >= 22 and EBADENGINEs on this runner.
+        # Node 22 bundles npm 10.x; tokenless trusted publishing needs
+        # npm >= 11.5.1. Pin to the npm 11 line.
         run: |
           npm install -g npm@11
           npm --version
