@@ -83,11 +83,16 @@ PRESETS: dict[str, list[str]] = {
         "_state/municipalities.json",
         "_state/wikidata_attractions.json",
         "_state/scrape_state.json",
+        # Every r3/ file consumed by harvestR3() in build_embeddings.ts must
+        # be listed here, or CI rebuilds silently drop that source from the
+        # semantic index (local files exist only on the operator machine).
         "r3/maff_gi.json",
         "r3/meti_densan.json",
         "r3/japan_heritage.json",
         "r3/bunka_intangible.json",
         "r3/unesco_japan.json",
+        "r3/dmo.json",
+        "r3/west_goldenroute.json",
     ],
     # translations-refresh.yml — incremental 17-language names + descriptions.
     # Needs the glossary/style inputs, the attractions corpus (entity context),
