@@ -76,6 +76,9 @@ PRESETS: dict[str, list[str]] = {
         "_state/official_urls.json",
         "_state/wikidata_attractions.json",
         "_state/enwiki_sitelinks.json",
+        # The wikipedia-summaries leg derives its ja targets from this #33
+        # sidecar (the regenerated master carries no wikipedia_titles).
+        "_state/wikidata_descriptions.json",
     ],
     # embeddings-rebuild.yml — full corpus rebuild needs the entire
     # per-prefecture set + R3 sources to compose the embedding source.

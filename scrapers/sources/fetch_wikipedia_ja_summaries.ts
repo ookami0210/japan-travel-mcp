@@ -28,6 +28,10 @@ import { createHash } from "node:crypto";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../..");
 const MASTER = resolve(REPO_ROOT, "data/_state/wikidata_attractions.json");
+const DESCRIPTIONS_SIDECAR = resolve(
+  REPO_ROOT,
+  "data/_state/wikidata_descriptions.json",
+);
 const OUT_FILE = resolve(REPO_ROOT, "data/_state/wikipedia_ja_summaries.json");
 const CACHE_DIR = resolve(REPO_ROOT, "data/_state/wikipedia_ja_summaries_cache");
 
@@ -113,12 +117,37 @@ async function main(): Promise<void> {
       wikipedia_titles?: { en?: string; ja?: string };
     }>;
   };
-  const targets: { qid: string; title: string }[] = [];
+  const byQid = new Map<string, string>();
   for (const a of master.attractions) {
     const ja = a.wikipedia_titles?.ja;
-    if (a.qid && ja) targets.push({ qid: a.qid, title: ja });
+    if (a.qid && ja) byQid.set(a.qid, ja);
   }
+  // The published master is regenerated from SPARQL, which strips the
+  // injected wikipedia_titles enrichment — so on a fresh CI checkout the
+  // master alone yields zero targets. The #33 descriptions sidecar records
+  // the jawiki sitelink per QID and is published to the dataset; union it
+  // in so the target set survives master regeneration.
+  try {
+    const sidecar = JSON.parse(
+      await readFile(DESCRIPTIONS_SIDECAR, "utf8"),
+    ) as { records?: Array<{ qid?: string; jawiki_title?: string | null }> };
+    for (const r of sidecar.records ?? []) {
+      if (r.qid && r.jawiki_title && !byQid.has(r.qid)) {
+        byQid.set(r.qid, r.jawiki_title);
+      }
+    }
+  } catch {
+    process.stderr.write(
+      `[wp_ja] WARN descriptions sidecar missing (${DESCRIPTIONS_SIDECAR})\n`,
+    );
+  }
+  const targets = [...byQid].map(([qid, title]) => ({ qid, title }));
   process.stderr.write(`[wp_ja] targets: ${targets.length}\n`);
+  if (targets.length === 0) {
+    throw new Error(
+      "no targets — master has no wikipedia_titles.ja and the descriptions sidecar is unavailable; refusing to write an empty output over good data",
+    );
+  }
 
   const startedAt = new Date().toISOString();
   const records: OutRecord[] = [];
