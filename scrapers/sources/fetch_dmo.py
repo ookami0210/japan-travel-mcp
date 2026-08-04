@@ -53,6 +53,7 @@ import argparse
 import json
 import re
 import sys
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
@@ -68,8 +69,11 @@ OUT_DMO = ROOT / "data" / "r3" / "dmo.json"
 OUT_SEEDS = ROOT / "data" / "_state" / "dmo_seed_urls.json"
 
 REGISTRY_PAGE = "https://www.mlit.go.jp/kankocho/seisaku_seido/dmo/ichiran.html"
-REGISTERED_PDF = "https://www.mlit.go.jp/kankocho/content/001993487.pdf"
-CANDIDATE_PDF = "https://www.mlit.go.jp/kankocho/content/001994512.pdf"
+# Fallbacks only — MLIT re-uploads the registry PDFs under a new content ID
+# on every revision, so the live URLs are discovered from REGISTRY_PAGE at
+# run time (discover_pdf_urls). A stale hardcoded URL 404s within months.
+REGISTERED_PDF_FALLBACK = "https://www.mlit.go.jp/kankocho/content/002005155.pdf"
+CANDIDATE_PDF_FALLBACK = "https://www.mlit.go.jp/kankocho/content/002005156.pdf"
 
 USER_AGENT = (
     "JapanTravelMCP/1.0 (+https://github.com/ookami0210/japan-travel-mcp; "
@@ -90,6 +94,34 @@ class DmoEntry:
     plan_pdf_url: str | None
     source: str
     authority: str
+
+
+def discover_pdf_urls() -> tuple[str, str]:
+    """Resolve the current registered / candidate list PDF URLs from the
+    registry page. Falls back to the last known content IDs if the page
+    layout changes — a fallback 404 then fails the run loudly, which is
+    the desired signal that the discovery regex needs updating."""
+    registered, candidate = REGISTERED_PDF_FALLBACK, CANDIDATE_PDF_FALLBACK
+    try:
+        req = urllib.request.Request(
+            REGISTRY_PAGE, headers={"User-Agent": USER_AGENT}
+        )
+        with urllib.request.urlopen(req, timeout=30) as r:
+            html = r.read().decode("utf-8", errors="replace")
+        for m in re.finditer(
+            r'<a[^>]+href="([^"]+\.pdf)"[^>]*>(.*?)</a>', html, re.S
+        ):
+            href, label = m.group(1), re.sub(r"<[^>]+>|\s+", "", m.group(2))
+            url = urllib.parse.urljoin(REGISTRY_PAGE, href)
+            if "登録DMO一覧" in label:
+                registered = url
+            elif "候補DMO一覧" in label:
+                candidate = url
+    except Exception as exc:  # noqa: BLE001 — discovery is best-effort
+        print(f"[dmo] WARN registry-page discovery failed: {exc}", file=sys.stderr)
+    print(f"[dmo] registered list: {registered}", file=sys.stderr)
+    print(f"[dmo] candidate list:  {candidate}", file=sys.stderr)
+    return registered, candidate
 
 
 def fetch_pdf(url: str, dest: Path) -> bytes:
@@ -255,12 +287,13 @@ def main() -> None:
     reg_pdf = CACHE_DIR / "registered.pdf"
     cand_pdf = CACHE_DIR / "candidate.pdf"
 
+    registered_url, candidate_url = discover_pdf_urls()
     if not args.no_download or not reg_pdf.exists():
-        print(f"[dmo] fetching {REGISTERED_PDF}", file=sys.stderr)
-        fetch_pdf(REGISTERED_PDF, reg_pdf)
+        print(f"[dmo] fetching {registered_url}", file=sys.stderr)
+        fetch_pdf(registered_url, reg_pdf)
     if not args.no_download or not cand_pdf.exists():
-        print(f"[dmo] fetching {CANDIDATE_PDF}", file=sys.stderr)
-        fetch_pdf(CANDIDATE_PDF, cand_pdf)
+        print(f"[dmo] fetching {candidate_url}", file=sys.stderr)
+        fetch_pdf(candidate_url, cand_pdf)
 
     print(f"[dmo] parsing registered ({reg_pdf})", file=sys.stderr)
     registered = harvest_entries(reg_pdf, "registered")

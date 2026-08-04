@@ -1,0 +1,36 @@
+# Freshness audit — weekly. Catches "workflow green but data frozen".
+#
+# Batch conclusions are not a health signal: fetchers can crash behind
+# continue-on-error, pickers can loop on one slice, uploads can ship
+# zero-byte files — all while every run stays green. This audit reads
+# per-file last-commit dates straight from the Hugging Face tree API and
+# compares them with each source's declared cadence (plus minimum-size
+# floors). Violations post to Slack and fail the run.
+#
+# Read-only: no HF token needed while the dataset is public.
+
+name: freshness-audit
+
+on:
+  schedule:
+    - cron: "0 23 * * 0"   # 08:00 JST Monday
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Audit dataset freshness vs cadence
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python3 scrapers/quality/freshness_audit.py

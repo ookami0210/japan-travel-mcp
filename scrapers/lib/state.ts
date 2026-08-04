@@ -105,6 +105,30 @@ export function recommendBatchSize(
   return clamp(scaled, baseline, MAX_BATCH);
 }
 
+/**
+ * Materialise picker output (codes, stalest-first) back into municipality
+ * rows WITHOUT losing that order.
+ *
+ * Never consume picker output via `munis.filter(m => codes.includes(m.code))`
+ * — filter preserves the source-array order (JIS code order), so in
+ * time-bounded mode (where the picker returns every candidate) the daily
+ * budget is spent on the lowest JIS codes every run and the stale tail is
+ * never reached. The steady scraper looped on Hokkaido for weeks this way
+ * while 1,700+ municipalities aged past the SLA.
+ */
+export function orderCodesToMunis<T extends { code: string }>(
+  codes: string[],
+  munis: T[],
+): T[] {
+  const byCode = new Map(munis.map((m) => [m.code, m]));
+  const out: T[] = [];
+  for (const c of codes) {
+    const m = byCode.get(c);
+    if (m) out.push(m);
+  }
+  return out;
+}
+
 export async function loadState(): Promise<ScraperState> {
   const path = fileURLToPath(STATE_PATH);
   try {

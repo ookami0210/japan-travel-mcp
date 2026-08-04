@@ -55,16 +55,25 @@ jobs:
           HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
         run: python3 scrapers/hf/prefetch_state.py --preset dmo
 
+      # Source steps use continue-on-error so one failing source cannot
+      # block its siblings — but their outcomes are collected by the
+      # "Fail if any source step failed" gate below, so a crash still turns
+      # the run red and triggers the Slack failure summary. Without the
+      # gate, a fetcher crash stays invisible while the data silently
+      # freezes (this is exactly how the registry stalled for 3 months).
       - name: DMO registry refresh (#10 — 観光庁 official registry)
+        id: registry
         # Per-script "skip if recent" cadence guards are inside each fetcher.
         continue-on-error: true
         run: python3 scrapers/sources/fetch_dmo.py
 
       - name: DMO plan PDFs (#11)
+        id: plans
         continue-on-error: true
         run: python3 scrapers/sources/fetch_dmo_plans.py
 
       - name: DMO website discovery (#12)
+        id: discovery
         # Uses Claude API (Haiku) for the strict 'official' prompt; needs ANTHROPIC_API_KEY.
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -110,6 +119,12 @@ jobs:
           python3 scrapers/hf/upload_dataset.py \
             --commit-message "DMO refresh $(date -u +%Y-%m-%d)" \
             --no-card
+
+      - name: Fail if any source step failed
+        if: steps.registry.outcome == 'failure' || steps.plans.outcome == 'failure' || steps.discovery.outcome == 'failure'
+        run: |
+          echo "::error::source step outcomes — registry=${{ steps.registry.outcome }} plans=${{ steps.plans.outcome }} discovery=${{ steps.discovery.outcome }}"
+          exit 1
 
       - name: Slack — failure summary
         if: failure()

@@ -813,6 +813,16 @@ contract.
 
 ## Change log
 
+- 2026-08-04 — reliability pass after the dataset-freshness audit:
+  steady-scrape picker order restored (stalest-first survives into the
+  task list; the order was being lost and the daily budget re-scraped the
+  same lowest-JIS-code block), fetch_dmo.py now discovers the registry
+  PDF URLs from the MLIT page at run time (hardcoded content IDs rot),
+  dmo-refresh gained a fail-loud gate over its continue-on-error source
+  steps, the wikipedia-summaries ja fetcher derives targets from the #33
+  sidecar (the regenerated master carries no wikipedia_titles), and a new
+  weekly `freshness-audit.yml` compares per-file HF last-commit dates
+  against declared cadences (+ min-size floors) and alerts on drift.
 - 2026-07-24 — added #39 西のゴールデンルート (Golden Route to West Japan
   Alliance official English site) as a WD-FOUNDATION monthly leg
   (`west-goldenroute`), output `data/r3/west_goldenroute.json`, wired into

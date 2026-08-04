@@ -23,6 +23,7 @@ import {
   loadState,
   saveState,
   pickStaleMunicipalities,
+  orderCodesToMunis,
 } from "./lib/state.js";
 import {
   DEFAULT_OPTIONS,
@@ -177,9 +178,11 @@ async function main(): Promise<void> {
   const selectCount = DAILY_BATCH_OVERRIDE ?? candidateCodes.length;
 
   const todayCodes = pickStaleMunicipalities(state, candidateCodes, selectCount);
-  const todayMunis = muniFile.municipalities.filter((m) =>
-    todayCodes.includes(m.code),
-  );
+  // Stalest-first order MUST survive into the task list — in time-bounded
+  // mode todayCodes covers every candidate, so an order-losing filter here
+  // would burn the whole budget on the lowest JIS codes each night (see
+  // orderCodesToMunis docs for the incident this caused).
+  const todayMunis = orderCodesToMunis(todayCodes, muniFile.municipalities);
 
   const counter = new ErrorCounter();
   const limit = pLimit(opts.globalConcurrency);

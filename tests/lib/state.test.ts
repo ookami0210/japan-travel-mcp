@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   pickStaleMunicipalities,
+  orderCodesToMunis,
   baselineBatchSize,
   recommendBatchSize,
   TARGET_CYCLE_DAYS,
@@ -70,6 +71,38 @@ describe("pickStaleMunicipalities", () => {
   it("returns fewer than `count` when allCodes is smaller", () => {
     const state = makeState({});
     expect(pickStaleMunicipalities(state, ["X"], 5)).toEqual(["X"]);
+  });
+});
+
+describe("orderCodesToMunis", () => {
+  const munis = [
+    { code: "01100", name: "sapporo" },
+    { code: "02201", name: "aomori" },
+    { code: "13101", name: "chiyoda" },
+  ];
+
+  it("preserves the picker's stalest-first order, not the source order", () => {
+    const stalestFirst = ["13101", "01100", "02201"];
+    expect(orderCodesToMunis(stalestFirst, munis).map((m) => m.name)).toEqual([
+      "chiyoda",
+      "sapporo",
+      "aomori",
+    ]);
+  });
+
+  it("keeps stalest-first order even when every candidate is selected (time-bounded mode)", () => {
+    // Regression guard for the steady-scrape stall: with all candidates
+    // selected, an order-losing implementation degenerates to JIS code
+    // order and the daily budget re-scrapes the same low-code block.
+    const allSelectedStalestFirst = ["02201", "13101", "01100"];
+    const out = orderCodesToMunis(allSelectedStalestFirst, munis);
+    expect(out.map((m) => m.code)).toEqual(allSelectedStalestFirst);
+  });
+
+  it("drops codes with no matching municipality row", () => {
+    expect(orderCodesToMunis(["13101", "99999"], munis).map((m) => m.code)).toEqual([
+      "13101",
+    ]);
   });
 });
 
