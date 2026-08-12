@@ -12,7 +12,7 @@
  * Slack: notifies start, daily summary, and any auto-stop.
  */
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import pLimit from "p-limit";
@@ -62,6 +62,29 @@ const DAILY_SCRAPE_MINUTES = (() => {
   const raw = process.env.DAILY_SCRAPE_MINUTES?.trim();
   const n = raw ? parseInt(raw, 10) : NaN;
   return Number.isFinite(n) && n > 0 ? n : 240;
+})();
+
+// Hard per-municipality wall-clock cap. The fetcher already times out each
+// HTTP request, but a pathological site (dozens of slow pages + retries) can
+// still keep one municipality in-flight far past the budget deadline. Because
+// the run waits on Promise.all(), a single hung municipality would block the
+// whole persist tail and eventually trip the workflow's job timeout — losing
+// the entire night's scrape. Capping each municipality bounds the overshoot.
+const MUNI_TIMEOUT_MINUTES = (() => {
+  const raw = process.env.MUNI_TIMEOUT_MINUTES?.trim();
+  const n = raw ? parseFloat(raw) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : 20;
+})();
+
+// How often the run flushes in-memory progress to disk. Persisting mid-run
+// means a SIGKILL (workflow step timeout / job cancellation) loses at most
+// this much work instead of the whole night — completed municipalities are
+// already on disk and get committed + pushed to HF by the always()-guarded
+// tail steps.
+const CHECKPOINT_MINUTES = (() => {
+  const raw = process.env.CHECKPOINT_MINUTES?.trim();
+  const n = raw ? parseFloat(raw) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : 5;
 })();
 
 const PREFECTURE_SLUGS: Record<string, string> = {
@@ -119,9 +142,32 @@ async function writePrefectureFile(
     ),
   };
 
-  const path = new URL(`${slug}.json`, PREFECTURES_DIR);
-  await mkdir(dirname(fileURLToPath(path)), { recursive: true });
-  await writeFile(fileURLToPath(path), JSON.stringify(merged, null, 2), "utf8");
+  const path = fileURLToPath(new URL(`${slug}.json`, PREFECTURES_DIR));
+  await mkdir(dirname(path), { recursive: true });
+  // Atomic write: mid-run checkpoints rewrite this file repeatedly, and a
+  // SIGKILL landing during a write must not truncate an existing prefecture
+  // file. Write to a temp path and rename.
+  const tmp = `${path}.tmp`;
+  await writeFile(tmp, JSON.stringify(merged, null, 2), "utf8");
+  await rename(tmp, path);
+}
+
+// Resolves to the promise's value, or to MUNI_TIMEOUT if `ms` elapses first.
+// The timer is cleared as soon as the promise settles so a fast municipality
+// never holds the event loop open waiting on a stale timeout.
+const MUNI_TIMEOUT = Symbol("muni-timeout");
+function withTimeout<T>(
+  p: Promise<T>,
+  ms: number,
+): Promise<T | typeof MUNI_TIMEOUT> {
+  let handle: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<typeof MUNI_TIMEOUT>((resolve) => {
+    handle = setTimeout(() => resolve(MUNI_TIMEOUT), ms);
+  });
+  return Promise.race([
+    p.finally(() => clearTimeout(handle)),
+    timeout,
+  ]);
 }
 
 async function main(): Promise<void> {
@@ -204,6 +250,54 @@ async function main(): Promise<void> {
   // Group by prefecture for output file management
   const byPref = new Map<string, MunicipalityScrapeResult[]>();
 
+  // Persist everything scraped so far to disk. Called on a timer during the
+  // run (checkpoint) and once at the end. Idempotent: writePrefectureFile
+  // merges by municipality code, so re-flushing the same prefecture with a
+  // growing result set is safe. Making progress durable mid-run is what lets
+  // a killed run keep the municipalities it already finished.
+  let flushing = false;
+  async function flushProgress(): Promise<void> {
+    if (flushing) return; // never overlap two flushes
+    flushing = true;
+    try {
+      for (const [prefCode, results] of Array.from(byPref.entries())) {
+        const slug = PREFECTURE_SLUGS[prefCode];
+        if (!slug) continue;
+        const prefName = results[0]?.municipality.prefecture_name ?? prefCode;
+        await writePrefectureFile(slug, prefCode, prefName, results);
+      }
+      state.last_run_at = new Date().toISOString();
+      await saveState(state);
+    } finally {
+      flushing = false;
+    }
+  }
+
+  // Periodic checkpoint. Sleeps CHECKPOINT_MINUTES between flushes; `wake()`
+  // interrupts the sleep so the loop exits promptly once scraping finishes.
+  let scrapingDone = false;
+  let wake: () => void = () => {};
+  const checkpointLoop = (async () => {
+    while (!scrapingDone) {
+      await new Promise<void>((resolve) => {
+        const h = setTimeout(resolve, CHECKPOINT_MINUTES * 60_000);
+        wake = () => {
+          clearTimeout(h);
+          resolve();
+        };
+      });
+      if (scrapingDone) break;
+      try {
+        await flushProgress();
+      } catch (err) {
+        console.error(
+          "[daily] checkpoint flush failed:",
+          (err as Error).message,
+        );
+      }
+    }
+  })();
+
   const tasks = todayMunis.map((m) =>
     limit(async () => {
       if (aborted) return;
@@ -218,18 +312,30 @@ async function main(): Promise<void> {
         return;
       }
       try {
-        const r = await scrapeOneMunicipality(
-          {
-            code: m.code,
-            name: m.name,
-            prefecture_code: m.prefecture_code,
-            prefecture_name: m.prefecture_name,
-            official_url: urlByCode.get(m.code) ?? null,
-          },
-          opts,
-          counter,
-          centroids,
+        const r = await withTimeout(
+          scrapeOneMunicipality(
+            {
+              code: m.code,
+              name: m.name,
+              prefecture_code: m.prefecture_code,
+              prefecture_name: m.prefecture_name,
+              official_url: urlByCode.get(m.code) ?? null,
+            },
+            opts,
+            counter,
+            centroids,
+          ),
+          MUNI_TIMEOUT_MINUTES * 60_000,
         );
+        if (r === MUNI_TIMEOUT) {
+          // Leave last_scraped_at untouched so this municipality stays stale
+          // and is re-picked next run. The abandoned scrape's in-flight fetch
+          // finishes in the background and is ignored.
+          console.error(
+            `[daily] ${m.name} exceeded ${MUNI_TIMEOUT_MINUTES}min cap — skipped (retries next run)`,
+          );
+          return;
+        }
         if (!byPref.has(m.prefecture_code)) byPref.set(m.prefecture_code, []);
         byPref.get(m.prefecture_code)!.push(r);
 
@@ -256,15 +362,11 @@ async function main(): Promise<void> {
 
   await Promise.all(tasks);
 
-  // Persist per-prefecture files
-  for (const [prefCode, results] of byPref) {
-    const slug = PREFECTURE_SLUGS[prefCode];
-    if (!slug) continue;
-    const prefName = results[0]?.municipality.prefecture_name ?? prefCode;
-    await writePrefectureFile(slug, prefCode, prefName, results);
-  }
+  // Stop the checkpoint timer and do the final durable flush.
+  scrapingDone = true;
+  wake();
+  await checkpointLoop;
 
-  state.last_run_at = new Date().toISOString();
   if (aborted) {
     state.auto_stop = {
       triggered: true,
@@ -272,7 +374,7 @@ async function main(): Promise<void> {
       triggered_at: new Date().toISOString(),
     };
   }
-  await saveState(state);
+  await flushProgress();
 
   const processedCount = Array.from(byPref.values()).flat().length;
   const totalSpots = Array.from(byPref.values())

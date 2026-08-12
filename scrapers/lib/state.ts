@@ -5,7 +5,7 @@
  * 30-day-stalest ~58 municipalities each run.
  */
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -144,7 +144,13 @@ export async function loadState(): Promise<ScraperState> {
 export async function saveState(state: ScraperState): Promise<void> {
   const path = fileURLToPath(STATE_PATH);
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, JSON.stringify(state, null, 2), "utf8");
+  // Atomic write: a mid-run checkpoint (or a SIGKILL from a workflow step
+  // timeout) must never leave a half-written scrape_state.json — a corrupt
+  // state file would break the next run's HF prefetch. Write to a temp file
+  // and rename, which is atomic on the same filesystem.
+  const tmp = `${path}.tmp`;
+  await writeFile(tmp, JSON.stringify(state, null, 2), "utf8");
+  await rename(tmp, path);
 }
 
 export function pickStaleMunicipalities(

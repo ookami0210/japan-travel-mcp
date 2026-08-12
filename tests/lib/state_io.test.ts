@@ -13,10 +13,11 @@ vi.mock("node:fs/promises", async () => {
     readFile: vi.fn(),
     writeFile: vi.fn(),
     mkdir: vi.fn(),
+    rename: vi.fn(),
   };
 });
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import {
   loadState,
   saveState,
@@ -27,14 +28,17 @@ import {
 const mockedReadFile = vi.mocked(readFile);
 const mockedWriteFile = vi.mocked(writeFile);
 const mockedMkdir = vi.mocked(mkdir);
+const mockedRename = vi.mocked(rename);
 
 beforeEach(() => {
   mockedReadFile.mockReset();
   mockedWriteFile.mockReset();
   mockedMkdir.mockReset();
-  // mkdir / writeFile resolve successfully by default
+  mockedRename.mockReset();
+  // mkdir / writeFile / rename resolve successfully by default
   mockedMkdir.mockResolvedValue(undefined);
   mockedWriteFile.mockResolvedValue(undefined);
+  mockedRename.mockResolvedValue(undefined);
 });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -153,14 +157,20 @@ describe("saveState", () => {
     expect(opts).toEqual({ recursive: true });
   });
 
-  it("writes pretty-printed JSON to scrape_state.json with utf8", async () => {
+  it("atomically writes pretty-printed JSON: temp file then rename", async () => {
     await saveState(sample);
+    // Content is written to a .tmp sibling, then renamed onto the final path.
     expect(mockedWriteFile).toHaveBeenCalledTimes(1);
-    const [path, content, encoding] = mockedWriteFile.mock.calls[0];
-    expect(String(path)).toMatch(/data\/_state\/scrape_state\.json$/);
+    const [tmpPath, content, encoding] = mockedWriteFile.mock.calls[0];
+    expect(String(tmpPath)).toMatch(/data\/_state\/scrape_state\.json\.tmp$/);
     expect(encoding).toBe("utf8");
     expect(String(content)).toMatch(/\n  "schema_version": 1/); // 2-space indent
     expect(JSON.parse(String(content))).toEqual(sample);
+
+    expect(mockedRename).toHaveBeenCalledTimes(1);
+    const [from, to] = mockedRename.mock.calls[0];
+    expect(String(from)).toMatch(/data\/_state\/scrape_state\.json\.tmp$/);
+    expect(String(to)).toMatch(/data\/_state\/scrape_state\.json$/);
   });
 
   it("performs mkdir before writeFile", async () => {
