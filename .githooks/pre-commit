@@ -9,6 +9,9 @@ set -euo pipefail
 HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
 SCANNER="$HOOK_DIR/_scan.sh"
 
+# pii-guard: block personal data (emails / phone numbers / raw data files)
+bash "$HOOK_DIR/pii_scan.sh" staged
+
 # Collect staged additions, excluding the diff header markers (+++)
 added_lines=$(git diff --cached --unified=0 --no-color --no-renames \
   | grep -E '^\+' | grep -vE '^\+\+\+ ' || true)

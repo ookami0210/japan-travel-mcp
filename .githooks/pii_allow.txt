@@ -1,0 +1,10 @@
+# pii-guard repo-specific allowlist.
+# plain line  = allowed content pattern (extended regex)
+# path:REGEX  = path exempt from scanning
+# Scraped official/public business contact data — publicly published by the
+# sources themselves (tourism orgs, hotels). Not personal data.
+path:^data/
+path:^docs/quality/
+path:^eval/
+# Role-based organizational addresses (public business contacts, not personal).
+(tips|partnership|hello|editor|info|contact|press|support|sales|marketing)@
