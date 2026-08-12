@@ -63,6 +63,13 @@ jobs:
           python3 scrapers/hf/prefetch_state.py --preset steady
 
       - name: Run daily MUNI scrape
+        # Step-level timeout (< the 300-min job timeout) is the safety net: if
+        # the scrape somehow overruns its DAILY_SCRAPE_MINUTES budget, only THIS
+        # step is killed — the job continues to the commit + HF-sync tail, which
+        # run under `if: always()` and persist whatever daily.ts already
+        # checkpointed to disk. Without this, an overrun tripped the JOB timeout
+        # and cancelled the whole job, discarding the night's scrape.
+        timeout-minutes: 230
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
@@ -73,6 +80,11 @@ jobs:
           # room of their own. ~180 munis/night still laps the corpus well
           # inside the 30-day freshness target.
           DAILY_SCRAPE_MINUTES: "180"
+          # Hard per-municipality cap and checkpoint cadence — daily.ts flushes
+          # progress to disk every CHECKPOINT_MINUTES so a kill loses at most
+          # that much work.
+          MUNI_TIMEOUT_MINUTES: "20"
+          CHECKPOINT_MINUTES: "5"
         run: npx tsx scrapers/daily.ts
 
       - name: R-3 weekly rotation (chain; errors isolated)
@@ -95,6 +107,10 @@ jobs:
         run: npx tsx scrapers/coverage_check.ts
 
       - name: Commit operational state (logs + scrape_state)
+        # always(): persist even if the scrape step was killed by its
+        # timeout-minutes — daily.ts checkpoints progress to disk, so there is
+        # real work to commit and push to HF even on a partial run.
+        if: always()
         # Only lightweight files committed in git get added here. Bulk data
         # (prefectures/*, hotels/master.json, translations/, embeddings/)
         # is gitignored — the next step pushes those to HF.
@@ -126,7 +142,9 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_DATASET_REPO: open-travel/japan-travel-mcp-data
-        if: env.HF_TOKEN != ''
+        # always(): push the checkpointed prefecture files even when the scrape
+        # step was killed mid-run, so partial progress still reaches HF.
+        if: ${{ always() && env.HF_TOKEN != '' }}
         continue-on-error: true
         run: |
           python3 -m pip install --quiet huggingface_hub
