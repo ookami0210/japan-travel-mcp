@@ -17,6 +17,9 @@ while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
   # Skip branch deletions
   [ "$local_sha" = "$zero" ] && continue
 
+  # pii-guard: block personal data in the pushed range
+  bash "$HOOK_DIR/pii_scan.sh" range "$remote_sha" "$local_sha" || violations=$((violations + 1))
+
   # Determine the range of new commits
   if [ "$remote_sha" = "$zero" ]; then
     # New ref — check commits not reachable from any other origin ref

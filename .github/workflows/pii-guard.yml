@@ -1,0 +1,13 @@
+name: pii-guard
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pii-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked tree for personal data
+        run: bash .githooks/pii_scan.sh tree
