@@ -64,22 +64,26 @@ jobs:
 
       - name: Run daily MUNI scrape
         # Step-level timeout (< the 300-min job timeout) is the safety net: if
-        # the scrape somehow overruns its DAILY_SCRAPE_MINUTES budget, only THIS
-        # step is killed — the job continues to the commit + HF-sync tail, which
-        # run under `if: always()` and persist whatever daily.ts already
+        # the scrape overruns its DAILY_SCRAPE_MINUTES budget, only THIS step is
+        # killed — the job continues to the commit + HF-sync tail, which run
+        # under `if: always()` and persist whatever daily.ts already
         # checkpointed to disk. Without this, an overrun tripped the JOB timeout
         # and cancelled the whole job, discarding the night's scrape.
-        timeout-minutes: 230
+        #
+        # Budget layout for the 01:00–06:00 JST window (300-min job timeout):
+        #   scrape soft budget 240 (stops launching new munis) → hard step kill
+        #   at 275 → ≥25 min left for commit + HF sync (the must-persist tail).
+        #   R-3 is skipped on a killed scrape (it runs only on step success).
+        timeout-minutes: 275
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
-          # Scrape as many stale municipalities as fit in this budget, then stop
-          # so the R-3 / commit / HF-sync tail runs inside timeout-minutes.
-          # 180 leaves ~2 h of tail: in-flight municipalities can overshoot the
-          # deadline by tens of minutes, and the R-3 + commit + HF sync need
-          # room of their own. ~180 munis/night still laps the corpus well
-          # inside the 30-day freshness target.
-          DAILY_SCRAPE_MINUTES: "180"
+          # Scrape stale-first until this wall-clock budget is spent, then stop
+          # launching new municipalities so the R-3 / commit / HF-sync tail runs
+          # inside the step + job timeouts. The public 01:00–06:00 JST window is
+          # ~5 h; 240 spends four of them on the scrape and reserves the rest
+          # for in-flight overshoot (≤ MUNI_TIMEOUT_MINUTES each) + the tail.
+          DAILY_SCRAPE_MINUTES: "240"
           # Hard per-municipality cap and checkpoint cadence — daily.ts flushes
           # progress to disk every CHECKPOINT_MINUTES so a kill loses at most
           # that much work.

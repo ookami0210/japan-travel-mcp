@@ -88,10 +88,6 @@ async function main(): Promise<void> {
   const onTrack = neverScraped === 0 && Number.isFinite(maxAgeDays) && maxAgeDays <= SLA_DAYS;
 
   const coverage: CoverageState = {
-    // Vestigial knob: daily throughput is governed by the run's time budget
-    // (DAILY_SCRAPE_MINUTES), not a batch size. Kept null for state-shape
-    // compatibility.
-    recommended_batch_size: null,
     last_check_at: new Date(now).toISOString(),
     max_age_days: Number.isFinite(maxAgeDays) ? Math.round(maxAgeDays * 10) / 10 : null,
     count_over_sla: countOverSla,
