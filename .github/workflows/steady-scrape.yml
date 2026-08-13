@@ -35,10 +35,15 @@ permissions:
 jobs:
   steady:
     runs-on: ubuntu-latest
-    # Public repo → unlimited free Actions minutes. The scrape runs inside a
-    # 01:00–06:00 JST window; daily.ts self-limits to DAILY_SCRAPE_MINUTES and
-    # this job timeout leaves a tail for the commit + HF sync steps.
-    timeout-minutes: 300
+    # The 01:00–06:00 JST window is a POLITENESS constraint on the municipal
+    # scrape only — we hit official sites when their traffic is lowest. The
+    # JTMCP-side tail (R-3, commit, HF sync) is internal/light and may run
+    # PAST 06:00; it does not need to fit inside the polite window. So the
+    # scrape gets the full ~5 h (DAILY_SCRAPE_MINUTES=300) and this job timeout
+    # is set to the GitHub-hosted-runner ceiling (6 h) to give the tail room
+    # after 06:00. (A single hosted job cannot run longer than 6 h; if the tail
+    # ever needs more, split it into a separate chained workflow.)
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
 
@@ -63,27 +68,29 @@ jobs:
           python3 scrapers/hf/prefetch_state.py --preset steady
 
       - name: Run daily MUNI scrape
-        # Step-level timeout (< the 300-min job timeout) is the safety net: if
-        # the scrape overruns its DAILY_SCRAPE_MINUTES budget, only THIS step is
-        # killed — the job continues to the commit + HF-sync tail, which run
-        # under `if: always()` and persist whatever daily.ts already
-        # checkpointed to disk. Without this, an overrun tripped the JOB timeout
-        # and cancelled the whole job, discarding the night's scrape.
+        # Step-level timeout (< the 360-min job timeout) is the safety net: if
+        # the scrape hangs, only THIS step is killed — the job continues to the
+        # commit + HF-sync tail, which run under `if: always()` and persist
+        # whatever daily.ts already checkpointed to disk. Without this, a hang
+        # tripped the JOB timeout and cancelled the whole job, discarding the
+        # night's scrape.
         #
-        # Budget layout for the 01:00–06:00 JST window (300-min job timeout):
-        #   scrape soft budget 240 (stops launching new munis) → hard step kill
-        #   at 275 → ≥25 min left for commit + HF sync (the must-persist tail).
-        #   R-3 is skipped on a killed scrape (it runs only on step success).
-        timeout-minutes: 275
+        # Timing (job starts 01:00 JST, ~7 min setup, so the scrape runs from
+        # ~01:07): the soft budget stops LAUNCHING new municipal fetches at
+        # ~06:07 — the edge of the polite window. In-flight fetches wrap up
+        # (≤ MUNI_TIMEOUT_MINUTES each). The 330-min step ceiling only fires if
+        # the scrape hangs; the tail then still has ~30 min before the 360 job
+        # cap. The R-3/commit/HF tail is allowed to run past 06:00.
+        timeout-minutes: 330
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
-          # Scrape stale-first until this wall-clock budget is spent, then stop
-          # launching new municipalities so the R-3 / commit / HF-sync tail runs
-          # inside the step + job timeouts. The public 01:00–06:00 JST window is
-          # ~5 h; 240 spends four of them on the scrape and reserves the rest
-          # for in-flight overshoot (≤ MUNI_TIMEOUT_MINUTES each) + the tail.
-          DAILY_SCRAPE_MINUTES: "240"
+          # Use the full ~5 h polite window (01:00–06:00 JST) for the municipal
+          # scrape: keep launching stale-first municipalities until this
+          # wall-clock budget is spent, then stop so in-flight fetches finish
+          # near 06:00. The JTMCP-side tail runs afterwards and is NOT charged
+          # against this window.
+          DAILY_SCRAPE_MINUTES: "300"
           # Hard per-municipality cap and checkpoint cadence — daily.ts flushes
           # progress to disk every CHECKPOINT_MINUTES so a kill loses at most
           # that much work.
