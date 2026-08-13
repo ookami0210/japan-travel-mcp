@@ -48,7 +48,17 @@ case "$MODE" in
     ;;
   range)
     OLD="${2:?old sha required}"; NEW="${3:?new sha required}"
-    [ "$OLD" = "$ZERO" ] && OLD="$EMPTY_TREE"
+    if [ "$OLD" = "$ZERO" ]; then
+      # New branch (no remote sha): scan only the commits this push actually
+      # adds to the remote, not the whole branch against the empty tree — the
+      # latter re-flags pre-existing repo content on every first push.
+      base=$(git rev-list "$NEW" --not --remotes=origin 2>/dev/null | tail -1)
+      if [ -n "$base" ]; then
+        OLD=$(git rev-parse "$base^" 2>/dev/null || echo "$EMPTY_TREE")
+      else
+        OLD="$NEW"   # nothing new relative to origin → scan nothing
+      fi
+    fi
     FILES=$(git diff --name-only --no-renames --diff-filter=ACMR "$OLD" "$NEW")
     ;;
   tree)
