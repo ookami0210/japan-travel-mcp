@@ -56,6 +56,14 @@ export const RUNTIME_FILES: readonly string[] = [
   "glossary/seed_canonical.json",
   "glossary/mlit_canonical.json",
   ...PREFECTURE_SLUGS.map((s) => `prefectures/${s}.json`),
+];
+
+/** Optional layers: fetched when present, but a missing file must never
+ *  fail the bootstrap — the server degrades to "layer absent" honestly
+ *  (e.g. get_spots category=food returns an empty venue list for that
+ *  prefecture). Keeps new dataset layers from bricking older/newer
+ *  installs during a rollout window. */
+export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // OSM food-venue layer (per prefecture) — feeds get_spots category=food.
   ...PREFECTURE_SLUGS.map((s) => `food/${s}.json`),
 ];
@@ -119,7 +127,8 @@ export async function ensureDataFromHf(): Promise<string> {
   const token = process.env.HF_TOKEN;
 
   const missing: string[] = [];
-  for (const rel of RUNTIME_FILES) {
+  const optionalSet = new Set(OPTIONAL_RUNTIME_FILES);
+  for (const rel of [...RUNTIME_FILES, ...OPTIONAL_RUNTIME_FILES]) {
     if (!(await fileExistsNonEmpty(join(cacheDir, rel)))) {
       missing.push(rel);
     }
@@ -159,7 +168,14 @@ export async function ensureDataFromHf(): Promise<string> {
           );
         }
       } catch (err) {
-        errors.push((err as Error).message);
+        if (optionalSet.has(rel)) {
+          // Optional layer — absence degrades a feature, never the server.
+          process.stderr.write(
+            `[japan-travel-mcp] optional layer missing (skipped): ${rel}\n`,
+          );
+        } else {
+          errors.push((err as Error).message);
+        }
       }
     }
   }
