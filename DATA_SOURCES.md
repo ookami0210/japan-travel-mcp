@@ -282,6 +282,25 @@ requires either extending an existing channel or creating a new one.
 - **Coverage**: 5,567 items with heritage designations + 6 direct-P31 types
 - **Status**: `active` (added iter54, 2026-05-04)
 
+#### #40 — OSM food venues (standalone dining layer)
+- **Authority**: OpenStreetMap contributors
+- **URL**: https://overpass-api.de/api/interpreter (Overpass API)
+- **License**: ODbL 1.0 (attribution surfaced in every tool response)
+- **Fetcher**: `scrapers/sources/fetch_osm_food.ts`
+- **Output**: `data/food/<slug>.json` (one file per prefecture, 47 files)
+- **Cadence**: monthly (1st, wd-foundation leg `osm-food`)
+- **Channel**: WD-FOUNDATION
+- **Coverage**: named dining POIs (amenity = restaurant / cafe / fast_food /
+  food_court / ice_cream) per prefecture — name (ja/en where tagged),
+  lat/lng, cuisine tags, raw `opening_hours`, venue website
+  (`official_url`), wheelchair, takeaway. Honest nulls for everything OSM
+  does not carry (price bands, last orders, reservation policy — those
+  require a per-venue official-page enrichment pass). Consumed by
+  `get_spots` `category=food` via `src/lib/food_layer.ts`.
+- **Status**: `active` (2026-08-15 — the dataset previously had NO
+  standalone food supply; food-focused consumers measured zero dining
+  candidates in major cities)
+
 #### #34 — Wikipedia ja summaries (description_ja upgrade)
 - **Authority**: Wikipedia (Wikimedia Foundation)
 - **URL**: https://ja.wikipedia.org/w/api.php (action=query&prop=extracts&exintro=1&exsentences=2&explaintext=1)
@@ -812,6 +831,21 @@ contract.
 ---
 
 ## Change log
+
+- 2026-08-15 — consumer-feedback pass (measured against real itinerary
+  generation): (1) dataset-integrity fix — the nightly merge was collapsing
+  re-scraped prefecture files to that night's municipalities and dropping
+  the `wikidata_attractions` layer; merge is now preservation-first, the
+  steady/embeddings prefetch pulls the current prefecture files, and a
+  repair restored the full corpus (all 47 files re-published). (2) NEW #40
+  OSM food-venue layer (`data/food/<slug>.json`, monthly wd-foundation leg
+  `osm-food`) + `get_spots category=food` — the dataset previously had no
+  standalone dining supply. (3) `area_id` (JIS muni code) stamped on
+  municipal spots at merge time. (4) New completeness KPI reporter
+  (`npm run quality:completeness`) — tracks placeable-entity counts
+  (name+geo+id+source+category+hours), not raw record counts. (5) Server:
+  OOM crash fix (heap guard + load-time compaction) for default-heap
+  machines.
 
 - 2026-08-04 — reliability pass after the dataset-freshness audit:
   steady-scrape picker order restored (stalest-first survives into the

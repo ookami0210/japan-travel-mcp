@@ -29,9 +29,14 @@ import { readdir, readFile } from "node:fs/promises";
 import { existsSync, realpathSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
-import { resolveDataRoot } from "./lib/hf_data.js";
+import { resolveDataRoot, PREFECTURE_SLUGS } from "./lib/hf_data.js";
 import { compactPrefectureFile } from "./lib/compact_data.js";
 import { ensureHeapHeadroom } from "./lib/heap_guard.js";
+import {
+  loadFoodLayer,
+  filterFoodVenues,
+  type FoodVenue,
+} from "./lib/food_layer.js";
 import { matchesMunicipality, stripPrefSuffix } from "./lib/match.js";
 import { semanticSearch, tryLoadSemanticIndex } from "./lib/semantic.js";
 import { hybridSearch } from "./lib/hybrid.js";
@@ -2944,6 +2949,11 @@ async function getSpots(args: {
    *  "post town", "cycling route", "shukubo" etc. without manually
    *  filtering an over-broad city list. */
   q?: string;
+  /** Category filter. "food" (also "restaurant" / "dining" / "cafe")
+   *  switches to the standalone OSM food-venue layer — named dining POIs
+   *  with coordinates, cuisine tags and (where OSM has them) opening hours
+   *  and official site. Other values pass through to the regular spot path. */
+  category?: string;
   /** Tier 5: explicit budget cap. Overrides intent-detected cap when
    *  both are present. Records with `price_band` exceeding the cap are
    *  dropped before the limit is applied. */
@@ -2958,6 +2968,98 @@ async function getSpots(args: {
    *  back to ja/en (iter138 RULE D constraint failures). */
   lang?: string;
 }): Promise<unknown> {
+  // ── Standalone food layer (category=food) ─────────────────────────────
+  // Dining venues come from the OSM food layer, not the municipal scrape —
+  // official municipal pages rarely enumerate restaurants, which used to
+  // leave food-focused queries with zero candidates. Handled BEFORE the
+  // full-corpus load: the food path only needs its own per-prefecture file.
+  const categoryNorm = args.category?.trim().toLowerCase() ?? "";
+  if (/^(food|restaurant|dining|cafe|restaurants|meal|eat)/.test(categoryNorm)) {
+    const limitFood = Math.min(Math.max(args.limit ?? 50, 1), 500);
+    if (!args.prefecture) {
+      return {
+        error: "prefecture_required",
+        hint: "category=food needs a prefecture (or region) to scope the venue list.",
+        disclaimer: DISCLAIMER,
+      };
+    }
+    let codes = (await resolvePrefectureCodes(args.prefecture)) ?? [];
+    if (codes.length === 0) {
+      // Forgiving fallback: "大阪" (no 府) → 大阪府 etc. Full-name scan first,
+      // then suffix-tolerant prefix match against the canonical ja names.
+      const inferred = inferPrefCode(args.prefecture);
+      if (inferred) {
+        codes = [inferred];
+      } else {
+        const bare = args.prefecture.trim();
+        for (const [name, code] of Object.entries(PREF_NAME_TO_CODE)) {
+          if (bare.length >= 2 && name.startsWith(bare)) {
+            codes = [code];
+            break;
+          }
+        }
+      }
+    }
+    if (codes.length === 0) {
+      return { error: "unknown_prefecture", query: args.prefecture, disclaimer: DISCLAIMER };
+    }
+    const venues: FoodVenue[] = [];
+    for (const code of codes) {
+      const slug = PREFECTURE_SLUGS[parseInt(code, 10) - 1];
+      if (!slug) continue;
+      const path = resolve(dataRoot(), "food", `${slug}.json`);
+      venues.push(...(await loadFoodLayer(path, slug)));
+    }
+    // City scoping is SOFT: OSM addr tags are sparse in Japan, so a hard
+    // filter on address would silently drop venues that simply lack the
+    // tag. Apply it only when it still leaves a usable set; otherwise fall
+    // back to the whole prefecture and say so honestly.
+    const cityRaw = args.city ?? args.municipality;
+    let scoped = venues;
+    let cityFilterApplied = false;
+    if (cityRaw) {
+      const needle = stripPrefSuffix(cityRaw);
+      const filtered = venues.filter((v) =>
+        (v.geo.address ?? "").includes(needle),
+      );
+      if (filtered.length >= 5) {
+        scoped = filtered;
+        cityFilterApplied = true;
+      }
+    }
+    const results = filterFoodVenues(scoped, {
+      q: args.q,
+      cuisine: categoryNorm === "cafe" ? "cafe" : undefined,
+      limit: limitFood,
+    });
+    return {
+      source: "osm_food_layer",
+      attribution:
+        "© OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright",
+      prefecture: args.prefecture,
+      city_filter: cityRaw ?? null,
+      city_filter_applied: cityRaw ? cityFilterApplied : null,
+      ...(cityRaw && !cityFilterApplied
+        ? {
+            city_filter_note:
+              "OSM address tags are too sparse to scope this city reliably — returning prefecture-wide venues. Narrow by geo (lat/lng) on the consumer side if needed.",
+          }
+        : {}),
+      total_in_scope: scoped.length,
+      count: results.length,
+      // Honest nulls contract: price bands / last orders / reservation
+      // policy are not in this layer. Null means "not published in the
+      // source", never "no" — do not guess values for these fields.
+      field_notes: {
+        hours_raw: "OSM opening_hours syntax where present; null = unknown",
+        official_url: "venue website from OSM where present; null = unknown",
+        price_band: "not available in this layer (null)",
+      },
+      results,
+      disclaimer: DISCLAIMER,
+    };
+  }
+
   const prefs = await loadAllPrefectures();
   const limit = Math.min(Math.max(args.limit ?? 50, 1), 500);
   const minQualityRequested =
@@ -12094,7 +12196,7 @@ const TOOLS = [
   {
     name: "get_spots",
     description:
-      "Returns tourist spots in a given prefecture or municipality.\n\nCombines two parallel data sources:\n  - Municipal-website scraping (spots from official tourism pages)\n  - Wikidata (multilingual labels, coordinates, CC0 license)\n\nUse this when the user wants to know 'what to see' in an area. Does NOT return availability or pricing — this is static reference data.",
+      "Returns tourist spots in a given prefecture or municipality.\n\nCombines two parallel data sources:\n  - Municipal-website scraping (spots from official tourism pages)\n  - Wikidata (multilingual labels, coordinates, CC0 license)\n\nWith category='food' it instead returns dining venues (restaurants / cafes / street food) from the OpenStreetMap food layer — named venues with coordinates, cuisine tags, and opening hours + official site where published.\n\nUse this when the user wants to know 'what to see' (or, with category=food, 'where to eat') in an area. Does NOT return availability or pricing — this is static reference data.",
     inputSchema: {
       type: "object",
       properties: {
@@ -12102,6 +12204,11 @@ const TOOLS = [
           type: "string",
           description:
             "Prefecture name in Japanese, English, or 2-digit JIS code (e.g., '鳥取県', 'tottori', '31')",
+        },
+        category: {
+          type: "string",
+          description:
+            "Set to 'food' (or 'restaurant' / 'cafe' / 'dining') to get dining venues from the OSM food layer instead of sightseeing spots. Requires `prefecture`. Combine with `q` to narrow by name/cuisine (e.g. q='sushi', q='ラーメン').",
         },
         city: {
           type: "string",
@@ -12719,6 +12826,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           city: args.city as string | undefined,
           municipality: args.municipality as string | undefined,
           q: args.q as string | undefined,
+          category: args.category as string | undefined,
           min_quality:
             typeof args.min_quality === "number" ? args.min_quality : undefined,
           limit:

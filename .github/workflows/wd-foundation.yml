@@ -54,6 +54,7 @@ jobs:
           - kunishitei
           - industry-shukubo
           - west-goldenroute
+          - osm-food
     steps:
       - uses: actions/checkout@v4
 
@@ -201,6 +202,12 @@ jobs:
       - name: Run leg = west-goldenroute (#39)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'west-goldenroute'
         run: npx tsx scrapers/sources/fetch_west_goldenroute.ts
+
+      - name: Run leg = osm-food (#40)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'osm-food'
+        # All 47 prefectures via Overpass with an 8s inter-query pause —
+        # roughly 10-20 min wall. Output data/food/<slug>.json.
+        run: npx tsx scrapers/sources/fetch_osm_food.ts
 
       - name: Sync this leg's outputs to HF
         if: steps.gate.outputs.run == 'true'

@@ -43,7 +43,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "validate:data-sources": "tsx scripts/validate_data_sources.ts",
-    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
+    "quality:completeness": "tsx scrapers/quality/completeness_report.ts"
   },
   "keywords": [
     "mcp",

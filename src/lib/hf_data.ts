@@ -24,7 +24,8 @@ import { homedir } from "node:os";
 const HF_REPO = "open-travel/japan-travel-mcp-data";
 const HF_BASE = `https://huggingface.co/datasets/${HF_REPO}/resolve/main`;
 
-const PREFECTURE_SLUGS = [
+/** All 47 prefecture slugs, ordered by JIS code (index 0 = code "01"). */
+export const PREFECTURE_SLUGS = [
   "hokkaido", "aomori", "iwate", "miyagi", "akita", "yamagata", "fukushima",
   "ibaraki", "tochigi", "gunma", "saitama", "chiba", "tokyo", "kanagawa",
   "niigata", "toyama", "ishikawa", "fukui", "yamanashi", "nagano", "gifu",
@@ -55,6 +56,8 @@ export const RUNTIME_FILES: readonly string[] = [
   "glossary/seed_canonical.json",
   "glossary/mlit_canonical.json",
   ...PREFECTURE_SLUGS.map((s) => `prefectures/${s}.json`),
+  // OSM food-venue layer (per prefecture) — feeds get_spots category=food.
+  ...PREFECTURE_SLUGS.map((s) => `food/${s}.json`),
 ];
 
 /** Where the cached data lives. */
