@@ -15,6 +15,7 @@ import { tmpdir, homedir } from "node:os";
 import { join, resolve } from "node:path";
 import {
   RUNTIME_FILES,
+  OPTIONAL_RUNTIME_FILES,
   getCacheDir,
   findLocalDataIfPresent,
   ensureDataFromHf,
@@ -174,24 +175,43 @@ describe("ensureDataFromHf", () => {
     await rm(cacheDir, { recursive: true, force: true });
   });
 
-  it("downloads every RUNTIME_FILE on a cold cache", async () => {
+  it("downloads every runtime file (required + optional) on a cold cache", async () => {
     const fetchMock = mockFetchOk("payload");
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await ensureDataFromHf();
 
     expect(result).toBe(cacheDir);
-    expect(fetchMock).toHaveBeenCalledTimes(RUNTIME_FILES.length);
+    expect(fetchMock).toHaveBeenCalledTimes(
+      RUNTIME_FILES.length + OPTIONAL_RUNTIME_FILES.length,
+    );
 
-    for (const rel of RUNTIME_FILES) {
+    for (const rel of [...RUNTIME_FILES, ...OPTIONAL_RUNTIME_FILES]) {
       const s = await stat(join(cacheDir, rel));
       expect(s.isFile()).toBe(true);
       expect(s.size).toBeGreaterThan(0);
     }
   });
 
-  it("does not re-fetch when every file already exists in cache", async () => {
+  it("optional-layer 404s are skipped; required-file 404s still fail", async () => {
+    // All required files cached; optional food files missing → 404s on the
+    // optional set must NOT throw (rollout-window safety).
     for (const rel of RUNTIME_FILES) {
+      const p = join(cacheDir, rel);
+      await mkdir(resolve(p, ".."), { recursive: true });
+      await writeFile(p, "cached");
+    }
+    vi.stubGlobal("fetch", mockFetchStatus(404, "Not Found"));
+    await expect(ensureDataFromHf()).resolves.toBe(cacheDir);
+
+    // But a REQUIRED file missing + 404 remains fatal.
+    await rm(join(cacheDir, RUNTIME_FILES[0]));
+    vi.stubGlobal("fetch", mockFetchStatus(404, "Not Found"));
+    await expect(ensureDataFromHf()).rejects.toThrow(/HF downloads failed/);
+  });
+
+  it("does not re-fetch when every file already exists in cache", async () => {
+    for (const rel of [...RUNTIME_FILES, ...OPTIONAL_RUNTIME_FILES]) {
       const p = join(cacheDir, rel);
       await mkdir(resolve(p, ".."), { recursive: true });
       await writeFile(p, "cached");
@@ -207,7 +227,7 @@ describe("ensureDataFromHf", () => {
 
   it("only downloads the files that are missing", async () => {
     const missingOne = RUNTIME_FILES[0];
-    for (const rel of RUNTIME_FILES) {
+    for (const rel of [...RUNTIME_FILES, ...OPTIONAL_RUNTIME_FILES]) {
       if (rel === missingOne) continue;
       const p = join(cacheDir, rel);
       await mkdir(resolve(p, ".."), { recursive: true });
@@ -224,7 +244,7 @@ describe("ensureDataFromHf", () => {
 
   it("treats zero-byte cached files as missing and re-downloads them", async () => {
     const emptyOne = RUNTIME_FILES[1];
-    for (const rel of RUNTIME_FILES) {
+    for (const rel of [...RUNTIME_FILES, ...OPTIONAL_RUNTIME_FILES]) {
       const p = join(cacheDir, rel);
       await mkdir(resolve(p, ".."), { recursive: true });
       await writeFile(p, rel === emptyOne ? "" : "cached");
