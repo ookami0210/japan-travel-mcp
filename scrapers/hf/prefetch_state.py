@@ -37,6 +37,22 @@ import shutil
 import sys
 from pathlib import Path
 
+# All 47 prefecture file slugs. The steady scraper MERGES tonight's results
+# into the existing file — on a fresh CI runner the "existing" file only
+# exists if we prefetch it, otherwise every re-scraped prefecture collapses
+# to that night's municipalities and loses its wikidata_attractions layer
+# (this exact data loss shipped to the dataset before the prefetch below).
+PREFECTURE_SLUGS: list[str] = [
+    "hokkaido", "aomori", "iwate", "miyagi", "akita", "yamagata", "fukushima",
+    "ibaraki", "tochigi", "gunma", "saitama", "chiba", "tokyo", "kanagawa",
+    "niigata", "toyama", "ishikawa", "fukui", "yamanashi", "nagano", "gifu",
+    "shizuoka", "aichi", "mie", "shiga", "kyoto", "osaka", "hyogo", "nara",
+    "wakayama", "tottori", "shimane", "okayama", "hiroshima", "yamaguchi",
+    "tokushima", "kagawa", "ehime", "kochi", "fukuoka", "saga", "nagasaki",
+    "kumamoto", "oita", "miyazaki", "kagoshima", "okinawa",
+]
+PREFECTURE_FILES: list[str] = [f"prefectures/{s}.json" for s in PREFECTURE_SLUGS]
+
 # Presets group the prefetch lists per workflow so each yml stays terse.
 PRESETS: dict[str, list[str]] = {
     # steady-scrape.yml (MUNI + chained R3). Picker reads municipalities +
@@ -56,6 +72,10 @@ PRESETS: dict[str, list[str]] = {
         # (real Batch API cost every night) and the nightly HF sync then
         # clobbers the corpus down to that one source's rows.
         "r3/translations/r3_translations.jsonl",
+        # The current prefecture files — the nightly merge preserves their
+        # wikidata_attractions + unscraped municipality blocks. See
+        # PREFECTURE_FILES note above for the data-loss incident this fixes.
+        *PREFECTURE_FILES,
     ],
     # dmo-refresh.yml — DMO discover + scrape inputs.
     "dmo": [
@@ -96,6 +116,10 @@ PRESETS: dict[str, list[str]] = {
         "r3/unesco_japan.json",
         "r3/dmo.json",
         "r3/west_goldenroute.json",
+        # The embedding source composes per-prefecture spots — on a fresh
+        # runner these must come from HF or the rebuild silently indexes an
+        # empty municipal corpus.
+        *PREFECTURE_FILES,
     ],
     # translations-refresh.yml — incremental 17-language names + descriptions.
     # Needs the glossary/style inputs, the attractions corpus (entity context),

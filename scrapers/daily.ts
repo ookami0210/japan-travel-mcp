@@ -26,6 +26,12 @@ import {
   orderCodesToMunis,
 } from "./lib/state.js";
 import {
+  mergePrefectureFile,
+  readPrefFile,
+  writePrefFileAtomic,
+  type PrefFileMuniBlock,
+} from "./lib/pref_file.js";
+import {
   DEFAULT_OPTIONS,
   type MunicipalityInput,
   type MunicipalityScrapeResult,
@@ -109,47 +115,25 @@ interface MunicipalityRaw {
   prefecture_name: string;
 }
 
-async function readPrefectureFile(slug: string): Promise<PrefectureFile | null> {
-  const path = new URL(`${slug}.json`, PREFECTURES_DIR);
-  try {
-    return JSON.parse(await readFile(fileURLToPath(path), "utf8")) as PrefectureFile;
-  } catch {
-    return null;
-  }
-}
-
 async function writePrefectureFile(
   slug: string,
   prefCode: string,
   prefName: string,
   results: MunicipalityScrapeResult[],
 ): Promise<void> {
-  const existing = await readPrefectureFile(slug);
-  const byCode = new Map<string, MunicipalityScrapeResult>();
-  if (existing) {
-    for (const r of existing.municipalities) byCode.set(r.municipality.code, r);
-  }
-  for (const r of results) byCode.set(r.municipality.code, r);
-
-  const merged: PrefectureFile = {
-    prefecture: { code: prefCode, name: prefName, name_en: slug },
-    data_as_of: new Date().toISOString(),
-    source: "https://github.com/ookami0210/japan-travel-mcp",
-    disclaimer:
-      "Data sourced from public websites. Verify directly with the property before making decisions.",
-    municipalities: Array.from(byCode.values()).sort((a, b) =>
-      a.municipality.code.localeCompare(b.municipality.code),
-    ),
-  };
-
   const path = fileURLToPath(new URL(`${slug}.json`, PREFECTURES_DIR));
-  await mkdir(dirname(path), { recursive: true });
-  // Atomic write: mid-run checkpoints rewrite this file repeatedly, and a
-  // SIGKILL landing during a write must not truncate an existing prefecture
-  // file. Write to a temp path and rename.
-  const tmp = `${path}.tmp`;
-  await writeFile(tmp, JSON.stringify(merged, null, 2), "utf8");
-  await rename(tmp, path);
+  // Preservation-first merge (see scrapers/lib/pref_file.ts): keeps the
+  // existing wikidata_attractions layer and every municipality block not
+  // scraped tonight. Requires the workflow to prefetch prefectures/* from HF
+  // so `existing` is the real current file, not empty-runner nothing.
+  const existing = await readPrefFile(path);
+  const merged = mergePrefectureFile(existing, {
+    prefCode,
+    prefName,
+    slug,
+    results: results as unknown as PrefFileMuniBlock[],
+  });
+  await writePrefFileAtomic(path, merged);
 }
 
 // Resolves to the promise's value, or to MUNI_TIMEOUT if `ms` elapses first.
