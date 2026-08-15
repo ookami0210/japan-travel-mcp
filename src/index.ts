@@ -30,6 +30,8 @@ import { existsSync, realpathSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 import { resolveDataRoot } from "./lib/hf_data.js";
+import { compactPrefectureFile } from "./lib/compact_data.js";
+import { ensureHeapHeadroom } from "./lib/heap_guard.js";
 import { matchesMunicipality, stripPrefSuffix } from "./lib/match.js";
 import { semanticSearch, tryLoadSemanticIndex } from "./lib/semantic.js";
 import { hybridSearch } from "./lib/hybrid.js";
@@ -87,6 +89,11 @@ interface ScrapedSpot {
   language: string;
   source_url: string;
   last_scraped_at: string;
+  /** Scraped page copy — used for keyword matching and get_local_food. */
+  body_paragraphs?: string[];
+  /** Image URLs from the source page. Compacted to the first entry at load
+   *  time (presence feeds the quality score; responses never include them). */
+  images?: string[];
 }
 
 interface MunicipalityBlock {
@@ -628,7 +635,12 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   for (const f of files) {
     try {
       const content = await readFile(resolve(dir, f), "utf8");
-      out.push(JSON.parse(content) as PrefectureFile);
+      const parsed = JSON.parse(content) as PrefectureFile;
+      // Drop response-invisible bulk (extra image URLs, scrape diagnostics)
+      // BEFORE caching — the corpus is ~680 MB of JSON and the parsed graph
+      // must fit the heap alongside every other dataset. See compact_data.ts.
+      compactPrefectureFile(parsed);
+      out.push(parsed);
     } catch {
       // skip malformed
     }
@@ -13052,8 +13064,14 @@ const isMain = (() => {
   }
 })();
 if (isMain) {
-  mainStdio().catch((err) => {
-    console.error("[japan-travel-mcp] FATAL:", err);
-    process.exit(1);
-  });
+  // The full corpus needs >2 GB of heap; on default-heap machines the server
+  // died with an OOM the first time search touched all prefectures. When the
+  // limit is too low this respawns once with a larger heap and mirrors the
+  // child — in that case normal startup must not continue here.
+  if (!ensureHeapHeadroom()) {
+    mainStdio().catch((err) => {
+      console.error("[japan-travel-mcp] FATAL:", err);
+      process.exit(1);
+    });
+  }
 }

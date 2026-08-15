@@ -30,6 +30,7 @@ import { pathToFileURL } from "node:url";
 // opposed to invoked via `node dist/src/index.js`), the stdio main() does
 // not run — that branch is gated by `import.meta.url === file://argv[1]`.
 import { buildServer, ensureDataReady } from "./index.js";
+import { ensureHeapHeadroom } from "./lib/heap_guard.js";
 
 // ── Operational hardening for a public, unauthenticated endpoint ───────
 //
@@ -291,8 +292,11 @@ const isMain = (() => {
   }
 })();
 if (isMain) {
-  main().catch((err) => {
-    console.error("[japan-travel-mcp/http] FATAL:", err);
-    process.exit(1);
-  });
+  // Same OOM guard as the stdio entrypoint — see src/lib/heap_guard.ts.
+  if (!ensureHeapHeadroom()) {
+    main().catch((err) => {
+      console.error("[japan-travel-mcp/http] FATAL:", err);
+      process.exit(1);
+    });
+  }
 }
