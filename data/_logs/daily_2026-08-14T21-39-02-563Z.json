@@ -1,0 +1,30 @@
+{
+  "run_type": "daily",
+  "municipalities_processed": 281,
+  "candidates_considered": 1932,
+  "time_budget_min": 300,
+  "prefectures_touched": [
+    "23",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46",
+    "47"
+  ],
+  "total_spots": 5392,
+  "total_errors": 2112,
+  "started_at": "2026-08-14T16:21:25.007Z",
+  "finished_at": "2026-08-14T21:39:02.564Z",
+  "elapsed_seconds": 19058,
+  "aborted": false,
+  "abort_reason": null,
+  "http": {
+    "success": 30815,
+    "fivexx": 6,
+    "fourxx": 3380,
+    "network_errors": 60
+  }
+}
