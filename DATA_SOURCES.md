@@ -301,6 +301,26 @@ requires either extending an existing channel or creating a new one.
   standalone food supply; food-focused consumers measured zero dining
   candidates in major cities)
 
+#### #41 — Food-venue official-page facts (Schema.org JSON-LD)
+- **Authority**: each venue's own official site (URL from OSM `website` tag)
+- **URL**: per-venue official_url (robots-checked, one page per venue)
+- **License**: facts published by the subject itself (structured data
+  intended for machine consumption); no free-text copying
+- **Fetcher**: `scrapers/sources/fetch_food_official_facts.ts`
+- **Output**: `data/food/<slug>.json` (in-place `official_page{...}` per
+  entry: hours_spec / opening_hours / price_range_raw /
+  accepts_reservations / telephone + retrieved_at provenance)
+- **Cadence**: monthly (manual or chained after the `osm-food` leg;
+  idempotent, 30-day recheck window, per-prefecture checkpoint)
+- **Channel**: WD-FOUNDATION
+- **Coverage**: venues with an official_url (~9% of the food layer).
+  Measured yield 2026-08-15: ~2% of pages carry venue-type JSON-LD (Japanese
+  small-business sites rarely embed schema.org) — kept because it is
+  deterministic, zero-cost, and the fetch+writeback skeleton is the base
+  for a later extraction pass. Pages without JSON-LD record an honest
+  `jsonld: false`, never guessed values.
+- **Status**: `active`
+
 #### #34 — Wikipedia ja summaries (description_ja upgrade)
 - **Authority**: Wikipedia (Wikimedia Foundation)
 - **URL**: https://ja.wikipedia.org/w/api.php (action=query&prop=extracts&exintro=1&exsentences=2&explaintext=1)
