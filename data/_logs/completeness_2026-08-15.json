@@ -1,0 +1,1403 @@
+{
+  "run_type": "completeness",
+  "generated_at": "2026-08-15T07:02:10.871Z",
+  "tier_definitions": {
+    "core": "name + geo + stable id + source provenance",
+    "categorized": "core + machine-readable category signal",
+    "placeable": "categorized + hours evidence"
+  },
+  "totals": {
+    "spots": {
+      "total": 70804,
+      "core": 70804,
+      "categorized": 0,
+      "placeable": 0,
+      "with_hours": 0,
+      "with_price": 0,
+      "with_official_url": 70804
+    },
+    "attractions": {
+      "total": 58939,
+      "core": 42886,
+      "categorized": 25351,
+      "placeable": 909,
+      "with_hours": 914,
+      "with_price": 49,
+      "with_official_url": 0
+    },
+    "food": {
+      "total": 155062,
+      "core": 155062,
+      "categorized": 83650,
+      "placeable": 16803,
+      "with_hours": 22132,
+      "with_price": 0,
+      "with_official_url": 14041
+    }
+  },
+  "per_prefecture": {
+    "gunma": {
+      "spots": {
+        "total": 1260,
+        "core": 1260,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1260
+      },
+      "attractions": {
+        "total": 1850,
+        "core": 1029,
+        "categorized": 607,
+        "placeable": 7,
+        "with_hours": 7,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1638,
+        "core": 1638,
+        "categorized": 882,
+        "placeable": 93,
+        "with_hours": 140,
+        "with_price": 0,
+        "with_official_url": 45
+      }
+    },
+    "saitama": {
+      "spots": {
+        "total": 3207,
+        "core": 3207,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 3207
+      },
+      "attractions": {
+        "total": 2654,
+        "core": 2226,
+        "categorized": 1963,
+        "placeable": 32,
+        "with_hours": 32,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 5802,
+        "core": 5802,
+        "categorized": 4150,
+        "placeable": 732,
+        "with_hours": 927,
+        "with_price": 0,
+        "with_official_url": 414
+      }
+    },
+    "chiba": {
+      "spots": {
+        "total": 1783,
+        "core": 1783,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1783
+      },
+      "attractions": {
+        "total": 4045,
+        "core": 2644,
+        "categorized": 2294,
+        "placeable": 32,
+        "with_hours": 32,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 5856,
+        "core": 5856,
+        "categorized": 3979,
+        "placeable": 542,
+        "with_hours": 702,
+        "with_price": 0,
+        "with_official_url": 438
+      }
+    },
+    "tokyo": {
+      "spots": {
+        "total": 2782,
+        "core": 2782,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 2782
+      },
+      "attractions": {
+        "total": 3729,
+        "core": 2163,
+        "categorized": 1603,
+        "placeable": 201,
+        "with_hours": 202,
+        "with_price": 12,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 27119,
+        "core": 27119,
+        "categorized": 18123,
+        "placeable": 4355,
+        "with_hours": 5148,
+        "with_price": 0,
+        "with_official_url": 3670
+      }
+    },
+    "kanagawa": {
+      "spots": {
+        "total": 2224,
+        "core": 2224,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 2224
+      },
+      "attractions": {
+        "total": 1406,
+        "core": 1335,
+        "categorized": 923,
+        "placeable": 70,
+        "with_hours": 71,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 10501,
+        "core": 10501,
+        "categorized": 7123,
+        "placeable": 1573,
+        "with_hours": 1827,
+        "with_price": 0,
+        "with_official_url": 795
+      }
+    },
+    "niigata": {
+      "spots": {
+        "total": 1423,
+        "core": 1423,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1423
+      },
+      "attractions": {
+        "total": 5592,
+        "core": 1357,
+        "categorized": 744,
+        "placeable": 10,
+        "with_hours": 10,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1800,
+        "core": 1800,
+        "categorized": 666,
+        "placeable": 79,
+        "with_hours": 107,
+        "with_price": 0,
+        "with_official_url": 56
+      }
+    },
+    "toyama": {
+      "spots": {
+        "total": 1076,
+        "core": 1076,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1076
+      },
+      "attractions": {
+        "total": 463,
+        "core": 410,
+        "categorized": 210,
+        "placeable": 5,
+        "with_hours": 5,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 699,
+        "core": 699,
+        "categorized": 331,
+        "placeable": 67,
+        "with_hours": 82,
+        "with_price": 0,
+        "with_official_url": 31
+      }
+    },
+    "ishikawa": {
+      "spots": {
+        "total": 639,
+        "core": 639,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 639
+      },
+      "attractions": {
+        "total": 685,
+        "core": 604,
+        "categorized": 254,
+        "placeable": 15,
+        "with_hours": 15,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1118,
+        "core": 1118,
+        "categorized": 586,
+        "placeable": 171,
+        "with_hours": 290,
+        "with_price": 0,
+        "with_official_url": 153
+      }
+    },
+    "fukui": {
+      "spots": {
+        "total": 1941,
+        "core": 1941,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1941
+      },
+      "attractions": {
+        "total": 723,
+        "core": 637,
+        "categorized": 306,
+        "placeable": 7,
+        "with_hours": 7,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1113,
+        "core": 1113,
+        "categorized": 634,
+        "placeable": 83,
+        "with_hours": 125,
+        "with_price": 0,
+        "with_official_url": 31
+      }
+    },
+    "yamanashi": {
+      "spots": {
+        "total": 844,
+        "core": 844,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 844
+      },
+      "attractions": {
+        "total": 484,
+        "core": 440,
+        "categorized": 169,
+        "placeable": 6,
+        "with_hours": 6,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 977,
+        "core": 977,
+        "categorized": 562,
+        "placeable": 103,
+        "with_hours": 138,
+        "with_price": 0,
+        "with_official_url": 106
+      }
+    },
+    "nagano": {
+      "spots": {
+        "total": 2250,
+        "core": 2250,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 2250
+      },
+      "attractions": {
+        "total": 1255,
+        "core": 1149,
+        "categorized": 426,
+        "placeable": 13,
+        "with_hours": 13,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 2555,
+        "core": 2555,
+        "categorized": 1467,
+        "placeable": 308,
+        "with_hours": 439,
+        "with_price": 0,
+        "with_official_url": 181
+      }
+    },
+    "gifu": {
+      "spots": {
+        "total": 1339,
+        "core": 1339,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1339
+      },
+      "attractions": {
+        "total": 996,
+        "core": 834,
+        "categorized": 471,
+        "placeable": 15,
+        "with_hours": 15,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1381,
+        "core": 1381,
+        "categorized": 593,
+        "placeable": 70,
+        "with_hours": 110,
+        "with_price": 0,
+        "with_official_url": 78
+      }
+    },
+    "shizuoka": {
+      "spots": {
+        "total": 2084,
+        "core": 2084,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 2084
+      },
+      "attractions": {
+        "total": 3684,
+        "core": 2432,
+        "categorized": 2033,
+        "placeable": 11,
+        "with_hours": 11,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 4046,
+        "core": 4046,
+        "categorized": 2257,
+        "placeable": 338,
+        "with_hours": 516,
+        "with_price": 0,
+        "with_official_url": 343
+      }
+    },
+    "aichi": {
+      "spots": {
+        "total": 4644,
+        "core": 4644,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 4644
+      },
+      "attractions": {
+        "total": 1686,
+        "core": 1543,
+        "categorized": 936,
+        "placeable": 22,
+        "with_hours": 22,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 6957,
+        "core": 6957,
+        "categorized": 4093,
+        "placeable": 663,
+        "with_hours": 891,
+        "with_price": 0,
+        "with_official_url": 403
+      }
+    },
+    "mie": {
+      "spots": {
+        "total": 943,
+        "core": 943,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 943
+      },
+      "attractions": {
+        "total": 1078,
+        "core": 933,
+        "categorized": 569,
+        "placeable": 14,
+        "with_hours": 14,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1729,
+        "core": 1729,
+        "categorized": 802,
+        "placeable": 86,
+        "with_hours": 121,
+        "with_price": 0,
+        "with_official_url": 116
+      }
+    },
+    "shiga": {
+      "spots": {
+        "total": 483,
+        "core": 483,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 483
+      },
+      "attractions": {
+        "total": 1150,
+        "core": 1060,
+        "categorized": 438,
+        "placeable": 6,
+        "with_hours": 6,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1940,
+        "core": 1940,
+        "categorized": 709,
+        "placeable": 94,
+        "with_hours": 132,
+        "with_price": 0,
+        "with_official_url": 103
+      }
+    },
+    "kyoto": {
+      "spots": {
+        "total": 807,
+        "core": 807,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 807
+      },
+      "attractions": {
+        "total": 1702,
+        "core": 1495,
+        "categorized": 673,
+        "placeable": 45,
+        "with_hours": 46,
+        "with_price": 4,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 4816,
+        "core": 4816,
+        "categorized": 2544,
+        "placeable": 499,
+        "with_hours": 742,
+        "with_price": 0,
+        "with_official_url": 434
+      }
+    },
+    "osaka": {
+      "spots": {
+        "total": 2211,
+        "core": 2211,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 2211
+      },
+      "attractions": {
+        "total": 1857,
+        "core": 1732,
+        "categorized": 890,
+        "placeable": 32,
+        "with_hours": 32,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 17742,
+        "core": 17742,
+        "categorized": 7297,
+        "placeable": 1260,
+        "with_hours": 1739,
+        "with_price": 0,
+        "with_official_url": 970
+      }
+    },
+    "hyogo": {
+      "spots": {
+        "total": 1326,
+        "core": 1326,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1326
+      },
+      "attractions": {
+        "total": 1858,
+        "core": 1748,
+        "categorized": 865,
+        "placeable": 38,
+        "with_hours": 38,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 9160,
+        "core": 9160,
+        "categorized": 3434,
+        "placeable": 822,
+        "with_hours": 1255,
+        "with_price": 0,
+        "with_official_url": 702
+      }
+    },
+    "nara": {
+      "spots": {
+        "total": 1280,
+        "core": 1280,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1280
+      },
+      "attractions": {
+        "total": 1291,
+        "core": 1172,
+        "categorized": 601,
+        "placeable": 17,
+        "with_hours": 17,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1725,
+        "core": 1725,
+        "categorized": 789,
+        "placeable": 111,
+        "with_hours": 175,
+        "with_price": 0,
+        "with_official_url": 99
+      }
+    },
+    "wakayama": {
+      "spots": {
+        "total": 545,
+        "core": 545,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 545
+      },
+      "attractions": {
+        "total": 699,
+        "core": 670,
+        "categorized": 195,
+        "placeable": 4,
+        "with_hours": 4,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1791,
+        "core": 1791,
+        "categorized": 689,
+        "placeable": 151,
+        "with_hours": 189,
+        "with_price": 0,
+        "with_official_url": 55
+      }
+    },
+    "tottori": {
+      "spots": {
+        "total": 747,
+        "core": 747,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 747
+      },
+      "attractions": {
+        "total": 434,
+        "core": 415,
+        "categorized": 142,
+        "placeable": 3,
+        "with_hours": 3,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 658,
+        "core": 658,
+        "categorized": 301,
+        "placeable": 118,
+        "with_hours": 151,
+        "with_price": 0,
+        "with_official_url": 99
+      }
+    },
+    "shimane": {
+      "spots": {
+        "total": 456,
+        "core": 456,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 456
+      },
+      "attractions": {
+        "total": 795,
+        "core": 635,
+        "categorized": 344,
+        "placeable": 12,
+        "with_hours": 12,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 561,
+        "core": 561,
+        "categorized": 358,
+        "placeable": 13,
+        "with_hours": 17,
+        "with_price": 0,
+        "with_official_url": 10
+      }
+    },
+    "okayama": {
+      "spots": {
+        "total": 643,
+        "core": 643,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 643
+      },
+      "attractions": {
+        "total": 757,
+        "core": 709,
+        "categorized": 285,
+        "placeable": 15,
+        "with_hours": 15,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 3246,
+        "core": 3246,
+        "categorized": 1750,
+        "placeable": 313,
+        "with_hours": 386,
+        "with_price": 0,
+        "with_official_url": 812
+      }
+    },
+    "hiroshima": {
+      "spots": {
+        "total": 1493,
+        "core": 1493,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1493
+      },
+      "attractions": {
+        "total": 682,
+        "core": 637,
+        "categorized": 242,
+        "placeable": 18,
+        "with_hours": 18,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1886,
+        "core": 1886,
+        "categorized": 1094,
+        "placeable": 210,
+        "with_hours": 303,
+        "with_price": 0,
+        "with_official_url": 192
+      }
+    },
+    "yamaguchi": {
+      "spots": {
+        "total": 276,
+        "core": 276,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 276
+      },
+      "attractions": {
+        "total": 417,
+        "core": 395,
+        "categorized": 161,
+        "placeable": 10,
+        "with_hours": 10,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 527,
+        "core": 527,
+        "categorized": 210,
+        "placeable": 28,
+        "with_hours": 46,
+        "with_price": 0,
+        "with_official_url": 40
+      }
+    },
+    "tokushima": {
+      "spots": {
+        "total": 695,
+        "core": 695,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 695
+      },
+      "attractions": {
+        "total": 670,
+        "core": 586,
+        "categorized": 327,
+        "placeable": 7,
+        "with_hours": 7,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 552,
+        "core": 552,
+        "categorized": 288,
+        "placeable": 45,
+        "with_hours": 58,
+        "with_price": 0,
+        "with_official_url": 39
+      }
+    },
+    "kagawa": {
+      "spots": {
+        "total": 355,
+        "core": 355,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 355
+      },
+      "attractions": {
+        "total": 1354,
+        "core": 778,
+        "categorized": 335,
+        "placeable": 14,
+        "with_hours": 14,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1106,
+        "core": 1106,
+        "categorized": 672,
+        "placeable": 116,
+        "with_hours": 191,
+        "with_price": 0,
+        "with_official_url": 55
+      }
+    },
+    "ehime": {
+      "spots": {
+        "total": 1668,
+        "core": 1668,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1668
+      },
+      "attractions": {
+        "total": 480,
+        "core": 445,
+        "categorized": 190,
+        "placeable": 11,
+        "with_hours": 11,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 962,
+        "core": 962,
+        "categorized": 491,
+        "placeable": 53,
+        "with_hours": 81,
+        "with_price": 0,
+        "with_official_url": 14
+      }
+    },
+    "kochi": {
+      "spots": {
+        "total": 640,
+        "core": 640,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 640
+      },
+      "attractions": {
+        "total": 464,
+        "core": 447,
+        "categorized": 104,
+        "placeable": 6,
+        "with_hours": 6,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 358,
+        "core": 358,
+        "categorized": 184,
+        "placeable": 10,
+        "with_hours": 21,
+        "with_price": 0,
+        "with_official_url": 13
+      }
+    },
+    "fukuoka": {
+      "spots": {
+        "total": 1868,
+        "core": 1868,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1868
+      },
+      "attractions": {
+        "total": 872,
+        "core": 793,
+        "categorized": 476,
+        "placeable": 22,
+        "with_hours": 23,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 3749,
+        "core": 3749,
+        "categorized": 2294,
+        "placeable": 382,
+        "with_hours": 502,
+        "with_price": 0,
+        "with_official_url": 239
+      }
+    },
+    "saga": {
+      "spots": {
+        "total": 598,
+        "core": 598,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 598
+      },
+      "attractions": {
+        "total": 309,
+        "core": 277,
+        "categorized": 110,
+        "placeable": 9,
+        "with_hours": 9,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 392,
+        "core": 392,
+        "categorized": 177,
+        "placeable": 20,
+        "with_hours": 33,
+        "with_price": 0,
+        "with_official_url": 16
+      }
+    },
+    "nagasaki": {
+      "spots": {
+        "total": 830,
+        "core": 830,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 830
+      },
+      "attractions": {
+        "total": 520,
+        "core": 451,
+        "categorized": 229,
+        "placeable": 12,
+        "with_hours": 12,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 541,
+        "core": 541,
+        "categorized": 293,
+        "placeable": 44,
+        "with_hours": 58,
+        "with_price": 0,
+        "with_official_url": 28
+      }
+    },
+    "kumamoto": {
+      "spots": {
+        "total": 1123,
+        "core": 1123,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1123
+      },
+      "attractions": {
+        "total": 465,
+        "core": 436,
+        "categorized": 142,
+        "placeable": 3,
+        "with_hours": 3,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 730,
+        "core": 730,
+        "categorized": 478,
+        "placeable": 199,
+        "with_hours": 228,
+        "with_price": 0,
+        "with_official_url": 64
+      }
+    },
+    "oita": {
+      "spots": {
+        "total": 645,
+        "core": 645,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 645
+      },
+      "attractions": {
+        "total": 481,
+        "core": 443,
+        "categorized": 123,
+        "placeable": 7,
+        "with_hours": 7,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 958,
+        "core": 958,
+        "categorized": 546,
+        "placeable": 183,
+        "with_hours": 227,
+        "with_price": 0,
+        "with_official_url": 172
+      }
+    },
+    "miyazaki": {
+      "spots": {
+        "total": 839,
+        "core": 839,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 839
+      },
+      "attractions": {
+        "total": 286,
+        "core": 244,
+        "categorized": 97,
+        "placeable": 3,
+        "with_hours": 3,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 511,
+        "core": 511,
+        "categorized": 280,
+        "placeable": 27,
+        "with_hours": 35,
+        "with_price": 0,
+        "with_official_url": 8
+      }
+    },
+    "kagoshima": {
+      "spots": {
+        "total": 1472,
+        "core": 1472,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1472
+      },
+      "attractions": {
+        "total": 1499,
+        "core": 641,
+        "categorized": 466,
+        "placeable": 8,
+        "with_hours": 8,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1234,
+        "core": 1234,
+        "categorized": 791,
+        "placeable": 83,
+        "with_hours": 110,
+        "with_price": 0,
+        "with_official_url": 57
+      }
+    },
+    "okinawa": {
+      "spots": {
+        "total": 1256,
+        "core": 1256,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1256
+      },
+      "attractions": {
+        "total": 378,
+        "core": 347,
+        "categorized": 194,
+        "placeable": 18,
+        "with_hours": 18,
+        "with_price": 1,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 2160,
+        "core": 2160,
+        "categorized": 1355,
+        "placeable": 383,
+        "with_hours": 558,
+        "with_price": 0,
+        "with_official_url": 359
+      }
+    },
+    "hokkaido": {
+      "spots": {
+        "total": 7131,
+        "core": 7131,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 7131
+      },
+      "attractions": {
+        "total": 881,
+        "core": 806,
+        "categorized": 600,
+        "placeable": 39,
+        "with_hours": 39,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 4664,
+        "core": 4664,
+        "categorized": 2853,
+        "placeable": 1064,
+        "with_hours": 1334,
+        "with_price": 0,
+        "with_official_url": 1154
+      }
+    },
+    "aomori": {
+      "spots": {
+        "total": 1512,
+        "core": 1512,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1512
+      },
+      "attractions": {
+        "total": 336,
+        "core": 287,
+        "categorized": 124,
+        "placeable": 9,
+        "with_hours": 9,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 2102,
+        "core": 2102,
+        "categorized": 653,
+        "placeable": 88,
+        "with_hours": 130,
+        "with_price": 0,
+        "with_official_url": 76
+      }
+    },
+    "iwate": {
+      "spots": {
+        "total": 2935,
+        "core": 2935,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 2935
+      },
+      "attractions": {
+        "total": 406,
+        "core": 377,
+        "categorized": 180,
+        "placeable": 8,
+        "with_hours": 8,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1271,
+        "core": 1271,
+        "categorized": 488,
+        "placeable": 33,
+        "with_hours": 51,
+        "with_price": 0,
+        "with_official_url": 17
+      }
+    },
+    "miyagi": {
+      "spots": {
+        "total": 1952,
+        "core": 1952,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1952
+      },
+      "attractions": {
+        "total": 636,
+        "core": 565,
+        "categorized": 281,
+        "placeable": 21,
+        "with_hours": 22,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 5876,
+        "core": 5876,
+        "categorized": 2296,
+        "placeable": 590,
+        "with_hours": 970,
+        "with_price": 0,
+        "with_official_url": 857
+      }
+    },
+    "akita": {
+      "spots": {
+        "total": 1256,
+        "core": 1256,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1256
+      },
+      "attractions": {
+        "total": 433,
+        "core": 408,
+        "categorized": 127,
+        "placeable": 12,
+        "with_hours": 12,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 2175,
+        "core": 2175,
+        "categorized": 672,
+        "placeable": 77,
+        "with_hours": 99,
+        "with_price": 0,
+        "with_official_url": 50
+      }
+    },
+    "yamagata": {
+      "spots": {
+        "total": 1500,
+        "core": 1500,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1500
+      },
+      "attractions": {
+        "total": 441,
+        "core": 418,
+        "categorized": 154,
+        "placeable": 10,
+        "with_hours": 10,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 2757,
+        "core": 2757,
+        "categorized": 621,
+        "placeable": 132,
+        "with_hours": 178,
+        "with_price": 0,
+        "with_official_url": 102
+      }
+    },
+    "fukushima": {
+      "spots": {
+        "total": 1305,
+        "core": 1305,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1305
+      },
+      "attractions": {
+        "total": 644,
+        "core": 606,
+        "categorized": 276,
+        "placeable": 8,
+        "with_hours": 8,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1699,
+        "core": 1699,
+        "categorized": 681,
+        "placeable": 83,
+        "with_hours": 172,
+        "with_price": 0,
+        "with_official_url": 121
+      }
+    },
+    "ibaraki": {
+      "spots": {
+        "total": 1571,
+        "core": 1571,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 1571
+      },
+      "attractions": {
+        "total": 3031,
+        "core": 1811,
+        "categorized": 1457,
+        "placeable": 10,
+        "with_hours": 10,
+        "with_price": 0,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 1883,
+        "core": 1883,
+        "categorized": 1171,
+        "placeable": 186,
+        "with_hours": 231,
+        "with_price": 0,
+        "with_official_url": 134
+      }
+    },
+    "tochigi": {
+      "spots": {
+        "total": 947,
+        "core": 947,
+        "categorized": 0,
+        "placeable": 0,
+        "with_hours": 0,
+        "with_price": 0,
+        "with_official_url": 947
+      },
+      "attractions": {
+        "total": 2381,
+        "core": 1316,
+        "categorized": 1015,
+        "placeable": 12,
+        "with_hours": 12,
+        "with_price": 2,
+        "with_official_url": 0
+      },
+      "food": {
+        "total": 2039,
+        "core": 2039,
+        "categorized": 943,
+        "placeable": 123,
+        "with_hours": 167,
+        "with_price": 0,
+        "with_official_url": 90
+      }
+    }
+  }
+}
