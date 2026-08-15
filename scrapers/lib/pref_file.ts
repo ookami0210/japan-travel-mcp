@@ -15,9 +15,14 @@
 
 import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import { dirname } from "node:path";
+import { classifySpot } from "./spot_category.js";
 
 export interface PrefFileSpot {
   id?: string;
+  name?: string;
+  description?: string | null;
+  /** Coarse category — extractor-set, else backfilled deterministically. */
+  category?: string | null;
   last_scraped_at?: string;
   /** JIS municipality code — stamped at merge time for area joins. */
   area_id?: string;
@@ -57,6 +62,22 @@ export function stampAreaIds(block: PrefFileMuniBlock): void {
   }
 }
 
+/** Backfill spot.category deterministically from name/description (see
+ *  spot_category.ts). Only fills nulls — a category the extractor set from
+ *  an explicit page signal always wins. */
+export function stampCategories(block: PrefFileMuniBlock): void {
+  for (const s of block.spots ?? []) {
+    if (!s || typeof s !== "object") continue;
+    if (s.category === undefined || s.category === null) {
+      const c = classifySpot(
+        s.name as string | undefined,
+        s.description as string | undefined,
+      );
+      if (c) s.category = c;
+    }
+  }
+}
+
 /**
  * Merge fresh municipality blocks into an existing prefecture file.
  *
@@ -86,6 +107,7 @@ export function mergePrefectureFile(
     const code = b?.municipality?.code;
     if (!code) continue;
     stampAreaIds(b);
+    stampCategories(b);
     const prev = byCode.get(code);
     if (!prev || blockRecency(b) >= blockRecency(prev)) byCode.set(code, b);
   }
