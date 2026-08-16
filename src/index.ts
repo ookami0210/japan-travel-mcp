@@ -27,9 +27,29 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { readdir, readFile } from "node:fs/promises";
 import { existsSync, realpathSync } from "node:fs";
+import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 import { resolveDataRoot, PREFECTURE_SLUGS } from "./lib/hf_data.js";
+
+/**
+ * Real package version, resolved from package.json (dev runs from src/,
+ * shipped runs from dist/src/ — hence the two relative candidates).
+ * Surfaced in the MCP server declaration and in responses so consumers can
+ * tell a stale cached install from the release they think they're running.
+ */
+const PACKAGE_VERSION: string = (() => {
+  const req = createRequire(import.meta.url);
+  for (const rel of ["../package.json", "../../package.json"]) {
+    try {
+      const pkg = req(rel) as { name?: string; version?: string };
+      if (pkg.name === "japan-travel-mcp" && pkg.version) return pkg.version;
+    } catch {
+      // try the next candidate
+    }
+  }
+  return "unknown";
+})();
 import { compactPrefectureFile } from "./lib/compact_data.js";
 import { ensureHeapHeadroom } from "./lib/heap_guard.js";
 import {
@@ -5679,12 +5699,16 @@ async function getSpots(args: {
     min_quality_applied: minQualityRequested,
     fallback_used: fallbackUsed,
     data_as_of: dataAsOf(prefs),
+    server_version: PACKAGE_VERSION,
     disclaimer: DISCLAIMER,
     note:
-      "Spots ranked by completeness + name-match boost. Wikidata curated " +
-      "entities are always included when admin or name matches the city. " +
-      "If everything was below `min_quality`, we drop the floor and return " +
-      "the top-N by raw quality (fallback_used=true).",
+      "Ordering contract: `spots` is sorted by score descending, which is " +
+      "tier-major by construction — every must_see precedes every notable, " +
+      "which precedes every broader. Naive clients can render the array " +
+      "as-is. Spots ranked by completeness + name-match boost. Wikidata " +
+      "curated entities are always included when admin or name matches the " +
+      "city. If everything was below `min_quality`, we drop the floor and " +
+      "return the top-N by raw quality (fallback_used=true).",
   };
 }
 
@@ -13119,7 +13143,7 @@ export { initDataRoot, ensureDataReady };
 
 export function buildServer(): Server {
   const server = new Server(
-    { name: "japan-travel-mcp", version: "1.0.0" },
+    { name: "japan-travel-mcp", version: PACKAGE_VERSION },
     { capabilities: { tools: {} } },
   );
   registerHandlers(server);

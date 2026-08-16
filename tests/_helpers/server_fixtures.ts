@@ -11,7 +11,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 
-import { RUNTIME_FILES } from "../../src/lib/hf_data.js";
+import { OPTIONAL_RUNTIME_FILES, RUNTIME_FILES } from "../../src/lib/hf_data.js";
 
 /**
  * Documented MCP tool registry. Shared between the stdio and HTTP smoke
@@ -178,13 +178,26 @@ export function pickFixtureContent(rel: string): string {
       records: [],
     });
   }
+  if (rel.startsWith("food/")) {
+    return JSON.stringify({
+      prefecture: basename(rel, ".json"),
+      generated_at: "2026-01-01",
+      source: "test-fixture",
+      count: 0,
+      entries: [],
+    });
+  }
   if (rel.startsWith("_state/")) return JSON.stringify({});
   if (rel.startsWith("glossary/")) return JSON.stringify([]);
   return "{}";
 }
 
 export async function materialiseFixtures(cacheDir: string): Promise<void> {
-  for (const rel of RUNTIME_FILES) {
+  // Optional layers included on purpose: ensureDataFromHf() downloads ANY
+  // missing file, optional or not — leaving them out silently turns the
+  // "fully offline" smoke suite into a network test that only passes when
+  // Hugging Face responds inside the hook timeout.
+  for (const rel of [...RUNTIME_FILES, ...OPTIONAL_RUNTIME_FILES]) {
     const full = join(cacheDir, rel);
     await mkdir(dirname(full), { recursive: true });
     await writeFile(full, pickFixtureContent(rel), "utf8");
