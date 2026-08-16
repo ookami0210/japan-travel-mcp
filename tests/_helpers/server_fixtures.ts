@@ -35,6 +35,7 @@ export const EXPECTED_TOOLS = [
   "get_traditional_arts",
   "get_transport",
   "plan_feasibility_check",
+  "resolve_entity",
   "search_area",
   "search_hybrid",
   "search_semantic",
