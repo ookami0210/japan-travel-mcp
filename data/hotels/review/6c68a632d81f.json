@@ -24,6 +24,8 @@
       "website": "https://www.choice-hotels.jp/hotel/narita/",
       "type": null,
       "prefecture_code": "12",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "qid": "Q111866306",
         "wikidata_url": "https://www.wikidata.org/wiki/Q111866306",
@@ -66,6 +68,8 @@
       "website": null,
       "type": "hotel",
       "prefecture_code": "12",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "osm_id": "node/11630327924",
         "osm_url": "https://www.openstreetmap.org/node/11630327924",
@@ -90,7 +94,8 @@
           "name": "コンフォートホテル",
           "name:en": "Comfort Hotel Narita",
           "source": "Bing",
-          "tourism": "hotel"
+          "tourism": "hotel",
+          "wikidata": "Q111866306"
         }
       }
     }

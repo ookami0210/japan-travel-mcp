@@ -1,0 +1,115 @@
+{
+  "id": "d4af64fa83a2",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 33m",
+    "name similarity 0.78 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "way/172117885",
+      "source_url": "https://www.openstreetmap.org/way/172117885",
+      "name": "ホテルニューグランド新館",
+      "name_en": "Hotel New Grand",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.4449834,
+        "lng": 139.6492829
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "231-8520",
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "14",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "way/172117885",
+        "osm_url": "https://www.openstreetmap.org/way/172117885",
+        "type": "hotel",
+        "name": "ホテルニューグランド新館",
+        "name_en": "Hotel New Grand",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.4449834,
+          "lng": 139.6492829
+        },
+        "postal_code": "231-8520",
+        "full_address": null,
+        "city": "横浜市",
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "addr:block_number": "10",
+          "addr:city": "横浜市",
+          "addr:postcode": "231-8520",
+          "addr:province": "神奈川県",
+          "addr:quarter": "山下町",
+          "addr:suburb": "中区",
+          "building": "historic",
+          "description": "'building:height'は45度方と歩測による実測値",
+          "height": "66.5",
+          "name": "ホテルニューグランド新館",
+          "name:en": "Hotel New Grand",
+          "name:es": "Hotel New Grand",
+          "rooms": "6",
+          "source": "survey.2012-07-22",
+          "tourism": "hotel",
+          "wikidata": "Q5911779",
+          "wikipedia": "ja:ホテルニューグランド"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/13871707589",
+      "source_url": "https://www.openstreetmap.org/node/13871707589",
+      "name": "ホテルニューグランド",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.4448006,
+        "lng": 139.6495658
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "14",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/13871707589",
+        "osm_url": "https://www.openstreetmap.org/node/13871707589",
+        "type": "hotel",
+        "name": "ホテルニューグランド",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.4448006,
+          "lng": 139.6495658
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "ホテルニューグランド",
+          "tourism": "hotel"
+        }
+      }
+    }
+  ]
+}

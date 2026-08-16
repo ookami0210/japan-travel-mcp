@@ -24,6 +24,8 @@
       "website": "https://www.strings-hotel.jp/nagoya/",
       "type": null,
       "prefecture_code": "23",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "qid": "Q111219073",
         "wikidata_url": "https://www.wikidata.org/wiki/Q111219073",
@@ -66,6 +68,8 @@
       "website": null,
       "type": "hotel",
       "prefecture_code": "23",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "osm_id": "node/11703600655",
         "osm_url": "https://www.openstreetmap.org/node/11703600655",
@@ -88,7 +92,8 @@
         "raw_tags": {
           "name": "ストリングスホテル",
           "name:en": "Strings Hotel",
-          "tourism": "hotel"
+          "tourism": "hotel",
+          "wikidata": "Q111219073"
         }
       }
     }

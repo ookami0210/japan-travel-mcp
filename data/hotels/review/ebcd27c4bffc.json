@@ -24,6 +24,8 @@
       "website": null,
       "type": "hotel",
       "prefecture_code": "27",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "osm_id": "node/10285605018",
         "osm_url": "https://www.openstreetmap.org/node/10285605018",
@@ -75,6 +77,8 @@
       "website": "http://www.holidaypearlhotel.com/",
       "type": "hotel",
       "prefecture_code": "27",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "osm_id": "way/1124757662",
         "osm_url": "https://www.openstreetmap.org/way/1124757662",
@@ -104,12 +108,14 @@
           "addr:suburb": "大正区",
           "air_conditioning": "yes",
           "building": "hotel",
+          "height": "13.2",
           "internet_access": "wlan",
           "internet_access:fee": "customers",
           "name": "ホリディパールホテル",
           "name:en": "Holiday Pearl Hotel",
           "name:ja": "ホリディパールホテル",
           "phone": "+81-6-6563-9318",
+          "source:height": "MLIT_PLATEAU",
           "start_date": "2018-12",
           "tourism": "hotel",
           "website": "http://www.holidaypearlhotel.com/"

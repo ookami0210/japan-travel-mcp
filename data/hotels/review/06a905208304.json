@@ -24,6 +24,8 @@
       "website": "https://www.tokyuhotels.co.jp/cerulean-h/",
       "type": null,
       "prefecture_code": "13",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "qid": "Q111406673",
         "wikidata_url": "https://www.wikidata.org/wiki/Q111406673",
@@ -66,6 +68,8 @@
       "website": null,
       "type": "hotel",
       "prefecture_code": "13",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
         "osm_id": "way/55441040",
         "osm_url": "https://www.openstreetmap.org/way/55441040",
@@ -89,6 +93,7 @@
           "assembly_point:unable_to_move": "yes",
           "building": "yes",
           "building:levels": "47",
+          "ele": "24.1",
           "emergency": "assembly_point",
           "height": "184",
           "internet_access": "wlan",

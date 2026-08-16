@@ -1,84 +1,89 @@
 {
-  "id": "3669bc1db96d",
+  "id": "c6cce527d577",
   "confidence": "likely",
   "match_reasons": [
-    "distance 67m",
+    "distance 35m",
     "name similarity 0.75 (likely)"
   ],
   "candidates": [
     {
       "source": "osm",
-      "source_id": "way/223115849",
-      "source_url": "https://www.openstreetmap.org/way/223115849",
-      "name": "オークラ千葉ホテル",
+      "source_id": "node/1927344759",
+      "source_url": "https://www.openstreetmap.org/node/1927344759",
+      "name": "第二スターナゴヤ",
       "name_en": null,
       "name_zh": null,
       "name_ko": null,
       "coordinates": {
-        "lat": 35.603618,
-        "lng": 140.1038586
+        "lat": 35.1686346,
+        "lng": 136.8796761
       },
-      "phone": null,
+      "phone": "+81 52-452-0022",
       "street": null,
       "postal_code": null,
       "website": null,
       "type": "hotel",
-      "prefecture_code": "12",
+      "prefecture_code": "23",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
-        "osm_id": "way/223115849",
-        "osm_url": "https://www.openstreetmap.org/way/223115849",
+        "osm_id": "node/1927344759",
+        "osm_url": "https://www.openstreetmap.org/node/1927344759",
         "type": "hotel",
-        "name": "オークラ千葉ホテル",
+        "name": "第二スターナゴヤ",
         "name_en": null,
         "name_zh": null,
         "name_ko": null,
         "coordinates": {
-          "lat": 35.603618,
-          "lng": 140.1038586
+          "lat": 35.1686346,
+          "lng": 136.8796761
         },
         "postal_code": null,
         "full_address": null,
         "city": null,
         "street": null,
-        "phone": null,
+        "phone": "+81 52-452-0022",
         "website": null,
         "stars": null,
         "raw_tags": {
-          "building": "yes",
-          "name": "オークラ千葉ホテル",
+          "fax": "+81 52-452-0487",
+          "name": "第二スターナゴヤ",
+          "phone": "+81 52-452-0022",
           "tourism": "hotel"
         }
       }
     },
     {
       "source": "osm",
-      "source_id": "way/223115858",
-      "source_url": "https://www.openstreetmap.org/way/223115858",
-      "name": "オークラ千葉ホテル南館",
+      "source_id": "node/14027061475",
+      "source_url": "https://www.openstreetmap.org/node/14027061475",
+      "name": "スターナゴヤ",
       "name_en": null,
       "name_zh": null,
       "name_ko": null,
       "coordinates": {
-        "lat": 35.6031136,
-        "lng": 140.103457
+        "lat": 35.1686368,
+        "lng": 136.879296
       },
       "phone": null,
       "street": null,
       "postal_code": null,
       "website": null,
       "type": "hotel",
-      "prefecture_code": "12",
+      "prefecture_code": "23",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
-        "osm_id": "way/223115858",
-        "osm_url": "https://www.openstreetmap.org/way/223115858",
+        "osm_id": "node/14027061475",
+        "osm_url": "https://www.openstreetmap.org/node/14027061475",
         "type": "hotel",
-        "name": "オークラ千葉ホテル南館",
+        "name": "スターナゴヤ",
         "name_en": null,
         "name_zh": null,
         "name_ko": null,
         "coordinates": {
-          "lat": 35.6031136,
-          "lng": 140.103457
+          "lat": 35.1686368,
+          "lng": 136.879296
         },
         "postal_code": null,
         "full_address": null,
@@ -88,8 +93,7 @@
         "website": null,
         "stars": null,
         "raw_tags": {
-          "building": "yes",
-          "name": "オークラ千葉ホテル南館",
+          "name": "スターナゴヤ",
           "tourism": "hotel"
         }
       }
