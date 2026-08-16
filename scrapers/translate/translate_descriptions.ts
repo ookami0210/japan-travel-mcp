@@ -75,6 +75,7 @@ const TARGET_LANGUAGES = [
   "en",
   "ja",
   "zh",
+  "zh-Hant",
   "ko",
   "fr",
   "es",
@@ -157,6 +158,7 @@ For each entity request, write ONE description per target language. Each descrip
 - en: Plain American English. Lead with the type ("X is a Buddhist temple in...").
 - ja: 自然な観光案内文。敬体（です・ます調）で。
 - zh: 简体中文。観光客向けの自然な紹介文。
+- zh-Hant: 繁體中文（臺灣用語）。観光客向けの自然な紹介文。
 - ko: 한국어 관광 안내문 (해요체). 자연스럽고 정확하게.
 - fr/es/de/it/pt: Use European conventions for date/era references. Translate suffixes appropriately.
 - ru: Русский язык. Использовать стандартную транслитерацию японских названий.

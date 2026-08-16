@@ -361,6 +361,7 @@ const SUPPORTED_LANGUAGES = [
   "en",
   "ja",
   "zh",
+  "zh-Hant",
   "ko",
   "fr",
   "es",
@@ -377,6 +378,26 @@ const SUPPORTED_LANGUAGES = [
   "tl",
 ] as const;
 type SupportedLang = (typeof SUPPORTED_LANGUAGES)[number];
+
+/**
+ * Canonicalize a requested language code. Consumers send regional variants
+ * ("en-US", "zh-TW", "ko_KR") that used to fail the exact-match gates and
+ * silently drop localized content. Chinese script variants map explicitly
+ * (Traditional readers must never get Simplified and vice versa); other
+ * codes fall back to their base language when that base is supported.
+ * Unknown codes pass through untouched so existing requested_lang_note
+ * fallback paths keep firing.
+ */
+function normalizeRequestedLang(raw: unknown): string | undefined {
+  if (typeof raw !== "string" || raw.trim() === "") return undefined;
+  const v = raw.trim().replace(/_/g, "-").toLowerCase();
+  if (["zh-hant", "zh-tw", "zh-hk", "zh-mo"].includes(v)) return "zh-Hant";
+  if (["zh", "zh-hans", "zh-cn", "zh-sg"].includes(v)) return "zh";
+  if ((SUPPORTED_LANGUAGES as readonly string[]).includes(v)) return v;
+  const base = v.split("-")[0];
+  if ((SUPPORTED_LANGUAGES as readonly string[]).includes(base)) return base;
+  return raw;
+}
 
 interface DescriptionRecord {
   qid: string;
@@ -13160,6 +13181,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: rawArgs } = request.params;
   const args = (rawArgs ?? {}) as Record<string, unknown>;
+  // Central choke point: every tool receives the canonical language code
+  // (zh-TW→zh-Hant, en-US→en, …) instead of each handler re-implementing it.
+  if ("lang" in args) args.lang = normalizeRequestedLang(args.lang);
   try {
     // Lazy data bootstrap: the handshake (initialize / tools/list) already
     // succeeded without touching the network; only an actual tool call needs

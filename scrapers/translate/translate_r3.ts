@@ -51,6 +51,7 @@ const TARGET_LANGUAGES = [
   "en",
   "ja",
   "zh",
+  "zh-Hant",
   "ko",
   "fr",
   "es",
@@ -315,6 +316,7 @@ For each entity input you receive, return:
 - en: Plain American English, neutral / encyclopedic register.
 - ja: Keep Japanese verbatim from the source where possible (the input *is* Japanese).
 - zh: 简体中文。客观、准确。
+- zh-Hant: 繁體中文（臺灣用語・計程車/捷運等）。客觀、準確。
 - ko: 한국어. 객관적이고 정확하게.
 - fr/es/de/it/pt: Use European conventions; keep Japanese proper nouns in Latin script.
 - ru: Русский язык. Стандартная транслитерация японских названий.

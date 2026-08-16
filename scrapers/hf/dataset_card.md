@@ -56,10 +56,10 @@ a structured, multilingual form. This dataset fixes that gap.
 
 ```
 translations/
-  descriptions_complete.jsonl     # 13,394 attractions × 17 languages — rich
+  descriptions_complete.jsonl     # 13,394 attractions × 18 languages — rich
                                   # 200-300 char tourism descriptions
-  multilingual_complete.jsonl     # 13,961 attractions × 17 languages — names
-  multilingual_wikipedia.jsonl    # 17-language names from Wikipedia sitelinks
+  multilingual_complete.jsonl     # 13,961 attractions × 18 languages — names
+  multilingual_wikipedia.jsonl    # 18-language names from Wikipedia sitelinks
   jp_en.jsonl                     # JP → EN canonical name mapping
 
 prefectures/                      # 47 prefecture files: municipal-scrape spots
@@ -75,12 +75,12 @@ r3/                               # Official designation registries
   bunka_intangible.json           # 125 Important Intangible Cultural Properties
   unesco_japan.json               # 58 UNESCO ICH inscriptions for Japan
   translations/
-    r3_translations.jsonl         # 690 designation records × 17 languages
+    r3_translations.jsonl         # 690 designation records × 18 languages
 
 glossary/
   seed_canonical.json             # House style for translations
   mlit_canonical.json             # Japan Tourism Agency (MLIT) official terminology
-  wikipedia_multilingual.json     # 17-language Wikipedia sitelinks (build-time)
+  wikipedia_multilingual.json     # 18-language Wikipedia sitelinks (build-time)
 
 _state/
   wikidata_attractions.json       # 41,404 Wikidata attractions, ja-anchored
@@ -126,10 +126,13 @@ The chart shows the per-prefecture entity count — the long tail outside Kyoto
 
 ![Coverage by prefecture](coverage_chart.png)
 
-**13,394 attractions × 17 languages = 227,698 description cells.** Plus 690
+**13,394 attractions × 18 languages = 241,092 description cells.** Traditional Chinese (`zh-Hant`, Taiwan
+lexicon) is derived from the quality-controlled Simplified layer via
+deterministic OpenCC conversion (s2twp); records added after 2026-08 are
+generated natively in both Chinese scripts. Plus 690
 official-designation records (MAFF GI, METI crafts, Japan Heritage,
 Bunka-cho intangible records, UNESCO ICH) translated to the same 17
-languages = 11,730 more cells. Plus 13,961 canonical names × 17 languages
+languages = 12,420 more cells. Plus 13,961 canonical names × 18 languages
 = 237,337 more cells.
 
 ## Refresh cadence
