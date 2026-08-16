@@ -524,7 +524,12 @@ requires either extending an existing channel or creating a new one.
 - **Output**: `data/hotels/raw/osm.json`
 - **Cadence**: monthly+
 - **Channel**: WD-FOUNDATION (manual)
-- **Coverage**: ~20,000 lodging tags in Japan bbox
+- **Coverage**: ~45,000 lodging tags in the Japan bbox (2026-08: hotel /
+  hostel / guest_house / motel / apartment + the seasonal-lodging layer
+  chalet / alpine_hut / wilderness_hut — ski cottages and mountain huts
+  that operate part of the year; `seasonal` and `opening_hours` raw tags
+  are carried through to the master). Bbox catches Korean/Taiwanese
+  points — dropped downstream by the 30km nearest-centroid rule in #19.
 - **Status**: `active`
 
 #### #19 — Hotel master merge (#17 + #18 + corrections)

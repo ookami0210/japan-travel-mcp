@@ -20,7 +20,20 @@ const USER_AGENT =
   "JapanTravelMCP/0.0.1 (+https://github.com/ookami0210/japan-travel-mcp)";
 
 // Types we treat as accommodation. Skip "love_hotel" by leaving it off the list.
-const TOURISM_TAGS = ["hotel", "hostel", "guest_house", "motel", "apartment"];
+// chalet / alpine_hut / wilderness_hut are the seasonal-lodging layer (ski
+// cottages, mountain huts) — often winter-only or summer-only operations
+// that no OTA-shaped source enumerates; seasonality is a feature to keep,
+// not noise to filter.
+const TOURISM_TAGS = [
+  "hotel",
+  "hostel",
+  "guest_house",
+  "motel",
+  "apartment",
+  "chalet",
+  "alpine_hut",
+  "wilderness_hut",
+];
 
 // Japan bounding box (covers main islands, Okinawa, Ogasawara). Includes
 // some adjacent waters but the tag filter restricts to actual hotel POIs.

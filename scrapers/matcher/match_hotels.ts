@@ -49,6 +49,8 @@ interface BaseHotel {
   website: string | null;
   type: string | null;
   prefecture_code: string | null;
+  seasonal: string | null;
+  hours_raw: string | null;
   raw: unknown;
 }
 
@@ -80,6 +82,7 @@ interface OsmHotel {
   street: string | null;
   phone: string | null;
   website: string | null;
+  raw_tags?: Record<string, string>;
 }
 
 interface MatchedRecord {
@@ -97,6 +100,14 @@ interface MatchedRecord {
   postal_code: string | null;
   street: string | null;
   prefecture_code: string | null;
+  /**
+   * OSM seasonal tag (yes / winter / summer / …). Ski-area and mountain-hut
+   * lodging often operates part of the year — a feature the ledger keeps,
+   * not noise. null = no claim (most operators don't tag it).
+   */
+  seasonal: string | null;
+  /** Raw OSM opening_hours where tagged (machine-parseable spec). */
+  hours_raw: string | null;
   sources: { source: "wikidata" | "osm"; id: string; url: string }[];
 }
 
@@ -223,6 +234,8 @@ async function loadWikidata(): Promise<BaseHotel[]> {
       website: h.website,
       type: null,
       prefecture_code: h.prefecture_code,
+      seasonal: null,
+      hours_raw: null,
       raw: h,
     }));
   } catch (err) {
@@ -251,6 +264,8 @@ async function loadOsm(): Promise<BaseHotel[]> {
       website: h.website,
       type: h.type,
       prefecture_code: null,
+      seasonal: h.raw_tags?.["seasonal"] ?? null,
+      hours_raw: h.raw_tags?.["opening_hours"] ?? null,
       raw: h,
     }));
   } catch (err) {
@@ -455,6 +470,8 @@ async function main(): Promise<void> {
       postal_code: null,
       street: null,
       prefecture_code: null,
+      seasonal: null,
+      hours_raw: null,
       sources: [],
     };
     for (const m of members) {
@@ -469,6 +486,8 @@ async function main(): Promise<void> {
       merged.postal_code = merged.postal_code ?? m.postal_code;
       merged.street = merged.street ?? m.street;
       merged.prefecture_code = merged.prefecture_code ?? m.prefecture_code;
+      merged.seasonal = merged.seasonal ?? m.seasonal;
+      merged.hours_raw = merged.hours_raw ?? m.hours_raw;
       merged.sources.push({
         source: m.source,
         id: m.source_id,
