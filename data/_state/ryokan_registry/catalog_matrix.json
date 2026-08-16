@@ -1,0 +1,6811 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-16T05:44:15.514Z",
+  "method": "CKAN package_search phrase queries across federated/regional catalogs; hits classified by vocabulary (facility_list/stats/related) and attributed to permit authorities via publishing organization. E-tier means 'absent from swept catalogs', not 'publishes nothing' — direct survey follows.",
+  "catalogs": [
+    {
+      "id": "bodik",
+      "base": "https://data.bodik.jp/api/3",
+      "note": "BODIK ODCS (multi-municipality)"
+    },
+    {
+      "id": "tokyo",
+      "base": "https://catalog.data.metro.tokyo.lg.jp/api/3",
+      "note": "東京都オープンデータカタログ"
+    },
+    {
+      "id": "e-gov",
+      "base": "https://data.e-gov.go.jp/data/api/3",
+      "note": "国 (旧 data.go.jp)"
+    }
+  ],
+  "queries": [
+    "旅館業",
+    "旅館業法",
+    "ホテル営業",
+    "簡易宿所",
+    "旅館・ホテル",
+    "宿泊施設",
+    "旅館台帳"
+  ],
+  "sweep_log": [
+    {
+      "catalog": "bodik",
+      "query": "旅館業",
+      "count": 20,
+      "kept": 20,
+      "error": null
+    },
+    {
+      "catalog": "bodik",
+      "query": "旅館業法",
+      "count": 7,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "catalog": "bodik",
+      "query": "ホテル営業",
+      "count": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "catalog": "bodik",
+      "query": "簡易宿所",
+      "count": 3,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "catalog": "bodik",
+      "query": "旅館・ホテル",
+      "count": 3,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "catalog": "bodik",
+      "query": "宿泊施設",
+      "count": 22,
+      "kept": 19,
+      "error": null
+    },
+    {
+      "catalog": "bodik",
+      "query": "旅館台帳",
+      "count": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "catalog": "tokyo",
+      "query": "旅館業",
+      "count": 3,
+      "kept": 3,
+      "error": null
+    },
+    {
+      "catalog": "tokyo",
+      "query": "旅館業法",
+      "count": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "catalog": "tokyo",
+      "query": "ホテル営業",
+      "count": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "catalog": "tokyo",
+      "query": "簡易宿所",
+      "count": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "catalog": "tokyo",
+      "query": "旅館・ホテル",
+      "count": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "catalog": "tokyo",
+      "query": "宿泊施設",
+      "count": 37,
+      "kept": 37,
+      "error": null
+    },
+    {
+      "catalog": "tokyo",
+      "query": "旅館台帳",
+      "count": 13,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "catalog": "e-gov",
+      "query": "旅館業",
+      "count": 180,
+      "kept": 66,
+      "error": null
+    },
+    {
+      "catalog": "e-gov",
+      "query": "旅館業法",
+      "count": 383,
+      "kept": 38,
+      "error": null
+    },
+    {
+      "catalog": "e-gov",
+      "query": "ホテル営業",
+      "count": 29,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "catalog": "e-gov",
+      "query": "簡易宿所",
+      "count": 171,
+      "kept": 39,
+      "error": null
+    },
+    {
+      "catalog": "e-gov",
+      "query": "旅館・ホテル",
+      "count": 150,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "catalog": "e-gov",
+      "query": "宿泊施設",
+      "count": 811,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "catalog": "e-gov",
+      "query": "旅館台帳",
+      "count": 0,
+      "kept": 0,
+      "error": null
+    }
+  ],
+  "summary": {
+    "authorities_total": 157,
+    "facility_list_found": 33,
+    "by_tier": {
+      "A": 31,
+      "B": 1,
+      "C/D": 0,
+      "unknown": 1,
+      "E": 124
+    },
+    "by_kind_datasets": {
+      "facility_list": 39,
+      "stats": 138,
+      "related": 53
+    },
+    "unattributed_datasets": 162
+  },
+  "authorities": [
+    {
+      "key": "pref-01",
+      "name": "北海道",
+      "kind": "prefecture",
+      "prefecture_code": "01",
+      "prefecture_name": "北海道",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-02",
+      "name": "青森県",
+      "kind": "prefecture",
+      "prefecture_code": "02",
+      "prefecture_name": "青森県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-03",
+      "name": "岩手県",
+      "kind": "prefecture",
+      "prefecture_code": "03",
+      "prefecture_name": "岩手県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-04",
+      "name": "宮城県",
+      "kind": "prefecture",
+      "prefecture_code": "04",
+      "prefecture_name": "宮城県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-05",
+      "name": "秋田県",
+      "kind": "prefecture",
+      "prefecture_code": "05",
+      "prefecture_name": "秋田県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-06",
+      "name": "山形県",
+      "kind": "prefecture",
+      "prefecture_code": "06",
+      "prefecture_name": "山形県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-07",
+      "name": "福島県",
+      "kind": "prefecture",
+      "prefecture_code": "07",
+      "prefecture_name": "福島県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-08",
+      "name": "茨城県",
+      "kind": "prefecture",
+      "prefecture_code": "08",
+      "prefecture_name": "茨城県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-09",
+      "name": "栃木県",
+      "kind": "prefecture",
+      "prefecture_code": "09",
+      "prefecture_name": "栃木県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-10",
+      "name": "群馬県",
+      "kind": "prefecture",
+      "prefecture_code": "10",
+      "prefecture_name": "群馬県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-11",
+      "name": "埼玉県",
+      "kind": "prefecture",
+      "prefecture_code": "11",
+      "prefecture_name": "埼玉県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-12",
+      "name": "千葉県",
+      "kind": "prefecture",
+      "prefecture_code": "12",
+      "prefecture_name": "千葉県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-13",
+      "name": "東京都",
+      "kind": "prefecture",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "f10e66b8-147e-418f-b22e-c812f78b1b49",
+          "ckan_name": "t000009d0000000020",
+          "title": "都内中小規模事業所を対象とした「東京都地球温暖化対策報告書制度」＿低炭素ベンチマーク[2012年度実績改訂版〕",
+          "organization": "東京都環境局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000009d0000000020",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:20:20.561384",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 35,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "旅館・ホテル"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "231e972c-1e4e-4294-96e2-dccd95f021b3",
+          "ckan_name": "t000029d0000000003",
+          "title": "宿泊施設等の施設情報ポータルサイト「だれでも東京」",
+          "organization": "東京都デジタルサービス局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000029d0000000003",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:39:37.440100",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 7,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "4214af5e-df4a-4696-9006-03a5a9d573ac",
+          "ckan_name": "t000055d0000000548",
+          "title": "「外国人旅行者等への医療情報提供に係る調査」結果について（平成28年10月）_外国人旅行者等への医療情報提供に係る調査結果（全体）（PDF：4,189KB）",
+          "organization": "東京都保健医療局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000055d0000000548",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:50:23.896555",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 141,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "907b64c1-d964-4c90-b44c-48f675176c38",
+          "ckan_name": "t000003d1700000059",
+          "title": "東京の防災プラン進捗レポート2017 【第2部】 ◆ 震災対策(島しょ地域における地震)_２　島しょ地域における備蓄・輸送体制の確保",
+          "organization": "東京都総務局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000003d1700000059",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T10:21:47.056680",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 20,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "3291c653-2fb9-4944-bb22-f83a3c858824",
+          "ckan_name": "t000003d2000001097",
+          "title": "三宅支庁管内概要（令和６年版）",
+          "organization": "東京都総務局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000003d2000001097",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-16T10:26:09.271902",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 136,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "62aba141-07ff-4866-b26b-9b43171373ff",
+          "ckan_name": "t000006d0000000005",
+          "title": "青少年育成ハンドブック(令和元年版）",
+          "organization": "東京都生活文化局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000006d0000000005",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T10:42:15.913850",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 18,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "9cf13af1-b93d-4b72-8bdb-f292e03d4f79",
+          "ckan_name": "t000012d0000000080",
+          "title": "R5国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000080",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:23:20.731176",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 22,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "3a393c41-417f-4c3d-9d33-fcaf2e5af5e5",
+          "ckan_name": "t000012d0000000079",
+          "title": "R4国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000079",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:23:19.655626",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 22,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "4b7f8c1e-0793-477a-9aaf-5360f661b3cc",
+          "ckan_name": "t000012d0000000039",
+          "title": "H27国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000039",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:22:37.450666",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 23,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "d2c6d5e3-eaab-430b-b811-26462076818b",
+          "ckan_name": "t000012d0000000081",
+          "title": "R6国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000081",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:23:21.835203",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 25,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "7ef04785-1c6c-447d-965c-7c04041e03af",
+          "ckan_name": "t000012d0000000041",
+          "title": "H29国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000041",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:22:39.564782",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 25,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "39ce9afa-8230-4615-9a7f-68a411fd0b69",
+          "ckan_name": "t000012d0000000040",
+          "title": "H28国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000040",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:22:38.532490",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 25,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "21135109-4c1d-4e34-a10f-326877601378",
+          "ckan_name": "t000012d0000000038",
+          "title": "H26国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000038",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:22:36.366667",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 23,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "89bca16e-cecd-4aab-b374-96165b12281c",
+          "ckan_name": "t000012d0000000043",
+          "title": "H31・R1国・地域別外国人旅行者行動特性調査",
+          "organization": "東京都産業労働局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000012d0000000043",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:22:41.680702",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 24,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "955fd6da-bcff-4aee-8530-240a40334716",
+          "ckan_name": "t000003d1700000021",
+          "title": "三宅島噴火災害誌 資料編_資料2 平成18年版 管内概要 東京都三宅支庁",
+          "organization": "東京都総務局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000003d1700000021",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T10:21:08.478334",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 158,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "3172f338-b7fa-4ef6-958b-8c3093e380d6",
+          "ckan_name": "t000015d0000000032",
+          "title": "東京港港勢(年報)2019年",
+          "organization": "東京都港湾局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000015d0000000032",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:26:41.897644",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 308,
+          "kind": "stats",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "c269af73-ad04-48cf-b761-279009a772fe",
+          "ckan_name": "t000015d0000000031",
+          "title": "東京港港勢(年報)2018年",
+          "organization": "東京都港湾局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000015d0000000031",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:26:39.709714",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 309,
+          "kind": "stats",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "00e634f3-0a8c-440a-9b13-5267ff4cca84",
+          "ckan_name": "t000015d0000000030",
+          "title": "東京港港勢(年報)2017年",
+          "organization": "東京都港湾局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000015d0000000030",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-02-05T07:06:24.472142",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 325,
+          "kind": "stats",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "8d93c687-a56e-4724-8780-1316521fb394",
+          "ckan_name": "t000055d0000000614",
+          "title": "環境衛生施設台帳",
+          "organization": "東京都保健医療局",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000055d0000000614",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:51:48.043241",
+          "formats": [
+            "HTML"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "B",
+          "matched_queries": [
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "B"
+    },
+    {
+      "key": "pref-14",
+      "name": "神奈川県",
+      "kind": "prefecture",
+      "prefecture_code": "14",
+      "prefecture_name": "神奈川県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-15",
+      "name": "新潟県",
+      "kind": "prefecture",
+      "prefecture_code": "15",
+      "prefecture_name": "新潟県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-16",
+      "name": "富山県",
+      "kind": "prefecture",
+      "prefecture_code": "16",
+      "prefecture_name": "富山県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-17",
+      "name": "石川県",
+      "kind": "prefecture",
+      "prefecture_code": "17",
+      "prefecture_name": "石川県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-18",
+      "name": "福井県",
+      "kind": "prefecture",
+      "prefecture_code": "18",
+      "prefecture_name": "福井県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-19",
+      "name": "山梨県",
+      "kind": "prefecture",
+      "prefecture_code": "19",
+      "prefecture_name": "山梨県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-20",
+      "name": "長野県",
+      "kind": "prefecture",
+      "prefecture_code": "20",
+      "prefecture_name": "長野県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-21",
+      "name": "岐阜県",
+      "kind": "prefecture",
+      "prefecture_code": "21",
+      "prefecture_name": "岐阜県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-22",
+      "name": "静岡県",
+      "kind": "prefecture",
+      "prefecture_code": "22",
+      "prefecture_name": "静岡県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-23",
+      "name": "愛知県",
+      "kind": "prefecture",
+      "prefecture_code": "23",
+      "prefecture_name": "愛知県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-24",
+      "name": "三重県",
+      "kind": "prefecture",
+      "prefecture_code": "24",
+      "prefecture_name": "三重県",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "2e78a656-3753-4314-9de3-b376c1f5bc22",
+          "ckan_name": "240001_ryokan",
+          "title": "旅館業",
+          "organization": "三重県",
+          "landing_page": "https://data.bodik.jp/dataset/240001_ryokan",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-14T06:44:43.505240",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "旅館業法"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "pref-25",
+      "name": "滋賀県",
+      "kind": "prefecture",
+      "prefecture_code": "25",
+      "prefecture_name": "滋賀県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-26",
+      "name": "京都府",
+      "kind": "prefecture",
+      "prefecture_code": "26",
+      "prefecture_name": "京都府",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "b32a9e11-1bd0-4f18-bcbb-d6144aaa867b",
+          "ckan_name": "260002_tokeisyo1421",
+          "title": "【京都府】ホテル・旅館・簡易宿所及び下宿営業の施設数",
+          "organization": "京都府",
+          "landing_page": "https://data.bodik.jp/dataset/260002_tokeisyo1421",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-04-15T06:14:41.759208",
+          "formats": [
+            "RDF",
+            "CSV",
+            "XLSX",
+            "XLS"
+          ],
+          "resource_count": 38,
+          "kind": "stats",
+          "tier": "A",
+          "matched_queries": [
+            "簡易宿所"
+          ]
+        }
+      ],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-27",
+      "name": "大阪府",
+      "kind": "prefecture",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "32736822-d240-4612-b435-7b3e43d47dee",
+          "ckan_name": "270008_ryokan",
+          "title": "旅館業法に基づく営業許可施設一覧",
+          "organization": "大阪府",
+          "landing_page": "https://data.bodik.jp/dataset/270008_ryokan",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-07-22T03:32:59.507765",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業法"
+          ]
+        },
+        {
+          "catalog": "bodik",
+          "ckan_id": "73a15961-36a3-4ae9-bf37-8f6562057c02",
+          "ckan_name": "270008_dai2shu_fukushi_todokede",
+          "title": "第二種社会福祉事業の届出事業者",
+          "organization": "大阪府",
+          "landing_page": "https://data.bodik.jp/dataset/270008_dai2shu_fukushi_todokede",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2021-07-02T08:31:02.675652",
+          "formats": [
+            "XLS"
+          ],
+          "resource_count": 2,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "pref-28",
+      "name": "兵庫県",
+      "kind": "prefecture",
+      "prefecture_code": "28",
+      "prefecture_name": "兵庫県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-29",
+      "name": "奈良県",
+      "kind": "prefecture",
+      "prefecture_code": "29",
+      "prefecture_name": "奈良県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-30",
+      "name": "和歌山県",
+      "kind": "prefecture",
+      "prefecture_code": "30",
+      "prefecture_name": "和歌山県",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "f2a9e175-b108-4081-9539-0024fb217a0d",
+          "ckan_name": "300004_080800_fukusi_map",
+          "title": "【和歌山県】福祉のまちづくりマップ掲載公共施設一覧",
+          "organization": "和歌山県",
+          "landing_page": "https://data.bodik.jp/dataset/300004_080800_fukusi_map",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2022-10-03T02:35:23.023410",
+          "formats": [
+            "HTML",
+            "CSV",
+            "ZIP",
+            "KML",
+            "GeoJSON"
+          ],
+          "resource_count": 37,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        }
+      ],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-31",
+      "name": "鳥取県",
+      "kind": "prefecture",
+      "prefecture_code": "31",
+      "prefecture_name": "鳥取県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-32",
+      "name": "島根県",
+      "kind": "prefecture",
+      "prefecture_code": "32",
+      "prefecture_name": "島根県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-33",
+      "name": "岡山県",
+      "kind": "prefecture",
+      "prefecture_code": "33",
+      "prefecture_name": "岡山県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-34",
+      "name": "広島県",
+      "kind": "prefecture",
+      "prefecture_code": "34",
+      "prefecture_name": "広島県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-35",
+      "name": "山口県",
+      "kind": "prefecture",
+      "prefecture_code": "35",
+      "prefecture_name": "山口県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-36",
+      "name": "徳島県",
+      "kind": "prefecture",
+      "prefecture_code": "36",
+      "prefecture_name": "徳島県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-37",
+      "name": "香川県",
+      "kind": "prefecture",
+      "prefecture_code": "37",
+      "prefecture_name": "香川県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-38",
+      "name": "愛媛県",
+      "kind": "prefecture",
+      "prefecture_code": "38",
+      "prefecture_name": "愛媛県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-39",
+      "name": "高知県",
+      "kind": "prefecture",
+      "prefecture_code": "39",
+      "prefecture_name": "高知県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-40",
+      "name": "福岡県",
+      "kind": "prefecture",
+      "prefecture_code": "40",
+      "prefecture_name": "福岡県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-41",
+      "name": "佐賀県",
+      "kind": "prefecture",
+      "prefecture_code": "41",
+      "prefecture_name": "佐賀県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-42",
+      "name": "長崎県",
+      "kind": "prefecture",
+      "prefecture_code": "42",
+      "prefecture_name": "長崎県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-43",
+      "name": "熊本県",
+      "kind": "prefecture",
+      "prefecture_code": "43",
+      "prefecture_name": "熊本県",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "dd2a3fef-845d-4f59-bf61-1c2abcd44415",
+          "ckan_name": "430005_00338",
+          "title": "熊本県旅館業許可施設一覧（熊本市域を除く。）",
+          "organization": "熊本県",
+          "landing_page": "https://data.bodik.jp/dataset/430005_00338",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-06-12T06:55:26.339593",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 51,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        },
+        {
+          "catalog": "bodik",
+          "ckan_id": "1e2c946f-ca16-4c4d-8f14-68bf8b9fbd9c",
+          "ckan_name": "430005_00309",
+          "title": "熊本県統計年鑑（令和4年（2022年））",
+          "organization": "熊本県",
+          "landing_page": "https://data.bodik.jp/dataset/430005_00309",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-14T06:45:55.635590",
+          "formats": [
+            "ZIP",
+            "XLSX",
+            "XLS"
+          ],
+          "resource_count": 256,
+          "kind": "stats",
+          "tier": "A",
+          "matched_queries": [
+            "旅館・ホテル"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "pref-44",
+      "name": "大分県",
+      "kind": "prefecture",
+      "prefecture_code": "44",
+      "prefecture_name": "大分県",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "a7da203c-8c3f-46d6-9e7a-46196d0161d2",
+          "ckan_name": "440001_ryokan_business",
+          "title": "旅館業営業許可施設一覧",
+          "organization": "大分県",
+          "landing_page": "https://data.bodik.jp/dataset/440001_ryokan_business",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-05-01T01:14:40.735056",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "pref-45",
+      "name": "宮崎県",
+      "kind": "prefecture",
+      "prefecture_code": "45",
+      "prefecture_name": "宮崎県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-46",
+      "name": "鹿児島県",
+      "kind": "prefecture",
+      "prefecture_code": "46",
+      "prefecture_name": "鹿児島県",
+      "municipality_code": null,
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "27317747-e12f-42a7-adaf-be2514cd2d45",
+          "ckan_name": "460001_amami_syukuhakushisetu",
+          "title": "奄美群島における宿泊施設",
+          "organization": "鹿児島県",
+          "landing_page": "https://data.bodik.jp/dataset/460001_amami_syukuhakushisetu",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2025-08-20T03:44:22.691074",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 2,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        }
+      ],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "pref-47",
+      "name": "沖縄県",
+      "kind": "prefecture",
+      "prefecture_code": "47",
+      "prefecture_name": "沖縄県",
+      "municipality_code": null,
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-011002",
+      "name": "札幌市",
+      "kind": "designated_city",
+      "prefecture_code": "01",
+      "prefecture_name": "北海道",
+      "municipality_code": "011002",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-041009",
+      "name": "仙台市",
+      "kind": "designated_city",
+      "prefecture_code": "04",
+      "prefecture_name": "宮城県",
+      "municipality_code": "041009",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-111007",
+      "name": "さいたま市",
+      "kind": "designated_city",
+      "prefecture_code": "11",
+      "prefecture_name": "埼玉県",
+      "municipality_code": "111007",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-121002",
+      "name": "千葉市",
+      "kind": "designated_city",
+      "prefecture_code": "12",
+      "prefecture_name": "千葉県",
+      "municipality_code": "121002",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-141003",
+      "name": "横浜市",
+      "kind": "designated_city",
+      "prefecture_code": "14",
+      "prefecture_name": "神奈川県",
+      "municipality_code": "141003",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-141305",
+      "name": "川崎市",
+      "kind": "designated_city",
+      "prefecture_code": "14",
+      "prefecture_name": "神奈川県",
+      "municipality_code": "141305",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-141500",
+      "name": "相模原市",
+      "kind": "designated_city",
+      "prefecture_code": "14",
+      "prefecture_name": "神奈川県",
+      "municipality_code": "141500",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-151009",
+      "name": "新潟市",
+      "kind": "designated_city",
+      "prefecture_code": "15",
+      "prefecture_name": "新潟県",
+      "municipality_code": "151009",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-221007",
+      "name": "静岡市",
+      "kind": "designated_city",
+      "prefecture_code": "22",
+      "prefecture_name": "静岡県",
+      "municipality_code": "221007",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "e5c122bd-4195-4909-b5f5-11b023144a28",
+          "ckan_name": "221007_ryokan-20160331",
+          "title": "旅館業台帳",
+          "organization": "静岡市",
+          "landing_page": "https://data.bodik.jp/dataset/221007_ryokan-20160331",
+          "license": "Creative Commons Attribution",
+          "metadata_modified": "2026-08-10T04:26:11.992005",
+          "formats": [
+            "CSV",
+            ".csv"
+          ],
+          "resource_count": 54,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-221309",
+      "name": "浜松市",
+      "kind": "designated_city",
+      "prefecture_code": "22",
+      "prefecture_name": "静岡県",
+      "municipality_code": "221309",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-231002",
+      "name": "名古屋市",
+      "kind": "designated_city",
+      "prefecture_code": "23",
+      "prefecture_name": "愛知県",
+      "municipality_code": "231002",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "88457704-532a-4575-989e-6e0785585f80",
+          "ckan_name": "231002_1304010000_kanyaku_03",
+          "title": "【名古屋市】旅館業法に基づき許可を受けた施設の一覧",
+          "organization": "名古屋市",
+          "landing_page": "https://data.bodik.jp/dataset/231002_1304010000_kanyaku_03",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2024-11-01T07:42:29.203138",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "旅館業法"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-261009",
+      "name": "京都市",
+      "kind": "designated_city",
+      "prefecture_code": "26",
+      "prefecture_name": "京都府",
+      "municipality_code": "261009",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-271004",
+      "name": "大阪市",
+      "kind": "designated_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "271004",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-271403",
+      "name": "堺市",
+      "kind": "designated_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "271403",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-281000",
+      "name": "神戸市",
+      "kind": "designated_city",
+      "prefecture_code": "28",
+      "prefecture_name": "兵庫県",
+      "municipality_code": "281000",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-331007",
+      "name": "岡山市",
+      "kind": "designated_city",
+      "prefecture_code": "33",
+      "prefecture_name": "岡山県",
+      "municipality_code": "331007",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-341002",
+      "name": "広島市",
+      "kind": "designated_city",
+      "prefecture_code": "34",
+      "prefecture_name": "広島県",
+      "municipality_code": "341002",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-401005",
+      "name": "北九州市",
+      "kind": "designated_city",
+      "prefecture_code": "40",
+      "prefecture_name": "福岡県",
+      "municipality_code": "401005",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "9000da6c-3839-4fdd-b527-1c8d38eea432",
+          "ckan_name": "401005_ryokangyoshisetsuichiran",
+          "title": "北九州市　旅館業施設一覧",
+          "organization": "北九州市",
+          "landing_page": "https://data.bodik.jp/dataset/401005_ryokangyoshisetsuichiran",
+          "license": "Creative Commons Attribution",
+          "metadata_modified": "2026-04-26T23:54:11.525674",
+          "formats": [
+            "CSV",
+            "XLSX"
+          ],
+          "resource_count": 8,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-401307",
+      "name": "福岡市",
+      "kind": "designated_city",
+      "prefecture_code": "40",
+      "prefecture_name": "福岡県",
+      "municipality_code": "401307",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "8e664ef6-afe5-4d75-97ad-09a34582c5f9",
+          "ckan_name": "401307_ryokangyou_eigyoukyoka",
+          "title": "福岡市　旅館業営業許可施設一覧",
+          "organization": "福岡市",
+          "landing_page": "https://data.bodik.jp/dataset/401307_ryokangyou_eigyoukyoka",
+          "license": "Creative Commons Attribution",
+          "metadata_modified": "2026-08-04T10:03:08.490637",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-431001",
+      "name": "熊本市",
+      "kind": "designated_city",
+      "prefecture_code": "43",
+      "prefecture_name": "熊本県",
+      "municipality_code": "431001",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "2ef577d6-5783-4d94-85c2-fc21b775a986",
+          "ckan_name": "431001_seisaku19",
+          "title": "熊本市_旅館業許可施設一覧",
+          "organization": "熊本市",
+          "landing_page": "https://data.bodik.jp/dataset/431001_seisaku19",
+          "license": "Public Data License 1.0",
+          "metadata_modified": "2026-06-03T05:34:25.592506",
+          "formats": [],
+          "resource_count": 0,
+          "kind": "facility_list",
+          "tier": "unknown",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "unknown"
+    },
+    {
+      "key": "muni-012041",
+      "name": "旭川市",
+      "kind": "core_city",
+      "prefecture_code": "01",
+      "prefecture_name": "北海道",
+      "municipality_code": "012041",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-012025",
+      "name": "函館市",
+      "kind": "core_city",
+      "prefecture_code": "01",
+      "prefecture_name": "北海道",
+      "municipality_code": "012025",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-022012",
+      "name": "青森市",
+      "kind": "core_city",
+      "prefecture_code": "02",
+      "prefecture_name": "青森県",
+      "municipality_code": "022012",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-022039",
+      "name": "八戸市",
+      "kind": "core_city",
+      "prefecture_code": "02",
+      "prefecture_name": "青森県",
+      "municipality_code": "022039",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-032018",
+      "name": "盛岡市",
+      "kind": "core_city",
+      "prefecture_code": "03",
+      "prefecture_name": "岩手県",
+      "municipality_code": "032018",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-052019",
+      "name": "秋田市",
+      "kind": "core_city",
+      "prefecture_code": "05",
+      "prefecture_name": "秋田県",
+      "municipality_code": "052019",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-062014",
+      "name": "山形市",
+      "kind": "core_city",
+      "prefecture_code": "06",
+      "prefecture_name": "山形県",
+      "municipality_code": "062014",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-072036",
+      "name": "郡山市",
+      "kind": "core_city",
+      "prefecture_code": "07",
+      "prefecture_name": "福島県",
+      "municipality_code": "072036",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-072044",
+      "name": "いわき市",
+      "kind": "core_city",
+      "prefecture_code": "07",
+      "prefecture_name": "福島県",
+      "municipality_code": "072044",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-072010",
+      "name": "福島市",
+      "kind": "core_city",
+      "prefecture_code": "07",
+      "prefecture_name": "福島県",
+      "municipality_code": "072010",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-082015",
+      "name": "水戸市",
+      "kind": "core_city",
+      "prefecture_code": "08",
+      "prefecture_name": "茨城県",
+      "municipality_code": "082015",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-092011",
+      "name": "宇都宮市",
+      "kind": "core_city",
+      "prefecture_code": "09",
+      "prefecture_name": "栃木県",
+      "municipality_code": "092011",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-102016",
+      "name": "前橋市",
+      "kind": "core_city",
+      "prefecture_code": "10",
+      "prefecture_name": "群馬県",
+      "municipality_code": "102016",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-102024",
+      "name": "高崎市",
+      "kind": "core_city",
+      "prefecture_code": "10",
+      "prefecture_name": "群馬県",
+      "municipality_code": "102024",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-112011",
+      "name": "川越市",
+      "kind": "core_city",
+      "prefecture_code": "11",
+      "prefecture_name": "埼玉県",
+      "municipality_code": "112011",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-112224",
+      "name": "越谷市",
+      "kind": "core_city",
+      "prefecture_code": "11",
+      "prefecture_name": "埼玉県",
+      "municipality_code": "112224",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-112038",
+      "name": "川口市",
+      "kind": "core_city",
+      "prefecture_code": "11",
+      "prefecture_name": "埼玉県",
+      "municipality_code": "112038",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-122041",
+      "name": "船橋市",
+      "kind": "core_city",
+      "prefecture_code": "12",
+      "prefecture_name": "千葉県",
+      "municipality_code": "122041",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "b8545c67-0051-4b47-b73b-feffd3a79d87",
+          "ckan_name": "122041_20260401_seikatsueisei-eigyoushisetsu_ryokann",
+          "title": "生活衛生関係営業施設一覧（旅館・ホテル・簡易宿所）",
+          "organization": "船橋市",
+          "landing_page": "https://data.bodik.jp/dataset/122041_20260401_seikatsueisei-eigyoushisetsu_ryokann",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-13T02:16:35.225972",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "簡易宿所",
+            "旅館・ホテル"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-122173",
+      "name": "柏市",
+      "kind": "core_city",
+      "prefecture_code": "12",
+      "prefecture_name": "千葉県",
+      "municipality_code": "122173",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-132012",
+      "name": "八王子市",
+      "kind": "core_city",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "132012",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-142018",
+      "name": "横須賀市",
+      "kind": "core_city",
+      "prefecture_code": "14",
+      "prefecture_name": "神奈川県",
+      "municipality_code": "142018",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "76f9d975-d773-486b-b7ad-48d046a4a696",
+          "ckan_name": "142018_00_19_environmental_sanitation_facilities",
+          "title": "【横須賀市】環境衛生関係営業施設公開情報",
+          "organization": "横須賀市",
+          "landing_page": "https://data.bodik.jp/dataset/142018_00_19_environmental_sanitation_facilities",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-12T00:28:28.838964",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 6,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-162019",
+      "name": "富山市",
+      "kind": "core_city",
+      "prefecture_code": "16",
+      "prefecture_name": "富山県",
+      "municipality_code": "162019",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-172014",
+      "name": "金沢市",
+      "kind": "core_city",
+      "prefecture_code": "17",
+      "prefecture_name": "石川県",
+      "municipality_code": "172014",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-182010",
+      "name": "福井市",
+      "kind": "core_city",
+      "prefecture_code": "18",
+      "prefecture_name": "福井県",
+      "municipality_code": "182010",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-192015",
+      "name": "甲府市",
+      "kind": "core_city",
+      "prefecture_code": "19",
+      "prefecture_name": "山梨県",
+      "municipality_code": "192015",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-202011",
+      "name": "長野市",
+      "kind": "core_city",
+      "prefecture_code": "20",
+      "prefecture_name": "長野県",
+      "municipality_code": "202011",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-202029",
+      "name": "松本市",
+      "kind": "core_city",
+      "prefecture_code": "20",
+      "prefecture_name": "長野県",
+      "municipality_code": "202029",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-212016",
+      "name": "岐阜市",
+      "kind": "core_city",
+      "prefecture_code": "21",
+      "prefecture_name": "岐阜県",
+      "municipality_code": "212016",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-232114",
+      "name": "豊田市",
+      "kind": "core_city",
+      "prefecture_code": "23",
+      "prefecture_name": "愛知県",
+      "municipality_code": "232114",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "57c36023-1519-4f73-9bd6-ca6dd4df7493",
+          "ckan_name": "232114_environmental_health_service_facility",
+          "title": "環境衛生営業施設一覧",
+          "organization": "豊田市",
+          "landing_page": "https://data.bodik.jp/dataset/232114_environmental_health_service_facility",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-06T01:19:06.159535",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 6,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "旅館業法"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-232017",
+      "name": "豊橋市",
+      "kind": "core_city",
+      "prefecture_code": "23",
+      "prefecture_name": "愛知県",
+      "municipality_code": "232017",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-232025",
+      "name": "岡崎市",
+      "kind": "core_city",
+      "prefecture_code": "23",
+      "prefecture_name": "愛知県",
+      "municipality_code": "232025",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-232033",
+      "name": "一宮市",
+      "kind": "core_city",
+      "prefecture_code": "23",
+      "prefecture_name": "愛知県",
+      "municipality_code": "232033",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-252018",
+      "name": "大津市",
+      "kind": "core_city",
+      "prefecture_code": "25",
+      "prefecture_name": "滋賀県",
+      "municipality_code": "252018",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "c91532cc-8c4e-406b-9f81-6196a92d4fc9",
+          "ckan_name": "252018_p_56091",
+          "title": "旅館業一覧",
+          "organization": "大津市",
+          "landing_page": "https://data.bodik.jp/dataset/252018_p_56091",
+          "license": "Creative Commons Attribution",
+          "metadata_modified": "2026-08-10T08:20:24.935582",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "旅館業法",
+            "簡易宿所"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-272078",
+      "name": "高槻市",
+      "kind": "core_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "272078",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-272272",
+      "name": "東大阪市",
+      "kind": "core_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "272272",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-272035",
+      "name": "豊中市",
+      "kind": "core_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "272035",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-272108",
+      "name": "枚方市",
+      "kind": "core_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "272108",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-272124",
+      "name": "八尾市",
+      "kind": "core_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "272124",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-272159",
+      "name": "寝屋川市",
+      "kind": "core_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "272159",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "b4630915-2fde-4cf6-82d5-19087847e6e1",
+          "ckan_name": "272159_ryokan",
+          "title": "旅館業許可施設一覧",
+          "organization": "寝屋川市",
+          "landing_page": "https://data.bodik.jp/dataset/272159_ryokan",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-13T02:31:54.037338",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 54,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "旅館業法"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-272051",
+      "name": "吹田市",
+      "kind": "core_city",
+      "prefecture_code": "27",
+      "prefecture_name": "大阪府",
+      "municipality_code": "272051",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-282014",
+      "name": "姫路市",
+      "kind": "core_city",
+      "prefecture_code": "28",
+      "prefecture_name": "兵庫県",
+      "municipality_code": "282014",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-282049",
+      "name": "西宮市",
+      "kind": "core_city",
+      "prefecture_code": "28",
+      "prefecture_name": "兵庫県",
+      "municipality_code": "282049",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-282022",
+      "name": "尼崎市",
+      "kind": "core_city",
+      "prefecture_code": "28",
+      "prefecture_name": "兵庫県",
+      "municipality_code": "282022",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-282031",
+      "name": "明石市",
+      "kind": "core_city",
+      "prefecture_code": "28",
+      "prefecture_name": "兵庫県",
+      "municipality_code": "282031",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-292010",
+      "name": "奈良市",
+      "kind": "core_city",
+      "prefecture_code": "29",
+      "prefecture_name": "奈良県",
+      "municipality_code": "292010",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-302015",
+      "name": "和歌山市",
+      "kind": "core_city",
+      "prefecture_code": "30",
+      "prefecture_name": "和歌山県",
+      "municipality_code": "302015",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-312011",
+      "name": "鳥取市",
+      "kind": "core_city",
+      "prefecture_code": "31",
+      "prefecture_name": "鳥取県",
+      "municipality_code": "312011",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-322016",
+      "name": "松江市",
+      "kind": "core_city",
+      "prefecture_code": "32",
+      "prefecture_name": "島根県",
+      "municipality_code": "322016",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-332020",
+      "name": "倉敷市",
+      "kind": "core_city",
+      "prefecture_code": "33",
+      "prefecture_name": "岡山県",
+      "municipality_code": "332020",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-342076",
+      "name": "福山市",
+      "kind": "core_city",
+      "prefecture_code": "34",
+      "prefecture_name": "広島県",
+      "municipality_code": "342076",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-342025",
+      "name": "呉市",
+      "kind": "core_city",
+      "prefecture_code": "34",
+      "prefecture_name": "広島県",
+      "municipality_code": "342025",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-352012",
+      "name": "下関市",
+      "kind": "core_city",
+      "prefecture_code": "35",
+      "prefecture_name": "山口県",
+      "municipality_code": "352012",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-372013",
+      "name": "高松市",
+      "kind": "core_city",
+      "prefecture_code": "37",
+      "prefecture_name": "香川県",
+      "municipality_code": "372013",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-382019",
+      "name": "松山市",
+      "kind": "core_city",
+      "prefecture_code": "38",
+      "prefecture_name": "愛媛県",
+      "municipality_code": "382019",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-392014",
+      "name": "高知市",
+      "kind": "core_city",
+      "prefecture_code": "39",
+      "prefecture_name": "高知県",
+      "municipality_code": "392014",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-402036",
+      "name": "久留米市",
+      "kind": "core_city",
+      "prefecture_code": "40",
+      "prefecture_name": "福岡県",
+      "municipality_code": "402036",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-422011",
+      "name": "長崎市",
+      "kind": "core_city",
+      "prefecture_code": "42",
+      "prefecture_name": "長崎県",
+      "municipality_code": "422011",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "14905493-23b5-4de0-a228-9fe1076c438f",
+          "ckan_name": "422011_ryokangyo_all",
+          "title": "旅館業営業許可・届出一覧（全許可・届出一覧）（長崎市）",
+          "organization": "長崎市",
+          "landing_page": "https://data.bodik.jp/dataset/422011_ryokangyo_all",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2025-03-27T11:11:30.329845",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        },
+        {
+          "catalog": "bodik",
+          "ckan_id": "b2b953a2-3b53-4bb2-8846-bde067b1f626",
+          "ckan_name": "422011_ryokangyo_new",
+          "title": "旅館業営業許可・届出一覧（新規許可・届出一覧）（長崎市）",
+          "organization": "長崎市",
+          "landing_page": "https://data.bodik.jp/dataset/422011_ryokangyo_new",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2025-03-27T11:14:01.472628",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-422029",
+      "name": "佐世保市",
+      "kind": "core_city",
+      "prefecture_code": "42",
+      "prefecture_name": "長崎県",
+      "municipality_code": "422029",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "6527c452-4315-4251-a933-11c6208109c7",
+          "ckan_name": "422029_barrierfreemap",
+          "title": "バリアフリーマップ（佐世保市）",
+          "organization": "佐世保市",
+          "landing_page": "https://data.bodik.jp/dataset/422029_barrierfreemap",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2025-12-18T05:55:27.497335",
+          "formats": [
+            "CSV",
+            "ZIP"
+          ],
+          "resource_count": 18,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "bodik",
+          "ckan_id": "0b8adb3e-e036-42af-be43-d37ded769eb7",
+          "ckan_name": "422029_syogyoshisetsu",
+          "title": "佐世保市内の商業施設等",
+          "organization": "佐世保市",
+          "landing_page": "https://data.bodik.jp/dataset/422029_syogyoshisetsu",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2019-10-01T04:51:17.326400",
+          "formats": [
+            "JPEG"
+          ],
+          "resource_count": 8,
+          "kind": "related",
+          "tier": "unknown",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        }
+      ],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-442011",
+      "name": "大分市",
+      "kind": "core_city",
+      "prefecture_code": "44",
+      "prefecture_name": "大分県",
+      "municipality_code": "442011",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "f736e84a-446e-412b-90ad-9911bcbf4d88",
+          "ckan_name": "442011_hotel_business",
+          "title": "旅館業新規施設",
+          "organization": "大分市",
+          "landing_page": "https://data.bodik.jp/dataset/442011_hotel_business",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-06-03T04:44:26.023287",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        },
+        {
+          "catalog": "bodik",
+          "ckan_id": "b03c9bdb-a1cc-4d7a-8891-bc7980ec693e",
+          "ckan_name": "442011_permitted_facility",
+          "title": "許可施設",
+          "organization": "大分市",
+          "landing_page": "https://data.bodik.jp/dataset/442011_permitted_facility",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-04T01:05:10.147461",
+          "formats": [
+            "CSV",
+            "XLSX",
+            "PDF"
+          ],
+          "resource_count": 14,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-452017",
+      "name": "宮崎市",
+      "kind": "core_city",
+      "prefecture_code": "45",
+      "prefecture_name": "宮崎県",
+      "municipality_code": "452017",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-462012",
+      "name": "鹿児島市",
+      "kind": "core_city",
+      "prefecture_code": "46",
+      "prefecture_name": "鹿児島県",
+      "municipality_code": "462012",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-472018",
+      "name": "那覇市",
+      "kind": "core_city",
+      "prefecture_code": "47",
+      "prefecture_name": "沖縄県",
+      "municipality_code": "472018",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "caa8060b-06a0-4879-8032-654b290e1adb",
+          "ckan_name": "472018_ryokangyo",
+          "title": "旅館営業施設情報",
+          "organization": "那覇市",
+          "landing_page": "https://data.bodik.jp/dataset/472018_ryokangyo",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2025-10-20T09:39:14.041621",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 3,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "旅館業法"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-012033",
+      "name": "小樽市",
+      "kind": "phc_city",
+      "prefecture_code": "01",
+      "prefecture_name": "北海道",
+      "municipality_code": "012033",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-132098",
+      "name": "町田市",
+      "kind": "phc_city",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "132098",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-142051",
+      "name": "藤沢市",
+      "kind": "phc_city",
+      "prefecture_code": "14",
+      "prefecture_name": "神奈川県",
+      "municipality_code": "142051",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-142077",
+      "name": "茅ヶ崎市",
+      "kind": "phc_city",
+      "prefecture_code": "14",
+      "prefecture_name": "神奈川県",
+      "municipality_code": "142077",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-242021",
+      "name": "四日市市",
+      "kind": "phc_city",
+      "prefecture_code": "24",
+      "prefecture_name": "三重県",
+      "municipality_code": "242021",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "9c2414c9-c4b5-46b9-b9f5-7defd4fc9beb",
+          "ckan_name": "242021_00114",
+          "title": "旅館業許可施設一覧",
+          "organization": "四日市市",
+          "landing_page": "https://data.bodik.jp/dataset/242021_00114",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-10T06:53:54.912117",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131016",
+      "name": "千代田区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131016",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "de95ccd2-34e7-4d93-aa12-99166b32cc70",
+          "ckan_name": "t131016d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "千代田区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131016d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T11:42:13.560798",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131024",
+      "name": "中央区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131024",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131032",
+      "name": "港区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131032",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "de042f21-ae85-4302-a40e-346378621960",
+          "ckan_name": "t131032d0000000235",
+          "title": "港区の旅館業施設情報",
+          "organization": "港区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131032d0000000235",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-07-03T07:03:13.002340",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 3,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "8575048b-a588-47c4-9529-b870edb67326",
+          "ckan_name": "t131032d0000000009",
+          "title": "港区観光情報",
+          "organization": "港区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131032d0000000009",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T07:56:24.548959",
+          "formats": [
+            "CSV",
+            "GeoJSON"
+          ],
+          "resource_count": 4,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131041",
+      "name": "新宿区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131041",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131059",
+      "name": "文京区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131059",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "b9384a1e-b1e0-4bc1-bd7e-39bc48c13706",
+          "ckan_name": "t131059d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "文京区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131059d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T12:13:45.143116",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131067",
+      "name": "台東区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131067",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "b796b2ff-c435-4737-88ce-88d26d079a49",
+          "ckan_name": "t131067d0000000278",
+          "title": "旅館業施設一覧",
+          "organization": "台東区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131067d0000000278",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T08:11:55.928013",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "fd4dd867-688f-445f-962e-917a9515990d",
+          "ckan_name": "t131067d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "台東区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131067d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T12:14:09.634608",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131075",
+      "name": "墨田区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131075",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131083",
+      "name": "江東区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131083",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "0dcb7994-058e-4818-8f43-c86b573ce710",
+          "ckan_name": "t131083d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "江東区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131083d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T12:14:42.841982",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131091",
+      "name": "品川区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131091",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "8a869cf3-f709-47bd-85fb-cacdd0478ae4",
+          "ckan_name": "t131091d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "品川区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131091d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:13:40.605804",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131105",
+      "name": "目黒区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131105",
+      "datasets": [
+        {
+          "catalog": "bodik",
+          "ckan_id": "800b5b11-f0ad-42e1-92d0-e05ca81bf2be",
+          "ckan_name": "131105_ryokan",
+          "title": "旅館業",
+          "organization": "目黒区",
+          "landing_page": "https://data.bodik.jp/dataset/131105_ryokan",
+          "license": "Creative Commons Attribution 4.0 International",
+          "metadata_modified": "2026-08-05T00:00:00.428521",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 22,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業",
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "926c6bc5-be77-49be-aa3a-0e484f1b02f0",
+          "ckan_name": "t131105d0000000178",
+          "title": "旅館業",
+          "organization": "目黒区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131105d0000000178",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-07-23T06:44:42.110807",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 33,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "旅館業"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131113",
+      "name": "大田区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131113",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "243ed552-b1f0-4097-802b-2fe772d07d72",
+          "ckan_name": "t131113d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "大田区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131113d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:14:05.224283",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "b63c158f-2374-4aa6-a452-94087ccea4f0",
+          "ckan_name": "t131113d3100000139",
+          "title": "区内宿泊施設の宿泊者数、観光情報発信拠点数",
+          "organization": "大田区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131113d3100000139",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-02-25T09:20:23.180298",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 1,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "e5e66b94-9562-4834-99b4-53a1ffe94f2c",
+          "ckan_name": "t131113d0000000179",
+          "title": "区内宿泊施設の宿泊者数、観光情報発信拠点数",
+          "organization": "大田区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131113d0000000179",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-06-04T03:11:19.405035",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 1,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "31c6cbf0-52f8-42f5-96c2-261e77903337",
+          "ckan_name": "t131113d0000000373",
+          "title": "令和4年度区政ファイルデータ",
+          "organization": "大田区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131113d0000000373",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-02-26T12:18:30.718957",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 101,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "9129a795-3de1-4d7b-87d7-a283f2e24369",
+          "ckan_name": "t131113d3100000224",
+          "title": "令和6年度区政ファイルデータ",
+          "organization": "大田区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131113d3100000224",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-02-26T12:15:49.529524",
+          "formats": [
+            "XLSX"
+          ],
+          "resource_count": 104,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131121",
+      "name": "世田谷区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131121",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131130",
+      "name": "渋谷区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131130",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "4e957c4b-3c55-44be-af80-c67b07b74975",
+          "ckan_name": "t131130d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "渋谷区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131130d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:14:59.998134",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131148",
+      "name": "中野区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131148",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131156",
+      "name": "杉並区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131156",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131164",
+      "name": "豊島区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131164",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "997f8f17-a3f1-42d8-9bc5-a77462140563",
+          "ckan_name": "t131164d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "豊島区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131164d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:15:34.433350",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131172",
+      "name": "北区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131172",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131181",
+      "name": "荒川区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131181",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "59d37edf-7f87-4c54-86fc-b91049521289",
+          "ckan_name": "t131181d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "荒川区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131181d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:16:36.066503",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131199",
+      "name": "板橋区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131199",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "94aa45be-086a-4296-a596-884c772978ab",
+          "ckan_name": "t131199d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "板橋区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131199d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:16:54.880090",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        },
+        {
+          "catalog": "tokyo",
+          "ckan_id": "2eeb013f-9774-44b1-b5e5-34818b7802a6",
+          "ckan_name": "t131199d0000000151",
+          "title": "区民施設",
+          "organization": "板橋区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131199d0000000151",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2025-12-12T08:45:44.444485",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 7,
+          "kind": "related",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131202",
+      "name": "練馬区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131202",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "fdb6803e-6194-4582-950d-efbdbf2e944e",
+          "ckan_name": "t131202d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "練馬区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131202d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:17:06.209706",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131211",
+      "name": "足立区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131211",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    },
+    {
+      "key": "muni-131229",
+      "name": "葛飾区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131229",
+      "datasets": [
+        {
+          "catalog": "tokyo",
+          "ckan_id": "6d51ded9-cdc6-4050-b9e2-c645ff13faab",
+          "ckan_name": "t131229d2025000004",
+          "title": "宿泊施設（旅館台帳）",
+          "organization": "葛飾区",
+          "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t131229d2025000004",
+          "license": "クリエイティブ・コモンズ 表示（CC BY）",
+          "metadata_modified": "2026-03-30T14:17:41.614079",
+          "formats": [
+            "CSV"
+          ],
+          "resource_count": 1,
+          "kind": "facility_list",
+          "tier": "A",
+          "matched_queries": [
+            "宿泊施設",
+            "旅館台帳"
+          ]
+        }
+      ],
+      "facility_list_found": true,
+      "best_tier": "A"
+    },
+    {
+      "key": "muni-131237",
+      "name": "江戸川区",
+      "kind": "special_ward",
+      "prefecture_code": "13",
+      "prefecture_name": "東京都",
+      "municipality_code": "131237",
+      "datasets": [],
+      "facility_list_found": false,
+      "best_tier": "E"
+    }
+  ],
+  "unattributed": [
+    {
+      "catalog": "bodik",
+      "ckan_id": "25f45376-a3ea-4ab6-af70-5a1cca002e82",
+      "ckan_name": "412066_tourisum",
+      "title": "観光地情報",
+      "organization": "武雄市",
+      "landing_page": "https://data.bodik.jp/dataset/412066_tourisum",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2020-08-05T05:54:05.034612",
+      "formats": [
+        "XLSX"
+      ],
+      "resource_count": 2,
+      "kind": "facility_list",
+      "tier": "A",
+      "matched_queries": [
+        "旅館・ホテル"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "1d97b3cb-e031-43b0-a56e-2698962eae7b",
+      "ckan_name": "402052_20",
+      "title": "宿泊施設一覧",
+      "organization": "飯塚市",
+      "landing_page": "https://data.bodik.jp/dataset/402052_20",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2025-04-04T00:10:33.073695",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 2,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "2fd64441-1288-4004-8c10-be34a50638fd",
+      "ckan_name": "422037_hotel",
+      "title": "宿泊施設一覧",
+      "organization": "島原市",
+      "landing_page": "https://data.bodik.jp/dataset/422037_hotel",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2026-07-13T02:25:20.413019",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 1,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "df6fa54c-4d28-4411-b9c8-5033a2968c5d",
+      "ckan_name": "422088_syukuhakushisetsu",
+      "title": "宿泊施設一覧（松浦市）",
+      "organization": "松浦市",
+      "landing_page": "https://data.bodik.jp/dataset/422088_syukuhakushisetsu",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2025-07-28T07:22:16.660017",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 1,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "4847d3d5-bd23-4bb4-8863-02c0c9cfc6d5",
+      "ckan_name": "143839_kanko-syohigaku",
+      "title": "観光客数、宿泊施設と消費額",
+      "organization": "真鶴町",
+      "landing_page": "https://data.bodik.jp/dataset/143839_kanko-syohigaku",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2026-02-17T07:53:26.017591",
+      "formats": [
+        "XLS"
+      ],
+      "resource_count": 1,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "0edcb51f-a493-4afd-a3bf-911de776abe6",
+      "ckan_name": "424111_hotel",
+      "title": "新上五島町宿泊施設一覧",
+      "organization": "新上五島町",
+      "landing_page": "https://data.bodik.jp/dataset/424111_hotel",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2020-02-06T10:56:01.407361",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 1,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "a5fe6658-ef01-41f2-a909-84c2c82a9ecc",
+      "ckan_name": "424111_hotel-wifi",
+      "title": "新上五島町宿泊施設(Wi-Fi設置)一覧",
+      "organization": "新上五島町",
+      "landing_page": "https://data.bodik.jp/dataset/424111_hotel-wifi",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2020-02-06T11:01:53.128173",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 1,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "92390b30-596b-4922-ae7b-a3f4945238ea",
+      "ckan_name": "472077_2026_ts-006",
+      "title": "2026_観光（圏域外客_宿泊）",
+      "organization": "石垣市",
+      "landing_page": "https://data.bodik.jp/dataset/472077_2026_ts-006",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2026-08-07T00:43:01.304520",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 4,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "02de388d-c554-4426-9197-80f635d0a1d4",
+      "ckan_name": "472077_r6_13",
+      "title": "【令和6年度統計いしがき】観光",
+      "organization": "石垣市",
+      "landing_page": "https://data.bodik.jp/dataset/472077_r6_13",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2026-05-26T04:19:28.458400",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 6,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "6a5551f2-7ca1-4c2b-b9bd-34c29af38f54",
+      "ckan_name": "472077_r4_13",
+      "title": "【令和4年度統計いしがき】観光",
+      "organization": "石垣市",
+      "landing_page": "https://data.bodik.jp/dataset/472077_r4_13",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2025-04-25T00:12:52.176628",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 6,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "4645957f-dd27-413d-9eee-92d190406087",
+      "ckan_name": "472077_r5_13",
+      "title": "【令和5年度統計いしがき】観光",
+      "organization": "石垣市",
+      "landing_page": "https://data.bodik.jp/dataset/472077_r5_13",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2025-04-25T00:02:09.277572",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 6,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "a146757c-4c09-4213-aaa3-104a39bea852",
+      "ckan_name": "452025_kaneisisetu_toukeisyo",
+      "title": "都城市の環境衛生施設数_統計書",
+      "organization": "都城市",
+      "landing_page": "https://data.bodik.jp/dataset/452025_kaneisisetu_toukeisyo",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2025-06-12T02:01:32.872492",
+      "formats": [
+        "XLSX"
+      ],
+      "resource_count": 1,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "acc49bb9-4f24-4d08-8d91-e9cf524a8eb1",
+      "ckan_name": "472077_r3_13",
+      "title": "【令和3年度統計いしがき】観光",
+      "organization": "石垣市",
+      "landing_page": "https://data.bodik.jp/dataset/472077_r3_13",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2025-05-13T06:57:27.299620",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 6,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "a44207a0-de1b-469e-9968-cd24ecac2776",
+      "ckan_name": "432156_amakusa014",
+      "title": "天草市宿泊客数推計",
+      "organization": "天草市",
+      "landing_page": "https://data.bodik.jp/dataset/432156_amakusa014",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2024-02-21T08:32:19.749833",
+      "formats": [
+        "HTML"
+      ],
+      "resource_count": 1,
+      "kind": "related",
+      "tier": "B",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "bodik",
+      "ckan_id": "6c39637c-5011-42d0-a617-cd8b8072fd60",
+      "ckan_name": "472077_kenikigaikyaku_syukuhaku",
+      "title": "圏域外客（宿泊）",
+      "organization": "石垣市",
+      "landing_page": "https://data.bodik.jp/dataset/472077_kenikigaikyaku_syukuhaku",
+      "license": "Creative Commons Attribution 4.0 International",
+      "metadata_modified": "2025-09-01T05:04:45.443794",
+      "formats": [
+        "CSV"
+      ],
+      "resource_count": 4,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "tokyo",
+      "ckan_id": "7de3d5e1-da69-4b88-b226-afe271ef17b8",
+      "ckan_name": "t132080d3100000285",
+      "title": "被災者一時宿泊施設大型備蓄倉庫(施設カルテ)",
+      "organization": "調布市",
+      "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t132080d3100000285",
+      "license": "クリエイティブ・コモンズ 表示（CC BY）",
+      "metadata_modified": "2026-05-13T15:14:43.701537",
+      "formats": [
+        "XLSX"
+      ],
+      "resource_count": 1,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "tokyo",
+      "ckan_id": "11dfbc66-d557-47fc-84e4-c233bd3cf704",
+      "ckan_name": "t132063d0000000006",
+      "title": "府中市統計書オープンデータ_民生",
+      "organization": "府中市",
+      "landing_page": "https://catalog.data.metro.tokyo.lg.jp/dataset/t132063d0000000006",
+      "license": "クリエイティブ・コモンズ 表示（CC BY）",
+      "metadata_modified": "2025-12-12T09:03:40.513414",
+      "formats": [
+        "XLS",
+        "CSV"
+      ],
+      "resource_count": 146,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "de255191-026e-4dc6-b548-02b7fb47bd4e",
+      "ckan_name": "clb_20181122_0002",
+      "title": "第194回国会での内閣提出法律案",
+      "organization": "内閣法制局",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/clb_20181122_0002",
+      "license": null,
+      "metadata_modified": "2023-06-09T22:40:59.518151",
+      "formats": [
+        "HTML"
+      ],
+      "resource_count": 7,
+      "kind": "related",
+      "tier": "B",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "ホテル営業"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "e8795e26-888c-45be-ac7f-3ca47f8ac9b9",
+      "ckan_name": "clb_20181122_0001",
+      "title": "第195回国会での内閣提出法律案",
+      "organization": "内閣法制局",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/clb_20181122_0001",
+      "license": null,
+      "metadata_modified": "2023-06-13T22:38:09.264033",
+      "formats": [
+        "HTML"
+      ],
+      "resource_count": 10,
+      "kind": "related",
+      "tier": "B",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "ホテル営業"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "13c39804-dd5b-4a35-9b66-b3a41cfac593",
+      "ckan_name": "mlit_20140919_0052",
+      "title": "平成１３年版 観光白書",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_0052",
+      "license": null,
+      "metadata_modified": "2023-05-25T00:22:58.387497",
+      "formats": [
+        "HTML"
+      ],
+      "resource_count": 61,
+      "kind": "related",
+      "tier": "B",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "旅館・ホテル",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "aa50d4c0-10c4-4806-b17d-b4b7a9395573",
+      "ckan_name": "clb_20221124_0001",
+      "title": "第210回国会での内閣提出法律案",
+      "organization": "内閣法制局",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/clb_20221124_0001",
+      "license": null,
+      "metadata_modified": "2023-06-06T21:41:00.015639",
+      "formats": [
+        "HTML"
+      ],
+      "resource_count": 18,
+      "kind": "facility_list",
+      "tier": "B",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "90a9256d-9530-45a6-962c-5a60ec67ef53",
+      "ckan_name": "clb_20181122_0003",
+      "title": "第193回国会での内閣提出法律案",
+      "organization": "内閣法制局",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/clb_20181122_0003",
+      "license": null,
+      "metadata_modified": "2023-06-05T21:33:25.417510",
+      "formats": [
+        "HTML"
+      ],
+      "resource_count": 73,
+      "kind": "related",
+      "tier": "B",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "ホテル営業"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "eab80390-06d6-4974-8b7e-6d7eb4ffa337",
+      "ckan_name": "maff_20191028_0033",
+      "title": "平成29年度６次産業化総合調査報告",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20191028_0033",
+      "license": null,
+      "metadata_modified": "2023-05-22T23:03:13.543655",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 30,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "3033c6e9-a159-45a3-b8e9-da892ddcc347",
+      "ckan_name": "maff_20201113_0018",
+      "title": "平成30年度６次産業化総合調査報告",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20201113_0018",
+      "license": null,
+      "metadata_modified": "2023-05-08T20:51:07.682442",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 33,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "e1722ce7-f19e-47f8-96dc-53bb33a2c690",
+      "ckan_name": "maff_20181122_0017",
+      "title": "平成28年度６次産業化総合調査報告_2/2",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20181122_0017",
+      "license": null,
+      "metadata_modified": "2023-05-22T22:56:53.697152",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 43,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "797494b0-b0e9-44fd-83d3-b1aed3641acc",
+      "ckan_name": "maff_20180312_0221",
+      "title": "平成27年度_６次産業化総合調査報告_2/2",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20180312_0221",
+      "license": null,
+      "metadata_modified": "2023-05-15T22:27:23.045710",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 43,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "397140f5-2472-4fb1-ad5b-8a6d70b4c7aa",
+      "ckan_name": "maff_20230714_0097",
+      "title": "令和３年度６次産業化総合調査報告",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20230714_0097",
+      "license": null,
+      "metadata_modified": "2024-07-01T18:02:29.667092",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 160,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ff859a2e-f4ab-44bf-a386-6c645b200d2c",
+      "ckan_name": "maff_20210721_0056",
+      "title": "令和元年度６次産業化総合調査報告",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20210721_0056",
+      "license": null,
+      "metadata_modified": "2024-06-28T17:04:40.263799",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 163,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "93ccc9ac-b929-41e7-a900-e9df26c7d158",
+      "ckan_name": "maff_20220712_0067",
+      "title": "令和２年度６次産業化総合調査報告",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20220712_0067",
+      "license": null,
+      "metadata_modified": "2024-06-28T17:02:12.012338",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 165,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f10e6e5b-f7cb-48e3-a6d7-1a46d283dbec",
+      "ckan_name": "maff_20180312_0220",
+      "title": "平成27年度_６次産業化総合調査報告_1/2",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20180312_0220",
+      "license": null,
+      "metadata_modified": "2023-05-23T22:48:45.951394",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 130,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "408f2798-6e40-452d-b1c5-6c3045a89786",
+      "ckan_name": "maff_20181122_0016",
+      "title": "平成28年度６次産業化総合調査報告_1/2",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20181122_0016",
+      "license": null,
+      "metadata_modified": "2023-05-09T20:57:08.688038",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 130,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "787acecb-dfee-4c03-9b8d-f5196132ca88",
+      "ckan_name": "maff_20191028_0032",
+      "title": "平成29年度６次産業化総合調査報告",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20191028_0032",
+      "license": null,
+      "metadata_modified": "2023-05-12T22:07:03.185277",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 130,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "35ba7631-9cb8-4cda-b3f2-b7fdcfae709c",
+      "ckan_name": "maff_20201113_0017",
+      "title": "平成30年度６次産業化総合調査報告",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20201113_0017",
+      "license": null,
+      "metadata_modified": "2023-05-08T20:41:03.873238",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 130,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "7bfd8b92-186e-4360-84f0-d5a7c1b3b27d",
+      "ckan_name": "maff_20210302_0062",
+      "title": "2018年漁業センサス　第２巻　海面漁業に関する統計（都道府県編）",
+      "organization": "農林水産省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/maff_20210302_0062",
+      "license": null,
+      "metadata_modified": "2023-05-15T22:19:13.246432",
+      "formats": [
+        "PDF",
+        "XLS"
+      ],
+      "resource_count": 87,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5f052800-3ea8-4fcd-bde8-322ec697b68d",
+      "ckan_name": "mlit_20160907_0016",
+      "title": "宿泊旅行統計調査_平成28年2月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160907_0016",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:46.437518",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "3600d22e-565b-47d2-be65-e851c526944a",
+      "ckan_name": "mlit_20151013_0300",
+      "title": "宿泊旅行統計調査_平成27年6月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0300",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:33.513725",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "af056ae6-a606-4c65-be0a-50e63227be27",
+      "ckan_name": "mlit_20170902_0048",
+      "title": "宿泊旅行統計調査_平成29年2月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170902_0048",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:24.920366",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "bff74a5f-8dbe-4ce8-9bec-ab30c76d8dd4",
+      "ckan_name": "mlit_20160907_0017",
+      "title": "宿泊旅行統計調査_平成28年1月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160907_0017",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:46.142235",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "56777b6b-c430-4dbe-b168-2aa83e295993",
+      "ckan_name": "mlit_20170902_0049",
+      "title": "宿泊旅行統計調査_平成29年1月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170902_0049",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:10:19.852781",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "28aed73c-3e22-4fbe-a3f8-77b9046cdc0c",
+      "ckan_name": "mlit_20160907_0015",
+      "title": "宿泊旅行統計調査_平成28年3月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160907_0015",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:06:01.757177",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "a6740436-2a9a-4a22-81ac-85e5ded5cd05",
+      "ckan_name": "mlit_20160209_0027",
+      "title": "宿泊旅行統計調査_平成27年10月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160209_0027",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:59.854870",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "395dd1c0-ba5c-4295-87aa-b2189f4ddb0b",
+      "ckan_name": "mlit_20151130_0329",
+      "title": "宿泊旅行統計調査_平成27年9月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151130_0329",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:57.571418",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "b1c25a95-faa2-4f7c-a233-6d64e0c39d18",
+      "ckan_name": "mlit_20160907_0019",
+      "title": "宿泊旅行統計調査_平成27年12月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160907_0019",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:52.215118",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f94f1508-09aa-4b87-af41-98f1484a2662",
+      "ckan_name": "mlit_20151013_0301",
+      "title": "宿泊旅行統計調査_平成27年5月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0301",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:50.476842",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "c639e345-018f-42fe-a895-0c0b6883f982",
+      "ckan_name": "mlit_20160209_0030",
+      "title": "宿泊旅行統計調査_平成27年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160209_0030",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:38.440459",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6b583216-1895-4ca9-85af-ee23ec7d7496",
+      "ckan_name": "mlit_20160209_0026",
+      "title": "宿泊旅行統計調査_平成27年11月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160209_0026",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:25.169937",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f49f17c6-4b15-4cc3-926f-1e75e76d04ba",
+      "ckan_name": "mlit_20170316_0019",
+      "title": "宿泊旅行統計調査_平成28年10月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170316_0019",
+      "license": null,
+      "metadata_modified": "2024-06-04T13:10:12.235509",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "c6eec88c-be2f-412e-9973-8645a471ed9a",
+      "ckan_name": "mlit_20160907_0013",
+      "title": "宿泊旅行統計調査_平成28年5月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160907_0013",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:50.174022",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "bc49fe35-18e7-4a0b-9f03-8f78da45b590",
+      "ckan_name": "mlit_20170902_0046",
+      "title": "宿泊旅行統計調査_平成29年4月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170902_0046",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:39.733290",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "18059b28-1d4c-44e0-894c-7752824285ec",
+      "ckan_name": "mlit_20161206_0025",
+      "title": "宿泊旅行統計調査_平成28年8月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20161206_0025",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:34.458530",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "4942bed0-77c9-4fd7-9a31-598a9784f1d4",
+      "ckan_name": "mlit_20170316_0017",
+      "title": "宿泊旅行統計調査_平成28年12月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170316_0017",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:09.232164",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5f204e88-d072-4cd0-b93e-82e9c7e8f522",
+      "ckan_name": "mlit_20140919_2444",
+      "title": "宿泊旅行統計調査_平成22年1月～3月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2444",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:05.705298",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ff4fd0bc-fd98-4554-849a-115d091fe693",
+      "ckan_name": "mlit_20190201_0022",
+      "title": "宿泊旅行統計調査_平成29年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0022",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:12:16.318111",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "59c9d4b6-d183-40d5-8c39-502f7c0b19fd",
+      "ckan_name": "mlit_20170902_0047",
+      "title": "宿泊旅行統計調査_平成29年3月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170902_0047",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:08:15.474783",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "20fab692-2cd1-47d1-854a-1c957fa5ab93",
+      "ckan_name": "mlit_20190201_0020",
+      "title": "宿泊旅行統計調査_平成29年9月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0020",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:50.665349",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "73955273-a268-43c1-b112-18508486c521",
+      "ckan_name": "mlit_20190201_0017",
+      "title": "宿泊旅行統計調査_平成29年12月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0017",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:48.884170",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "be2fde4b-1b47-4a01-b589-6fee52cf6e05",
+      "ckan_name": "mlit_20161206_0024",
+      "title": "宿泊旅行統計調査_平成28年9月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20161206_0024",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:19:12.050944",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "deaa8785-31c0-491a-b5db-d397a48a5b95",
+      "ckan_name": "mlit_20161206_0026",
+      "title": "宿泊旅行統計調査_平成28年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20161206_0026",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:15.535277",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "afff6d2d-07ef-450b-b922-d1b27480ff5c",
+      "ckan_name": "mlit_20161206_0027",
+      "title": "宿泊旅行統計調査_平成28年6月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20161206_0027",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:59.261539",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "73f2e89c-3ece-4422-a503-d037d46dbd6c",
+      "ckan_name": "mlit_20170316_0018",
+      "title": "宿泊旅行統計調査_平成28年11月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170316_0018",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:51.829977",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0716624b-fe3c-4bc4-8eb6-d84c60b06c25",
+      "ckan_name": "mlit_20190201_0021",
+      "title": "宿泊旅行統計調査_平成29年8月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0021",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:09.772017",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f017e4cb-ebf9-45fa-8f3a-c0e8e96811ff",
+      "ckan_name": "mlit_20190201_0018",
+      "title": "宿泊旅行統計調査_平成29年11月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0018",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:50.288480",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "783efb25-4367-40dd-823c-163cfa4a9f0e",
+      "ckan_name": "mlit_20140919_2448",
+      "title": "宿泊旅行統計調査_平成21年4月～6月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2448",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:34.221787",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "b177ed4d-bf10-402f-becf-e6afd7e5d988",
+      "ckan_name": "mlit_20140919_2449",
+      "title": "宿泊旅行統計調査_平成21年1月～3月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2449",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:25.975269",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "fd0a0337-2f0a-4d65-922e-5d177d7b9525",
+      "ckan_name": "mlit_20140919_2447",
+      "title": "宿泊旅行統計調査_平成21年7月～9月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2447",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:28.363489",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "7bc213c7-9a99-4245-aa57-8ca4f7041fd8",
+      "ckan_name": "mlit_20140919_2446",
+      "title": "宿泊旅行統計調査_平成21年10月～12月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2446",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:45.136516",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "a5a7d3c6-2e44-43db-8209-dc38749e3a0a",
+      "ckan_name": "mlit_20140919_2437",
+      "title": "宿泊旅行統計調査_平成23年7月～9月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2437",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:37.810930",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6d19acc6-34c7-4f63-869e-725635771d3f",
+      "ckan_name": "mlit_20140919_2438",
+      "title": "宿泊旅行統計調査_平成23年4月～6月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2438",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:32.326897",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "60acfbef-986b-443f-bd23-c9a81c8a5a6a",
+      "ckan_name": "mlit_20140919_2431",
+      "title": "宿泊旅行統計調査_平成24年10月～12月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2431",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:38.005236",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5d00cfdd-c961-4f69-8248-7d09efefa467",
+      "ckan_name": "mlit_20140919_2441",
+      "title": "宿泊旅行統計調査_平成22年10月～12月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2441",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:22.415358",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "b3b5ceaf-8a12-495c-babd-d2a1e7f9b7f5",
+      "ckan_name": "mlit_20151013_0312",
+      "title": "宿泊旅行統計調査_平成25年1月～3月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0312",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:53.608140",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "791c4792-299c-4291-9a55-2ee51396ef10",
+      "ckan_name": "mlit_20140919_2436",
+      "title": "宿泊旅行統計調査_平成23年10月～12月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2436",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:59.031873",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "77600dde-193d-449c-8764-ee4840d52feb",
+      "ckan_name": "mlit_20140919_2443",
+      "title": "宿泊旅行統計調査_平成22年4月～6月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2443",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:50.199603",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "661d14cf-9740-4caf-869c-df0d17f9fc5a",
+      "ckan_name": "mlit_20140919_2439",
+      "title": "宿泊旅行統計調査_平成23年1月～3月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2439",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:10:22.513403",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5ab103f2-0712-4818-b6cf-66bf9ddc5a68",
+      "ckan_name": "mlit_20151013_0302",
+      "title": "宿泊旅行統計調査_平成27年1月～3月及び4月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0302",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:01.204589",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 5,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "cfd13fb4-b9f6-4ae2-90b7-2cd820821480",
+      "ckan_name": "mlit_20140919_2440",
+      "title": "宿泊旅行統計調査_平成22年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2440",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:10:13.563307",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "bd3c7a14-729d-4441-95b5-b97f3bcace0a",
+      "ckan_name": "mlit_20140919_2454",
+      "title": "宿泊旅行統計調査_平成20年1月～3月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2454",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:26.628626",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "c9f6deed-cd54-469b-9878-2b303c5078f5",
+      "ckan_name": "mlit_20140919_2453",
+      "title": "宿泊旅行統計調査_平成20年4月～6月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2453",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:20.406011",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "c2d28119-f0ff-4c64-bf7a-5e9c804fbd4f",
+      "ckan_name": "mlit_20140919_2452",
+      "title": "宿泊旅行統計調査_平成20年7月～9月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2452",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:56.430643",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5f645d10-c4af-4b4c-ab69-b37779dc5dab",
+      "ckan_name": "mlit_20140919_2451",
+      "title": "宿泊旅行統計調査_平成20年10月～12月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2451",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:17.139460",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f7aa60d9-6804-49e9-a549-1c49dc4bbe46",
+      "ckan_name": "mlit_20140919_2450",
+      "title": "宿泊旅行統計調査_平成20年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2450",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:10:17.723310",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "9912861f-d345-41e2-b9ee-d37084ea2866",
+      "ckan_name": "mlit_20151013_0313",
+      "title": "宿泊旅行統計調査_平成24年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0313",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:42.672088",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "c024b5ff-032c-4a17-8800-4d86baeb5d2b",
+      "ckan_name": "mlit_20140919_2445",
+      "title": "宿泊旅行統計調査_平成21年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2445",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:12:47.689509",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業",
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "2fb0b4e3-1868-4b86-9a8e-e7c5f337cca8",
+      "ckan_name": "mlit_20211007_0050",
+      "title": "宿泊旅行統計調査_令和2年5月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0050",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:36.263139",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "4a74d9e4-028a-4ac9-8c0a-72ed3da74bb1",
+      "ckan_name": "mlit_20211007_0037",
+      "title": "宿泊旅行統計調査_令和3年5月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0037",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:11.128797",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0fd527fb-27cb-40a4-adfe-04cbe4ad330a",
+      "ckan_name": "mlit_20220808_0012",
+      "title": "宿泊旅行統計調査_令和3年9月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20220808_0012",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:12:49.897991",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "435b549d-d5c9-4094-a684-46c8fbd866a5",
+      "ckan_name": "mlit_20211007_0041",
+      "title": "宿泊旅行統計調査_令和3年1月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0041",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:12:45.926997",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "15e00b81-189d-4221-bc6e-71b5b67f53d4",
+      "ckan_name": "mlit_20211007_0038",
+      "title": "宿泊旅行統計調査_令和3年4月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0038",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:19:00.406790",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "d2f65732-0f72-4966-a4ee-4b0f86e7a402",
+      "ckan_name": "mlit_20211007_0039",
+      "title": "宿泊旅行統計調査_令和3年3月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0039",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:57.206916",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0fb11851-a31a-4e8c-941a-207b6e6872de",
+      "ckan_name": "mlit_20211007_0048",
+      "title": "宿泊旅行統計調査_令和2年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0048",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:30.420211",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "4fa24fa7-85af-4acc-8316-ee1176ccc413",
+      "ckan_name": "mlit_20211007_0049",
+      "title": "宿泊旅行統計調査_令和2年6月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0049",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:10.377631",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ca990286-582c-48ee-adc1-a381e855ed94",
+      "ckan_name": "mlit_20211007_0051",
+      "title": "宿泊旅行統計調査_令和2年4月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0051",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:37.278973",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0b5cfb14-80fc-4770-8007-3496f4573e1c",
+      "ckan_name": "mlit_20211007_0052",
+      "title": "宿泊旅行統計調査_令和2年3月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0052",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:33.791940",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "47e4a328-f51b-4229-8727-aa5b09b1b217",
+      "ckan_name": "mlit_20211007_0067",
+      "title": "宿泊旅行統計調査_平成31年1月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0067",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:22.153339",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6c6451c9-7bbb-42be-aa56-c6af20fe7f83",
+      "ckan_name": "mlit_20211007_0046",
+      "title": "宿泊旅行統計調査_令和2年9月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0046",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:11.455182",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "7715a7bb-39bf-46e6-a6ec-0754a022ecaa",
+      "ckan_name": "mlit_20211007_0036",
+      "title": "宿泊旅行統計調査_令和3年6月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0036",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:26.688729",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f9d314c8-756a-4233-a29e-d842d180c3e1",
+      "ckan_name": "mlit_20211007_0040",
+      "title": "宿泊旅行統計調査_令和3年2月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0040",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:10:16.158438",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "69043660-1fc1-49fc-8ab7-c402d455b87c",
+      "ckan_name": "mlit_20190201_0013",
+      "title": "宿泊旅行統計調査_平成30年3月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0013",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:12:59.013463",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "4ae2c92d-995b-4b24-969d-8ae967ffde8e",
+      "ckan_name": "mlit_20190201_0010",
+      "title": "宿泊旅行統計調査_平成30年6月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0010",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:08:07.046258",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "b205eb7c-3725-4f4c-b889-2cf6bbb90c04",
+      "ckan_name": "mlit_20190201_0009",
+      "title": "宿泊旅行統計調査_平成30年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0009",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:54.272656",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "4b44049e-9421-4c02-9458-4d53c16d6576",
+      "ckan_name": "mlit_20190201_0012",
+      "title": "宿泊旅行統計調査_平成30年4月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0012",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:52.488469",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "3e4608c9-c597-45d7-8a04-3b802d9b0c1f",
+      "ckan_name": "mlit_20190201_0006",
+      "title": "宿泊旅行統計調査_平成30年10月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0006",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:40.540607",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "3c8ecee0-1bc1-48b2-afb8-7d86b1ed08ac",
+      "ckan_name": "mlit_20190201_0008",
+      "title": "宿泊旅行統計調査_平成30年8月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0008",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:26.572359",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f488decf-34d2-442e-8230-b495949bcd9b",
+      "ckan_name": "mlit_20220808_0013",
+      "title": "宿泊旅行統計調査_令和3年8月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20220808_0013",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:42.026618",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "331ef275-06d3-4c9b-94e7-7e131cd1eabb",
+      "ckan_name": "mlit_20211007_0056",
+      "title": "宿泊旅行統計調査_令和元年12月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0056",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:32.100843",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "e356e61a-9462-4e22-bcdf-f65f25538200",
+      "ckan_name": "mlit_20220808_0011",
+      "title": "宿泊旅行統計調査_令和3年10月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20220808_0011",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:03.508556",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5b86fcf4-84cb-4618-8408-dcdf5984dbd1",
+      "ckan_name": "mlit_20211007_0062",
+      "title": "宿泊旅行統計調査_令和元年6月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0062",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:50.011807",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "8bcdd3e6-f8e7-4771-b50c-e8ce6f5bb101",
+      "ckan_name": "mlit_20211007_0059",
+      "title": "宿泊旅行統計調査_令和元年9月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0059",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:40.951351",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "61a6e4a2-abce-4e25-9ca3-dce6752a96b7",
+      "ckan_name": "mlit_20220808_0010",
+      "title": "宿泊旅行統計調査_令和3年11月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20220808_0010",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:39.105498",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ec54601e-f001-4765-bd24-3ac706a6c6bc",
+      "ckan_name": "mlit_20211007_0065",
+      "title": "宿泊旅行統計調査_平成31年3月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0065",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:31.919044",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ca82ea7d-6d70-409b-a8bc-95045594aaad",
+      "ckan_name": "mlit_20211007_0066",
+      "title": "宿泊旅行統計調査_平成31年2月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0066",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:20.454728",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "987b96bc-e507-48dd-894f-a37836a47780",
+      "ckan_name": "mlit_20211007_0061",
+      "title": "宿泊旅行統計調査_令和元年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0061",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:18.605434",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "1d0e97fd-4654-43b4-8706-af6ed237ad9a",
+      "ckan_name": "mlit_20220808_0014",
+      "title": "宿泊旅行統計調査_令和3年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20220808_0014",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:13.327954",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "be534d1a-5831-4972-aee5-9d4c222d2ba0",
+      "ckan_name": "mlit_20211007_0054",
+      "title": "宿泊旅行統計調査_令和2年1月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0054",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:48.389332",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "afaaa234-5bd6-4a1c-8247-35b37384139c",
+      "ckan_name": "mlit_20211007_0064",
+      "title": "宿泊旅行統計調査_平成31年4月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0064",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:28.347500",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "50d11398-9716-4d16-9f2a-df5b88921193",
+      "ckan_name": "mlit_20211007_0060",
+      "title": "宿泊旅行統計調査_令和元年8月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0060",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:20.261127",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "dc1fddb8-9da7-4e71-8a88-9803bf3ff376",
+      "ckan_name": "mlit_20220808_0009",
+      "title": "宿泊旅行統計調査_令和3年12月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20220808_0009",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:48.609867",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ba004a14-c6c6-4114-ac5d-6c3ec9ce869e",
+      "ckan_name": "mlit_20211007_0053",
+      "title": "宿泊旅行統計調査_令和2年2月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0053",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:29.375325",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "fbdf0588-c6d2-4c05-8c5b-a20147597633",
+      "ckan_name": "mlit_20211007_0057",
+      "title": "宿泊旅行統計調査_令和元年11月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0057",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:27.589264",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "31daa2b1-a1a1-40ca-a36b-9dc87b753e07",
+      "ckan_name": "mlit_20190201_0007",
+      "title": "宿泊旅行統計調査_平成30年9月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0007",
+      "license": null,
+      "metadata_modified": "2024-05-24T13:09:12.693941",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "fe861faa-1ce2-46eb-a3a4-7c0655c36c94",
+      "ckan_name": "mlit_20211007_0063",
+      "title": "宿泊旅行統計調査_令和元年5月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0063",
+      "license": null,
+      "metadata_modified": "2024-12-03T13:06:22.108231",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "旅館業法",
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "7c8b6331-7656-4cc2-975b-94cce23d2b40",
+      "ckan_name": "mlit_20170902_0050",
+      "title": "宿泊旅行統計調査_平成28年年間値（確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170902_0050",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:27.331913",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "50eaafd4-8b55-4c77-a83c-d9702f3828f1",
+      "ckan_name": "mlit_20211007_0042",
+      "title": "宿泊旅行統計調査_令和2年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0042",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:55.233600",
+      "formats": [
+        "XLSX",
+        "PDF",
+        "ビジュアル分析(Tableau)"
+      ],
+      "resource_count": 4,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6ca63dfd-b37c-4909-bc45-7b24ce280d75",
+      "ckan_name": "mlit_20221124_0038",
+      "title": "宿泊旅行統計調査_令和3年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20221124_0038",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:29.449996",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0c440e39-eb28-497c-95c0-b00bfa5110b7",
+      "ckan_name": "mlit_20190201_0016",
+      "title": "宿泊旅行統計調査_平成29年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0016",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:06:06.167564",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0f614186-0fbf-4059-809a-5064335c4719",
+      "ckan_name": "mlit_20160907_0018",
+      "title": "宿泊旅行統計調査_平成27年年間値（確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160907_0018",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:35.178790",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "b101404c-c08e-4466-b9c0-84a76cf094f0",
+      "ckan_name": "mlit_20211007_0068",
+      "title": "宿泊旅行統計調査_平成30年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0068",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:43.475011",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "76684393-19c7-4d4c-930e-7fd3a70fd9af",
+      "ckan_name": "mlit_20211007_0055",
+      "title": "宿泊旅行統計調査_平成31年1月～令和元年12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0055",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:40.323649",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "910dbee5-d450-467d-9cfc-3c41312fce41",
+      "ckan_name": "mlit_20140919_2435",
+      "title": "宿泊旅行統計調査_平成23年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2435",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:35.457657",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "24c21074-b6a1-47d8-b319-9f671abf6cdf",
+      "ckan_name": "mlit_20151013_0303",
+      "title": "宿泊旅行統計調査_平成26年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0303",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:25.690783",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f5c25a95-72ef-44a9-973f-7a3267457026",
+      "ckan_name": "mlit_20151013_0308",
+      "title": "宿泊旅行統計調査_平成25年1月～12月分（年の確定値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0308",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:33.938918",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0a693175-3dcb-40a1-acb4-e050fb96c53b",
+      "ckan_name": "cao_20210602_0006",
+      "title": "New ESRI Working Paper No.056",
+      "organization": "内閣府",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/cao_20210602_0006",
+      "license": null,
+      "metadata_modified": "2023-05-25T00:37:37.252145",
+      "formats": [
+        "HTML",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "related",
+      "tier": "B",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ca309377-9e4c-4db5-969d-d52cf912b8da",
+      "ckan_name": "mlit_20160907_0014",
+      "title": "宿泊旅行統計調査_平成28年4月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20160907_0014",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:48.090998",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6339add1-96da-4faf-a840-3159f369ae59",
+      "ckan_name": "mlit_20190201_0015",
+      "title": "宿泊旅行統計調査_平成30年1月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0015",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:41.601473",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5f3d3b8d-415d-47dc-b3bb-33f631a33fdc",
+      "ckan_name": "mlit_20190201_0011",
+      "title": "宿泊旅行統計調査_平成30年5月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0011",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:12.738008",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "64fd9df1-ffd5-4865-9360-f18aeac21893",
+      "ckan_name": "mlit_20190201_0019",
+      "title": "宿泊旅行統計調査_平成29年10月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0019",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:08:10.734403",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "28c65770-972d-4463-8fad-3813f2768578",
+      "ckan_name": "mlit_20211007_0070",
+      "title": "宿泊旅行統計調査_平成30年11月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0070",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:08:01.135781",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "ee14e8e5-a875-49cc-977e-a5c59afac2ba",
+      "ckan_name": "mlit_20190201_0014",
+      "title": "宿泊旅行統計調査_平成30年2月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0014",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:43.521843",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6a6bd50a-0ee5-43d2-880b-707d977e4f76",
+      "ckan_name": "mlit_20211007_0044",
+      "title": "宿泊旅行統計調査_令和2年11月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0044",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:50.047743",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "0f5acb6b-a850-4c01-996a-07dbc7336bc0",
+      "ckan_name": "mlit_20211007_0045",
+      "title": "宿泊旅行統計調査_令和2年10月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0045",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:48.275736",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "de9ebcd9-833b-46cc-acc4-a149eb0e0bac",
+      "ckan_name": "mlit_20211007_0058",
+      "title": "宿泊旅行統計調査_令和元年10月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0058",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:26.163718",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "83cda951-394d-4af1-ab49-3f868378d332",
+      "ckan_name": "mlit_20211007_0043",
+      "title": "宿泊旅行統計調査_令和2年12月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0043",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:28.235582",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "14f567b1-2b3c-4df5-87a0-85ff780cd738",
+      "ckan_name": "mlit_20211007_0047",
+      "title": "宿泊旅行統計調査_令和2年8月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0047",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:23.932503",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "7e094356-4568-4e2f-a6a9-3d82711973cb",
+      "ckan_name": "mlit_20190201_0023",
+      "title": "宿泊旅行統計調査_平成29年6月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20190201_0023",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:16.881868",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "defa5aac-566e-47ea-84fa-f81d0f775a7a",
+      "ckan_name": "mlit_20170902_0045",
+      "title": "宿泊旅行統計調査_平成29年5月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20170902_0045",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:46.641174",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "a3af420f-cd2a-46a6-994d-999eb531c8c2",
+      "ckan_name": "mlit_20211007_0069",
+      "title": "宿泊旅行統計調査_平成30年12月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20211007_0069",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:32.840511",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "9f2b3f09-81a6-447e-ab79-e49ed87b37bd",
+      "ckan_name": "mlit_20151130_0330",
+      "title": "宿泊旅行統計調査_平成27年8月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151130_0330",
+      "license": null,
+      "metadata_modified": "2025-10-10T13:05:31.873496",
+      "formats": [
+        "XLSX",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "9119391f-48f6-47e0-b747-61fb61ac3212",
+      "ckan_name": "mlit_20221124_0032",
+      "title": "宿泊旅行統計調査_令和4年7月分（第2次速報値）",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20221124_0032",
+      "license": null,
+      "metadata_modified": "2024-06-04T13:10:48.183326",
+      "formats": [
+        "PDF",
+        "XLSX"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "079554f8-4e02-4054-8ea7-f11e24fac899",
+      "ckan_name": "mlit_20151013_0310",
+      "title": "宿泊旅行統計調査_平成25年7月～9月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0310",
+      "license": null,
+      "metadata_modified": "2024-12-03T13:06:44.803450",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "3c4885df-2547-470a-a82d-52c339162fbf",
+      "ckan_name": "mlit_20151013_0305",
+      "title": "宿泊旅行統計調査_平成26年7月～9月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0305",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:46.470679",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "d1114bb4-a0b3-4901-b810-8cad6e392826",
+      "ckan_name": "mlit_20151013_0309",
+      "title": "宿泊旅行統計調査_平成25年10月～12月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0309",
+      "license": null,
+      "metadata_modified": "2024-05-30T13:13:14.429026",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "295aaa20-e22d-4d95-a2b9-9367859d4754",
+      "ckan_name": "mlit_20140919_2432",
+      "title": "宿泊旅行統計調査_平成24年7月～9月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2432",
+      "license": null,
+      "metadata_modified": "2024-05-28T13:07:55.866334",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "旅館・ホテル",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "7c911e0c-8c41-4d1b-9ec9-5ce1745ce148",
+      "ckan_name": "mlit_20151013_0306",
+      "title": "宿泊旅行統計調査_平成26年4月～6月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0306",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:24.528945",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "50e9f2b2-95e4-48ed-9738-d1fe8045cddc",
+      "ckan_name": "mlit_20151013_0304",
+      "title": "宿泊旅行統計調査_平成26年10月～12月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0304",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:12.037176",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "aa6bad87-1a00-4e52-8890-823f81996ff0",
+      "ckan_name": "mlit_20151013_0307",
+      "title": "宿泊旅行統計調査_平成26年1月～3月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0307",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:18:05.697615",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "52344924-4782-4040-a9c6-05510257a714",
+      "ckan_name": "mlit_20140919_2434",
+      "title": "宿泊旅行統計調査_平成24年1月～3月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2434",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:55.848154",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "旅館・ホテル",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6e6b46c8-c7f0-4918-a64e-0afea263916d",
+      "ckan_name": "mlit_20140919_2433",
+      "title": "宿泊旅行統計調査_平成24年4月～6月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2433",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:15.059408",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "旅館・ホテル",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "5ccad126-2900-4b84-96cb-d62ee49a46b0",
+      "ckan_name": "mlit_20151013_0311",
+      "title": "宿泊旅行統計調査_平成25年4月～6月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20151013_0311",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:16:52.282620",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 3,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "f0579da5-9fb8-487d-a831-24ff0617361e",
+      "ckan_name": "mlit_20140919_2442",
+      "title": "宿泊旅行統計調査_平成22年7月～9月分",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2442",
+      "license": null,
+      "metadata_modified": "2024-05-27T13:17:47.989634",
+      "formats": [
+        "XLS",
+        "PDF"
+      ],
+      "resource_count": 2,
+      "kind": "stats",
+      "tier": "A",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "83b0cdae-37fe-49eb-b6ed-559b40906d05",
+      "ckan_name": "mlit_20140919_2430",
+      "title": "宿泊旅行統計調査_調査の概要",
+      "organization": "国土交通省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/mlit_20140919_2430",
+      "license": null,
+      "metadata_modified": "2023-06-05T21:40:54.694961",
+      "formats": [
+        "HTML"
+      ],
+      "resource_count": 1,
+      "kind": "stats",
+      "tier": "B",
+      "matched_queries": [
+        "簡易宿所",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "a835682f-b220-45c9-8f8d-d0ef43575d2c",
+      "ckan_name": "cao_20140904_0222",
+      "title": "地域の経済(全文)_2008年",
+      "organization": "内閣府",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/cao_20140904_0222",
+      "license": null,
+      "metadata_modified": "2023-06-06T21:42:25.511094",
+      "formats": [
+        "HTML",
+        "PDF"
+      ],
+      "resource_count": 128,
+      "kind": "stats",
+      "tier": "B",
+      "matched_queries": [
+        "旅館・ホテル",
+        "宿泊施設"
+      ]
+    },
+    {
+      "catalog": "e-gov",
+      "ckan_id": "6ee7efdf-7967-4985-a213-93be888f3a5e",
+      "ckan_name": "soumu_20180312_0015",
+      "title": "情報通信白書_平成29年版（４）",
+      "organization": "総務省",
+      "landing_page": "https://data.e-gov.go.jp/data/dataset/soumu_20180312_0015",
+      "license": null,
+      "metadata_modified": "2023-06-15T19:20:48.945690",
+      "formats": [
+        "PDF",
+        "XLSX"
+      ],
+      "resource_count": 130,
+      "kind": "related",
+      "tier": "A",
+      "matched_queries": [
+        "宿泊施設"
+      ]
+    }
+  ]
+}

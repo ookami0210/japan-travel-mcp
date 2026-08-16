@@ -321,6 +321,31 @@ requires either extending an existing channel or creating a new one.
   `jsonld: false`, never guessed values.
 - **Status**: `active`
 
+#### #42 — Ryokan-gyo permit-registry discovery (CKAN cross-catalog survey)
+- **Authority**: the 157 Hotel Business Act (旅館業法) permit authorities —
+  47 prefectures + 87 public-health-center cities + 23 Tokyo special wards
+  (authority list: `scrapers/sources/ryokan_authority_list.ts`; city
+  designations verified against 地域保健法施行令 §1, 2026-08-16)
+- **URL**: CKAN `package_search` across data.bodik.jp,
+  catalog.data.metro.tokyo.lg.jp, data.e-gov.go.jp (phrase queries;
+  swept-catalog list versioned in the fetcher)
+- **License**: catalog metadata only at this stage (titles / orgs / formats /
+  landing pages); per-dataset licenses recorded in the matrix for the
+  ingestion pass to honor
+- **Fetcher**: `scrapers/sources/discover_ryokan_registries.ts`
+- **Output**: `data/_state/ryokan_registry/catalog_matrix.json` — per-authority
+  coverage matrix with format tiers (A = CSV/XLSX/JSON, B = HTML,
+  C/D = PDF, E = absent from swept catalogs → direct-survey worklist)
+- **Cadence**: quarterly re-sweep (catalog drift is slow), or on demand when
+  a new regional catalog endpoint is added
+- **Channel**: WD-FOUNDATION (manual) — survey sidecar feeding the hotel
+  ledger's public-verification layer; not part of MUNI/R3 rotation
+- **Coverage**: first sweep 2026-08-16 — 33/157 authorities publish a
+  permit-facility list in a swept catalog (31 tier A, 1 tier B, 1 unknown);
+  124 tier E pending direct survey. E means "absent from swept catalogs",
+  never "publishes nothing".
+- **Status**: `active`
+
 #### #34 — Wikipedia ja summaries (description_ja upgrade)
 - **Authority**: Wikipedia (Wikimedia Foundation)
 - **URL**: https://ja.wikipedia.org/w/api.php (action=query&prop=extracts&exintro=1&exsentences=2&explaintext=1)
