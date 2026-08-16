@@ -138,6 +138,7 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 
 | Tool | Description |
 |------|-------------|
+| `resolve_entity` | **Conversation-grade** name→entity resolution: free-text facility names (Japanese / English / romaji / nicknames, e.g. from web search) resolve to canonical entities with id, coordinates, name variants, and honest confidence. Returns nothing rather than a forced guess. Warm lookups run in milliseconds |
 | `search_area` | Search across prefectures, municipalities, and 41,000+ Wikidata attractions by name or keyword |
 | `search_semantic` | Vector search over the `multilingual-e5` embedding index — semantic similarity, language-agnostic |
 | `search_hybrid` | BM25 lexical + vector + RRF fusion — the preferred general-purpose retriever |
@@ -320,7 +321,7 @@ japan-travel-mcp/                          # this repo — code + lightweight me
 ├── CONTRIBUTING.md
 ├── DATA_POLICY.md
 ├── src/
-│   ├── index.ts                           # MCP server (18 tools)
+│   ├── index.ts                           # MCP server (19 tools)
 │   └── lib/hf_data.ts                     # HF dataset bootstrap (first-run download)
 ├── data/                                  # only what readers / contributors need to see
 │   ├── _logs/                             # daily scrape run summaries (transparency)

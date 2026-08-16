@@ -37,6 +37,12 @@ import {
   filterFoodVenues,
   type FoodVenue,
 } from "./lib/food_layer.js";
+import {
+  buildResolveIndex,
+  resolveByName,
+  type ResolveEntry,
+  type ResolveIndex,
+} from "./lib/resolve.js";
 import { matchesMunicipality, stripPrefSuffix } from "./lib/match.js";
 import { semanticSearch, tryLoadSemanticIndex } from "./lib/semantic.js";
 import { hybridSearch } from "./lib/hybrid.js";
@@ -848,6 +854,224 @@ async function loadNames(): Promise<Map<string, MultilingualNameRecord>> {
 // dataAsOf → ./lib/dataset.js.
 
 // ──────────────────────────────────────────────────────────────────────
+// Tool: resolve_entity — free-text name → canonical entity (see lib/resolve.ts)
+
+let entityResolveIndex: ResolveIndex | null = null;
+
+async function buildEntityResolveIndex(): Promise<ResolveIndex> {
+  if (entityResolveIndex) return entityResolveIndex;
+  const entries: ResolveEntry[] = [];
+
+  // 1) Wikidata attractions (with wikipedia titles) + municipal spots.
+  const prefs = await loadAllPrefectures();
+  const attractionByQid = new Map<string, ResolveEntry>();
+  for (const p of prefs) {
+    for (const a of p.wikidata_attractions ?? []) {
+      const names: string[] = [];
+      for (const n of [a.name_ja, a.name_en, a.name_zh, a.name_ko]) {
+        if (n) names.push(n);
+      }
+      const wt = (a as { wikipedia_titles?: Record<string, string> })
+        .wikipedia_titles;
+      if (wt) for (const t of Object.values(wt)) if (t) names.push(t);
+      if (names.length === 0) continue;
+      const e: ResolveEntry = {
+        id: a.qid,
+        source: "attraction",
+        names,
+        canonical_name: a.name_ja ?? a.name_en ?? names[0],
+        lat: a.coordinates?.lat ?? null,
+        lng: a.coordinates?.lng ?? null,
+        prefecture_code: a.prefecture_code ?? null,
+        category: (a as { category?: string }).category ?? null,
+        official_url:
+          (a as { official_url?: string }).official_url ?? null,
+        reference_url: a.wikidata_url ?? null,
+      };
+      entries.push(e);
+      attractionByQid.set(a.qid, e);
+    }
+    for (const m of p.municipalities) {
+      for (const s of m.spots) {
+        if (!s.name) continue;
+        entries.push({
+          id: s.id,
+          source: "municipal_spot",
+          names: [s.name],
+          canonical_name: s.name,
+          lat: s.coordinates?.lat ?? null,
+          lng: s.coordinates?.lng ?? null,
+          prefecture_code: p.prefecture.code,
+          category: (s as { category?: string | null }).category ?? null,
+          official_url: s.url ?? null,
+          reference_url: null,
+        });
+      }
+    }
+  }
+
+  // 2) 17-language translated names — the variant dictionary that makes
+  //    English-search spellings resolve to Japanese canonical entities.
+  try {
+    const raw = await readFile(findMultilingualNamesPath(), "utf8");
+    for (const line of raw.split("\n")) {
+      if (!line.trim()) continue;
+      try {
+        const rec = JSON.parse(line) as {
+          qid?: string;
+          translations?: Record<string, string>;
+        };
+        const target = rec.qid ? attractionByQid.get(rec.qid) : undefined;
+        if (!target || !rec.translations) continue;
+        for (const t of Object.values(rec.translations)) {
+          if (t) target.names.push(t);
+        }
+      } catch {
+        /* skip malformed line */
+      }
+    }
+  } catch {
+    /* translations file absent — resolve still works on base names */
+  }
+
+  // 3) Hotels (Wikidata ∪ OSM master).
+  const hotelsFile = await loadHotels();
+  for (const h of hotelsFile?.hotels ?? []) {
+    const names = [h.name, h.name_en, (h as { name_zh?: string | null }).name_zh, (h as { name_ko?: string | null }).name_ko].filter(
+      (n): n is string => !!n,
+    );
+    if (names.length === 0) continue;
+    entries.push({
+      id: `hotel:${h.id}`,
+      source: "hotel",
+      names,
+      canonical_name: h.name ?? h.name_en ?? names[0],
+      lat: h.coordinates?.lat ?? null,
+      lng: h.coordinates?.lng ?? null,
+      prefecture_code: (h as { prefecture_code?: string }).prefecture_code ?? null,
+      category: (h as { type?: string | null }).type ?? "lodging",
+      official_url: (h as { website?: string | null }).website ?? null,
+      reference_url: null,
+    });
+  }
+
+  // 4) Food venues (OSM food layer, all prefectures).
+  for (let i = 0; i < PREFECTURE_SLUGS.length; i++) {
+    const slug = PREFECTURE_SLUGS[i];
+    const code = String(i + 1).padStart(2, "0");
+    const venues = await loadFoodLayer(
+      resolve(dataRoot(), "food", `${slug}.json`),
+      slug,
+    );
+    for (const v of venues) {
+      const names = [v.names.default, v.names.ja, v.names.en].filter(
+        (n): n is string => !!n,
+      );
+      entries.push({
+        id: v.id,
+        source: "food_venue",
+        names,
+        canonical_name: v.names.ja ?? v.names.default,
+        lat: v.geo.lat,
+        lng: v.geo.lng,
+        prefecture_code: code,
+        category: v.cuisine[0] ?? v.amenity ?? "food",
+        official_url: v.official_url,
+        reference_url: null,
+      });
+    }
+  }
+
+  entityResolveIndex = buildResolveIndex(entries);
+  return entityResolveIndex;
+}
+
+/** Forgiving area-hint → prefecture codes (same tolerance as the food path). */
+async function areaHintToPrefCodes(hint: string): Promise<Set<string> | null> {
+  let codes = (await resolvePrefectureCodes(hint)) ?? [];
+  if (codes.length === 0) {
+    const inferred = inferPrefCode(hint);
+    if (inferred) codes = [inferred];
+  }
+  if (codes.length === 0) {
+    const bare = hint.trim();
+    for (const [name, code] of Object.entries(PREF_NAME_TO_CODE)) {
+      if (bare.length >= 2 && name.startsWith(bare)) {
+        codes = [code];
+        break;
+      }
+    }
+  }
+  return codes.length > 0 ? new Set(codes) : null;
+}
+
+async function resolveEntity(args: {
+  name: string;
+  area_hint?: string;
+  lat?: number;
+  lng?: number;
+  limit?: number;
+}): Promise<unknown> {
+  const name = args.name?.trim();
+  if (!name) return { error: "empty_name", disclaimer: DISCLAIMER };
+  const index = await buildEntityResolveIndex();
+
+  const prefCodes = args.area_hint
+    ? await areaHintToPrefCodes(args.area_hint)
+    : null;
+  const near =
+    typeof args.lat === "number" && typeof args.lng === "number"
+      ? { lat: args.lat, lng: args.lng }
+      : null;
+
+  const t0 = Date.now();
+  const matches = resolveByName(index, name, {
+    prefCodes,
+    near,
+    limit: args.limit,
+  });
+  const elapsedMs = Date.now() - t0;
+
+  if (matches.length === 0) {
+    return {
+      query: name,
+      area_hint: args.area_hint ?? null,
+      results: [],
+      no_match: true,
+      note: "No entity met the confidence floor. A wrong match is worse than none — treat this name as unverified rather than assuming a mapping.",
+      resolve_ms: elapsedMs,
+      disclaimer: DISCLAIMER,
+    };
+  }
+
+  return {
+    query: name,
+    area_hint: args.area_hint ?? null,
+    count: matches.length,
+    results: matches.map((m) => ({
+      id: m.entry.id,
+      source: m.entry.source,
+      canonical_name: m.entry.canonical_name,
+      name_variants: Array.from(new Set(m.entry.names)).slice(0, 25),
+      matched_name: m.matched_name,
+      confidence: m.confidence,
+      score: m.score,
+      lat: m.entry.lat,
+      lng: m.entry.lng,
+      prefecture_code: m.entry.prefecture_code,
+      category: m.entry.category,
+      official_url: m.entry.official_url,
+      reference_url: m.entry.reference_url,
+      lookup_hint:
+        m.entry.source === "attraction"
+          ? `get_entity_full qid='${m.entry.id}' for the full record`
+          : null,
+    })),
+    resolve_ms: elapsedMs,
+    disclaimer: DISCLAIMER,
+  };
+}
+
 // Tool: search_area
 
 // kindsFromQuery + heritageQidsFromQuery (and their constants
@@ -12194,6 +12418,30 @@ const TOOLS = [
     },
   },
   {
+    name: "resolve_entity",
+    description:
+      "Resolves a free-text facility name (hotel / restaurant / spot — Japanese, English, romaji, or nickname) to canonical verified entities with id, coordinates, category, name variants, and official/source URL.\n\nUse this when a name came from web search or user conversation and you need the verified entity behind it before acting on it. Returns top-N candidates with an honest confidence (high/medium/low); returns an empty result rather than a forced guess when nothing clears the confidence floor.\n\nLATENCY TIER: conversation-grade — designed to be called mid-turn (warm lookups run in milliseconds; the very first call after server start pays a one-time index build). Bulk/aggregation tools (get_spots, get_hotels without filters) are NOT conversation-grade.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description:
+            "The facility name to resolve, as found in search/conversation. Any language or romaji, e.g. 'Hotel Granvia Kyoto', '俵屋旅館', 'Kikunoi', 'Golden Pavilion'.",
+        },
+        area_hint: {
+          type: "string",
+          description:
+            "Optional prefecture/region hint to disambiguate (e.g. '京都', 'kyoto', 'Kansai'). Boosts in-area candidates, demotes out-of-area ones.",
+        },
+        lat: { type: "number", description: "Optional latitude hint — boosts nearby candidates." },
+        lng: { type: "number", description: "Optional longitude hint." },
+        limit: { type: "number", description: "Max candidates to return (default 5, max 20)." },
+      },
+      required: ["name"],
+    },
+  },
+  {
     name: "get_spots",
     description:
       "Returns tourist spots in a given prefecture or municipality.\n\nCombines two parallel data sources:\n  - Municipal-website scraping (spots from official tourism pages)\n  - Wikidata (multilingual labels, coordinates, CC0 license)\n\nWith category='food' it instead returns dining venues (restaurants / cafes / street food) from the OpenStreetMap food layer — named venues with coordinates, cuisine tags, and opening hours + official site where published.\n\nUse this when the user wants to know 'what to see' (or, with category=food, 'where to eat') in an area. Does NOT return availability or pricing — this is static reference data.",
@@ -12820,6 +13068,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           lang: args.lang as string | undefined,
         });
         break;
+      case "resolve_entity":
+        result = await resolveEntity({
+          name: args.name as string,
+          area_hint: args.area_hint as string | undefined,
+          lat: typeof args.lat === "number" ? args.lat : undefined,
+          lng: typeof args.lng === "number" ? args.lng : undefined,
+          limit:
+            typeof args.limit === "number"
+              ? args.limit
+              : args.limit
+                ? Number(args.limit)
+                : undefined,
+        });
+        break;
       case "get_spots":
         result = await getSpots({
           prefecture: args.prefecture as string | undefined,
@@ -13072,7 +13334,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // get_japan_heritage with q="南山城茶" → routing_hint to
       // get_local_specialty). Skips tools that already wired intent
       // internally (search_area, get_spots already emit query_intent).
-      const SKIP_INTENT_TOOLS = new Set(["search_area", "get_spots", "get_entity_full", "get_entities_bulk", "plan_feasibility_check"]);
+      const SKIP_INTENT_TOOLS = new Set(["search_area", "get_spots", "get_entity_full", "get_entities_bulk", "plan_feasibility_check", "resolve_entity"]);
       if (!SKIP_INTENT_TOOLS.has(name)) {
         const universalIntent = extractTravelIntent(safetyInput);
         if (universalIntent.concepts.length > 0) {

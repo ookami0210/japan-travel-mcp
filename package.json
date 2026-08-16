@@ -44,7 +44,8 @@
     "test:coverage": "vitest run --coverage",
     "validate:data-sources": "tsx scripts/validate_data_sources.ts",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
-    "quality:completeness": "tsx scrapers/quality/completeness_report.ts"
+    "quality:completeness": "tsx scrapers/quality/completeness_report.ts",
+    "quality:unresolved": "tsx scrapers/quality/ingest_unresolved.ts"
   },
   "keywords": [
     "mcp",

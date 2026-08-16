@@ -33,7 +33,7 @@ this file is the **engineering** brief.
 `japan-travel-mcp` is **two things wired together**:
 
 1. An **MCP server** (`src/`) — TypeScript, Node 20+, stdio + Streamable-HTTP
-   transports, exposes **18 tools** over a static dataset of Japanese tourism data.
+   transports, exposes **19 tools** over a static dataset of Japanese tourism data.
 2. A **multi-source scraper pipeline** (`scrapers/`) — TypeScript with a few
    Python helpers (DMO PDFs, HF uploads), runs on GitHub Actions, writes
    JSON/JSONL artefacts under `data/` and syncs them to a Hugging Face dataset.
@@ -53,7 +53,7 @@ Code is MIT, dataset is CC BY 4.0. No API keys are required at runtime.
 ```
 japan-travel-mcp/
 ├── src/                           # MCP server
-│   ├── index.ts                   # stdio transport + 18 tool definitions (~6.2k lines)
+│   ├── index.ts                   # stdio transport + 19 tool definitions (~6.2k lines)
 │   ├── index_http.ts              # Streamable-HTTP transport (HF Spaces / Cloudflare)
 │   └── lib/
 │       ├── hf_data.ts             # Hugging Face download + cache resolution
@@ -154,12 +154,13 @@ Smoke scripts (run directly with `tsx`, not via npm script): `scripts/smoke_inte
 
 ### MCP server (`src/`)
 
-The server registers **18 tools**, all defined in a single `TOOLS` array
+The server registers **19 tools**, all defined in a single `TOOLS` array
 near the bottom of `src/index.ts` (search for `const TOOLS = [`, around line 5318).
 Both transports share the same registry via `buildServer()`.
 
 | Tool | Purpose |
 |---|---|
+| `resolve_entity` | Conversation-grade name→entity resolution (free-text ja/en/romaji names → canonical id + variants + honest confidence) |
 | `search_area` | Lexical search across prefectures / municipalities / attractions / R-3 records |
 | `search_semantic` | Vector search over `multilingual-e5-small` embeddings |
 | `search_hybrid` | BM25 + vector + RRF fusion — preferred general-purpose retriever |
