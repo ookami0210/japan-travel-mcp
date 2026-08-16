@@ -3442,6 +3442,12 @@ async function getSpots(args: {
   const qRaw = args.q?.trim() ?? null;
   const qLower = qRaw?.toLowerCase() ?? null;
 
+  // EN-first consumers (lang=en*): a spot the canvas can only render in
+  // Japanese is a worse pick than an equally-good spot with an English
+  // name. Small rank boost for EN-renderable records — quality still
+  // dominates, but ties break toward what the consumer can display.
+  const enFirstRanking = (args.lang ?? "").toLowerCase().startsWith("en");
+
   // Iter 58: hoist targetHeritageQids / targetKinds outside the per-attraction
   // loop and union with intent extraction (travel concept dictionary).
   // Avoids re-running heritageQidsFromQuery / kindsFromQuery for every entity
@@ -3462,15 +3468,54 @@ async function getSpots(args: {
   if (intent) {
     for (const k of intent.recommended_kinds) targetKindsHoisted.add(k);
   }
+  // Machine callers (LLM agents) send multi-word phrases ("Kyoto Nara
+  // temples food") that raw substring matching silently zeroes out, and
+  // English plurals ("temples") miss singular text ("temple"). Tokenize the
+  // query once: whole-phrase match stays the strongest signal, but any
+  // token hit keeps the spot in the result set (OR semantics), ranked by
+  // how many tokens matched.
+  const Q_STOPWORDS = new Set([
+    "the", "a", "an", "and", "or", "of", "in", "at", "on", "near",
+    "for", "to", "with", "japan", "japanese",
+  ]);
+  const qTokenGroups: string[][] = (() => {
+    if (!qLower) return [];
+    const tokens = qLower
+      .split(/[\s,、。・／/]+/)
+      .filter((t) => t.length >= 2 && !Q_STOPWORDS.has(t));
+    if (tokens.length === 0) return [];
+    return tokens.map((t) => {
+      const variants = new Set([t]);
+      // Light singularization: temples→temple, cherries→cherry.
+      if (t.length > 4 && t.endsWith("ies")) variants.add(t.slice(0, -3) + "y");
+      else if (t.length > 3 && t.endsWith("s") && !t.endsWith("ss")) {
+        variants.add(t.slice(0, -1));
+      }
+      return [...variants];
+    });
+  })();
   function qMatchScore(...fields: (string | null | undefined)[]): number {
     if (!qRaw || !qLower) return 0;
     let s = 0;
+    let joined: string | null = null;
     for (const f of fields) {
       if (!f) continue;
       const fl = f.toLowerCase();
       if (fl === qLower || f === qRaw) s = Math.max(s, 100);
       else if (fl.startsWith(qLower) || f.startsWith(qRaw)) s = Math.max(s, 50);
       else if (fl.includes(qLower) || f.includes(qRaw)) s = Math.max(s, 20);
+      joined = joined === null ? fl : joined + " " + fl;
+    }
+    // Token tier: any token hit keeps the spot; more tokens → higher score,
+    // capped below whole-phrase tiers so exact matches still rank first.
+    if (s < 40 && joined !== null && qTokenGroups.length > 0) {
+      let matched = 0;
+      for (const variants of qTokenGroups) {
+        if (variants.some((v) => joined!.includes(v))) matched += 1;
+      }
+      if (matched > 0) {
+        s = Math.max(s, Math.round((matched / qTokenGroups.length) * 40));
+      }
     }
     return s;
   }
@@ -3512,7 +3557,8 @@ async function getSpots(args: {
         const qBody = qMatchScore(bodyJoin);
         if (qRaw && qNameDesc === 0 && qBody === 0) continue;  // q-filter
         const qBoost = qRaw ? (qNameDesc * 0.005 + Math.min(qBody, 30) * 0.002) : 0;
-        const finalScore = Math.min(1.0, q + nameMatchBoost + qBoost);
+        const enBoost = enFirstRanking && s.language === "en" ? 0.04 : 0;
+        const finalScore = Math.min(1.0, q + nameMatchBoost + qBoost + enBoost);
         const baseRec: Record<string, unknown> = {
           source: "municipal_scrape",
           id: s.id,
@@ -3635,8 +3681,9 @@ async function getSpots(args: {
         aKindsForWild.some((k) => k === "zoo" || k === "aquarium")
           ? -0.30
           : 0;
+      const enNameBoost = enFirstRanking && a.name_en ? 0.04 : 0;
       const baseScore =
-        0.45 + langContribution + heritageBoost + wpKindBoost + wildPenalty;
+        0.45 + langContribution + heritageBoost + wpKindBoost + wildPenalty + enNameBoost;
       const qBoost = qRaw ? qRel * 0.003 : 0;
       const wkRec: Record<string, unknown> = {
         source: "wikidata",
@@ -4243,7 +4290,7 @@ async function getSpots(args: {
   // sees the canonical signature spot in the first 12K view. Fire
   // whenever the prefecture matches (these are 'must mention' landmarks
   // for that prefecture, so unconditional fire is safe).
-  const ICONIC_LANDMARKS_BY_PREF: Record<string, Array<{ name_ja: string; name_en: string; municipality: string; qid?: string; kind: string; note_en: string }>> = {
+  const ICONIC_LANDMARKS_BY_PREF: Record<string, Array<{ name_ja: string; name_en: string; municipality: string; qid?: string; kind: string; note_en: string; coordinates?: { lat: number; lng: number } }>> = {
     "01": [ // Hokkaido
       { name_ja: "函館山", name_en: "Mt Hakodate", municipality: "函館市", qid: "Q1138281", kind: "night_view / mountain", note_en: "334m peak ropeway-accessed; one of Japan's Three Great Night Views. Iconic isthmus-shape Hakodate city-lights panorama at sunset / evening." },
       { name_ja: "札幌時計台", name_en: "Sapporo Clock Tower", municipality: "札幌市", qid: "Q2270188", kind: "historic / urban landmark", note_en: "Late 19th-c. wooden 'Bell Hall' built for the Sapporo Agricultural College; symbol of Sapporo's Meiji-Hokkaido development. Stands at the heart of Odori district." },
@@ -4315,9 +4362,13 @@ async function getSpots(args: {
       { name_ja: "伊勢神宮", name_en: "Ise Grand Shrine", municipality: "伊勢市", qid: "Q207368", kind: "shrine / national heart", note_en: "Japan's most sacred Shinto shrine complex; Naikū (inner shrine — Amaterasu) + Gekū (outer shrine — Toyouke). Sengū rebuilding every 20 years (next 2033). Pilgrimage route from Oharaimachi." },
     ],
     "26": [ // Kyoto
-      { name_ja: "清水寺", name_en: "Kiyomizu-dera", municipality: "京都市", qid: "Q35517", kind: "UNESCO WHS / temple", note_en: "Famous wooden stage projecting over the hillside; UNESCO WHS. Spring sakura + autumn maple light-ups draw the most night visitors in Kyoto. Walk via Sannei-zaka / Ninnen-zaka preserved street." },
-      { name_ja: "金閣寺", name_en: "Kinkaku-ji (Golden Pavilion)", municipality: "京都市", qid: "Q146368", kind: "UNESCO WHS / temple", note_en: "Three-story shariden covered in gold leaf; UNESCO WHS. Iconic reflection on Kyōko-chi pond. Built 1397, reconstructed 1955 after arson." },
-      { name_ja: "伏見稲荷大社", name_en: "Fushimi Inari Taisha", municipality: "京都市", qid: "Q391643", kind: "shrine / torii", note_en: "10,000-torii senbon-torii corridor up Mt Inari; head shrine of the 30,000 Inari shrines nationwide. Free entry, 24-hour access. Most-photographed Kyoto site." },
+      // The dataset has no entity for 清水寺 itself (a known master-layer
+      // gap) — curated coordinates keep the flagship pinnable until the
+      // master layer catches up.
+      { name_ja: "清水寺", name_en: "Kiyomizu-dera", municipality: "京都市", kind: "UNESCO WHS / temple", coordinates: { lat: 34.99486, lng: 135.78499 }, note_en: "Famous wooden stage projecting over the hillside; UNESCO WHS. Spring sakura + autumn maple light-ups draw the most night visitors in Kyoto. Walk via Sannei-zaka / Ninnen-zaka preserved street." },
+      // Dataset entity is the formal temple name 鹿苑寺 (Q270983).
+      { name_ja: "金閣寺", name_en: "Kinkaku-ji (Golden Pavilion)", municipality: "京都市", qid: "Q270983", kind: "UNESCO WHS / temple", note_en: "Three-story shariden covered in gold leaf; UNESCO WHS. Iconic reflection on Kyōko-chi pond. Built 1397, reconstructed 1955 after arson." },
+      { name_ja: "伏見稲荷大社", name_en: "Fushimi Inari Taisha", municipality: "京都市", qid: "Q714828", kind: "shrine / torii", note_en: "10,000-torii senbon-torii corridor up Mt Inari; head shrine of the 30,000 Inari shrines nationwide. Free entry, 24-hour access. Most-photographed Kyoto site." },
       { name_ja: "嵐山 (竹林の小径)", name_en: "Arashiyama Bamboo Grove", municipality: "京都市", qid: "Q11414117", kind: "bamboo grove / scenic", note_en: "Arashiyama district bamboo-corridor path; the iconic 'green tunnel' Kyoto photograph. Pair with Tenryū-ji (UNESCO WHS) and Togetsukyō bridge." },
     ],
     "27": [ // Osaka
@@ -4766,13 +4817,33 @@ async function getSpots(args: {
     // / 熊本城 / Nara deer-park sub-spots / Takachiho gorge etc.
     ...(prefCodeForBlock && ICONIC_LANDMARKS_BY_PREF[prefCodeForBlock]
       ? {
-          canonical_iconic_landmarks: ICONIC_LANDMARKS_BY_PREF[prefCodeForBlock].map((e) => ({
-            ...e,
-            source: "curated_canonical",
-            lookup_hint: e.qid
-              ? `get_entity_full qid='${e.qid}' for full detail`
-              : `search_area q='${e.name_ja}' for details`,
-          })),
+          canonical_iconic_landmarks: ICONIC_LANDMARKS_BY_PREF[prefCodeForBlock].map((e) => {
+            // Downstream maps want to pin exactly these flagship spots —
+            // join coordinates from the master layer (qid first, name
+            // fallback). null stays null: no guessed pins.
+            const prefAttractions =
+              prefs.find((p) => p.prefecture.code === prefCodeForBlock)
+                ?.wikidata_attractions ?? [];
+            // Parenthetical qualifiers in curated names ("嵐山 (竹林の小径)")
+            // never match data-layer names — strip before the name fallback.
+            const bareJa = e.name_ja.replace(/\s*[（(].*$/, "");
+            const hit =
+              (e.qid ? prefAttractions.find((a) => a.qid === e.qid) : undefined) ??
+              prefAttractions.find(
+                (a) =>
+                  a.name_ja === e.name_ja ||
+                  a.name_en === e.name_en ||
+                  a.name_ja === bareJa,
+              );
+            return {
+              ...e,
+              coordinates: e.coordinates ?? hit?.coordinates ?? null,
+              source: "curated_canonical",
+              lookup_hint: e.qid
+                ? `get_entity_full qid='${e.qid}' for full detail`
+                : `search_area q='${e.name_ja}' for details`,
+            };
+          }),
           canonical_iconic_landmarks_note:
             "Hand-curated must-see / signature landmarks for the queried prefecture. These are the canonical 'flagship' destinations every prefecture tourism guide would list. Some are missing from the wikidata_attractions master layer (master data layer gaps) or buried under sub-spot entries; this block guarantees their visibility in the response.",
         }
@@ -5593,6 +5664,18 @@ async function getSpots(args: {
     count: top.length,
     total_before_limit: scored.length,
     truncated: scored.length > limit,
+    // Machine-caller guidance: a phrase query that matched nothing should
+    // say WHY instead of silently returning 0 (agents retry better with a
+    // concrete hint than with an empty list).
+    ...(qRaw && top.length === 0
+      ? {
+          q_hint:
+            `q='${qRaw}' matched nothing. q works best as 1-2 keywords ` +
+            `(e.g. 'temple', 'onsen'), not a sentence — place names belong ` +
+            `in 'prefecture'/'city', not in q. Multi-word q is OR-matched ` +
+            `per token; try dropping q entirely to see the area's top spots.`,
+        }
+      : {}),
     min_quality_applied: minQualityRequested,
     fallback_used: fallbackUsed,
     data_as_of: dataAsOf(prefs),
