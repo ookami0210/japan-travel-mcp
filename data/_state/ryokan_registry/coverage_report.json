@@ -1,0 +1,406 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-16T06:35:37.368Z",
+  "baseline": {
+    "survey": "衛生行政報告例",
+    "vintage": "令和6年度 (as of 2025-03-31)",
+    "national_total": 98338
+  },
+  "national": {
+    "ingested": 13599,
+    "baseline_total": 98338,
+    "coverage_pct": 13.8
+  },
+  "tokyo_rollup": {
+    "ingested": 4266,
+    "baseline_total": 7122,
+    "coverage_pct": 59.9
+  },
+  "authorities": [
+    {
+      "authority_key": "muni-401307",
+      "authority_name": "福岡県 福岡市",
+      "kind": "designated_city",
+      "ingested": 1341,
+      "by_category": {
+        "ryokan_hotel": 1242,
+        "kani_shukusho": 99
+      },
+      "baseline_total": 828,
+      "coverage_pct": 162,
+      "note": null
+    },
+    {
+      "authority_key": "muni-272159",
+      "authority_name": "大阪府 寝屋川市",
+      "kind": "core_city",
+      "ingested": 25,
+      "by_category": {
+        "ryokan_hotel": 5,
+        "kani_shukusho": 20
+      },
+      "baseline_total": 17,
+      "coverage_pct": 147.1,
+      "note": null
+    },
+    {
+      "authority_key": "muni-122041",
+      "authority_name": "千葉県 船橋市",
+      "kind": "core_city",
+      "ingested": 82,
+      "by_category": {
+        "ryokan_hotel": 82
+      },
+      "baseline_total": 73,
+      "coverage_pct": 112.3,
+      "note": null
+    },
+    {
+      "authority_key": "muni-252018",
+      "authority_name": "滋賀県 大津市",
+      "kind": "core_city",
+      "ingested": 200,
+      "by_category": {
+        "ryokan_hotel": 89,
+        "kani_shukusho": 111
+      },
+      "baseline_total": 184,
+      "coverage_pct": 108.7,
+      "note": null
+    },
+    {
+      "authority_key": "pref-44",
+      "authority_name": "大分県",
+      "kind": "prefecture",
+      "ingested": 1983,
+      "by_category": {
+        "uncategorized": 1983
+      },
+      "baseline_total": 1882,
+      "coverage_pct": 105.4,
+      "note": "pref total minus re-listed cities; remainder still includes non-re-listed PHC cities"
+    },
+    {
+      "authority_key": "muni-442011",
+      "authority_name": "大分県 大分市",
+      "kind": "core_city",
+      "ingested": 117,
+      "by_category": {
+        "uncategorized": 117
+      },
+      "baseline_total": 111,
+      "coverage_pct": 105.4,
+      "note": null
+    },
+    {
+      "authority_key": "pref-27",
+      "authority_name": "大阪府",
+      "kind": "prefecture",
+      "ingested": 427,
+      "by_category": {
+        "ryokan_hotel": 282,
+        "kani_shukusho": 144,
+        "geshuku": 1
+      },
+      "baseline_total": 406,
+      "coverage_pct": 105.2,
+      "note": "pref total minus re-listed cities; remainder still includes non-re-listed PHC cities"
+    },
+    {
+      "authority_key": "pref-43",
+      "authority_name": "熊本県",
+      "kind": "prefecture",
+      "ingested": 1541,
+      "by_category": {
+        "kani_shukusho": 772,
+        "ryokan_hotel": 766,
+        "geshuku": 3
+      },
+      "baseline_total": 1470,
+      "coverage_pct": 104.8,
+      "note": "pref total minus re-listed cities; remainder still includes non-re-listed PHC cities"
+    },
+    {
+      "authority_key": "muni-221007",
+      "authority_name": "静岡県 静岡市",
+      "kind": "designated_city",
+      "ingested": 255,
+      "by_category": {
+        "ryokan_hotel": 182,
+        "kani_shukusho": 73
+      },
+      "baseline_total": 245,
+      "coverage_pct": 104.1,
+      "note": null
+    },
+    {
+      "authority_key": "muni-472018",
+      "authority_name": "沖縄県 那覇市",
+      "kind": "core_city",
+      "ingested": 767,
+      "by_category": {
+        "ryokan_hotel": 574,
+        "kani_shukusho": 193
+      },
+      "baseline_total": 738,
+      "coverage_pct": 103.9,
+      "note": null
+    },
+    {
+      "authority_key": "muni-401005",
+      "authority_name": "福岡県 北九州市",
+      "kind": "designated_city",
+      "ingested": 177,
+      "by_category": {
+        "ryokan_hotel": 147,
+        "kani_shukusho": 30
+      },
+      "baseline_total": 172,
+      "coverage_pct": 102.9,
+      "note": null
+    },
+    {
+      "authority_key": "muni-142018",
+      "authority_name": "神奈川県 横須賀市",
+      "kind": "core_city",
+      "ingested": 91,
+      "by_category": {
+        "kani_shukusho": 23,
+        "ryokan_hotel": 68
+      },
+      "baseline_total": 91,
+      "coverage_pct": 100,
+      "note": null
+    },
+    {
+      "authority_key": "muni-232114",
+      "authority_name": "愛知県 豊田市",
+      "kind": "core_city",
+      "ingested": 89,
+      "by_category": {
+        "ryokan_hotel": 67,
+        "kani_shukusho": 22
+      },
+      "baseline_total": 89,
+      "coverage_pct": 100,
+      "note": null
+    },
+    {
+      "authority_key": "muni-231002",
+      "authority_name": "愛知県 名古屋市",
+      "kind": "designated_city",
+      "ingested": 452,
+      "by_category": {
+        "uncategorized": 452
+      },
+      "baseline_total": 474,
+      "coverage_pct": 95.4,
+      "note": null
+    },
+    {
+      "authority_key": "pref-24",
+      "authority_name": "三重県",
+      "kind": "prefecture",
+      "ingested": 1483,
+      "by_category": {
+        "ryokan_hotel": 1204,
+        "kani_shukusho": 279
+      },
+      "baseline_total": 1564,
+      "coverage_pct": 94.8,
+      "note": "pref total minus re-listed cities; remainder still includes non-re-listed PHC cities"
+    },
+    {
+      "authority_key": "muni-422011",
+      "authority_name": "長崎県 長崎市",
+      "kind": "core_city",
+      "ingested": 226,
+      "by_category": {
+        "ryokan_hotel": 179,
+        "kani_shukusho": 47
+      },
+      "baseline_total": 242,
+      "coverage_pct": 93.4,
+      "note": null
+    },
+    {
+      "authority_key": "muni-242021",
+      "authority_name": "三重県 四日市市",
+      "kind": "phc_city",
+      "ingested": 77,
+      "by_category": {
+        "ryokan_hotel": 77
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131016",
+      "authority_name": "東京都 千代田区",
+      "kind": "special_ward",
+      "ingested": 165,
+      "by_category": {
+        "ryokan_hotel": 146,
+        "kani_shukusho": 19
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131032",
+      "authority_name": "東京都 港区",
+      "kind": "special_ward",
+      "ingested": 605,
+      "by_category": {
+        "ryokan_hotel": 550,
+        "kani_shukusho": 54,
+        "uncategorized": 1
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131059",
+      "authority_name": "東京都 文京区",
+      "kind": "special_ward",
+      "ingested": 55,
+      "by_category": {
+        "ryokan_hotel": 55
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131067",
+      "authority_name": "東京都 台東区",
+      "kind": "special_ward",
+      "ingested": 883,
+      "by_category": {
+        "ryokan_hotel": 675,
+        "kani_shukusho": 205,
+        "geshuku": 3
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131083",
+      "authority_name": "東京都 江東区",
+      "kind": "special_ward",
+      "ingested": 287,
+      "by_category": {
+        "uncategorized": 287
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131091",
+      "authority_name": "東京都 品川区",
+      "kind": "special_ward",
+      "ingested": 229,
+      "by_category": {
+        "ryokan_hotel": 204,
+        "kani_shukusho": 24,
+        "geshuku": 1
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131113",
+      "authority_name": "東京都 大田区",
+      "kind": "special_ward",
+      "ingested": 152,
+      "by_category": {
+        "ryokan_hotel": 132,
+        "kani_shukusho": 20
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131130",
+      "authority_name": "東京都 渋谷区",
+      "kind": "special_ward",
+      "ingested": 480,
+      "by_category": {
+        "ryokan_hotel": 462,
+        "kani_shukusho": 18
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131164",
+      "authority_name": "東京都 豊島区",
+      "kind": "special_ward",
+      "ingested": 706,
+      "by_category": {
+        "uncategorized": 706
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131181",
+      "authority_name": "東京都 荒川区",
+      "kind": "special_ward",
+      "ingested": 97,
+      "by_category": {
+        "kani_shukusho": 31,
+        "ryokan_hotel": 66
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131199",
+      "authority_name": "東京都 板橋区",
+      "kind": "special_ward",
+      "ingested": 82,
+      "by_category": {
+        "ryokan_hotel": 82
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131202",
+      "authority_name": "東京都 練馬区",
+      "kind": "special_ward",
+      "ingested": 16,
+      "by_category": {
+        "ryokan_hotel": 15,
+        "kani_shukusho": 1
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    },
+    {
+      "authority_key": "muni-131229",
+      "authority_name": "東京都 葛飾区",
+      "kind": "special_ward",
+      "ingested": 509,
+      "by_category": {
+        "uncategorized": 509
+      },
+      "baseline_total": null,
+      "coverage_pct": null,
+      "note": "no dedicated baseline row in the survey (inside prefecture total)"
+    }
+  ]
+}

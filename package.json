@@ -46,6 +46,9 @@
     "validate:data-sources": "tsx scripts/validate_data_sources.ts",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "quality:completeness": "tsx scrapers/quality/completeness_report.ts",
+    "quality:ryokan_coverage": "tsx scrapers/quality/ryokan_coverage_report.ts",
+    "fetch:mhlw_ryokan_baseline": "tsx scrapers/sources/fetch_mhlw_ryokan_baseline.ts",
+    "fetch:ryokan_facilities": "tsx scrapers/sources/fetch_ryokan_facilities.ts",
     "quality:unresolved": "tsx scrapers/quality/ingest_unresolved.ts"
   },
   "keywords": [

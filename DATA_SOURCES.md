@@ -346,6 +346,55 @@ requires either extending an existing channel or creating a new one.
   never "publishes nothing".
 - **Status**: `active`
 
+#### #43 — MHLW ryokan-gyo baseline (衛生行政報告例)
+- **Authority**: Ministry of Health, Labour and Welfare (survey 00450027)
+- **URL**: e-Stat file download, 生活衛生 第8表 (fiscal-year-end facility
+  counts; statInfId pinned in the fetcher, currently 令和6年度 = FY2024)
+- **License**: 政府標準利用規約（第2.0版） / compatible with CC BY 4.0
+- **Fetcher**: `scrapers/sources/fetch_mhlw_ryokan_baseline.ts`
+- **Output**: `data/_state/ryokan_registry/mhlw_baseline.json` — national +
+  47 prefectures (full totals) + 20 designated / 62 core cities (再掲),
+  counts for 旅館・ホテル営業 (facilities/rooms), 簡易宿所, 下宿
+- **Cadence**: yearly (each autumn when the next fiscal year publishes —
+  update statInfId + fiscal-year label together; the fetcher hard-fails if
+  the downloaded vintage doesn't match)
+- **Channel**: WD-FOUNDATION (manual) — the ground-truth denominator for
+  ryokan ledger coverage, consumed by `quality:ryokan_coverage`
+- **Coverage**: 令和6年度 (as of 2025-03-31): 52,946 旅館・ホテル +
+  44,901 簡易宿所 + 491 下宿 = 98,338 facilities nationally. Prefecture
+  sums are validated against the national row at parse time.
+- **Status**: `active`
+
+#### #44 — Ryokan-gyo permit facilities (tier-A municipal ledgers)
+- **Authority**: each permit authority's own published ledger (datasets
+  discovered by #42; per-source license recorded in every output file)
+- **URL**: per-authority CKAN resources (CSV/XLSX), resolved fresh via
+  `package_show` at fetch time
+- **License**: per-dataset (CC BY 4.0 / 政府標準利用規約 variants) —
+  recorded per authority in the output provenance
+- **Fetcher**: `scrapers/sources/fetch_ryokan_facilities.ts`
+- **Output**: `data/hotels/registry/<authority_key>.json` (bulk, gitignored,
+  HF-synced later) + `data/_state/ryokan_registry/ingest_report.json`
+  (committed summary). Normalized fields: facility name, address, permit
+  category (旅館・ホテル / 簡易宿所 / 下宿), permit number, permit date,
+  phone, rooms, capacity, lat/lng where published.
+  **PII rule (hard)**: operator/applicant identity columns (営業者・申請者・
+  代表者・法人名・肩書 etc.) are dropped at ingest and never enter the repo
+  or the published dataset. Mixed-trade all-permit ledgers are filtered to
+  lodging permit rows; rows carrying food/barber/cleaning permit types are
+  dropped and counted.
+- **Cadence**: monthly (rosters update monthly at most; delta-only
+  authorities are queued for review, not accumulated)
+- **Channel**: WD-FOUNDATION (manual) — feeds the hotel ledger's
+  public-verification layer
+- **Coverage**: first ingest 2026-08-16 — 30/33 tier-A authorities parsed,
+  13,599 facilities (8,104 with permit numbers, 1,498 with coordinates);
+  13.8% of the #43 national baseline, 59.9% of the Tokyo prefecture total.
+  Where a roster exists, per-authority counts track the baseline at
+  93–112% (post-baseline permits and closure lag explain the spread;
+  福岡市 at 162% is flagged for verification).
+- **Status**: `active`
+
 #### #34 — Wikipedia ja summaries (description_ja upgrade)
 - **Authority**: Wikipedia (Wikimedia Foundation)
 - **URL**: https://ja.wikipedia.org/w/api.php (action=query&prop=extracts&exintro=1&exsentences=2&explaintext=1)

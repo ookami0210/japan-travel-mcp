@@ -1,0 +1,872 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-16T06:35:25.871Z",
+  "pii_policy": "operator/applicant identity columns dropped at ingest",
+  "totals": {
+    "authorities_attempted": 33,
+    "ingested": 30,
+    "facilities": 13599
+  },
+  "results": [
+    {
+      "authority_key": "pref-13",
+      "authority_name": "東京都",
+      "status": "no_resources",
+      "dataset_title": null,
+      "resource_name": null,
+      "facility_count": 0,
+      "by_category": {},
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [],
+      "unmapped_columns": [],
+      "detail": "no tier-A facility_list dataset"
+    },
+    {
+      "authority_key": "pref-24",
+      "authority_name": "三重県",
+      "status": "ingested",
+      "dataset_title": "旅館業",
+      "resource_name": "旅館業",
+      "facility_count": 1483,
+      "by_category": {
+        "ryokan_hotel": 1204,
+        "kani_shukusho": 279
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名"
+      ],
+      "unmapped_columns": [],
+      "detail": null
+    },
+    {
+      "authority_key": "pref-27",
+      "authority_name": "大阪府",
+      "status": "ingested",
+      "dataset_title": "旅館業法に基づく営業許可施設一覧",
+      "resource_name": "旅館業法に基づく営業許可施設一覧",
+      "facility_count": 427,
+      "by_category": {
+        "ryokan_hotel": 282,
+        "kani_shukusho": 144,
+        "geshuku": 1
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [],
+      "unmapped_columns": [
+        "連番"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "pref-43",
+      "authority_name": "熊本県",
+      "status": "ingested",
+      "dataset_title": "熊本県旅館業許可施設一覧（熊本市域を除く。）",
+      "resource_name": "338_R8.3月末営業中　旅館業許可施設一覧.xlsx",
+      "facility_count": 1541,
+      "by_category": {
+        "kani_shukusho": 772,
+        "ryokan_hotel": 766,
+        "geshuku": 3
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "申請者住所（法人のみ）",
+        "申請者法人名",
+        "法人代表者氏名",
+        "申請者電話番号（法人のみ）",
+        "申請者氏名"
+      ],
+      "unmapped_columns": [
+        "管轄名称",
+        "建築延面積（㎡）"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "pref-44",
+      "authority_name": "大分県",
+      "status": "ingested",
+      "dataset_title": "旅館業営業許可施設一覧",
+      "resource_name": "旅館業営業許可施設一覧（全件）",
+      "facility_count": 1983,
+      "by_category": {
+        "uncategorized": 1983
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "開設者名（法人名）",
+        "法人番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "施設名称_カナ",
+        "施設名称_英字",
+        "営業の種類",
+        "所在地_全国地方公共団体コード",
+        "町字ID",
+        "所在地_連結表記",
+        "施設所在地_市区町村",
+        "施設所在地_町字",
+        "施設所在地_番地以下",
+        "施設方書",
+        "連絡先メールアドレス",
+        "連絡先FormURL",
+        "連絡先備考（その他、SNSなど）",
+        "郵便番号",
+        "許可年月日",
+        "許可開始日",
+        "許可満了日",
+        "廃業年月日",
+        "申請区分",
+        "許可条件",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-221007",
+      "authority_name": "静岡県 静岡市",
+      "status": "ingested",
+      "dataset_title": "旅館業台帳",
+      "resource_name": "旅館業許可全施設（R8.3.31現在）",
+      "facility_count": 255,
+      "by_category": {
+        "ryokan_hotel": 182,
+        "kani_shukusho": 73
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者住所",
+        "氏名(法人)",
+        "代表者氏名"
+      ],
+      "unmapped_columns": [],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-231002",
+      "authority_name": "愛知県 名古屋市",
+      "status": "ingested",
+      "dataset_title": "【名古屋市】旅館業法に基づき許可を受けた施設の一覧",
+      "resource_name": "旅館業法に基づき許可を受けた施設の一覧",
+      "facility_count": 452,
+      "by_category": {
+        "uncategorized": 452
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [],
+      "unmapped_columns": [],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-401005",
+      "authority_name": "福岡県 北九州市",
+      "status": "ingested",
+      "dataset_title": "北九州市　旅館業施設一覧",
+      "resource_name": "旅館業施設一覧（2026(令和8)年3月31日時点）",
+      "facility_count": 177,
+      "by_category": {
+        "ryokan_hotel": 147,
+        "kani_shukusho": 30
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "肩書",
+        "代表者氏名"
+      ],
+      "unmapped_columns": [],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-401307",
+      "authority_name": "福岡県 福岡市",
+      "status": "ingested",
+      "dataset_title": "福岡市　旅館業営業許可施設一覧",
+      "resource_name": "福岡市内旅館業営業許可施設一覧（令和８年７月31日現在）",
+      "facility_count": 1341,
+      "by_category": {
+        "ryokan_hotel": 1242,
+        "kani_shukusho": 99
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "営業者法人代表者名及び役職"
+      ],
+      "unmapped_columns": [
+        "施設ビル名"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-431001",
+      "authority_name": "熊本県 熊本市",
+      "status": "parse_failed",
+      "dataset_title": null,
+      "resource_name": null,
+      "facility_count": 0,
+      "by_category": {},
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [],
+      "unmapped_columns": [],
+      "detail": "no tabular (CSV/XLSX) resources on any candidate dataset"
+    },
+    {
+      "authority_key": "muni-122041",
+      "authority_name": "千葉県 船橋市",
+      "status": "ingested",
+      "dataset_title": "生活衛生関係営業施設一覧（旅館・ホテル・簡易宿所）",
+      "resource_name": "20260701_生活衛生関係営業施設一覧（旅館・ホテル・簡易宿所）.csv",
+      "facility_count": 82,
+      "by_category": {
+        "ryokan_hotel": 82
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "申請者_氏名",
+        "代表者_氏名",
+        "申請者所在地",
+        "申請者電話番号"
+      ],
+      "unmapped_columns": [
+        "営業の種類"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-142018",
+      "authority_name": "神奈川県 横須賀市",
+      "status": "ingested",
+      "dataset_title": "【横須賀市】環境衛生関係営業施設公開情報",
+      "resource_name": "旅館業一覧",
+      "facility_count": 91,
+      "by_category": {
+        "kani_shukusho": 23,
+        "ryokan_hotel": 68
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者",
+        "法人電話番号"
+      ],
+      "unmapped_columns": [
+        "町　 名",
+        "番   　地"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-232114",
+      "authority_name": "愛知県 豊田市",
+      "status": "ingested",
+      "dataset_title": "環境衛生営業施設一覧",
+      "resource_name": "旅館業施設一覧.xlsx",
+      "facility_count": 89,
+      "by_category": {
+        "ryokan_hotel": 67,
+        "kani_shukusho": 22
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名（法人）",
+        "営業者住所（法人）"
+      ],
+      "unmapped_columns": [
+        "No."
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-252018",
+      "authority_name": "滋賀県 大津市",
+      "status": "ingested",
+      "dataset_title": "旅館業一覧",
+      "resource_name": "旅館業2026年7月末現在",
+      "facility_count": 200,
+      "by_category": {
+        "ryokan_hotel": 89,
+        "kani_shukusho": 111
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名"
+      ],
+      "unmapped_columns": [],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-272159",
+      "authority_name": "大阪府 寝屋川市",
+      "status": "ingested",
+      "dataset_title": "旅館業許可施設一覧",
+      "resource_name": "旅館業許可施設一覧（令和8年7月31日時点）",
+      "facility_count": 25,
+      "by_category": {
+        "ryokan_hotel": 5,
+        "kani_shukusho": 20
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "法人営業者名称",
+        "営業者名称（法人の場合は代表者氏名）",
+        "営業者所在地（法人のみ）"
+      ],
+      "unmapped_columns": [
+        "都道府県コード又は市区町村コード",
+        "NO",
+        "都道府県名",
+        "市区町村名",
+        "名称_カナ",
+        "方書"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-422011",
+      "authority_name": "長崎県 長崎市",
+      "status": "ingested",
+      "dataset_title": "旅館業営業許可・届出一覧（全許可・届出一覧）（長崎市）",
+      "resource_name": "旅館業営業許可・届出一覧（全許可・届出一覧）（長崎市）",
+      "facility_count": 226,
+      "by_category": {
+        "ryokan_hotel": 179,
+        "kani_shukusho": 47
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "法人名"
+      ],
+      "unmapped_columns": [],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-442011",
+      "authority_name": "大分県 大分市",
+      "status": "ingested",
+      "dataset_title": "許可施設",
+      "resource_name": "旅館業許可施設一覧（令和8年3月31日現在）",
+      "facility_count": 117,
+      "by_category": {
+        "uncategorized": 117
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者"
+      ],
+      "unmapped_columns": [
+        "種類"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-472018",
+      "authority_name": "沖縄県 那覇市",
+      "status": "ingested",
+      "dataset_title": "旅館営業施設情報",
+      "resource_name": "旅館業施設一覧（令和7年10月15日時点）",
+      "facility_count": 767,
+      "by_category": {
+        "ryokan_hotel": 574,
+        "kani_shukusho": 193
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "申請者氏名"
+      ],
+      "unmapped_columns": [
+        "No."
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-242021",
+      "authority_name": "三重県 四日市市",
+      "status": "ingested",
+      "dataset_title": "旅館業許可施設一覧",
+      "resource_name": "旅館業許可施設一覧（2026-07-31）",
+      "facility_count": 77,
+      "by_category": {
+        "ryokan_hotel": 77
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "申請者住所",
+        "申請者氏名",
+        "申請者代表者氏名",
+        "申請者電話番号"
+      ],
+      "unmapped_columns": [
+        "業態",
+        "洋室数"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131016",
+      "authority_name": "東京都 千代田区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 165,
+      "by_category": {
+        "ryokan_hotel": 146,
+        "kani_shukusho": 19
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131032",
+      "authority_name": "東京都 港区",
+      "status": "ingested",
+      "dataset_title": "港区の旅館業施設情報",
+      "resource_name": "旅館業施設一覧",
+      "facility_count": 605,
+      "by_category": {
+        "ryokan_hotel": 550,
+        "kani_shukusho": 54,
+        "uncategorized": 1
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [],
+      "unmapped_columns": [
+        "施設郵便番号",
+        "施設方書"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131059",
+      "authority_name": "東京都 文京区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 55,
+      "by_category": {
+        "ryokan_hotel": 55
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131067",
+      "authority_name": "東京都 台東区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 883,
+      "by_category": {
+        "ryokan_hotel": 675,
+        "kani_shukusho": 205,
+        "geshuku": 3
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131083",
+      "authority_name": "東京都 江東区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 287,
+      "by_category": {
+        "uncategorized": 287
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131091",
+      "authority_name": "東京都 品川区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 229,
+      "by_category": {
+        "ryokan_hotel": 204,
+        "kani_shukusho": 24,
+        "geshuku": 1
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131105",
+      "authority_name": "東京都 目黒区",
+      "status": "fetch_failed",
+      "dataset_title": null,
+      "resource_name": null,
+      "facility_count": 0,
+      "by_category": {},
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [],
+      "unmapped_columns": [],
+      "detail": "fetch/parse failed for \"旅館業　令和７年３月３１日現在\": HTTP 404"
+    },
+    {
+      "authority_key": "muni-131113",
+      "authority_name": "東京都 大田区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 152,
+      "by_category": {
+        "ryokan_hotel": 132,
+        "kani_shukusho": 20
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131130",
+      "authority_name": "東京都 渋谷区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 480,
+      "by_category": {
+        "ryokan_hotel": 462,
+        "kani_shukusho": 18
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131164",
+      "authority_name": "東京都 豊島区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 706,
+      "by_category": {
+        "uncategorized": 706
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131181",
+      "authority_name": "東京都 荒川区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 97,
+      "by_category": {
+        "kani_shukusho": 31,
+        "ryokan_hotel": 66
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131199",
+      "authority_name": "東京都 板橋区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 82,
+      "by_category": {
+        "ryokan_hotel": 82
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131202",
+      "authority_name": "東京都 練馬区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 16,
+      "by_category": {
+        "ryokan_hotel": 15,
+        "kani_shukusho": 1
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    },
+    {
+      "authority_key": "muni-131229",
+      "authority_name": "東京都 葛飾区",
+      "status": "ingested",
+      "dataset_title": "宿泊施設（旅館台帳）",
+      "resource_name": "宿泊施設（旅館台帳）",
+      "facility_count": 509,
+      "by_category": {
+        "uncategorized": 509
+      },
+      "dropped_non_lodging_rows": 0,
+      "dropped_pii_columns": [
+        "営業者氏名",
+        "法人代表者氏名",
+        "営業者_所在地_連結表記",
+        "営業者_所在地_都道府県",
+        "営業者_所在地_市区町村",
+        "営業者_所在地_町字",
+        "営業者_所在地_番地以下",
+        "営業者_所在地_建物名等(方書)",
+        "営業者_ 電話番号"
+      ],
+      "unmapped_columns": [
+        "全国地方公共団体コード",
+        "ID",
+        "地方公共団体名",
+        "所在地_都道府県",
+        "所在地_市区町村",
+        "所在地_町字",
+        "所在地_番地以下",
+        "建物名等(方書)",
+        "備考"
+      ],
+      "detail": null
+    }
+  ]
+}
