@@ -46,6 +46,7 @@ export type PrefectureFixture = {
   nameJa: string;
   nameEn: string;
   attractions?: Array<Record<string, unknown>>;
+  municipalities?: Array<Record<string, unknown>>;
 };
 
 const SLUG_TO_FIXTURE: Record<string, PrefectureFixture> = {
@@ -67,6 +68,35 @@ const SLUG_TO_FIXTURE: Record<string, PrefectureFixture> = {
         admin_code: null,
         admin_name: null,
         types: ["Q207326"],
+      },
+    ],
+    municipalities: [
+      {
+        municipality: {
+          code: "31201",
+          name: "鳥取市",
+          prefecture_code: "31",
+          prefecture_name: "鳥取県",
+        },
+        spots: [
+          {
+            id: "31201-tottori-castle",
+            url: "https://www.city.tottori.lg.jp/kanko/tottori-castle",
+            name: "鳥取城跡",
+            description:
+              "Historic hilltop castle ruins overlooking the city, a popular sightseeing spot with stone walls, cherry blossoms in spring, and panoramic views from Kyusho-zan.",
+            category: null,
+            address: "鳥取県鳥取市東町",
+            coordinates: { lat: 35.5106, lng: 134.2515 },
+            language: "en",
+            source_url: "https://www.city.tottori.lg.jp/kanko/tottori-castle",
+            last_scraped_at: "2026-08-01T00:00:00.000Z",
+            body_paragraphs: [
+              "Tottori Castle was the seat of the Ikeda clan and its ruins are now a designated national historic site.",
+              "The grounds are one of the region's best-known cherry blossom viewing spots.",
+            ],
+          },
+        ],
       },
     ],
   },
@@ -96,7 +126,7 @@ export function pickFixtureContent(rel: string): string {
       prefecture: { code: fx.code, name: fx.nameJa, name_en: fx.nameEn },
       data_as_of: "2026-01-01",
       source: "test-fixture",
-      municipalities: [],
+      municipalities: fx.municipalities ?? [],
       wikidata_attractions: fx.attractions ?? [],
     });
   }

@@ -3619,6 +3619,11 @@ async function getSpots(args: {
           prefecture: p.prefecture.name,
           prefecture_code: p.prefecture.code,
           language: s.language,
+          // Freshness contract: the date this record was last fetched from and
+          // verified against its official municipal source. Lets a consumer
+          // measure the "verified within N days" SLA per record. Honest null
+          // only if a legacy record predates the field.
+          last_verified: s.last_scraped_at ?? null,
           quality_score: Math.round(q * 100) / 100,
         };
         if (qRaw) baseRec.q_relevance = Math.max(qNameDesc, qBody);
@@ -3744,6 +3749,11 @@ async function getSpots(args: {
         area_id: a.admin_code ?? null,
         prefecture: p.prefecture.name,
         prefecture_code: a.prefecture_code ?? p.prefecture.code,
+        // Freshness contract: the Wikidata layer has no per-record verification
+        // date (it is rebuilt wholesale from a Wikidata snapshot), so this is an
+        // honest null. Consumers should read the dataset-level snapshot version
+        // from metadata.json for this layer rather than a per-record date.
+        last_verified: null,
         quality_score: 0.65,
       };
       // Iter56.4: expose kinds so agents can distinguish e.g. waterfall vs
@@ -12572,7 +12582,7 @@ const TOOLS = [
   {
     name: "get_spots",
     description:
-      "Returns tourist spots in a given prefecture or municipality.\n\nCombines two parallel data sources:\n  - Municipal-website scraping (spots from official tourism pages)\n  - Wikidata (multilingual labels, coordinates, CC0 license)\n\nWith category='food' it instead returns dining venues (restaurants / cafes / street food) from the OpenStreetMap food layer — named venues with coordinates, cuisine tags, and opening hours + official site where published.\n\nUse this when the user wants to know 'what to see' (or, with category=food, 'where to eat') in an area. Does NOT return availability or pricing — this is static reference data.",
+      "Returns tourist spots in a given prefecture or municipality.\n\nCombines two parallel data sources:\n  - Municipal-website scraping (spots from official tourism pages)\n  - Wikidata (multilingual labels, coordinates, CC0 license)\n\nWith category='food' it instead returns dining venues (restaurants / cafes / street food) from the OpenStreetMap food layer — named venues with coordinates, cuisine tags, and opening hours + official site where published.\n\nEach spot carries `last_verified`: an ISO date for municipal-scrape records (when the record was last fetched from and verified against its official source), or null for Wikidata records (that layer is rebuilt wholesale from a snapshot and has no per-record date — read the snapshot version from metadata.json instead). Null always means 'not tracked for this layer', never a guessed date.\n\nUse this when the user wants to know 'what to see' (or, with category=food, 'where to eat') in an area. Does NOT return availability or pricing — this is static reference data.",
     inputSchema: {
       type: "object",
       properties: {
