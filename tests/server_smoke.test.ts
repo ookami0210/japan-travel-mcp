@@ -167,6 +167,34 @@ describe("buildServer() — MCP integration smoke", () => {
     ).toBe(true);
   });
 
+  it("get_spots exposes a last_verified freshness field with honest nulls", async () => {
+    const json = await callToolOk("get_spots", { prefecture: "tottori" });
+    const spots = json.spots as Array<Record<string, unknown>>;
+    expect(Array.isArray(spots)).toBe(true);
+    expect(spots.length).toBeGreaterThan(0);
+
+    // Uniform contract: every spot carries last_verified (string ISO date or
+    // an honest null), never omitted and never a guessed value.
+    for (const s of spots) {
+      expect(s).toHaveProperty("last_verified");
+      const lv = s.last_verified;
+      expect(lv === null || typeof lv === "string").toBe(true);
+    }
+
+    // Municipal-scrape records carry the scrape/verification date; the Wikidata
+    // layer has no per-record date and reports an honest null.
+    const municipal = spots.filter((s) => s.source === "municipal_scrape");
+    const wikidata = spots.filter((s) => s.source === "wikidata");
+    expect(municipal.length).toBeGreaterThan(0);
+    for (const s of municipal) {
+      expect(typeof s.last_verified).toBe("string");
+      expect((s.last_verified as string).length).toBeGreaterThan(0);
+    }
+    for (const s of wikidata) {
+      expect(s.last_verified).toBeNull();
+    }
+  });
+
   it("get_hotels accepts the prefecture filter against an empty master", async () => {
     const json = await callToolOk("get_hotels", { prefecture: "tottori" });
     expect(
