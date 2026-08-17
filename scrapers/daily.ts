@@ -410,6 +410,14 @@ async function main(): Promise<void> {
   await notify(
     `✅ Daily done in ${elapsedSec}s — ${processedCount} municipalities, ${totalSpots} spots, ${totalErrors} errors across ${byPref.size} prefectures (HTTP ${summary.success}✅/${summary.fivexx}5xx/${summary.fourxx}4xx)`,
   );
+
+  // Exit explicitly: every write above is awaited, so the run is durably done.
+  // Municipalities that exceeded MUNI_TIMEOUT_MINUTES were abandoned mid-fetch
+  // (see the withTimeout branch above) and their detached sockets keep the Node
+  // event loop alive after main() resolves. Without this the process lingers
+  // idle until the workflow step timeout kills it and marks the whole run
+  // failed — even though the scrape, state commit, and HF sync all succeeded.
+  process.exit(0);
 }
 
 main().catch(async (err) => {
