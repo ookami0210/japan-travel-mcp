@@ -262,13 +262,13 @@ requires either extending an existing channel or creating a new one.
 
 #### #15 — Wikidata attractions v2 (broader P31 type chain)
 - **Authority**: Wikidata
-- **URL**: https://query.wikidata.org/sparql
+- **URL**: https://query.wikidata.org/sparql (P625 coordinates, P856 official website, rdfs:label multilingual)
 - **License**: CC0
 - **Fetcher**: `scrapers/sources/fetch_wikidata_attractions_v2.ts`
 - **Output**: `data/_state/wikidata_attractions.json` (master file)
 - **Cadence**: monthly+ (one-shot per schema change)
 - **Channel**: WD-FOUNDATION (manual)
-- **Coverage**: 67,862 items (v2.2 with 39 P31 types)
+- **Coverage**: 67,862 items (v2.2 with 39 P31 types). Each item also carries `official_url` (P856) when Wikidata publishes one — an honest null otherwise. The current snapshot is topped up between full fetches by `scrapers/backfill_attraction_official_urls.ts` (P856 via the wbgetentities REST API, non-destructive).
 - **Status**: `active`
 
 #### #16 — Wikidata P1435 heritage anchor
