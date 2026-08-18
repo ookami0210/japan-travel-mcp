@@ -75,4 +75,33 @@ describe("loadFoodLayer", () => {
     const out = await loadFoodLayer("/nonexistent/nowhere.json", "none");
     expect(out).toEqual([]);
   });
+
+  it("structures hours_raw into opening_hours_structured at load time", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "food-hrs-"));
+    const p = join(dir, "kyoto.json");
+    await writeFile(
+      p,
+      JSON.stringify({
+        entries: [
+          venue({ id: "withhours", hours_raw: "Mo-Fr 11:00-14:30,17:00-22:00" }),
+          venue({ id: "nohours", hours_raw: null }),
+        ],
+      }),
+      "utf8",
+    );
+    const out = await loadFoodLayer(p, "kyoto-hrs");
+    const withHours = out.find((e) => e.id === "withhours")!;
+    const noHours = out.find((e) => e.id === "nohours")!;
+
+    // Parsed to minute-granularity weekday windows the planner can use.
+    expect(withHours.opening_hours_structured).not.toBeNull();
+    expect(withHours.opening_hours_structured?.weekly.mo).toEqual([
+      { open: 660, close: 870 },
+      { open: 1020, close: 1320 },
+    ]);
+    // Saturday absent from the expression stays unstated (not a false "open").
+    expect(withHours.opening_hours_structured?.weekly.sa).toBeUndefined();
+    // No raw hours → honest null, never a guessed window.
+    expect(noHours.opening_hours_structured).toBeNull();
+  });
 });

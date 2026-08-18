@@ -34,7 +34,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseOpeningHours } from "./lib/opening_hours.js";
+import { parseOpeningHours } from "../src/lib/opening_hours.js";
 import { categorizeFromOsmTags } from "./lib/osm_category.js";
 import { parseCharge } from "./lib/charge.js";
 

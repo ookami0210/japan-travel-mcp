@@ -13,6 +13,11 @@
 
 import { readFile } from "node:fs/promises";
 
+import {
+  parseOpeningHours,
+  type StructuredOpeningHours,
+} from "./opening_hours.js";
+
 export interface FoodVenue {
   id: string;
   names: { default: string; ja: string | null; en: string | null };
@@ -20,6 +25,14 @@ export interface FoodVenue {
   amenity: string;
   cuisine: string[];
   hours_raw: string | null;
+  // Minute-granularity weekly windows parsed from hours_raw (the raw OSM
+  // opening_hours string). Consumers need this to check a plan against
+  // opening times — the raw OSM syntax is not something a planner can map to
+  // an open_window on its own. Absent in the stored file; loadFoodLayer fills
+  // it once (value, or null when hours_raw is absent / unparseable). A
+  // `partial: true` flag marks expressions only partly representable.
+  // Mirrors the attraction layer's opening_hours_structured.
+  opening_hours_structured?: StructuredOpeningHours | null;
   official_url: string | null;
   wheelchair: string | null;
   takeaway: string | null;
@@ -51,6 +64,17 @@ export async function loadFoodLayer(
     entries = Array.isArray(parsed.entries) ? parsed.entries : [];
   } catch {
     entries = []; // absent layer is a coverage gap, not an error
+  }
+  // Structure the raw OSM opening_hours once, at load time, so every consumer
+  // of this layer gets the same machine-usable windows without re-parsing.
+  // Deterministic and offline — no data migration needed to light up the
+  // hours the OSM layer already carries.
+  for (const v of entries) {
+    if (v.opening_hours_structured === undefined) {
+      v.opening_hours_structured = v.hours_raw
+        ? parseOpeningHours(v.hours_raw)
+        : null;
+    }
   }
   cache.set(cacheKey, entries);
   return entries;
