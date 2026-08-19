@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseOpeningHours } from "../../scrapers/lib/opening_hours.js";
+import { parseOpeningHours } from "../../src/lib/opening_hours.js";
 
 describe("parseOpeningHours", () => {
   it("parses 24/7", () => {

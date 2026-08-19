@@ -3317,6 +3317,8 @@ async function getSpots(args: {
       // source", never "no" — do not guess values for these fields.
       field_notes: {
         hours_raw: "OSM opening_hours syntax where present; null = unknown",
+        opening_hours_structured:
+          "hours_raw parsed to minute-granularity per-weekday windows (twenty_four_seven / weekly / partial); null = absent or unparseable. Use this over hours_raw for opening-time checks.",
         official_url: "venue website from OSM where present; null = unknown",
         price_band: "not available in this layer (null)",
       },
