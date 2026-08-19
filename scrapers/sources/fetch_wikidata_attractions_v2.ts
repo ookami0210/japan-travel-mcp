@@ -106,6 +106,10 @@ interface AttractionRecord {
   name_ko: string | null;
   description_en: string | null;
   coordinates: { lat: number; lng: number } | null;
+  // Official website (Wikidata P856). Null when the entity carries no P856 —
+  // that is an honest "not published on Wikidata", never a guess. This is the
+  // per-attraction official page a downstream pass can crawl for hours/pricing.
+  official_url: string | null;
   prefecture_code: string;
   admin_code: string | null;
   admin_name: string | null;
@@ -126,13 +130,14 @@ interface SparqlBinding {
   label_zh?: SparqlValue;
   label_ko?: SparqlValue;
   desc_en?: SparqlValue;
+  official?: SparqlValue;
 }
 
 function buildQuery(prefix: string, types: string[]): string {
   const typesValues = types.map((q) => `wd:${q}`).join(" ");
   return `
 SELECT DISTINCT ?item ?coord ?adminCode ?adminLabel ?type
-  ?label_ja ?label_en ?label_zh ?label_ko ?desc_en
+  ?label_ja ?label_en ?label_zh ?label_ko ?desc_en ?official
 WHERE {
   ?adminEntity wdt:P429 ?adminCode .
   FILTER(STRSTARTS(?adminCode, "${prefix}"))
@@ -142,6 +147,7 @@ WHERE {
   VALUES ?type { ${typesValues} }
 
   OPTIONAL { ?item wdt:P625 ?coord . }
+  OPTIONAL { ?item wdt:P856 ?official . }
   OPTIONAL { ?item rdfs:label ?label_ja . FILTER(LANG(?label_ja) = "ja") }
   OPTIONAL { ?item rdfs:label ?label_en . FILTER(LANG(?label_en) = "en") }
   OPTIONAL { ?item rdfs:label ?label_zh . FILTER(LANG(?label_zh) = "zh") }
@@ -223,6 +229,7 @@ function processBindings(
         name_ko: b.label_ko?.value ?? null,
         description_en: b.desc_en?.value ?? null,
         coordinates: coord,
+        official_url: b.official?.value ?? null,
         prefecture_code: prefCode,
         admin_code: adminCode,
         admin_name: b.adminLabel?.value ?? null,
@@ -237,6 +244,9 @@ function processBindings(
         existing.description_en = b.desc_en.value;
       }
       if (!existing.coordinates && coord) existing.coordinates = coord;
+      if (!existing.official_url && b.official) {
+        existing.official_url = b.official.value;
+      }
       if (!existing.admin_code && adminCode) {
         existing.admin_code = adminCode;
         existing.prefecture_code = prefCode;
@@ -414,6 +424,7 @@ async function main(): Promise<void> {
         "P131* (administrative entity)",
         "P429 (JIS municipality code)",
         "P625 (coordinates)",
+        "P856 (official website)",
         "rdfs:label (multilingual)",
       ],
       types: ATTRACTION_TYPES,
