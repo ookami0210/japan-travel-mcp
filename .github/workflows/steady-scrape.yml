@@ -16,12 +16,35 @@
 name: steady-scrape
 
 on:
+  # Four windows per day (cron is UTC; JST = UTC+9). Two night windows run at
+  # higher parallelism inside the quiet hours; two daytime windows run at the
+  # gentler default parallelism. Each window is a separate <6 h job — the
+  # GitHub-hosted 6 h ceiling forbids one continuous long run, and splitting
+  # also shrinks the blast radius of a hang/OOM and checkpoints progress to
+  # HF/git more often. The `scrape` concurrency group serialises any overlap
+  # (a delayed window queues rather than colliding). The per-domain 5 s
+  # interval holds in every window, so more windows never hit any one site
+  # harder — they just cover more distinct municipalities per day. This is a
+  # catch-up cadence; once coverage is back inside the SLA the daytime windows
+  # (and then the night parallelism) should be dialled back — see
+  # docs/automation/AUTOMATION_DESIGN.md.
   schedule:
-    - cron: "0 16 * * *"   # 01:00 JST = 16:00 UTC (previous day)
+    - cron: "30 14 * * *"   # 23:30 JST — night window A (parallelism 16)
+    - cron: "15 18 * * *"   # 03:15 JST — night window B (parallelism 16)
+    - cron: "30 22 * * *"   # 07:30 JST — day window A (parallelism 8)
+    - cron: "0 10 * * *"    # 19:00 JST — day window B (parallelism 8)
   workflow_dispatch:
     inputs:
       munis_per_day:
         description: "Override daily muni count (empty = auto)"
+        required: false
+        default: ""
+      concurrency:
+        description: "Override parallelism (empty = tier default)"
+        required: false
+        default: ""
+      minutes:
+        description: "Override scrape budget in minutes (empty = tier default)"
         required: false
         default: ""
 
@@ -35,15 +58,13 @@ permissions:
 jobs:
   steady:
     runs-on: ubuntu-latest
-    # The 01:00–06:00 JST window is a POLITENESS constraint on the municipal
-    # scrape only — we hit official sites when their traffic is lowest. The
-    # JTMCP-side tail (R-3, commit, HF sync) is internal/light and may run
-    # PAST 06:00; it does not need to fit inside the polite window. So the
-    # scrape gets the full ~5 h (DAILY_SCRAPE_MINUTES=300) and this job timeout
-    # is set to the GitHub-hosted-runner ceiling (6 h) to give the tail room
-    # after 06:00. (A single hosted job cannot run longer than 6 h; if the tail
-    # ever needs more, split it into a separate chained workflow.)
-    timeout-minutes: 360
+    # Each window's scrape budget (DAILY_SCRAPE_MINUTES, set per-tier below)
+    # ends early enough that the JTMCP-side tail (R-3, commit, HF sync) finishes
+    # before the next window's cron, leaving a comfortable gap for GitHub's cron
+    # jitter. The job timeout is a safety ceiling comfortably above the largest
+    # window budget + tail, and well under the 6 h hosted-runner cap so a run
+    # never bleeds into the following window.
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
@@ -67,30 +88,49 @@ jobs:
           python3 -m pip install --quiet huggingface_hub
           python3 scrapers/hf/prefetch_state.py --preset steady
 
+      - name: Configure scrape tier
+        # Map each scheduled window to its parallelism + scrape budget. Night
+        # windows run at higher parallelism inside the quiet hours; daytime
+        # windows run gentler. A manual workflow_dispatch can override either.
+        # Budgets are sized so scrape + tail finish before the next window fires.
+        id: tier
+        env:
+          IN_CONC: ${{ github.event.inputs.concurrency }}
+          IN_MINS: ${{ github.event.inputs.minutes }}
+        run: |
+          case "${{ github.event.schedule }}" in
+            "30 14 * * *") conc=16; mins=180 ;;  # 23:30 JST — night A
+            "15 18 * * *") conc=16; mins=210 ;;  # 03:15 JST — night B
+            "30 22 * * *") conc=8;  mins=165 ;;  # 07:30 JST — day A
+            "0 10 * * *")  conc=8;  mins=225 ;;  # 19:00 JST — day B
+            *)             conc=8;  mins=300 ;;  # manual dispatch default
+          esac
+          [ -n "$IN_CONC" ] && conc="$IN_CONC"
+          [ -n "$IN_MINS" ] && mins="$IN_MINS"
+          echo "conc=$conc" >> "$GITHUB_OUTPUT"
+          echo "mins=$mins" >> "$GITHUB_OUTPUT"
+          echo "Tier: parallelism=$conc, scrape budget=${mins}min (schedule='${{ github.event.schedule }}')"
+
       - name: Run daily MUNI scrape
-        # Step-level timeout (< the 360-min job timeout) is the safety net: if
-        # the scrape hangs, only THIS step is killed — the job continues to the
-        # commit + HF-sync tail, which run under `if: always()` and persist
-        # whatever daily.ts already checkpointed to disk. Without this, a hang
-        # tripped the JOB timeout and cancelled the whole job, discarding the
-        # night's scrape.
-        #
-        # Timing (job starts 01:00 JST, ~7 min setup, so the scrape runs from
-        # ~01:07): the soft budget stops LAUNCHING new municipal fetches at
-        # ~06:07 — the edge of the polite window. In-flight fetches wrap up
-        # (≤ MUNI_TIMEOUT_MINUTES each). The 330-min step ceiling only fires if
-        # the scrape hangs; the tail then still has ~30 min before the 360 job
-        # cap. The R-3/commit/HF tail is allowed to run past 06:00.
-        timeout-minutes: 330
+        # Step-level timeout is the safety net: if the scrape hangs, only THIS
+        # step is killed — the job continues to the commit + HF-sync tail, which
+        # run under `if: always()` and persist whatever daily.ts checkpointed to
+        # disk. Sized above the largest window budget (225) plus one in-flight
+        # municipality (MUNI_TIMEOUT), and kept short enough that a hung run
+        # never bleeds into the next window.
+        timeout-minutes: 260
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DAILY_BATCH_SIZE: ${{ github.event.inputs.munis_per_day || '' }}
-          # Use the full ~5 h polite window (01:00–06:00 JST) for the municipal
-          # scrape: keep launching stale-first municipalities until this
-          # wall-clock budget is spent, then stop so in-flight fetches finish
-          # near 06:00. The JTMCP-side tail runs afterwards and is NOT charged
-          # against this window.
-          DAILY_SCRAPE_MINUTES: "300"
+          # Per-window wall-clock budget (set by the tier step): keep launching
+          # stale-first municipalities until spent, then stop so in-flight
+          # fetches finish. The tail (R-3 / commit / HF sync) runs afterwards and
+          # is NOT charged against this budget.
+          DAILY_SCRAPE_MINUTES: ${{ steps.tier.outputs.mins }}
+          # Municipalities crawled in parallel. Each domain still gets the 5 s
+          # per-domain interval, so this scales throughput across distinct sites
+          # without hitting any single site harder.
+          GLOBAL_CONCURRENCY: ${{ steps.tier.outputs.conc }}
           # Hard per-municipality cap and checkpoint cadence — daily.ts flushes
           # progress to disk every CHECKPOINT_MINUTES so a kill loses at most
           # that much work.

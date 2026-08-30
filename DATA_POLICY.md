@@ -60,14 +60,20 @@ We aim to keep every record fresh within **30 days**.
 That's the freshness target — not a server-load mitigation.
 
 **Implementation:**  
-A GitHub Actions cron job runs daily in a 01:00–06:00 JST window. Each run is
+GitHub Actions cron jobs run in several short windows per day. Each run is
 **time-boxed**: it re-scrapes the stalest entities (oldest `last_scraped_at`
 first) until a wall-clock budget is spent, then stops launching new work so the
 R-3 refresh, state commit, and Hugging Face sync always complete within the job
 timeout. Concretely:
 
-- 1 daily cron run, stale-first selection
-- Each domain hit at most once per run, with a 5-second per-domain interval
+- Multiple short cron runs per day, stale-first selection. The bulk of the work
+  runs in the quiet overnight hours; when coverage falls behind the freshness
+  target we add gentler daytime windows (at reduced parallelism) to catch up,
+  and dial them back once the cycle is healthy again.
+- Each domain hit at most once per run, with a **5-second per-domain interval in
+  every window** — the politeness floor never changes with the schedule or the
+  parallelism. Higher parallelism only means more *distinct* domains are crawled
+  at once, never any single site faster.
 - The rolling cycle keeps every entity within the 30-day freshness target
 
 The initial dataset is bootstrapped in a single run (a few hours, 2-second  

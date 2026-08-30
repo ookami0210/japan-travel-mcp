@@ -93,6 +93,19 @@ const CHECKPOINT_MINUTES = (() => {
   return Number.isFinite(n) && n > 0 ? n : 5;
 })();
 
+// Parallelism = how many municipalities are crawled at once. Each municipality
+// lives on its own domain and the fetcher enforces the 5-second per-domain
+// interval regardless, so raising this speeds a run up by hitting MORE distinct
+// official sites in parallel — never by hitting any single site faster, so the
+// public politeness policy is unaffected. Bounded by runner memory (the crawl
+// holds page buffers per in-flight municipality); ramp gradually. Env override
+// lets the workflow run a higher parallelism at night and a gentler one by day.
+const GLOBAL_CONCURRENCY = (() => {
+  const raw = process.env.GLOBAL_CONCURRENCY?.trim();
+  const n = raw ? parseInt(raw, 10) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_OPTIONS.globalConcurrency;
+})();
+
 const PREFECTURE_SLUGS: Record<string, string> = {
   "01": "hokkaido", "02": "aomori", "03": "iwate", "04": "miyagi",
   "05": "akita", "06": "yamagata", "07": "fukushima", "08": "ibaraki",
@@ -158,6 +171,7 @@ async function main(): Promise<void> {
   const opts: ScrapeOptions = {
     ...DEFAULT_OPTIONS,
     rateLimitMs: 5000, // daily runs respect the public 5-second policy
+    globalConcurrency: GLOBAL_CONCURRENCY,
   };
 
   const muniFile = JSON.parse(
