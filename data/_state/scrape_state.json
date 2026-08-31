@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "last_run_at": "2026-08-31T01:35:32.490Z",
+  "last_run_at": "2026-08-31T14:18:32.374Z",
   "per_municipality": {
     "102016": {
       "last_scraped_at": "2026-08-18T20:09:13.458Z",
@@ -6212,11 +6212,11 @@
       "error_count": 22
     },
     "302031": {
-      "last_scraped_at": "2026-04-26T04:49:24.760Z",
+      "last_scraped_at": "2026-08-31T10:58:13.608Z",
       "last_status": "partial",
-      "pages_fetched": 18,
-      "spots_found": 13,
-      "error_count": 5
+      "pages_fetched": 111,
+      "spots_found": 54,
+      "error_count": 57
     },
     "302040": {
       "last_scraped_at": "2026-08-13T18:49:20.230Z",
@@ -13435,9 +13435,9 @@
     "triggered_at": null
   },
   "coverage": {
-    "last_check_at": "2026-08-31T01:41:10.641Z",
-    "max_age_days": 126.9,
-    "count_over_sla": 39,
+    "last_check_at": "2026-08-31T14:24:29.732Z",
+    "max_age_days": 127.5,
+    "count_over_sla": 38,
     "never_scraped": 0
   }
 }
