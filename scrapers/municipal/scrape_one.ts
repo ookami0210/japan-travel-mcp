@@ -13,11 +13,12 @@ import { rateLimitedFetch, ErrorCounter } from "../lib/fetcher.js";
 import { shouldCrawl } from "../lib/robots.js";
 import { extract } from "../lib/extractor.js";
 import { discoverTourismPages } from "../lib/discover.js";
-import { pickCanonical } from "../lib/canonical.js";
+import { pickCanonical, canonicalize } from "../lib/canonical.js";
 import { passesSpotFilter } from "../lib/spot_filter.js";
 import { geocodeAddress } from "../lib/geocode.js";
 import type {
   MunicipalityInput,
+  MunicipalityCheckpoint,
   MunicipalityScrapeResult,
   ScrapeOptions,
   TouristSpot,
@@ -32,6 +33,13 @@ export async function scrapeOneMunicipality(
   opts: ScrapeOptions,
   counter: ErrorCounter,
   centroids?: Record<string, { lat: number; lng: number }>,
+  // Resume state from a prior window (null/undefined = fresh crawl) and a soft
+  // window deadline (ms epoch). When the deadline passes the crawl stops and
+  // returns a checkpoint so a later run continues instead of restarting — this
+  // is what lets large sites finish across windows at the polite 5 s pace,
+  // rather than being abandoned by the old per-municipality time cap.
+  resume?: MunicipalityCheckpoint | null,
+  deadlineMs?: number,
 ): Promise<MunicipalityScrapeResult> {
   const startedAt = new Date().toISOString();
   const result: MunicipalityScrapeResult = {
@@ -66,26 +74,61 @@ export async function scrapeOneMunicipality(
     return result;
   }
 
-  // Phase 1: discover tourism pages from all seeds.
-  let discovery: { pages: { url: string; title: string }[]; visited_count: number };
-  try {
-    discovery = await discoverTourismPages(seeds, opts, counter);
-  } catch (err) {
-    result.errors.push({
-      url: seeds[0],
-      reason: `discovery failed: ${(err as Error).message}`,
-    });
-    result.finished_at = new Date().toISOString();
-    return result;
+  // Pages already extracted in a prior window — skipped below so extraction
+  // advances across windows instead of re-doing the whole site each time.
+  const extractedSet = new Set<string>(resume?.extracted ?? []);
+  // Cycle start: preserved across resume windows so the daily merge can drop
+  // spots from a previous cycle that weren't re-found this cycle.
+  const crawlStartedAt = resume?.crawl_started_at ?? startedAt;
+
+  // Phase 1: discover tourism pages from all seeds (resumable + deadline-aware).
+  // Skip entirely when a prior window already finished discovery.
+  let discoveredPages: { url: string; title: string }[];
+  let discoveryComplete: boolean;
+  let truncatedAtCap: boolean;
+  let discoveryCheckpoint: MunicipalityCheckpoint["discovery"];
+  if (resume?.discovery_complete) {
+    discoveredPages = resume.discovered_pages;
+    discoveryComplete = true;
+    truncatedAtCap = resume.truncated_at_cap;
+    discoveryCheckpoint = { visited: [], frontier: [], pages: discoveredPages };
+  } else {
+    try {
+      const disc = await discoverTourismPages(
+        seeds,
+        opts,
+        counter,
+        resume?.discovery ?? null,
+        deadlineMs,
+      );
+      discoveredPages = disc.pages;
+      discoveryComplete = disc.complete;
+      truncatedAtCap = disc.truncated_at_cap;
+      discoveryCheckpoint = disc.checkpoint;
+    } catch (err) {
+      result.errors.push({
+        url: seeds[0],
+        reason: `discovery failed: ${(err as Error).message}`,
+      });
+      result.finished_at = new Date().toISOString();
+      return result;
+    }
   }
-  result.tourism_pages_found = discovery.pages.length;
+  result.tourism_pages_found = discoveredPages.length;
 
   // Phase 2: extract per-page details and emit canonical-deduplicated spots.
   // discovery.pages are already canonicalised, but we re-check after fetch in
   // case the page declared a different canonical via <link rel="canonical">.
   const seenSpotIds = new Set<string>();
 
-  for (const page of discovery.pages) {
+  for (const page of discoveredPages) {
+    // Window over: stop and let the checkpoint below carry the rest forward.
+    if (deadlineMs !== undefined && Date.now() >= deadlineMs) break;
+    const pageCanonical = canonicalize(page.url);
+    if (extractedSet.has(pageCanonical)) continue; // done in a prior window
+    // Mark attempted up front so a transient failure isn't retried forever on
+    // resume — the next full refresh cycle re-scrapes the municipality anyway.
+    extractedSet.add(pageCanonical);
     const decision = await shouldCrawl(page.url, opts);
     if (!decision.allowed) {
       result.errors.push({
@@ -177,6 +220,28 @@ export async function scrapeOneMunicipality(
     if (spot.language === "ko") result.multilingual.ko += 1;
   }
 
+  // Fully done only when discovery drained AND every discovered page has been
+  // through extraction. Otherwise hand back a checkpoint so the next window
+  // resumes from the frontier + the un-extracted pages.
+  const allExtracted = discoveredPages.every((p) =>
+    extractedSet.has(canonicalize(p.url)),
+  );
+  const complete = discoveryComplete && allExtracted;
+
+  result.total_pages = discoveredPages.length;
+  result.truncated_at_cap = truncatedAtCap;
+  result.complete = complete;
+  result.crawl_started_at = crawlStartedAt;
+  result.checkpoint = complete
+    ? null
+    : {
+        crawl_started_at: crawlStartedAt,
+        discovery: discoveryCheckpoint,
+        discovery_complete: discoveryComplete,
+        discovered_pages: discoveredPages,
+        extracted: Array.from(extractedSet),
+        truncated_at_cap: truncatedAtCap,
+      };
   result.finished_at = new Date().toISOString();
   return result;
 }

@@ -31,12 +31,15 @@ import {
   writePrefFileAtomic,
   type PrefFileMuniBlock,
 } from "./lib/pref_file.js";
+import { hybridMergeSpots } from "./lib/crawl_merge.js";
 import {
   DEFAULT_OPTIONS,
   type MunicipalityInput,
+  type MunicipalityCheckpoint,
   type MunicipalityScrapeResult,
   type PrefectureFile,
   type ScrapeOptions,
+  type TouristSpot,
 } from "./lib/types.js";
 
 const ROOT = new URL("../", import.meta.url);
@@ -48,6 +51,39 @@ const CENTROIDS_PATH = new URL(
 );
 const PREFECTURES_DIR = new URL("data/prefectures/", ROOT);
 const LOG_DIR = new URL("data/_logs/", ROOT);
+// Per-municipality resume state for crawls that span multiple windows. Keyed by
+// JIS code; a municipality is present only while its crawl is unfinished.
+// gitignored (HF-only, like the other bulk _state files) — prefetched at run
+// start and pushed to HF in the tail, so a fresh runner resumes correctly.
+const CHECKPOINTS_PATH = new URL(
+  "data/_state/crawl_checkpoints.json",
+  ROOT,
+);
+
+/** Load the per-municipality resume checkpoints (missing/corrupt → empty). */
+async function loadCheckpoints(): Promise<Map<string, MunicipalityCheckpoint>> {
+  try {
+    const raw = JSON.parse(
+      await readFile(fileURLToPath(CHECKPOINTS_PATH), "utf8"),
+    ) as Record<string, MunicipalityCheckpoint>;
+    return new Map(Object.entries(raw));
+  } catch {
+    return new Map();
+  }
+}
+
+/** Persist the resume checkpoints (atomic write). */
+async function saveCheckpoints(
+  checkpoints: Map<string, MunicipalityCheckpoint>,
+): Promise<void> {
+  const path = fileURLToPath(CHECKPOINTS_PATH);
+  await mkdir(dirname(path), { recursive: true });
+  const obj = Object.fromEntries(checkpoints.entries());
+  const tmp = `${path}.tmp`;
+  await writeFile(tmp, JSON.stringify(obj), "utf8");
+  await rename(tmp, path);
+}
+
 
 // Manual override only. Empty/unset → the size is derived dynamically from
 // the candidate count and the coverage verifier's recommendation (see main()).
@@ -70,16 +106,17 @@ const DAILY_SCRAPE_MINUTES = (() => {
   return Number.isFinite(n) && n > 0 ? n : 240;
 })();
 
-// Hard per-municipality wall-clock cap. The fetcher already times out each
-// HTTP request, but a pathological site (dozens of slow pages + retries) can
-// still keep one municipality in-flight far past the budget deadline. Because
-// the run waits on Promise.all(), a single hung municipality would block the
-// whole persist tail and eventually trip the workflow's job timeout — losing
-// the entire night's scrape. Capping each municipality bounds the overshoot.
-const MUNI_TIMEOUT_MINUTES = (() => {
-  const raw = process.env.MUNI_TIMEOUT_MINUTES?.trim();
-  const n = raw ? parseFloat(raw) : NaN;
-  return Number.isFinite(n) && n > 0 ? n : 20;
+// Total pages crawled per municipality across ALL resume windows (cumulative,
+// not per-window). Large official sites finish over several windows up to this
+// ceiling, then stop. There is no per-municipality time cap any more: a crawl
+// runs until it completes, hits this cap, or the window deadline. The
+// per-request fetch timeout plus this page cap bound it, so no municipality can
+// hang — which is what the old 20-minute cap protected against, at the cost of
+// abandoning (and never finishing) big sites.
+const MAX_PAGES_PER_MUNICIPALITY = (() => {
+  const raw = process.env.MAX_PAGES_PER_MUNICIPALITY?.trim();
+  const n = raw ? parseInt(raw, 10) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : 5000;
 })();
 
 // How often the run flushes in-memory progress to disk. Persisting mid-run
@@ -140,38 +177,43 @@ async function writePrefectureFile(
   // scraped tonight. Requires the workflow to prefetch prefectures/* from HF
   // so `existing` is the real current file, not empty-runner nothing.
   const existing = await readPrefFile(path);
+
+  // Hybrid resume merge: union each municipality's fresh spots with what the
+  // file already holds (coverage grows, never drops mid-crawl), and drop
+  // stale-cycle spots once the crawl completes. Only then does the
+  // preservation-first block merge replace the municipality block.
+  const existingSpotsByCode = new Map<string, TouristSpot[]>();
+  for (const b of existing?.municipalities ?? []) {
+    const code = (b as { municipality?: { code?: string } }).municipality?.code;
+    const spots = (b as { spots?: TouristSpot[] }).spots;
+    if (code) existingSpotsByCode.set(code, spots ?? []);
+  }
+  const mergedResults = results.map((r) => ({
+    ...r,
+    spots: hybridMergeSpots(
+      existingSpotsByCode.get(r.municipality.code) ?? [],
+      r.spots,
+      r.complete ?? true,
+      r.crawl_started_at,
+    ),
+  }));
+
   const merged = mergePrefectureFile(existing, {
     prefCode,
     prefName,
     slug,
-    results: results as unknown as PrefFileMuniBlock[],
+    results: mergedResults as unknown as PrefFileMuniBlock[],
   });
   await writePrefFileAtomic(path, merged);
 }
 
-// Resolves to the promise's value, or to MUNI_TIMEOUT if `ms` elapses first.
-// The timer is cleared as soon as the promise settles so a fast municipality
-// never holds the event loop open waiting on a stale timeout.
-const MUNI_TIMEOUT = Symbol("muni-timeout");
-function withTimeout<T>(
-  p: Promise<T>,
-  ms: number,
-): Promise<T | typeof MUNI_TIMEOUT> {
-  let handle: ReturnType<typeof setTimeout>;
-  const timeout = new Promise<typeof MUNI_TIMEOUT>((resolve) => {
-    handle = setTimeout(() => resolve(MUNI_TIMEOUT), ms);
-  });
-  return Promise.race([
-    p.finally(() => clearTimeout(handle)),
-    timeout,
-  ]);
-}
 
 async function main(): Promise<void> {
   const opts: ScrapeOptions = {
     ...DEFAULT_OPTIONS,
     rateLimitMs: 5000, // daily runs respect the public 5-second policy
     globalConcurrency: GLOBAL_CONCURRENCY,
+    maxPagesPerMunicipality: MAX_PAGES_PER_MUNICIPALITY,
   };
 
   const muniFile = JSON.parse(
@@ -196,6 +238,9 @@ async function main(): Promise<void> {
   }
 
   const state = await loadState();
+  // Per-municipality resume state for crawls still in progress from earlier
+  // windows (prefetched from HF with the other _state files).
+  const checkpoints = await loadCheckpoints();
   if (state.auto_stop.triggered) {
     await notify(
       `⛔ Daily run skipped — auto_stop is active: ${state.auto_stop.reason}. Clear data/_state/scrape_state.json (auto_stop block) once resolved.`,
@@ -266,6 +311,9 @@ async function main(): Promise<void> {
       }
       state.last_run_at = new Date().toISOString();
       await saveState(state);
+      // Persist resume state too, so a killed window doesn't lose the crawl
+      // progress of in-flight municipalities.
+      await saveCheckpoints(checkpoints);
     } finally {
       flushing = false;
     }
@@ -310,44 +358,50 @@ async function main(): Promise<void> {
         return;
       }
       try {
-        const r = await withTimeout(
-          scrapeOneMunicipality(
-            {
-              code: m.code,
-              name: m.name,
-              prefecture_code: m.prefecture_code,
-              prefecture_name: m.prefecture_name,
-              official_url: urlByCode.get(m.code) ?? null,
-            },
-            opts,
-            counter,
-            centroids,
-          ),
-          MUNI_TIMEOUT_MINUTES * 60_000,
+        // Resume from any saved checkpoint and hand the crawl the window
+        // deadline so it stops cleanly (returning a checkpoint) instead of
+        // being cut at a per-municipality time cap. This is what lets a large
+        // site finish across several windows at the polite 5 s pace.
+        const r = await scrapeOneMunicipality(
+          {
+            code: m.code,
+            name: m.name,
+            prefecture_code: m.prefecture_code,
+            prefecture_name: m.prefecture_name,
+            official_url: urlByCode.get(m.code) ?? null,
+          },
+          opts,
+          counter,
+          centroids,
+          checkpoints.get(m.code) ?? null,
+          deadlineMs,
         );
-        if (r === MUNI_TIMEOUT) {
-          // Leave last_scraped_at untouched so this municipality stays stale
-          // and is re-picked next run. The abandoned scrape's in-flight fetch
-          // finishes in the background and is ignored.
-          console.error(
-            `[daily] ${m.name} exceeded ${MUNI_TIMEOUT_MINUTES}min cap — skipped (retries next run)`,
-          );
-          return;
-        }
+
         if (!byPref.has(m.prefecture_code)) byPref.set(m.prefecture_code, []);
         byPref.get(m.prefecture_code)!.push(r);
 
+        // Keep the resume checkpoint for an unfinished crawl; drop it once done.
+        if (r.complete) checkpoints.delete(m.code);
+        else if (r.checkpoint) checkpoints.set(m.code, r.checkpoint);
+
+        // Stamp last_scraped_at fresh ONLY on completion. While a crawl is
+        // still in progress leave it null, so the stale picker treats the
+        // municipality as oldest and re-picks it first next window to continue.
+        const prev = state.per_municipality[m.code];
         state.per_municipality[m.code] = {
-          last_scraped_at: r.finished_at,
-          last_status:
-            r.spots.length > 0
+          last_scraped_at: r.complete ? r.finished_at : null,
+          last_status: r.complete
+            ? r.spots.length > 0
               ? r.errors.length === 0
                 ? "success"
                 : "partial"
-              : "failed",
+              : "failed"
+            : "in_progress",
           pages_fetched: r.pages_fetched,
           spots_found: r.spots.length,
           error_count: r.errors.length,
+          truncated_at_cap: r.truncated_at_cap ?? prev?.truncated_at_cap,
+          total_pages: r.total_pages ?? prev?.total_pages,
         };
       } catch (err) {
         console.error(
@@ -374,13 +428,16 @@ async function main(): Promise<void> {
   }
   await flushProgress();
 
-  const processedCount = Array.from(byPref.values()).flat().length;
-  const totalSpots = Array.from(byPref.values())
-    .flat()
-    .reduce((s, r) => s + r.spots.length, 0);
-  const totalErrors = Array.from(byPref.values())
-    .flat()
-    .reduce((s, r) => s + r.errors.length, 0);
+  const allResults = Array.from(byPref.values()).flat();
+  const processedCount = allResults.length;
+  const completedCount = allResults.filter((r) => r.complete).length;
+  const inProgressCount = processedCount - completedCount;
+  // Municipalities whose official site is larger than the page cap (crawl hit
+  // the cap with URLs still queued) — measured this run and, durably, in
+  // scrape_state.json per municipality.
+  const truncatedCount = allResults.filter((r) => r.truncated_at_cap).length;
+  const totalSpots = allResults.reduce((s, r) => s + r.spots.length, 0);
+  const totalErrors = allResults.reduce((s, r) => s + r.errors.length, 0);
   const elapsedSec = Math.round((Date.now() - runStart) / 1000);
   const summary = counter.summary();
 
@@ -395,6 +452,10 @@ async function main(): Promise<void> {
       {
         run_type: "daily",
         municipalities_processed: processedCount,
+        municipalities_completed: completedCount,
+        municipalities_in_progress: inProgressCount,
+        municipalities_truncated_at_cap: truncatedCount,
+        crawl_checkpoints_open: checkpoints.size,
         candidates_considered: todayMunis.length,
         time_budget_min: timeBounded ? DAILY_SCRAPE_MINUTES : null,
         prefectures_touched: Array.from(byPref.keys()),
@@ -422,7 +483,7 @@ async function main(): Promise<void> {
   }
 
   await notify(
-    `✅ Daily done in ${elapsedSec}s — ${processedCount} municipalities, ${totalSpots} spots, ${totalErrors} errors across ${byPref.size} prefectures (HTTP ${summary.success}✅/${summary.fivexx}5xx/${summary.fourxx}4xx)`,
+    `✅ Daily done in ${elapsedSec}s — ${processedCount} municipalities (${completedCount} completed, ${inProgressCount} still crawling), ${totalSpots} spots, ${totalErrors} errors across ${byPref.size} prefectures. ${truncatedCount} hit the ${MAX_PAGES_PER_MUNICIPALITY}-page cap; ${checkpoints.size} crawls open. (HTTP ${summary.success}✅/${summary.fivexx}5xx/${summary.fourxx}4xx)`,
   );
 
   // Exit explicitly: every write above is awaited, so the run is durably done.
