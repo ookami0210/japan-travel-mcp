@@ -66,6 +66,11 @@ PRESETS: dict[str, list[str]] = {
         "_state/tourism_org_urls.json",
         "_state/wikidata_attractions.json",
         "_state/scrape_state.json",
+        # Per-municipality crawl resume state. Without this a fresh runner would
+        # restart every large site from its seed each window and never finish
+        # (the whole point of resumable crawling). Absent on the very first run
+        # (handled as a normal prefetch miss).
+        "_state/crawl_checkpoints.json",
         # Existing R-3 translations MUST be restored before the r3_refresh
         # chain runs: translate_r3 is incremental by key against this file.
         # Without it every rotation re-translates the whole day's source

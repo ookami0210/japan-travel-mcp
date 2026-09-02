@@ -15,11 +15,21 @@ const STATE_PATH = new URL(
 );
 
 export interface MunicipalityState {
+  /** Null while a resumable crawl is still in progress (also treated as
+   *  "never scraped" by the stale picker, so an unfinished municipality is
+   *  re-picked first next window to continue). Stamped fresh only on
+   *  completion. */
   last_scraped_at: string | null;
-  last_status: "success" | "partial" | "failed" | null;
+  last_status: "success" | "partial" | "failed" | "in_progress" | null;
   pages_fetched: number;
   spots_found: number;
   error_count: number;
+  /** True when the last crawl hit the per-municipality page cap with URLs
+   *  still queued — i.e. the official site is larger than the cap and was
+   *  truncated. Lets the operator list municipalities that exceed the cap. */
+  truncated_at_cap?: boolean;
+  /** Tourism pages discovered in the last (or in-progress) crawl. */
+  total_pages?: number;
 }
 
 export interface CoverageState {

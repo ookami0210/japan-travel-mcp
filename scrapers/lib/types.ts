@@ -127,6 +127,38 @@ export interface MunicipalityInput {
   tourism_org_urls?: string[];
 }
 
+/** Serialisable BFS state for one municipality's discovery crawl (see
+ *  scrapers/lib/discover.ts). Persisted between runs so a crawl that ran out of
+ *  window budget resumes from the frontier instead of restarting at the seed. */
+export interface DiscoveryCheckpoint {
+  visited: string[];
+  frontier: { url: string; depth: number }[];
+  pages: { url: string; title: string }[];
+}
+
+/** Full resumable state for one municipality across the discovery + extraction
+ *  phases. Written to data/_state/crawl_checkpoints.json while a municipality
+ *  is mid-crawl; removed once it is fully done. */
+export interface MunicipalityCheckpoint {
+  /** ISO timestamp when THIS crawl cycle first started (carried across resume
+   *  windows). On completion the merge drops any spot whose last_scraped_at is
+   *  older than this — i.e. pages that existed last cycle but were not
+   *  re-found this cycle (deleted from the site) — so a finished crawl leaves a
+   *  clean, current set without ever dropping coverage mid-crawl. */
+  crawl_started_at: string;
+  /** Discovery-phase BFS state. */
+  discovery: DiscoveryCheckpoint;
+  /** True once discovery drained its frontier (or hit the page cap). */
+  discovery_complete: boolean;
+  /** Tourism pages discovered so far (frozen once discovery_complete). */
+  discovered_pages: { url: string; title: string }[];
+  /** Canonical URLs already processed by extraction (whether they produced a
+   *  spot or were filtered) — skipped on resume so extraction advances too. */
+  extracted: string[];
+  /** Discovery stopped at the page cap with a non-empty frontier (site > cap). */
+  truncated_at_cap: boolean;
+}
+
 export interface MunicipalityScrapeResult {
   municipality: {
     code: string;
@@ -144,6 +176,19 @@ export interface MunicipalityScrapeResult {
   started_at: string;
   finished_at: string;
   data_as_of: string;
+  // Resumable-crawl fields (set by scrapeOneMunicipality). Optional so other
+  // constructors/tests need not provide them.
+  /** True when discovery AND extraction both finished for this municipality. */
+  complete?: boolean;
+  /** Resume state to persist when `complete` is false; null when done. */
+  checkpoint?: MunicipalityCheckpoint | null;
+  /** Discovery hit the page cap with URLs still queued (site larger than cap). */
+  truncated_at_cap?: boolean;
+  /** Tourism pages discovered so far (for cap / progress reporting). */
+  total_pages?: number;
+  /** ISO start of this crawl cycle (see MunicipalityCheckpoint). Used by the
+   *  daily merge to drop stale spots once the crawl completes. */
+  crawl_started_at?: string;
 }
 
 export interface PrefectureFile {
