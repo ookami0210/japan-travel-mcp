@@ -13,7 +13,7 @@ import { rateLimitedFetch, ErrorCounter } from "./fetcher.js";
 import { extract } from "./extractor.js";
 import { shouldCrawl } from "./robots.js";
 import { canonicalize, pickCanonical } from "./canonical.js";
-import type { ScrapeOptions } from "./types.js";
+import type { ScrapeOptions, DiscoveryCheckpoint } from "./types.js";
 
 // Vocabulary expanded 2026-04-30 (see docs/decisions/0001-multi-source-tourism-data.md).
 // Earlier we missed feature pages that used "祭礼" / "催事" / "特産" / "名物" / "guide"
@@ -192,6 +192,19 @@ export interface DiscoveryResult {
   visited_count: number;
   /** Number of distinct seed URLs we crawled from. Always >= 1. */
   seed_count: number;
+  /** BFS state to persist when the crawl is not yet complete, so the next run
+   *  resumes instead of restarting. */
+  checkpoint: DiscoveryCheckpoint;
+  /** True when the frontier drained (site fully explored within scope/depth)
+   *  OR the page cap was hit — either way the discovery is done. */
+  complete: boolean;
+  /** True when discovery stopped because it hit `maxPagesPerMunicipality`
+   *  while the frontier still had URLs — i.e. the site is larger than the cap
+   *  and was truncated. Lets the operator measure which municipalities exceed
+   *  the cap. */
+  truncated_at_cap: boolean;
+  /** URLs left in the frontier at exit (0 when complete). */
+  remaining_frontier: number;
 }
 
 /**
@@ -210,26 +223,48 @@ export async function discoverTourismPages(
   startUrls: string | string[],
   opts: ScrapeOptions,
   counter?: ErrorCounter,
+  resume?: DiscoveryCheckpoint | null,
+  deadlineMs?: number,
 ): Promise<DiscoveryResult> {
+  const emptyResult = (seed_count: number): DiscoveryResult => ({
+    pages: [],
+    visited_count: 0,
+    seed_count,
+    checkpoint: { visited: [], frontier: [], pages: [] },
+    complete: true,
+    truncated_at_cap: false,
+    remaining_frontier: 0,
+  });
+
   const seeds = (Array.isArray(startUrls) ? startUrls : [startUrls]).filter(
     (s) => typeof s === "string" && s.length > 0,
   );
   if (seeds.length === 0) {
-    return { pages: [], visited_count: 0, seed_count: 0 };
+    return emptyResult(0);
   }
 
   // visited tracks canonical URLs so that /a/, /a, /a/index.html collapse.
   const visited = new Set<string>();
   // Seed queue with every seed URL + its multilingual landing path probes.
   const queue: { url: string; depth: number }[] = [];
-  for (const seed of seeds) {
-    queue.push({ url: seed, depth: 0 });
-    for (const langSeed of buildLanguageSeeds(seed)) {
-      queue.push({ url: langSeed, depth: 0 });
-    }
-  }
   // pages keyed by canonical URL for cheap dedup.
   const pagesByCanonical = new Map<string, { url: string; title: string }>();
+
+  if (resume) {
+    // Resume from a prior run's checkpoint: restore the visited set, the
+    // remaining frontier, and the pages found so far. Do NOT re-seed from the
+    // start URLs — we are continuing, not restarting.
+    for (const v of resume.visited) visited.add(v);
+    for (const f of resume.frontier) queue.push(f);
+    for (const p of resume.pages) pagesByCanonical.set(canonicalize(p.url), p);
+  } else {
+    for (const seed of seeds) {
+      queue.push({ url: seed, depth: 0 });
+      for (const langSeed of buildLanguageSeeds(seed)) {
+        queue.push({ url: langSeed, depth: 0 });
+      }
+    }
+  }
 
   // Compute "same-domain" guards for each seed so links from one seed can
   // freely walk that seed's site, but won't drift onto an unrelated host.
@@ -247,7 +282,7 @@ export async function discoverTourismPages(
     }
   }
   if (domainsByHost.length === 0) {
-    return { pages: [], visited_count: 0, seed_count: seeds.length };
+    return emptyResult(seeds.length);
   }
 
   function isOnSameSiteAsAnySeed(url: string): boolean {
@@ -271,6 +306,11 @@ export async function discoverTourismPages(
   };
 
   while (queue.length > 0 && pagesByCanonical.size < opts.maxPagesPerMunicipality) {
+    // Window deadline: stop cleanly and hand back a checkpoint so the next run
+    // resumes from the current frontier. Checked before each fetch so we stop
+    // within one page of the deadline (the caller sets it below its hard
+    // step/job timeout, leaving room for the commit + HF-sync tail).
+    if (deadlineMs !== undefined && Date.now() >= deadlineMs) break;
     const { url, depth } = queue.shift()!;
     const preCanonical = canonicalize(url);
     if (visited.has(preCanonical)) continue;
@@ -343,9 +383,22 @@ export async function discoverTourismPages(
     }
   }
 
+  const hitCap = pagesByCanonical.size >= opts.maxPagesPerMunicipality;
+  const frontierEmpty = queue.length === 0;
+  const pages = Array.from(pagesByCanonical.values());
   return {
-    pages: Array.from(pagesByCanonical.values()),
+    pages,
     visited_count: visited.size,
     seed_count: seeds.length,
+    // Frontier drained or cap hit → discovery is done for this municipality;
+    // otherwise (stopped on the window deadline) it resumes next run.
+    complete: frontierEmpty || hitCap,
+    truncated_at_cap: hitCap && !frontierEmpty,
+    remaining_frontier: queue.length,
+    checkpoint: {
+      visited: Array.from(visited),
+      frontier: queue,
+      pages,
+    },
   };
 }
