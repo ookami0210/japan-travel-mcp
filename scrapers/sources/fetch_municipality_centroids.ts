@@ -13,6 +13,7 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isExcludedMunicipality } from "../lib/excluded_municipalities.js";
 
 const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
 const USER_AGENT =
@@ -86,6 +87,7 @@ async function main(): Promise<void> {
           const code = b.code?.value;
           const coordStr = b.coord?.value;
           if (!code || !coordStr) continue;
+          if (isExcludedMunicipality(code)) continue; // out of scope — see excluded_municipalities.ts
           const coord = parseWktPoint(coordStr);
           if (!coord) continue;
           if (!centroids[code]) {

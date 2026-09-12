@@ -41,6 +41,7 @@ import {
   type ScrapeOptions,
   type TouristSpot,
 } from "./lib/types.js";
+import { isExcludedMunicipality } from "./lib/excluded_municipalities.js";
 
 const ROOT = new URL("../", import.meta.url);
 const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
@@ -281,14 +282,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Only consider municipalities that have a resolved official URL. A small,
-  // expected set is permanently excluded because no official municipal website
-  // exists to scrape — currently the six villages in the Nemuro Subprefecture
-  // disputed-islands range (codes 0169xx–0170xx). They are not a coverage gap:
-  // there is no site to fetch, so they are simply never candidates and never
+  // Only consider municipalities that have a resolved official URL, minus the
+  // permanently-excluded set (see excluded_municipalities.ts — the six villages
+  // in the Nemuro Subprefecture disputed-islands range, which have no official
+  // municipal website to scrape). Excluded municipalities are not a coverage
+  // gap: there is nothing to fetch, so they are never candidates and never
   // count against the refresh SLA.
   const candidateCodes = muniFile.municipalities
-    .filter((m) => urlByCode.has(m.code))
+    .filter((m) => urlByCode.has(m.code) && !isExcludedMunicipality(m.code))
     .map((m) => m.code);
 
   // Selection is time-bounded by default: consider every stale candidate,
