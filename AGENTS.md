@@ -202,7 +202,9 @@ that's the LLM client's job, not the server's.
 Three orchestrators you'll touch most often:
 
 - **`daily.ts`** — steady incremental scrape. Picks ~70 oldest-by-`last_scraped_at`
-  municipalities, hits each domain once with a 5 s interval, updates
+  municipalities, seeds each from its official_url plus any discovered
+  tourism-association / portal URLs (`tourism_org_urls.json`, ADR 0001), hits
+  each domain once with a 5 s interval, and updates
   `data/_state/scrape_state.json`. Triggered nightly by `scrape.yml` (legacy,
   active) and slated to migrate to `steady-scrape.yml` once enabled.
 - **`r3_refresh.ts`** — refreshes R-3 sources (MAFF GI, METI, Japan Heritage,
