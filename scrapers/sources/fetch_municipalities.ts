@@ -15,6 +15,7 @@ import * as XLSX from "xlsx";
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isExcludedMunicipality } from "../lib/excluded_municipalities.js";
 
 const SOUMU_URL = "https://www.soumu.go.jp/main_content/000925835.xlsx";
 
@@ -89,6 +90,9 @@ async function main(): Promise<void> {
         }
         continue;
       }
+
+      // Out of scope for the dataset — see excluded_municipalities.ts.
+      if (isExcludedMunicipality(codeRaw)) continue;
 
       municipalities.push({
         code: codeRaw,
