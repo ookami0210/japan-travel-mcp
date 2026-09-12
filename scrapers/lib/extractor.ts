@@ -265,14 +265,36 @@ function parseGeoFromJsonLd(scriptText: string): { lat: number; lng: number } | 
   return null;
 }
 
+/**
+ * Collapse an exact, adjacent duplication of a trailing text block. Some CMS /
+ * SEO-plugin combinations emit the site name twice in <title> (and occasionally
+ * inside an <h1>), e.g. "Page - Site NameSite Name" or "Site NameSite Name".
+ * When a string ends with the same non-trivial block repeated back-to-back, one
+ * copy is dropped. Conservative: it only fires on an exact adjacent repeat of a
+ * reasonably long block (>= 10 trimmed chars), so naturally repeating short
+ * words are never rewritten.
+ */
+export function collapseAdjacentDuplicate(s: string): string {
+  const n = s.length;
+  for (let len = Math.floor(n / 2); len >= 10; len--) {
+    const first = s.slice(n - 2 * len, n - len);
+    const second = s.slice(n - len);
+    if (first === second && first.trim().length >= 10) {
+      return s.slice(0, n - len).replace(/\s+$/, "");
+    }
+  }
+  return s;
+}
+
 export function extract(html: string, baseUrl: string): ExtractedPage {
   const $ = cheerio.load(html);
 
-  const title =
+  const title = collapseAdjacentDuplicate(
     $("title").first().text().trim() ||
-    $("h1").first().text().trim() ||
-    $('meta[property="og:title"]').attr("content")?.trim() ||
-    "";
+      $("h1").first().text().trim() ||
+      $('meta[property="og:title"]').attr("content")?.trim() ||
+      "",
+  );
 
   const description =
     $('meta[name="description"]').attr("content")?.trim() ||
@@ -281,7 +303,7 @@ export function extract(html: string, baseUrl: string): ExtractedPage {
 
   const headings: string[] = [];
   $("h1, h2").each((_, el) => {
-    const t = $(el).text().trim();
+    const t = collapseAdjacentDuplicate($(el).text().trim());
     if (t) headings.push(t);
   });
 

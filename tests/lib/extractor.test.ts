@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extract } from "../../scrapers/lib/extractor.js";
+import { extract, collapseAdjacentDuplicate } from "../../scrapers/lib/extractor.js";
 
 const BASE = "https://example.com/page";
 
@@ -391,5 +391,44 @@ describe("extract — schema_places", () => {
     const r = extract("<html><body><p>nothing</p></body></html>", BASE);
     expect(r.schema_events).toEqual([]);
     expect(r.schema_places).toEqual([]);
+  });
+});
+
+describe("extract() — collapses source-side title duplication", () => {
+  const SITE = "【公式】みなかみ町観光協会 Minakami Japan Tourism";
+
+  it("de-duplicates a <title> that repeats the site name (whole string doubled)", () => {
+    const html = `<html><head><title>${SITE}${SITE}</title></head><body></body></html>`;
+    expect(extract(html, BASE).title).toBe(SITE);
+  });
+
+  it("de-duplicates a doubled trailing site name after a page title", () => {
+    const html = `<html><head><title>モデルコース - ${SITE}${SITE}</title></head><body></body></html>`;
+    expect(extract(html, BASE).title).toBe(`モデルコース - ${SITE}`);
+  });
+});
+
+describe("collapseAdjacentDuplicate()", () => {
+  it("collapses an exact adjacent repeat of a long block", () => {
+    expect(collapseAdjacentDuplicate("Minakami Japan TourismMinakami Japan Tourism")).toBe(
+      "Minakami Japan Tourism",
+    );
+  });
+
+  it("collapses only the doubled trailing block, keeping the prefix", () => {
+    expect(
+      collapseAdjacentDuplicate("Page - Long Site NameLong Site Name"),
+    ).toBe("Page - Long Site Name");
+  });
+
+  it("leaves a string without an adjacent duplicate untouched", () => {
+    expect(collapseAdjacentDuplicate("谷川岳 - Minakami Japan Tourism")).toBe(
+      "谷川岳 - Minakami Japan Tourism",
+    );
+  });
+
+  it("does not rewrite short natural repeats (below the length guard)", () => {
+    expect(collapseAdjacentDuplicate("hahaha")).toBe("hahaha");
+    expect(collapseAdjacentDuplicate("blahblah")).toBe("blahblah"); // 8 chars < 10 guard
   });
 });
