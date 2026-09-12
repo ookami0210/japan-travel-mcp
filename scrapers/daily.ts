@@ -385,11 +385,18 @@ async function main(): Promise<void> {
         else if (r.checkpoint) checkpoints.set(m.code, r.checkpoint);
 
         // Stamp last_scraped_at fresh ONLY on completion. While a crawl is
-        // still in progress leave it null, so the stale picker treats the
-        // municipality as oldest and re-picks it first next window to continue.
+        // still in progress, PRESERVE the prior timestamp (null only if the
+        // municipality was genuinely never scraped). This keeps an overdue,
+        // mid-refresh site honestly counted as over-SLA (and its real age in
+        // max_age) instead of being reclassified as "never scraped" — which
+        // would make the coverage dashboard read as caught-up while big sites
+        // are still crawling. Its old age keeps it near the front of the
+        // stale-first queue, so it is still re-picked to continue.
         const prev = state.per_municipality[m.code];
         state.per_municipality[m.code] = {
-          last_scraped_at: r.complete ? r.finished_at : null,
+          last_scraped_at: r.complete
+            ? r.finished_at
+            : (prev?.last_scraped_at ?? null),
           last_status: r.complete
             ? r.spots.length > 0
               ? r.errors.length === 0
