@@ -45,6 +45,7 @@ import {
 const ROOT = new URL("../", import.meta.url);
 const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
 const URLS_PATH = new URL("data/_state/official_urls.json", ROOT);
+const TOURISM_ORGS_PATH = new URL("data/_state/tourism_org_urls.json", ROOT);
 const CENTROIDS_PATH = new URL(
   "data/_state/municipality_centroids.json",
   ROOT,
@@ -237,6 +238,37 @@ async function main(): Promise<void> {
     if (e.official_url) urlByCode.set(e.code, e.official_url);
   }
 
+  // Multi-source seeds (ADR 0001): the discovered tourism-association / portal
+  // URLs for each municipality. A city-hall official_url alone often yields no
+  // crawlable tourism pages (administrative sites), while the association site
+  // is where the tourism content actually lives. The burst orchestrator already
+  // feeds both; the daily steady scrape did not, so those discovered URLs never
+  // entered the 30-day cycle. Feed them here too. tourism_org_urls.json is
+  // committed to git, so it is always in the checkout (no HF prefetch needed).
+  const orgByCode = new Map<string, string[]>();
+  try {
+    const orgsFile = JSON.parse(
+      await readFile(fileURLToPath(TOURISM_ORGS_PATH), "utf8"),
+    ) as {
+      entries: {
+        code: string;
+        primary?: string | null;
+        candidates?: { url: string; confidence: string }[];
+      }[];
+    };
+    for (const e of orgsFile.entries ?? []) {
+      const urls: string[] = [];
+      if (e.primary) urls.push(e.primary);
+      // Also include high-confidence candidates that aren't the primary.
+      for (const c of e.candidates ?? []) {
+        if (c.confidence === "high" && !urls.includes(c.url)) urls.push(c.url);
+      }
+      if (urls.length > 0) orgByCode.set(e.code, urls);
+    }
+  } catch {
+    /* missing/invalid tourism_org_urls.json → crawl falls back to official_url only */
+  }
+
   const state = await loadState();
   // Per-municipality resume state for crawls still in progress from earlier
   // windows (prefetched from HF with the other _state files).
@@ -369,6 +401,7 @@ async function main(): Promise<void> {
             prefecture_code: m.prefecture_code,
             prefecture_name: m.prefecture_name,
             official_url: urlByCode.get(m.code) ?? null,
+            tourism_org_urls: orgByCode.get(m.code) ?? [],
           },
           opts,
           counter,
