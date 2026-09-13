@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "_comment": "Manual/researched tourism-association seed URLs per municipality code, merged into the daily crawl seeds (scrapers/daily.ts) on top of tourism_org_urls.json. Committed to git so it survives HF regeneration of tourism_org_urls.json. Fills municipalities that automated discover:tourism_orgs missed — their tourism content lives on an official association / DMO / municipal-tourism site that the city-hall page does not link to. Official/public sources only (観光協会 / DMO / city-authorized tourism portals); no OTAs, blogs, or UGC. 'note' flags borderline judgment calls for reviewers.",
+  "last_updated": "2026-09-13",
+  "overrides": {
+    "012203": { "name": "士別市", "urls": ["https://shibetsu-kanko.com/"] },
+    "015181": { "name": "利尻町", "urls": ["https://www.rishiri-plus.jp/"], "note": "island portal run jointly by 利尻町観光協会 and 利尻富士町観光協会" },
+    "016641": { "name": "標茶町", "urls": ["https://shibecha-kanko.com/"] },
+    "052060": { "name": "男鹿市", "urls": ["https://oganavi.com/"], "note": "男鹿市公認観光情報サイト, operated by a city-authorized private operator" },
+    "052094": { "name": "鹿角市", "urls": ["https://explorekazuno.jp/"], "note": "地域DMO かづの観光物産公社" },
+    "082104": { "name": "下妻市", "urls": ["https://www.shimotsuma-kankou.jp/"] },
+    "112437": { "name": "吉川市", "urls": ["http://yoshikawa-kankoukyoukai.com/"] },
+    "131016": { "name": "千代田区", "urls": ["https://visit-chiyoda.tokyo/"] },
+    "131156": { "name": "杉並区", "urls": ["https://www.suginamigaku.org/"], "note": "ward tourism-division site (dedicated domain)" },
+    "132071": { "name": "昭島市", "urls": ["https://akishima-kanko.org/"] },
+    "203238": { "name": "御代田町", "urls": ["https://www.miyota.gr.jp/"] },
+    "222054": { "name": "熱海市", "urls": ["https://www.ataminews.gr.jp/"] },
+    "272141": { "name": "富田林市", "urls": ["https://tondabayashi-navi.com/"] },
+    "282065": { "name": "芦屋市", "urls": ["https://ashiya-ata.org/"] },
+    "283657": { "name": "多可町", "urls": ["https://kanko.takacho.net/"] },
+    "285013": { "name": "佐用町", "urls": ["http://34cho.com/"] },
+    "303437": { "name": "九度山町", "urls": ["https://www.kudoyama-kanko.jp/"] },
+    "343692": { "name": "北広島町", "urls": ["https://kitahiro.jp/"] },
+    "422045": { "name": "諫早市", "urls": ["https://www.isahaya-kankou.com/"] }
+  }
+}

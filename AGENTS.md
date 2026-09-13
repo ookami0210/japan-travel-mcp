@@ -239,6 +239,7 @@ data/_state/
   scrape_state.json                # Steady-scrape SLA tracker (last_scraped_at, errors)
   prefecture_tourism_orgs.json     # Per-prefecture portal seed list
   tourism_org_urls.json            # Resolved multi-source URLs per muni (ADR 0001 A)
+  tourism_org_overrides.json       # Manual/researched tourism-org seeds (fills discovery gaps; merged by daily.ts)
   dmo_website_overrides.json       # Manual DMO URL corrections
   translation_batch.json           # Anthropic batch IDs (transient)
   r3_translation_batch.json        # Same, for R-3 sources
