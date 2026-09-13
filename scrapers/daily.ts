@@ -47,6 +47,10 @@ const ROOT = new URL("../", import.meta.url);
 const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
 const URLS_PATH = new URL("data/_state/official_urls.json", ROOT);
 const TOURISM_ORGS_PATH = new URL("data/_state/tourism_org_urls.json", ROOT);
+const TOURISM_ORG_OVERRIDES_PATH = new URL(
+  "data/_state/tourism_org_overrides.json",
+  ROOT,
+);
 const CENTROIDS_PATH = new URL(
   "data/_state/municipality_centroids.json",
   ROOT,
@@ -268,6 +272,29 @@ async function main(): Promise<void> {
     }
   } catch {
     /* missing/invalid tourism_org_urls.json → crawl falls back to official_url only */
+  }
+
+  // Manual / researched tourism-org seed overrides, committed to git so they
+  // survive HF regeneration of tourism_org_urls.json. This is where we fill
+  // municipalities that automated discovery missed — typically towns whose
+  // tourism content lives on an association site the city-hall page does not
+  // link to (so discovery found no outbound signal). Overrides are unioned on
+  // top of any discovered seeds for the same municipality.
+  try {
+    const ovFile = JSON.parse(
+      await readFile(fileURLToPath(TOURISM_ORG_OVERRIDES_PATH), "utf8"),
+    ) as { overrides?: Record<string, { urls?: string[] }> };
+    for (const [code, entry] of Object.entries(ovFile.overrides ?? {})) {
+      const urls = (entry.urls ?? []).filter(
+        (u): u is string => typeof u === "string" && u.length > 0,
+      );
+      if (urls.length === 0) continue;
+      const merged = [...(orgByCode.get(code) ?? [])];
+      for (const u of urls) if (!merged.includes(u)) merged.push(u);
+      orgByCode.set(code, merged);
+    }
+  } catch {
+    /* no tourism_org_overrides.json → discovered seeds only */
   }
 
   const state = await loadState();
