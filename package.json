@@ -49,7 +49,8 @@
     "quality:ryokan_coverage": "tsx scrapers/quality/ryokan_coverage_report.ts",
     "fetch:mhlw_ryokan_baseline": "tsx scrapers/sources/fetch_mhlw_ryokan_baseline.ts",
     "fetch:ryokan_facilities": "tsx scrapers/sources/fetch_ryokan_facilities.ts",
-    "quality:unresolved": "tsx scrapers/quality/ingest_unresolved.ts"
+    "quality:unresolved": "tsx scrapers/quality/ingest_unresolved.ts",
+    "quality:campground_status": "tsx scrapers/quality/campground_site_status.ts"
   },
   "keywords": [
     "mcp",
