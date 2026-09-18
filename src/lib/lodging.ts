@@ -2,13 +2,15 @@
  * Lodging-type classifier.
  *
  * The OSM `tourism=*` tags in source data only give us
- * `hotel/motel/guesthouse/hostel/apartment`, but Japanese travellers (and
- * the agents querying this server) expect ryokan / onsen ryokan / shukubo /
- * kominka as first-class distinctions. Tag entries by JA/EN name keywords
- * so the `hotel_type` filter works without a re-scrape.
+ * `hotel/motel/guesthouse/hostel/apartment/camp_site`, but Japanese
+ * travellers (and the agents querying this server) expect ryokan / onsen
+ * ryokan / shukubo / kominka / campground as first-class distinctions. Tag
+ * entries by JA/EN name keywords so the `hotel_type` filter works without a
+ * re-scrape.
  */
 
 export type LodgingType =
+  | "campground"
   | "ryokan"
   | "onsen_ryokan"
   | "shukubo"
@@ -38,7 +40,22 @@ export interface LodgingInput {
  */
 export function classifyLodging(h: LodgingInput): LodgingType {
   const name = (h.name ?? "") + " " + (h.name_en ?? "").toLowerCase();
+  const tag = h.type ?? "";
   // Order matters — most specific first.
+  // Camping first: a name can carry both 温泉 and キャンプ場, and the pitch is
+  // what the guest books.
+  if (tag === "camp_site" || tag === "caravan_site") return "campground";
+  if (
+    name.includes("キャンプ場") ||
+    name.includes("オートキャンプ") ||
+    name.includes("野営場") ||
+    name.toLowerCase().includes("campground") ||
+    name.toLowerCase().includes("campsite") ||
+    name.toLowerCase().includes("camping ground") ||
+    name.toLowerCase().includes("auto camp")
+  ) {
+    return "campground";
+  }
   if (name.includes("宿坊") || name.toLowerCase().includes("shukubo") ||
       name.toLowerCase().includes("temple lodging")) return "shukubo";
   if (name.includes("古民家") || name.toLowerCase().includes("kominka") ||
