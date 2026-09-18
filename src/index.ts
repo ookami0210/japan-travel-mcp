@@ -5866,6 +5866,7 @@ async function getHotels(args: {
   //   "traditional"  → ryokan | onsen_ryokan | shukubo | kominka | minshuku
   //   "onsen"        → onsen_ryokan
   //   "budget"       → hostel | guest_house | apartment
+  //   "camping"      → campground
   let lodgingFilter: Set<LodgingType> | null = null;
   const requested = args.hotel_type?.trim().toLowerCase();
   if (requested) {
@@ -5875,6 +5876,8 @@ async function getHotels(args: {
       lodgingFilter = new Set(["onsen_ryokan"]);
     } else if (requested === "budget") {
       lodgingFilter = new Set(["hostel","guest_house","apartment"]);
+    } else if (requested === "camping" || requested === "camp") {
+      lodgingFilter = new Set(["campground"]);
     } else {
       lodgingFilter = new Set([requested as LodgingType]);
     }
@@ -6678,7 +6681,7 @@ async function getHotels(args: {
     r3_official_count: r3Lodgings.length,
     hotel_type_filter: requested ?? null,
     lodging_types_note:
-      "lodging_type values: ryokan, onsen_ryokan (incl. 日本秘湯を守る会 official hisoyu), shukubo (temple lodging, incl. 高野山宿坊協会 members), kominka (traditional house), minshuku, hostel, guest_house, apartment, motel, hotel. Group aliases for hotel_type arg: 'traditional', 'onsen', 'budget'.",
+      "lodging_type values: ryokan, onsen_ryokan (incl. 日本秘湯を守る会 official hisoyu), shukubo (temple lodging, incl. 高野山宿坊協会 members), kominka (traditional house), minshuku, hostel, guest_house, apartment, motel, hotel, campground (incl. auto-camp / caravan sites). Group aliases for hotel_type arg: 'traditional', 'onsen', 'budget', 'camping'.",
     note: "Information only — does NOT include availability or pricing. For bookings, visit the hotel's official website. Records prefixed with 'koyasan_shukubo:' / 'hito_yu_kai:' are sourced from official-org membership lists with designation_jp/en attribution.",
     data_as_of: file.generated_at,
     disclaimer: DISCLAIMER,
@@ -12643,7 +12646,7 @@ const TOOLS = [
   {
     name: "get_hotels",
     description:
-      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget').\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
+      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
     inputSchema: {
       type: "object",
       properties: {
@@ -12664,7 +12667,7 @@ const TOOLS = [
         hotel_type: {
           type: "string",
           description:
-            "Lodging-type filter. Specific values: ryokan, onsen_ryokan, shukubo, kominka, minshuku, hostel, guest_house, apartment, motel, hotel. Group aliases: 'traditional' (ryokan|onsen_ryokan|shukubo|kominka|minshuku), 'onsen' (onsen_ryokan), 'budget' (hostel|guest_house|apartment).",
+            "Lodging-type filter. Specific values: ryokan, onsen_ryokan, shukubo, kominka, minshuku, hostel, guest_house, apartment, motel, hotel, campground. Group aliases: 'traditional' (ryokan|onsen_ryokan|shukubo|kominka|minshuku), 'onsen' (onsen_ryokan), 'budget' (hostel|guest_house|apartment), 'camping' (campground).",
         },
         limit: {
           type: "number",

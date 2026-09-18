@@ -32,6 +32,7 @@ const HOTEL_TYPES = [
   "Q3411712", // capsule hotel
   "Q2607215", // boutique hotel
   "Q1639378", // hostel
+  "Q832778", // campsite
 ];
 
 interface SparqlValue {

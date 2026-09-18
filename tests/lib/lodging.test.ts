@@ -27,6 +27,9 @@ describe("classifyLodging — JA-name match", () => {
     ["ryokan only", "○○旅館", "ryokan"],
     ["minshuku", "○○民宿", "minshuku"],
     ["onsen alone → onsen_ryokan", "○○温泉ホテル", "onsen_ryokan"],
+    ["campground (キャンプ場)", "○○キャンプ場", "campground"],
+    ["auto camp (オートキャンプ)", "○○オートキャンプ場", "campground"],
+    ["yaeijo (野営場)", "○○野営場", "campground"],
   ])("classifies %s", (_label, name, expected) => {
     expect(classifyLodging(input({ name }))).toBe(expected);
   });
@@ -42,6 +45,9 @@ describe("classifyLodging — EN-name match (case-insensitive)", () => {
     ["Famous Ryokan", "ryokan"],
     ["Family Minshuku", "minshuku"],
     ["Onsen Resort", "onsen_ryokan"],
+    ["Lakeside Campground", "campground"],
+    ["Highland Campsite", "campground"],
+    ["Auto Camp Fuji", "campground"],
   ])("'%s' → %s", (name_en, expected) => {
     expect(classifyLodging(input({ name_en }))).toBe(expected);
   });
@@ -83,6 +89,23 @@ describe("classifyLodging — specificity order", () => {
     expect(
       classifyLodging(input({ name: "○○温泉旅館" })),
     ).toBe("onsen_ryokan");
+  });
+});
+
+describe("classifyLodging — camping", () => {
+  it.each<[type: string]>([["camp_site"], ["caravan_site"]])(
+    "OSM type '%s' is a campground even without a telling name",
+    (type) => {
+      expect(classifyLodging(input({ type, name: "○○パーク" }))).toBe("campground");
+    },
+  );
+
+  it("campground wins over onsen when a hot-spring campground carries both", () => {
+    expect(classifyLodging(input({ name: "○○温泉キャンプ場" }))).toBe("campground");
+  });
+
+  it("a cabin-only name is not forced into camping", () => {
+    expect(classifyLodging(input({ name: "○○コテージ" }))).toBe("hotel");
   });
 });
 
