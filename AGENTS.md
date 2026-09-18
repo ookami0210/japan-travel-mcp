@@ -143,6 +143,9 @@ npm run translate:r3           # Translate freshly-fetched R-3 records into 18 l
 # Build derived artefacts
 npm run embed:build            # Rebuild data/embeddings/spots.{f16.bin,index.json}
 npm run quality:report         # Coverage gap dashboard + per-spot quality scores
+npm run quality:campground_status  # Read each campground's official page once and
+                                   #   label it active / closed_suspected / url_dead /
+                                   #   ota_listing / no_official_site (--limit N)
 ```
 
 Smoke scripts (run directly with `tsx`, not via npm script): `scripts/smoke_intent.ts`,
