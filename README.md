@@ -143,7 +143,7 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 | `search_semantic` | Vector search over the `multilingual-e5` embedding index — semantic similarity, language-agnostic |
 | `search_hybrid` | BM25 lexical + vector + RRF fusion — the preferred general-purpose retriever |
 | `get_spots` | Tourist spots by prefecture or municipality (combines municipal scrape + Wikidata). `spots` is ordered tier-major: every `must_see` precedes every `notable`, which precedes every `broader` (score-descending within tier) — naive clients can render the array as-is |
-| `get_hotels` | About 20,000 accommodations (Wikidata + OpenStreetMap merged) — filter by area or lat/lng/radius |
+| `get_hotels` | About 20,000 accommodations, hotels through campgrounds (Wikidata + OpenStreetMap merged) — filter by area, lat/lng/radius, or lodging type |
 | `get_transport` | Spot coordinates, prefecture, municipality, and the official URL where access is documented |
 | `get_events` | Festivals registered in Wikidata for a given prefecture, with optional month filter (live SPARQL, in-memory cache) |
 | `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |
@@ -226,7 +226,7 @@ Wikidata + OpenStreetMap → entity matching → master.json
 
 **Sources used:**
 - **Wikidata** — accommodation entities tagged in Japan (CC0). Multilingual labels.
-- **OpenStreetMap** — `tourism=hotel|hostel|guest_house|motel` and `tourism=apartment` nodes/ways inside Japan (ODbL). OSM-derived fields in each record carry the ODbL license; the project-created compilation around them is CC BY 4.0.
+- **OpenStreetMap** — `tourism=hotel|hostel|guest_house|motel|apartment`, the seasonal layer (`chalet|alpine_hut|wilderness_hut`) and campgrounds (`camp_site|caravan_site`) as nodes/ways inside Japan (ODbL). OSM-derived fields in each record carry the ODbL license; the project-created compilation around them is CC BY 4.0.
 
 **Matching logic:**
 Two records are considered the same property if they fall within 100 meters of each other

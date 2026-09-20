@@ -3,7 +3,8 @@
  *
  * Endpoint: https://overpass-api.de/api/interpreter
  *
- * Query: every node/way in Japan tagged tourism=hotel|hostel|guest_house|motel|apartment.
+ * Query: every node/way in Japan tagged with one of the accommodation
+ * values of tourism=* (see TOURISM_TAGS).
  *
  * Output: data/hotels/raw/osm.json
  *
@@ -24,6 +25,10 @@ const USER_AGENT =
 // cottages, mountain huts) — often winter-only or summer-only operations
 // that no OTA-shaped source enumerates; seasonality is a feature to keep,
 // not noise to filter.
+// camp_site / caravan_site are the camping layer: in Japan these are staffed
+// businesses with pitches, cabins and opening seasons, and outside the big
+// cities they are often the only place to stay for miles — the same reason
+// the mountain huts are here.
 const TOURISM_TAGS = [
   "hotel",
   "hostel",
@@ -33,6 +38,8 @@ const TOURISM_TAGS = [
   "chalet",
   "alpine_hut",
   "wilderness_hut",
+  "camp_site",
+  "caravan_site",
 ];
 
 // Japan bounding box (covers main islands, Okinawa, Ogasawara). Includes
