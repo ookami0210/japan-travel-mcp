@@ -103,7 +103,7 @@ jobs:
             "15 18 * * *") conc=16; mins=210 ;;  # 03:15 JST — night B
             "30 22 * * *") conc=8;  mins=165 ;;  # 07:30 JST — day A
             "0 10 * * *")  conc=8;  mins=225 ;;  # 19:00 JST — day B
-            *)             conc=8;  mins=300 ;;  # manual dispatch default
+            *)             conc=8;  mins=200 ;;  # manual dispatch default (must stay < the 260-min step cap so the scrape + tail finish; a manual `minutes` input can still override)
           esac
           [ -n "$IN_CONC" ] && conc="$IN_CONC"
           [ -n "$IN_MINS" ] && mins="$IN_MINS"
