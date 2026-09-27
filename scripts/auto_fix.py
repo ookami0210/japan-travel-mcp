@@ -31,7 +31,8 @@ Behaviour:
        tier 3: Slack notify with diagnosis, no code change.
 
 Hard guards:
-  - Whitelist of editable paths (mainly .github/workflows/ + scrapers/).
+  - Whitelist of editable paths (scrapers/ + scripts/ + src/). Workflow files
+    are NOT editable — those fixes are diagnosed to Slack for a human.
   - Blacklist of read-only files (data policy, voice policy, hooks).
   - Diff line cap: 50 added + 50 removed total.
   - Max 1 file per fix.
@@ -74,9 +75,15 @@ FORBIDDEN_PATHS = {
 }
 
 # Paths the orchestrator may write to. Anything outside this allowlist
-# is downgraded to tier 3.
+# is downgraded to tier 3 (Slack diagnosis only).
+#
+# .github/workflows/ is deliberately NOT here: the bot's GitHub App token
+# lacks the `workflows` permission, so any push that touches a workflow file
+# is rejected by GitHub (the push fails and the whole run errors). Autonomous
+# edits to CI workflows on main are also a risk we do not want a bot to take
+# unattended. Workflow-file fixes are therefore downgraded to tier 3 — the bot
+# diagnoses the issue and posts it to Slack for a human to apply and review.
 EDITABLE_PREFIXES = (
-    ".github/workflows/",
     "scrapers/",
     "scripts/",
     "src/",
