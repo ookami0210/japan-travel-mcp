@@ -42,6 +42,7 @@ import {
   type TouristSpot,
 } from "./lib/types.js";
 import { isExcludedMunicipality } from "./lib/excluded_municipalities.js";
+import { shouldDropSeed } from "./lib/seed_filter.js";
 
 const ROOT = new URL("../", import.meta.url);
 const MUNI_PATH = new URL("data/_state/municipalities.json", ROOT);
@@ -66,25 +67,36 @@ const CHECKPOINTS_PATH = new URL(
   ROOT,
 );
 
-/** Load the per-municipality resume checkpoints (missing/corrupt → empty). */
+// Bump to force a one-time reset of ALL resume checkpoints. A checkpoint file
+// whose epoch does not match is discarded on load (treated as empty), so stale
+// or contaminated frontiers do not survive a crawl-logic change. Epoch 2 clears
+// the pre-seed-filter checkpoints, whose frontiers had accumulated shared
+// prefecture-portal URLs and bloated to ~59 MB.
+const CHECKPOINT_EPOCH = 2;
+
+/** Load the per-municipality resume checkpoints (missing/corrupt/stale epoch → empty). */
 async function loadCheckpoints(): Promise<Map<string, MunicipalityCheckpoint>> {
   try {
     const raw = JSON.parse(
       await readFile(fileURLToPath(CHECKPOINTS_PATH), "utf8"),
-    ) as Record<string, MunicipalityCheckpoint>;
-    return new Map(Object.entries(raw));
+    ) as { epoch?: number; checkpoints?: Record<string, MunicipalityCheckpoint> };
+    if (raw.epoch !== CHECKPOINT_EPOCH || !raw.checkpoints) return new Map();
+    return new Map(Object.entries(raw.checkpoints));
   } catch {
     return new Map();
   }
 }
 
-/** Persist the resume checkpoints (atomic write). */
+/** Persist the resume checkpoints (atomic write, stamped with the current epoch). */
 async function saveCheckpoints(
   checkpoints: Map<string, MunicipalityCheckpoint>,
 ): Promise<void> {
   const path = fileURLToPath(CHECKPOINTS_PATH);
   await mkdir(dirname(path), { recursive: true });
-  const obj = Object.fromEntries(checkpoints.entries());
+  const obj = {
+    epoch: CHECKPOINT_EPOCH,
+    checkpoints: Object.fromEntries(checkpoints.entries()),
+  };
   const tmp = `${path}.tmp`;
   await writeFile(tmp, JSON.stringify(obj), "utf8");
   await rename(tmp, path);
@@ -258,15 +270,27 @@ async function main(): Promise<void> {
       entries: {
         code: string;
         primary?: string | null;
-        candidates?: { url: string; confidence: string }[];
+        primary_source?: string;
+        candidates?: { url: string; confidence: string; source?: string }[];
       }[];
     };
     for (const e of orgsFile.entries ?? []) {
       const urls: string[] = [];
-      if (e.primary) urls.push(e.primary);
+      // Skip shared prefecture-wide portals and framework/CDN garbage — they
+      // yield no municipality-specific spots and derail the crawl with an
+      // unbounded frontier (see seed_filter.ts).
+      if (e.primary && !shouldDropSeed(e.primary, e.primary_source)) {
+        urls.push(e.primary);
+      }
       // Also include high-confidence candidates that aren't the primary.
       for (const c of e.candidates ?? []) {
-        if (c.confidence === "high" && !urls.includes(c.url)) urls.push(c.url);
+        if (
+          c.confidence === "high" &&
+          !shouldDropSeed(c.url, c.source) &&
+          !urls.includes(c.url)
+        ) {
+          urls.push(c.url);
+        }
       }
       if (urls.length > 0) orgByCode.set(e.code, urls);
     }
