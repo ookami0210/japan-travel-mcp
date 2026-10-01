@@ -173,11 +173,17 @@ jobs:
             echo "No state changes to commit"
           else
             git commit -m "data: steady scrape state $(date -u +%Y-%m-%d)"
-            # Other workflows (and maintainers) push to main too. Rebase onto
-            # the latest main and retry so a concurrent push doesn't fail the run.
+            # Other workflows (and maintainers) push to main too, so integrate
+            # the latest main before pushing. scrape_state.json / logs are
+            # auto-generated operational snapshots: on the rare concurrent-commit
+            # conflict, keep THIS run's freshly-computed version (`-X ours`)
+            # instead of wedging on an unresolvable merge, which previously left
+            # a stuck rebase and failed every retry. `git merge --abort` clears
+            # any half-done merge from a prior attempt before retrying.
             pushed=""
             for attempt in 1 2 3; do
-              if git pull --rebase origin main && git push; then
+              git merge --abort 2>/dev/null || true
+              if git pull --no-rebase -X ours origin main && git push; then
                 pushed="yes"; break
               fi
               echo "push attempt $attempt failed — retrying in 5s"
