@@ -195,6 +195,22 @@ describe("buildServer() — MCP integration smoke", () => {
     }
   });
 
+  it("get_spots excludes event records and get_festivals retains them", async () => {
+    const spotsJson = await callToolOk("get_spots", { prefecture: "tottori" });
+    const spots = spotsJson.spots as Array<Record<string, unknown>>;
+    expect(spots.map((spot) => spot.id)).not.toContain("31201-schema-event");
+    expect(spots.map((spot) => spot.id)).not.toContain("31201-event-page");
+
+    const festivalsJson = await callToolOk("get_festivals", { prefecture: "tottori" });
+    const festivals = festivalsJson.items as Array<Record<string, unknown>>;
+    expect(festivals).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "鳥取秋まつり" }),
+        expect.objectContaining({ name: "鳥取夏まつり" }),
+      ]),
+    );
+  });
+
   it("get_hotels accepts the prefecture filter against an empty master", async () => {
     const json = await callToolOk("get_hotels", { prefecture: "tottori" });
     expect(

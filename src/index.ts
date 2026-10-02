@@ -85,6 +85,7 @@ import { haversineMeters, haversineKm, parseWktPoint } from "./lib/geo.js";
 import {
   PREF_NAME_TO_CODE,
   PREF_CODE_TO_NAME,
+  canonicalPrefectureCode,
   inferPrefCode,
   applyWikidataPrefCorrections,
 } from "./lib/prefecture.js";
@@ -99,6 +100,10 @@ import {
 } from "./lib/text_filters.js";
 import { scoreSpotQuality } from "./lib/spot_quality.js";
 import { dataAsOf } from "./lib/dataset.js";
+import {
+  hasStructuredEvent,
+  isEventPageRecord,
+} from "./lib/event_page.js";
 
 const DISCLAIMER =
   "Data sourced from public websites (municipal tourism pages) and Wikidata (CC0). Verify directly with the property before making decisions.";
@@ -125,6 +130,8 @@ interface ScrapedSpot {
   /** Image URLs from the source page. Compacted to the first entry at load
    *  time (presence feeds the quality score; responses never include them). */
   images?: string[];
+  /** Schema.org Event objects extracted from the page, when present. */
+  schema_events?: unknown[];
 }
 
 interface MunicipalityBlock {
@@ -607,6 +614,11 @@ interface R3TranslationRecord {
 }
 
 let cachedData: PrefectureFile[] | null = null;
+const cachedPrefecturesByCode = new Map<string, PrefectureFile>();
+let cachedWikidataAttractionsMaster:
+  | { attractions: WikidataAttraction[] }
+  | null
+  | undefined;
 let cachedHotels: HotelsFile | null = null;
 let cachedWdQidTypes: Map<string, string[]> | null = null;
 // Iter 54: qid → heritage_designations cache. Used by the
@@ -685,6 +697,13 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   const files = (await readdir(dir)).filter((f) => f.endsWith(".json"));
   const out: PrefectureFile[] = [];
   for (const f of files) {
+    const slug = f.slice(0, -".json".length);
+    const slugIndex = PREFECTURE_SLUGS.indexOf(slug);
+    const code = slugIndex >= 0 ? String(slugIndex + 1).padStart(2, "0") : null;
+    if (code && cachedPrefecturesByCode.has(code)) {
+      out.push(cachedPrefecturesByCode.get(code)!);
+      continue;
+    }
     try {
       const content = await readFile(resolve(dir, f), "utf8");
       const parsed = JSON.parse(content) as PrefectureFile;
@@ -693,6 +712,9 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
       // must fit the heap alongside every other dataset. See compact_data.ts.
       compactPrefectureFile(parsed);
       out.push(parsed);
+      if (parsed.prefecture?.code) {
+        cachedPrefecturesByCode.set(parsed.prefecture.code, parsed);
+      }
     } catch {
       // skip malformed
     }
@@ -736,18 +758,59 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   return out;
 }
 
+async function loadPrefecturesByCodes(codes: readonly string[]): Promise<PrefectureFile[]> {
+  if (cachedData) {
+    const wanted = new Set(codes);
+    return cachedData.filter((prefecture) => wanted.has(prefecture.prefecture.code));
+  }
+
+  const out: PrefectureFile[] = [];
+  for (const code of codes) {
+    const cached = cachedPrefecturesByCode.get(code);
+    if (cached) {
+      out.push(cached);
+      continue;
+    }
+    const index = Number.parseInt(code, 10) - 1;
+    const slug = PREFECTURE_SLUGS[index];
+    if (!slug) continue;
+    try {
+      const content = await readFile(resolve(findDataDir(), `${slug}.json`), "utf8");
+      const parsed = JSON.parse(content) as PrefectureFile;
+      compactPrefectureFile(parsed);
+      await supplementWikidataAttractions([parsed]);
+      applyWikidataPrefCorrections([parsed]);
+      cachedPrefecturesByCode.set(parsed.prefecture.code, parsed);
+      out.push(parsed);
+    } catch {
+      // Skip missing or malformed prefecture files, matching full-corpus loading.
+    }
+  }
+  return out;
+}
+
 // applyWikidataPrefCorrections → ./lib/prefecture.js.
 
 async function supplementWikidataAttractions(
   prefs: PrefectureFile[],
 ): Promise<void> {
-  const masterPath = findWikidataAttractionsMasterPath();
-  if (!existsSync(masterPath)) return;
-  let master: { attractions: WikidataAttraction[] };
-  try {
-    const content = await readFile(masterPath, "utf8");
-    master = JSON.parse(content) as { attractions: WikidataAttraction[] };
-  } catch {
+  if (cachedWikidataAttractionsMaster === undefined) {
+    const masterPath = findWikidataAttractionsMasterPath();
+    if (!existsSync(masterPath)) {
+      cachedWikidataAttractionsMaster = null;
+    } else {
+      try {
+        const content = await readFile(masterPath, "utf8");
+        cachedWikidataAttractionsMaster = JSON.parse(content) as {
+          attractions: WikidataAttraction[];
+        };
+      } catch {
+        cachedWikidataAttractionsMaster = null;
+      }
+    }
+  }
+  const master = cachedWikidataAttractionsMaster;
+  if (!master) {
     return;
   }
   const byPref = new Map<string, WikidataAttraction[]>();
@@ -3327,7 +3390,6 @@ async function getSpots(args: {
     };
   }
 
-  const prefs = await loadAllPrefectures();
   const limit = Math.min(Math.max(args.limit ?? 50, 1), 500);
   const minQualityRequested =
     typeof args.min_quality === "number"
@@ -3340,8 +3402,10 @@ async function getSpots(args: {
   // is "Kansai" / 東北 / 九州 etc., expand to the constituent prefecture
   // codes and accept any match. Single-pref behavior is unchanged.
   let regionPrefSet: Set<string> | null = null;
+  let requestedPrefCodes: string[] | null = null;
   if (args.prefecture) {
     const codes = await resolvePrefectureCodes(args.prefecture);
+    requestedPrefCodes = codes;
     if (codes && codes.length > 1) regionPrefSet = new Set(codes);
   }
   // iter148: city-as-prefecture fallback. R420-077 ('Nikko' as prefecture)
@@ -3434,11 +3498,15 @@ async function getSpots(args: {
         cityFromFallback = lookup.cityJa;
         // Re-resolve region set with the new prefecture.
         const codes2 = await resolvePrefectureCodes(lookup.prefSlug);
+        requestedPrefCodes = codes2;
         if (codes2 && codes2.length > 1) regionPrefSet = new Set(codes2);
         else regionPrefSet = null;
       }
     }
   }
+  const prefs = requestedPrefCodes && requestedPrefCodes.length > 0
+    ? await loadPrefecturesByCodes(requestedPrefCodes)
+    : (args.prefecture ? [] : await loadAllPrefectures());
   const matchesPrefecture = (p: PrefectureFile): boolean => {
     if (!args.prefecture) return true;
     if (regionPrefSet) return regionPrefSet.has(p.prefecture.code);
@@ -3568,6 +3636,10 @@ async function getSpots(args: {
     for (const m of p.municipalities) {
       if (!matchesMunicipality(m.municipality.name, cityRaw)) continue;
       for (const s of m.spots) {
+        // Event records belong to get_festivals, not the place catalog.
+        // Prefer structured Schema.org evidence and fall back to an explicit
+        // event path on either the canonical or source URL.
+        if (isEventPageRecord(s)) continue;
         // Iter 13: drop nav-chrome scraped names that
         // leak into get_spots responses (ホーム / 観光案内 / お知らせ等).
         // The filter is the same one search_area uses; without it, the
@@ -7367,15 +7439,7 @@ LIMIT 200
 }
 
 async function resolvePrefectureCode(input: string): Promise<string | null> {
-  const q = input.trim().toLowerCase();
-  if (/^\d{1,2}$/.test(q)) return q.padStart(2, "0");
-  const prefs = await loadAllPrefectures();
-  const match = prefs.find(
-    (p) =>
-      p.prefecture.name.toLowerCase() === q ||
-      p.prefecture.name_en?.toLowerCase() === q,
-  );
-  return match?.prefecture.code ?? null;
+  return canonicalPrefectureCode(input);
 }
 
 // Region (regional) name → prefecture-code list. Iter 15:
@@ -12066,6 +12130,29 @@ async function getFestivals(args: {
               municipality: m.municipality.name,
               prefecture: p.prefecture.name,
               source_url: (e.url as string | null) ?? s.url,
+            },
+          });
+        }
+        // Some official event pages omit Schema.org Event JSON-LD. Preserve
+        // those records in the event API using the page-level evidence, while
+        // avoiding a duplicate when structured events already exist.
+        if (!hasStructuredEvent(s) && isEventPageRecord(s)) {
+          if (!keywordRe(s.name, s.description)) continue;
+          scored.push({
+            rel: relScore(s.name, null, s.description, null, 0),
+            item: {
+              source: "scraped_event_page",
+              name_ja: s.name,
+              name: s.name,
+              description_ja: s.description,
+              description: s.description,
+              event_type: null,
+              start_date: null,
+              end_date: null,
+              location: m.municipality.name,
+              municipality: m.municipality.name,
+              prefecture: p.prefecture.name,
+              source_url: s.url || s.source_url,
             },
           });
         }

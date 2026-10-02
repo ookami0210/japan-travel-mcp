@@ -3,6 +3,7 @@ import {
   PREF_NAME_TO_CODE,
   PREF_CODE_TO_NAME,
   WIKIDATA_PREF_CORRECTIONS,
+  canonicalPrefectureCode,
   inferPrefCode,
   applyWikidataPrefCorrections,
   type CorrectablePrefectureFile,
@@ -44,6 +45,16 @@ describe("PREF_CODE_TO_NAME", () => {
 
   it("has 47 entries", () => {
     expect(Object.keys(PREF_CODE_TO_NAME)).toHaveLength(47);
+  });
+});
+
+describe("canonicalPrefectureCode", () => {
+  it("resolves canonical inputs without loading prefecture data", () => {
+    expect(canonicalPrefectureCode("26")).toBe("26");
+    expect(canonicalPrefectureCode("京都府")).toBe("26");
+    expect(canonicalPrefectureCode("Kyoto")).toBe("26");
+    expect(canonicalPrefectureCode("tottori")).toBe("31");
+    expect(canonicalPrefectureCode("Nikko")).toBeNull();
   });
 });
 

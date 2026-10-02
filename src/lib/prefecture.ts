@@ -8,6 +8,8 @@
  * the per-prefecture arrays at startup.
  */
 
+import { PREFECTURE_SLUGS } from "./hf_data.js";
+
 // ──────────────────────────────────────────────────────────────────────
 // Prefecture-name → 2-digit JIS code map.
 //
@@ -31,6 +33,17 @@ export const PREF_NAME_TO_CODE: Record<string, string> = {
 export const PREF_CODE_TO_NAME: Record<string, string> = Object.fromEntries(
   Object.entries(PREF_NAME_TO_CODE).map(([k, v]) => [v, k]),
 );
+
+/** Resolve canonical JIS code, full Japanese name, or English slug without I/O. */
+export function canonicalPrefectureCode(input: string): string | null {
+  const trimmed = input.trim();
+  const normalized = trimmed.toLowerCase();
+  if (/^\d{1,2}$/.test(normalized)) return normalized.padStart(2, "0");
+  const jaCode = PREF_NAME_TO_CODE[trimmed];
+  if (jaCode) return jaCode;
+  const slugIndex = PREFECTURE_SLUGS.indexOf(normalized);
+  return slugIndex >= 0 ? String(slugIndex + 1).padStart(2, "0") : null;
+}
 
 /**
  * Extract the first prefecture mentioned in `text`. Returns `null` when no
