@@ -66,6 +66,9 @@ export const RUNTIME_FILES: readonly string[] = [
 export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // OSM food-venue layer (per prefecture) — feeds get_spots category=food.
   ...PREFECTURE_SLUGS.map((s) => `food/${s}.json`),
+  // Campground official-page text (DATA_SOURCES.md #45) — feeds the
+  // official_page block on get_hotels results.
+  "campgrounds/official_pages.jsonl",
 ];
 
 /** Where the cached data lives. */
