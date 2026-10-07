@@ -8,7 +8,12 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { decodeHtml, declaredCharset, japaneseScore } from "../../scrapers/lib/decode.js";
+import {
+  decodeHtml,
+  declaredCharset,
+  japaneseScore,
+  looksUnreadable,
+} from "../../scrapers/lib/decode.js";
 
 const NAME = "みどりのキャンプ場";
 const PRICE = "ご利用料金 1区画 4,000円";
@@ -119,5 +124,30 @@ describe("japaneseScore", () => {
 
   it("is about zero for plain ASCII", () => {
     expect(japaneseScore("campground price list")).toBe(0);
+  });
+});
+
+describe("looksUnreadable", () => {
+  it("catches what a decoder gave up on", () => {
+    expect(looksUnreadable("\ufffdw\ufffdK\ufffd\ufffd\ufffdV\ufffd\ufffd")).toBe(true);
+  });
+
+  it("catches a decode that went the wrong way", () => {
+    // UTF-8 bytes read as a legacy encoding: real characters, never this dense.
+    expect(looksUnreadable("繧ｭ繝｣繝ｳ繝励ち蝣ｴ")).toBe(true);
+  });
+
+  it("leaves real Japanese alone", () => {
+    expect(looksUnreadable("年間イベント｜高山村公式サイト｜群馬県")).toBe(false);
+    expect(looksUnreadable("魚津市ホームページ")).toBe(false);
+    expect(looksUnreadable("みどりのキャンプ場")).toBe(false);
+  });
+
+  it("leaves a rare kanji that happens to be a mojibake marker alone", () => {
+    expect(looksUnreadable("荳の宮神社")).toBe(false);
+  });
+
+  it("is false for empty text rather than a verdict", () => {
+    expect(looksUnreadable("")).toBe(false);
   });
 });

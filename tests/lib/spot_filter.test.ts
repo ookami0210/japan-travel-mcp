@@ -12,6 +12,36 @@ describe("passesSpotFilter", () => {
     expect(r.reason).toMatch(/title too short/);
   });
 
+  it("rejects a spot whose name did not survive decoding", () => {
+    // Exactly what reached the published dataset from Shift_JIS municipal
+    // sites: a name that is replacement characters all the way through.
+    const r = passesSpotFilter({
+      url: "https://www.city.semboku.akita.jp/sightseeing/travel",
+      title: "\ufffdw\ufffdK\ufffd\ufffd\ufffdV\ufffd\ufffd",
+      description: "観光情報",
+    });
+    expect(r.ok).toBe(false);
+    expect(r.reason).toMatch(/did not survive decoding/);
+  });
+
+  it("rejects a spot whose description is mojibake", () => {
+    const r = passesSpotFilter({
+      url: "https://vill.takayama.gunma.jp/02chiiki/event/top.html",
+      title: "年間イベント",
+      description: "繧ｭ繝｣繝ｳ繝励ち蝣ｴ",
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it("keeps the same page once it is read in its own charset", () => {
+    const r = passesSpotFilter({
+      url: "https://vill.takayama.gunma.jp/02chiiki/event/top.html",
+      title: "年間イベント｜高山村公式サイト｜群馬県",
+      description: "高山村の年間イベントと観光のご案内",
+    });
+    expect(r.ok).toBe(true);
+  });
+
   it("rejects infrastructure titles (Search / Sitemap / Privacy / 404)", () => {
     // Note: titles must be ≥3 chars to bypass the prior "title too short" check.
     for (const title of [

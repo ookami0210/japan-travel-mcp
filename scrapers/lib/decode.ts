@@ -103,6 +103,24 @@ export function japaneseScore(text: string): number {
   return kana + kanji - replacement - mojibake - latin;
 }
 
+/**
+ * Text that did not survive decoding, and must not be shown to anyone.
+ *
+ * Two signatures, both conservative. Replacement characters mean a decoder
+ * gave up on these bytes. A cluster of the kanji that only appear when UTF-8
+ * is read as a legacy encoding means a decode silently went the wrong way —
+ * one such character can be a rare but real name, three together cannot.
+ *
+ * This is the guard at the publishing boundary rather than at the fetch: a
+ * page can be decoded correctly and still be stored from an older run, or
+ * reach us through a path that does not use this fetcher at all.
+ */
+export function looksUnreadable(text: string): boolean {
+  if (!text) return false;
+  if (text.includes("\ufffd")) return true;
+  return (text.match(MOJIBAKE_MARKERS)?.length ?? 0) >= 3;
+}
+
 function tryDecode(bytes: Uint8Array, label: string): string | null {
   try {
     return new TextDecoder(label as never, { fatal: false }).decode(bytes);

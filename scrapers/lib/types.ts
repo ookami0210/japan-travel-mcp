@@ -21,15 +21,17 @@ export interface ScrapeOptions {
   consecutive4xxAbort: number;
   /**
    * Decode response bodies with the charset the page declares instead of
-   * assuming UTF-8 (see scrapers/lib/decode.ts). Off by default so existing
-   * callers keep their exact behaviour; on for crawls that reach the
-   * small-operator tail, where Shift_JIS and EUC-JP are still served and a
-   * UTF-8 read returns mojibake rather than an error.
+   * assuming UTF-8 (see scrapers/lib/decode.ts). On by default: municipal and
+   * village sites still serve Shift_JIS and EUC-JP, a UTF-8 read of those
+   * bytes returns mojibake rather than an error, and 395 spot names reached
+   * the published dataset that way. Set false only for a caller that needs
+   * the raw UTF-8 read.
    */
   decodeJapanese?: boolean;
 }
 
 export const DEFAULT_OPTIONS: ScrapeOptions = {
+  decodeJapanese: true,
   rateLimitMs: 2000,
   globalConcurrency: 8,
   userAgent:

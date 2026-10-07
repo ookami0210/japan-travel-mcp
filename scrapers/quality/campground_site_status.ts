@@ -48,10 +48,6 @@ const OPTIONS: ScrapeOptions = {
   rateLimitMs: 5_000, // public politeness policy: 5 s per domain
   timeoutMs: 15_000,
   retries: 1,
-  // These pages are the small-operator tail: a UTF-8 read turns a Shift_JIS
-  // page into replacement characters, and a verdict read off that text says
-  // the page never mentions the place when in fact it does.
-  decodeJapanese: true,
   userAgent:
     "JapanTravelMCP/1.3 (+https://github.com/ookami0210/japan-travel-mcp; campground official-page status)",
 };

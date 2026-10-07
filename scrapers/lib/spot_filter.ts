@@ -10,6 +10,8 @@
  * was the site header. This filter is the second-pass gate.
  */
 
+import { looksUnreadable } from "./decode.js";
+
 const REJECT_TITLE_PATTERNS: RegExp[] = [
   /^Search\b/i,
   /^検索\s*$/,
@@ -66,6 +68,7 @@ export interface FilterResult {
  *   - Pages whose URL matches a search/sitemap/etc. pattern, AND lack a
  *     tourism keyword in title or description → reject
  *   - Pages with very short titles (<3 chars) → reject
+ *   - Pages whose title or description is mojibake → reject
  *   - Pages with no description AND no tourism keyword in title → soft-reject
  *
  * Tourism keyword presence is a positive signal that overrides URL pattern
@@ -82,6 +85,14 @@ export function passesSpotFilter(input: FilterInput): FilterResult {
 
   if (title.length < 3) {
     return { ok: false, reason: "title too short" };
+  }
+
+  // A name nobody can read is worse than a missing spot: it reaches a
+  // traveller as a row of replacement characters and cannot be searched,
+  // matched or translated. Dropping it also means the next crawl of that page
+  // adds it back properly rather than sitting beside the broken copy.
+  if (looksUnreadable(title) || looksUnreadable(desc)) {
+    return { ok: false, reason: "title or description did not survive decoding" };
   }
 
   for (const p of REJECT_TITLE_PATTERNS) {

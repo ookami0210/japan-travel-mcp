@@ -88,7 +88,6 @@ const OPTIONS: ScrapeOptions = {
   globalConcurrency: GLOBAL_CONCURRENCY,
   timeoutMs: 20_000,
   retries: 1,
-  decodeJapanese: true, // Shift_JIS and EUC-JP are still served in this tail
   userAgent:
     "JapanTravelMCP/1.3 (+https://github.com/ookami0210/japan-travel-mcp; campground official-page crawl)",
 };
