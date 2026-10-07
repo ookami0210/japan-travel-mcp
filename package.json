@@ -35,6 +35,7 @@
     "discover:ryokan_registries": "tsx scrapers/sources/discover_ryokan_registries.ts",
     "scrape:enriched": "tsx scrapers/run_enriched_scrape.ts",
     "scrape:dmo_websites": "tsx scrapers/sources/scrape_dmo_websites.ts",
+    "scrape:campground_sites": "tsx scrapers/sources/scrape_campground_sites.ts",
     "embed:build": "tsx scrapers/embed/build_embeddings.ts",
     "quality:report": "tsx scrapers/quality/quality_report.ts",
     "eval:selection": "tsx eval/selection/run.ts",

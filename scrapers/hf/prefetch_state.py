@@ -138,6 +138,17 @@ PRESETS: dict[str, list[str]] = {
         "translations/multilingual_complete.jsonl",
         "translations/descriptions_complete.jsonl",
     ],
+    # campground-refresh.yml — the official-page status pass and the crawl.
+    # Both are incremental against their own output: without these a fresh
+    # runner would re-read all 284 pages and re-crawl every site from
+    # scratch every month, which is both impolite and pointless.
+    "campground": [
+        # The campground list itself: both steps select their targets by
+        # classifying master.json, which lives only on HF.
+        "hotels/master.json",
+        "_state/campground_site_status.json",
+        "campgrounds/official_pages.jsonl",
+    ],
     # burst-scrape.yml — same as steady, kept here for shared invocation.
     "burst": [
         "_state/municipalities.json",

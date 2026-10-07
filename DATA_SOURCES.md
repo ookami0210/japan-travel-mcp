@@ -80,6 +80,7 @@ corresponding workflow flips ON.
 | **WD-FOUNDATION** | `wd-foundation.yml` (matrix legs) | monthly (1st) 05:00 JST | gh-actions (cron OFF until launch) | #1–4, #15–19, #24, #25, #29–38, #39 |
 | **GLOSSARY** | `wd-foundation.yml` (leg `glossary`) | monthly | gh-actions (cron OFF until launch) | #20–22 |
 | **WIKIPEDIA-ABSTRACT** | `wd-foundation.yml` (leg `wikipedia-summaries`) | monthly | gh-actions (cron OFF until launch) | #34 / #35 / #36 (live) / #P1 (planned alias) |
+| **LODGING** | `campground-refresh.yml` | monthly (8th) 05:00 JST | gh-actions | #45 |
 | **EVENTS** | (planned) | weekly during seasons | local (cold-start, planned) | #P4, #P10, #P14 |
 | **SEASONAL** | (planned) | weekly during seasons | gh-actions (planned) | #P9 |
 
@@ -393,6 +394,41 @@ requires either extending an existing channel or creating a new one.
   Where a roster exists, per-authority counts track the baseline at
   93–112% (post-baseline permits and closure lag explain the spread;
   福岡市 at 162% is flagged for verification).
+- **Status**: `active`
+
+#### #45 — Campground official-page text (operator sites)
+- **Authority**: each campground's own official site (URL from the OSM
+  `website` tag on the `tourism=camp_site` / `caravan_site` entity, #24/#28
+  lodging layer)
+- **URL**: per-campground official page (robots-checked per URL; homepage plus
+  up to 7 pages that carry prices, facilities, access, rules and season)
+- **License**: text published by the subject itself, kept as a dated snapshot
+  with its source URL and retrieval time on every page. Rights remain with the
+  operator — the snapshot is redistributed as cached public content under the
+  removal commitment in `DATA_POLICY.md` (48 hours), not as part of the
+  dataset's own CC BY grant. Booking-portal listings are never fetched.
+- **Fetcher**: `scrapers/sources/scrape_campground_sites.ts`
+- **Output**: `data/campgrounds/official_pages.jsonl` (one line per campground:
+  homepage, pages[{url, title, content_sha256, chars, charset, text,
+  fetched_at}], pages_attempted / pages_failed, crawled_at)
+- **Cadence**: monthly (`campground-refresh.yml`, 8th 05:00 JST; 30-day
+  recheck window enforced in-job, oldest-first, soft deadline, resumable)
+- **Channel**: LODGING
+- **Coverage**: 2,163 campgrounds in the lodging layer, 286 with a website on
+  record (13%). The gate is the status pass
+  (`scrapers/quality/campground_site_status.ts`,
+  `npm run quality:campground_status`), which reads each URL once per 30 days
+  and labels it active / closed_suspected / url_dead / ota_listing /
+  no_official_site; only `active` pages are crawled, so dead domains and
+  portal listings cost nothing. 55 of the 286 sit on a municipality's own
+  domain, where the municipal crawl also visits: the crawl doubles its
+  per-domain interval on those hosts so the combined rate stays inside the
+  published 5-second floor.
+- **Why text and not facts**: a campground's season, pitch prices and rules are
+  written as prose on one page, with no structured markup to read (contrast
+  #41, where JSON-LD exists and only facts are kept). The text is stored
+  verbatim and interpreted by consumers; `content_sha256` per page lets a
+  consumer re-format only what changed.
 - **Status**: `active`
 
 #### #34 — Wikipedia ja summaries (description_ja upgrade)
@@ -950,6 +986,14 @@ contract.
   OOM crash fix (heap guard + load-time compaction) for default-heap
   machines.
 
+- 2026-10-08 — added #45 campground official-page text as the first source of
+  a new LODGING channel (`campground-refresh.yml`, monthly). The channel
+  exists because an accommodation's own page is a different crawl from a
+  municipality's: known targets, eight pages, no discovery, and a monthly
+  recheck because prices and seasons move seasonally. The shared fetcher
+  gained opt-in charset-aware decoding (`scrapers/lib/decode.ts`) for the
+  same reason — this tail still serves Shift_JIS and EUC-JP, which a UTF-8
+  read turns into mojibake rather than an error.
 - 2026-08-04 — reliability pass after the dataset-freshness audit:
   steady-scrape picker order restored (stalest-first survives into the
   task list; the order was being lost and the daily budget re-scraped the
