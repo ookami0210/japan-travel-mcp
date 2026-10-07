@@ -10,6 +10,7 @@ We collect:
 - Prefectural tourism office content
 - Prefectural ryokan business-license registries
 - Hotel and ryokan official homepages
+- Campground official pages (season, pitch prices, facilities, access, rules)
 - JNTO (Japan National Tourism Organization) published data
 - Japan Tourism Agency accommodation statistics
 - OpenStreetMap and Wikidata
@@ -47,6 +48,7 @@ open an issue and we will act within 48 hours.
 
 - Each domain is refreshed **at most once every ~30 days** (rolling cycle)
 - **Steady-state**: minimum **5-second interval** between requests to the same domain — slower than Googlebot, by design
+- Where two of our jobs can reach the same domain (a campground whose page lives on its town's own site), the second one **doubles its interval** so the combined rate stays inside the 5-second floor
 - **Initial bootstrap**: may run faster, down to a 2-second per-domain interval, to finish the first build in hours
 - We are a periodic snapshot, not a continuous crawler
 - All data is cached statically in this repository

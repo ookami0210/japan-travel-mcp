@@ -68,6 +68,15 @@ prefectures/                      # 47 prefecture files: municipal-scrape spots
 hotels/
   master.json                     # ~20,000 accommodations (Wikidata + OSM merged)
 
+campgrounds/
+  official_pages.jsonl            # Official-page text for 177 campgrounds whose
+                                  # own site is live (2,163 campgrounds in the
+                                  # lodging layer, 286 with a URL on record).
+                                  # Homepage + up to 7 pages carrying season, pitch
+                                  # prices, facilities, access and rules; verbatim
+                                  # text with a sha256 per page so a consumer can
+                                  # re-read only what changed. Refreshed monthly.
+
 r3/                               # Official designation registries
   maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
   meti_densan.json                # 231 METI-designated Traditional Crafts (Dentō Kōgeihin)
@@ -100,6 +109,7 @@ no AI-curated lists, no UGC.
 | Municipal tourism pages | 1,938 city / town / ward governments of Japan | Public information; per-page robots.txt respected |
 | Wikidata attractions | Wikidata, Wikimedia Foundation | CC0 |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
+| Campground official pages | each campground operator, from its own public site | Operator's own text, kept as a dated snapshot with source URL and retrieval time. Rights remain with the operator; removal on request within 48 h |
 | Tourist descriptions (17-lang) | AI-generated from Wikidata-derived structured data + project glossary | CC BY 4.0 (this compilation) |
 | Geographical Indications (GI) | Ministry of Agriculture, Forestry and Fisheries (MAFF) | Government Standard Terms of Use 2.0 (CC BY 4.0 compatible) |
 | Traditional Crafts (Dentō Kōgeihin) | Ministry of Economy, Trade and Industry (METI) / Association for the Promotion of Traditional Craft Industries | Public designation; cited |
@@ -144,6 +154,7 @@ refreshes data on two tracks and re-publishes to this dataset:
 |:---|:---|:---|:---|
 | Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
 | Official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
+| Campground official pages | 177 sites | rolling 30 days | monthly batch |
 
 Each domain is hit at most once per cycle.
 

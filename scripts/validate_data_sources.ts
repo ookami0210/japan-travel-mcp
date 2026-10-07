@@ -58,6 +58,9 @@ const KNOWN_CHANNELS = new Set([
   "WIKIPEDIA-ABSTRACT",
   "EVENTS",
   "SEASONAL",
+  // An accommodation's own official pages (campgrounds today; the same shape
+  // fits ryokan and minshuku official sites).
+  "LODGING",
 ]);
 
 async function parseDoc(): Promise<DocEntry[]> {
