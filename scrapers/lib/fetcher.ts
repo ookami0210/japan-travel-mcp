@@ -9,6 +9,7 @@
  * Tracks consecutive 5xx / 4xx counts so the caller can trigger auto-stop.
  */
 
+import { decodeHtml } from "./decode.js";
 import type { FetchResult, ScrapeOptions } from "./types.js";
 
 const lastFetchByDomain = new Map<string, number>();
@@ -134,7 +135,21 @@ export async function rateLimitedFetch(
         /^(text\/|application\/(xhtml\+xml|xml|json))/i.test(lastContentType);
 
       if (res.ok && isText) {
-        const body = await res.text();
+        // `Response.text()` is UTF-8 by definition. Callers that reach pages
+        // which may be served in a legacy Japanese encoding ask for the
+        // page's own charset instead; everyone else keeps the UTF-8 read.
+        let body: string;
+        let charset: string | undefined;
+        if (opts.decodeJapanese) {
+          const decoded = decodeHtml(
+            new Uint8Array(await res.arrayBuffer()),
+            lastContentType,
+          );
+          body = decoded.text;
+          charset = decoded.charset;
+        } else {
+          body = await res.text();
+        }
         counter?.record(res.status, false);
         return {
           url,
@@ -143,6 +158,7 @@ export async function rateLimitedFetch(
           contentType: lastContentType,
           body,
           fetched_at: fetchedAt,
+          ...(charset ? { charset } : {}),
         };
       }
 

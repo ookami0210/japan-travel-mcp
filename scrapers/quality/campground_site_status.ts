@@ -23,7 +23,7 @@
  * Checkpointed: safe to interrupt; a re-run only revisits entries older than
  * the recheck window.
  *
- * Run: npx tsx scrapers/quality/campground_site_status.ts [--limit N]
+ * Run: npx tsx scrapers/quality/campground_site_status.ts [--limit N] [--force]
  * Output: data/_state/campground_site_status.json
  */
 
@@ -31,6 +31,7 @@ import { readFile, rename, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { classifyLodging } from "../../src/lib/lodging.js";
 import { rateLimitedFetch } from "../lib/fetcher.js";
+import { pageText } from "../lib/page_text.js";
 import { shouldCrawl } from "../lib/robots.js";
 import { classifySiteStatus, isListingHost, type SiteStatus } from "../lib/site_status.js";
 import { DEFAULT_OPTIONS, type ScrapeOptions } from "../lib/types.js";
@@ -47,6 +48,10 @@ const OPTIONS: ScrapeOptions = {
   rateLimitMs: 5_000, // public politeness policy: 5 s per domain
   timeoutMs: 15_000,
   retries: 1,
+  // These pages are the small-operator tail: a UTF-8 read turns a Shift_JIS
+  // page into replacement characters, and a verdict read off that text says
+  // the page never mentions the place when in fact it does.
+  decodeJapanese: true,
   userAgent:
     "JapanTravelMCP/1.3 (+https://github.com/ookami0210/japan-travel-mcp; campground official-page status)",
 };
@@ -57,6 +62,8 @@ interface Entry {
   reason: string;
   http_status: number | null;
   checked_at: string;
+  /** Charset the page was read with; absent for verdicts decided without a request. */
+  charset?: string;
 }
 
 interface StateFile {
@@ -73,23 +80,10 @@ interface MasterHotel {
   prefecture_code: string | null;
 }
 
-/** Tags out, entities in, whitespace collapsed — enough to read a page by. */
-export function pageText(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 async function main(): Promise<void> {
   const limitIdx = process.argv.indexOf("--limit");
   const limit = limitIdx >= 0 ? Number(process.argv[limitIdx + 1]) : Infinity;
+  const force = process.argv.includes("--force");
 
   const master = JSON.parse(await readFile(MASTER_URL, "utf8")) as { hotels: MasterHotel[] };
   const campgrounds = master.hotels.filter((h) => classifyLodging(h) === "campground");
@@ -109,7 +103,7 @@ async function main(): Promise<void> {
     const url = c.website && /^https?:\/\//.test(c.website) ? c.website : null;
     const seen = state.entries[c.id];
     const fresh = seen && seen.url === url && Date.parse(seen.checked_at) >= cutoff;
-    if (fresh) continue;
+    if (fresh && !force) continue;
 
     // Decided without a request: nothing on record, or a portal listing.
     if (!url || isListingHost(url)) {
@@ -158,6 +152,7 @@ async function main(): Promise<void> {
         ...verdict,
         http_status: res.status || null,
         checked_at: new Date().toISOString(),
+        ...(res.charset ? { charset: res.charset } : {}),
       };
     }
     done += 1;

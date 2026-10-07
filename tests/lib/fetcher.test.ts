@@ -549,3 +549,50 @@ describe("rateLimitedFetch — per-domain rate limit", () => {
     expect(callTimes[1] - callTimes[0]).toBe(0);
   });
 });
+
+describe("rateLimitedFetch — charset-aware decoding (opt-in)", () => {
+  /**
+   * Shift_JIS bytes for a small page saying みどりのキャンプ場 / ご利用料金.
+   * Bytes, not a string: a string fixture would be decoded by the test file's
+   * own encoding and prove nothing about the fetcher.
+   */
+  const SJIS = Buffer.from(
+    "PGh0bWw+PGhlYWQ+PG1ldGEgY2hhcnNldD0iU2hpZnRfSklTIj48dGl0bGU+gt2Cx4LogsyDTIODg5ODdo/qPC90aXRsZT48L2hlYWQ+PGJvZHk+PGgxPoLdgseC6ILMg0yDg4OTg3aP6jwvaDE+PHA+grKXmJdwl7+L4CAxi+aJ5iA0LDAwMIl+PC9wPjwvYm9keT48L2h0bWw+",
+    "base64",
+  );
+
+  function stubBytes(bytes: Buffer, contentType: string, url: string): void {
+    stubFetch(async () => {
+      const res = new Response(new Uint8Array(bytes), {
+        status: 200,
+        headers: new Headers({ "content-type": contentType }),
+      });
+      Object.defineProperty(res, "url", { value: url, configurable: true });
+      return res;
+    });
+  }
+
+  it("reads the page in its own charset when asked", async () => {
+    const url = uniqUrl();
+    stubBytes(SJIS, "text/html; charset=Shift_JIS", url);
+    const r = await rateLimitedFetch(url, fastOpts({ decodeJapanese: true }), c);
+    expect(r.body).toContain("みどりのキャンプ場");
+    expect(r.charset).toBe("shift_jis");
+  });
+
+  it("leaves every other caller on the UTF-8 read it already had", async () => {
+    const url = uniqUrl();
+    stubBytes(SJIS, "text/html; charset=Shift_JIS", url);
+    const r = await rateLimitedFetch(url, fastOpts(), c);
+    expect(r.body).not.toContain("みどりのキャンプ場");
+    expect(r.charset).toBeUndefined();
+  });
+
+  it("returns UTF-8 content unchanged under the flag", async () => {
+    const url = uniqUrl();
+    stubBytes(Buffer.from("<html><body>キャンプ場</body></html>", "utf8"), "text/html", url);
+    const r = await rateLimitedFetch(url, fastOpts({ decodeJapanese: true }), c);
+    expect(r.body).toContain("キャンプ場");
+    expect(r.charset).toBe("utf-8");
+  });
+});

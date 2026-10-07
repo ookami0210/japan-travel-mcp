@@ -19,6 +19,14 @@ export interface ScrapeOptions {
   consecutive5xxAbort: number;
   /** If consecutive 4xx exceeds this number, the run aborts. */
   consecutive4xxAbort: number;
+  /**
+   * Decode response bodies with the charset the page declares instead of
+   * assuming UTF-8 (see scrapers/lib/decode.ts). Off by default so existing
+   * callers keep their exact behaviour; on for crawls that reach the
+   * small-operator tail, where Shift_JIS and EUC-JP are still served and a
+   * UTF-8 read returns mojibake rather than an error.
+   */
+  decodeJapanese?: boolean;
 }
 
 export const DEFAULT_OPTIONS: ScrapeOptions = {
@@ -46,6 +54,12 @@ export interface FetchResult {
   body: string | null;
   fetched_at: string;
   error?: string;
+  /**
+   * The charset the body was decoded with. Only set when the caller asked for
+   * charset-aware decoding (`ScrapeOptions.decodeJapanese`); absent otherwise,
+   * where the body is UTF-8 by `Response.text()` definition.
+   */
+  charset?: string;
 }
 
 export interface RobotsDecision {
