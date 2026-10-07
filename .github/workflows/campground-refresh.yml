@@ -1,0 +1,150 @@
+# Campground official pages — monthly. Owns the LODGING channel
+# (DATA_SOURCES.md #45).
+#
+#   scrapers/quality/campground_site_status.ts    which URLs are a live
+#                                                 official page at all
+#   scrapers/sources/scrape_campground_sites.ts   crawl those pages and keep
+#                                                 the text fresh (#45)
+#
+# The order matters: the crawl reads the status pass's verdicts and refuses to
+# run without them, so a status failure stops the run rather than letting the
+# crawl fetch dead domains and portal listings.
+#
+# Independent of MUNI: its own concurrency group, so a campground run neither
+# waits for a scrape window nor delays one. The 55 campgrounds whose page sits
+# on a town's own site are the one place the two crawls share a domain, and
+# the crawl doubles its interval on those hosts (see the fetcher options in
+# scrape_campground_sites.ts) so the combined rate stays inside the published
+# 5-second floor even if the workflows overlap.
+#
+# Monthly, because that is the recheck window the job itself enforces: a
+# campground's prices and season move with the season, not with the week.
+
+name: campground-refresh
+
+on:
+  schedule:
+    - cron: "0 20 8 * *"   # 05:00 JST on the 8th — off the 1st/15th DMO slots
+  workflow_dispatch:
+    inputs:
+      deadline_minutes:
+        description: "Stop launching new sites after this many minutes"
+        required: false
+        default: "120"
+      force_status:
+        description: "Re-read every official page, ignoring the 30-day window"
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: campground
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  campground:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --quiet huggingface_hub requests
+
+      # master.json (the campground list), the status verdicts and the page
+      # corpus. Without these a fresh runner would re-read every page and
+      # re-crawl every site from scratch — impolite and pointless, since both
+      # steps are incremental against their own last output.
+      - name: Prefetch campground state from HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
+        run: python3 scrapers/hf/prefetch_state.py --preset campground
+
+      # Reads each campground's URL once per 30 days and labels it: a live
+      # official page, a closure notice for a human to read, a dead URL, a
+      # booking-portal listing (labelled from the URL, never fetched), or
+      # nothing on record.
+      - name: Official-page status (gate)
+        timeout-minutes: 90
+        run: |
+          if [ "${{ inputs.force_status }}" = "true" ]; then
+            npx tsx scrapers/quality/campground_site_status.ts --force
+          else
+            npm run quality:campground_status
+          fi
+
+      # Crawls the sites the status pass found live: homepage plus up to seven
+      # pages that carry prices, facilities, access, rules and season. The
+      # deadline is a soft stop well inside the step timeout — sites left over
+      # stay due and lead the next run, because ordering is oldest-first.
+      - name: Official-page crawl (#45)
+        timeout-minutes: 180
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DEADLINE_MINUTES: ${{ inputs.deadline_minutes || '120' }}
+        run: npm run scrape:campground_sites
+
+      - name: Commit operational state
+        run: |
+          git config user.name "japan-travel-mcp-bot"
+          git config user.email "noreply@github.com"
+          git add data/_state data/_logs
+          if git diff --cached --quiet; then
+            echo "No state changes to commit"
+          else
+            git commit -m "data: campground refresh $(date -u +%Y-%m-%d)"
+            # A concurrent push to main must not fail the run. Merge rather
+            # than rebase, and keep this run's snapshot of the state files on
+            # conflict: they are regenerated wholesale, so a merge of two
+            # versions is meaningless while either version alone is valid.
+            pushed=""
+            for attempt in 1 2 3; do
+              if git pull --no-rebase -X ours origin main && git push; then
+                pushed="yes"; break
+              fi
+              git merge --abort || true
+              echo "push attempt $attempt failed — retrying in 5s"
+              sleep 5
+            done
+            if [ -z "$pushed" ]; then
+              echo "::error::failed to push state after 3 attempts"
+              exit 1
+            fi
+          fi
+
+      # The page corpus itself is bulk data: HF carries it, git does not.
+      - name: Sync campground outputs to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_DATASET_REPO: open-travel/japan-travel-mcp-data
+        if: env.HF_TOKEN != ''
+        continue-on-error: true
+        run: |
+          python3 scrapers/hf/upload_dataset.py \
+            --commit-message "Campground refresh $(date -u +%Y-%m-%d)" \
+            --no-card
+
+      - name: Slack — failure summary
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🚨 campground-refresh FAILED on ${GITHUB_REF##*/} ($(date -u +%Y-%m-%dT%H:%M:%SZ))\"}" \
+            "$SLACK_WEBHOOK_URL" || true

@@ -146,6 +146,9 @@ npm run quality:report         # Coverage gap dashboard + per-spot quality score
 npm run quality:campground_status  # Read each campground's official page once and
                                    #   label it active / closed_suspected / url_dead /
                                    #   ota_listing / no_official_site (--limit N)
+npm run scrape:campground_sites    # Crawl the campgrounds the status pass found live
+                                   #   (homepage + up to 7 info pages, 30-day recheck,
+                                   #   LIMIT / ONLY / DEADLINE_MINUTES env overrides)
 ```
 
 Smoke scripts (run directly with `tsx`, not via npm script): `scripts/smoke_intent.ts`,
@@ -243,6 +246,7 @@ data/_state/
   prefecture_tourism_orgs.json     # Per-prefecture portal seed list
   tourism_org_urls.json            # Resolved multi-source URLs per muni (ADR 0001 A)
   tourism_org_overrides.json       # Manual/researched tourism-org seeds (fills discovery gaps; merged by daily.ts)
+  campground_site_status.json      # Per-campground official-page verdict (gate for the #45 crawl)
   dmo_website_overrides.json       # Manual DMO URL corrections
   translation_batch.json           # Anthropic batch IDs (transient)
   r3_translation_batch.json        # Same, for R-3 sources
@@ -259,6 +263,7 @@ What lives **only on Hugging Face** (downloaded at runtime, written by scrapers)
 data/prefectures/<slug>.json       # 47 files — per-prefecture spots + wikidata_attractions
 data/hotels/master.json            # Merged Wikidata + OSM hotels
 data/hotels/raw/{wikidata,osm}.jsonl
+data/campgrounds/official_pages.jsonl           # Campground official-page text (#45)
 data/translations/descriptions_complete.jsonl   # 17-lang descriptions
 data/translations/multilingual_complete.jsonl   # 17-lang names
 data/embeddings/spots.{f16.bin,index.json}      # Vector index (~50 MB)
@@ -396,6 +401,7 @@ If you add a new MCP tool, it must satisfy the Editorial Policy:
 | `scrape.yml` (legacy) | daily cron 03:00 JST + manual | Active steady scraper today; `daily.ts` + `r3_refresh.ts`, commits state, syncs to HF. To be retired when `steady-scrape.yml` is enabled. |
 | `steady-scrape.yml` | manual + (cron commented; flip when ready)      | Replacement for `scrape.yml` with dynamic muni picker (overdue-first, 65–130 / day). |
 | `burst-scrape.yml` | manual + PR label `burst-required` | Full re-scrape across 6 batches (3-1 … 3-6); `shallow` (~4-6h) or `full` (~12h) mode. |
+| `campground-refresh.yml` | monthly cron (8th 05:00 JST) + manual | LODGING channel: campground official-page status pass, then the official-page crawl (#45). Own concurrency group — never waits for a scrape window, never delays one. |
 | `translate.yml` | manual only | Anthropic Batch API translation pass for missing names. |
 | `validate-data-sources.yml` | PR touching `scrapers/` / `DATA_SOURCES.md` / workflows + manual | Runs `validate:data-sources` — the SSOT gate. |
 | `publish.yml` | git tag `v*` (or manual dry-run) | Publishes to npm with provenance. Bump via `npm version <part> && git push --follow-tags`. |

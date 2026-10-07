@@ -57,6 +57,10 @@ RULES: list[tuple[str, int, int]] = [
     ("_state/wikidata_descriptions.json", 40, 100_000),
     ("_state/wikipedia_ja_summaries.json", 40, 100_000),
     ("_state/wikipedia_en_summaries.json", 40, 100_000),
+    # Campground official pages (campground-refresh, monthly + grace). A
+    # stalled crawl is invisible otherwise: the file stays readable and simply
+    # stops being true.
+    ("campgrounds/official_pages.jsonl", 40, 100_000),
     # Translations (chained after wd-foundation) + weekly embeddings.
     ("translations/descriptions_complete.jsonl", 40, 1_000_000),
     ("translations/multilingual_complete.jsonl", 40, 1_000_000),
