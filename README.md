@@ -143,7 +143,7 @@ The point isn't that Wikipedia or Google Places are wrong — they cover Tokyo a
 | `search_semantic` | Vector search over the `multilingual-e5` embedding index — semantic similarity, language-agnostic |
 | `search_hybrid` | BM25 lexical + vector + RRF fusion — the preferred general-purpose retriever |
 | `get_spots` | Tourist spots by prefecture or municipality (combines municipal scrape + Wikidata). `spots` is ordered tier-major: every `must_see` precedes every `notable`, which precedes every `broader` (score-descending within tier) — naive clients can render the array as-is |
-| `get_hotels` | About 20,000 accommodations, hotels through campgrounds (Wikidata + OpenStreetMap merged) — filter by area, lat/lng/radius, or lodging type |
+| `get_hotels` | About 20,000 accommodations, hotels through campgrounds (Wikidata + OpenStreetMap merged) — filter by area, lat/lng/radius, or lodging type. Campgrounds whose own site has been read also carry an `official_page` block: the page list with fetch dates, and the text itself with `include_official_page_text: true` |
 | `get_transport` | Spot coordinates, prefecture, municipality, and the official URL where access is documented |
 | `get_events` | Festivals registered in Wikidata for a given prefecture, with optional month filter (live SPARQL, in-memory cache) |
 | `get_multilingual` | Tourist-spot names in EN / ZH / KO (lightweight name lookup) |

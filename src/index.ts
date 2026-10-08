@@ -89,6 +89,11 @@ import {
   applyWikidataPrefCorrections,
 } from "./lib/prefecture.js";
 import { classifyLodging, type LodgingType } from "./lib/lodging.js";
+import {
+  loadOfficialPages,
+  officialPageMeta,
+  TextBudget,
+} from "./lib/official_pages.js";
 import { pickR3Name, pickR3Description, r3Translation } from "./lib/r3.js";
 import {
   compileKeywordMatcher,
@@ -5766,6 +5771,8 @@ async function getHotels(args: {
    *  Added 2026-05-17 iter141. */
   q?: string;
   lang?: string;
+  /** Attach the stored official-page text, not just which pages exist. */
+  include_official_page_text?: boolean;
 }): Promise<unknown> {
   const file = await loadHotels();
   if (!file) {
@@ -6475,6 +6482,25 @@ async function getHotels(args: {
     },
   };
 
+  // Official-page text (DATA_SOURCES.md #45). Which pages exist, when they
+  // were read and each one's hash ride along with every result, so an agent
+  // can see that an answer exists and cite the page it came from; the text
+  // itself is attached only when asked for, under a shared budget. Campgrounds
+  // are the layer's current coverage — for most other lodging the block is
+  // simply absent, which is a coverage gap stated plainly rather than hidden.
+  const officialPages = await loadOfficialPages(
+    resolve(dataRoot(), "campgrounds", "official_pages.jsonl"),
+  );
+  const budget = args.include_official_page_text ? new TextBudget() : null;
+  const withOfficialPages = blended.map((h) => {
+    const rec = officialPages.get((h as { id?: string }).id ?? "");
+    if (!rec || rec.pages.length === 0) return h;
+    return {
+      ...h,
+      official_page: budget ? budget.attach(rec) : officialPageMeta(rec),
+    };
+  });
+
   return {
     // Canonical blocks HOISTED above hotels[] so the judge's 12K view sees
     // them. L2-02 iter129 root cause: empty Tokushima hotels filled judge
@@ -6674,7 +6700,7 @@ async function getHotels(args: {
       : {}),
     // Main hotels payload — placed AFTER canonical blocks for judge-view
     // priority (canonical answers visible in the first 12K chars).
-    hotels: blended,
+    hotels: withOfficialPages,
     count: blended.length,
     truncated: filtered.length + r3Lodgings.length > limit,
     total_matching: filtered.length + r3Lodgings.length,
@@ -12646,7 +12672,7 @@ const TOOLS = [
   {
     name: "get_hotels",
     description:
-      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
+      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nAccommodations whose own pages have been read carry an `official_page` block: the page list with titles, sizes, hashes and the date they were fetched. Pass `include_official_page_text: true` to get the text itself — for campgrounds that text is usually the only public source for season, pitch prices, facilities and rules.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
     inputSchema: {
       type: "object",
       properties: {
@@ -12672,6 +12698,11 @@ const TOOLS = [
         limit: {
           type: "number",
           description: "Max results (1–500, default 50)",
+        },
+        include_official_page_text: {
+          type: "boolean",
+          description:
+            "Attach the stored text of each accommodation's official pages, not just the page list. Currently covers campgrounds, whose own page is usually the only public source for season, pitch prices, facilities and rules. Off by default because the text is long; when on, it is capped per page and per response and anything the cap cannot cover is reported as omitted.",
         },
       },
     },
@@ -13256,6 +13287,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           hotel_type: args.hotel_type as string | undefined,
           q: args.q as string | undefined,
           lang: args.lang as string | undefined,
+          include_official_page_text: args.include_official_page_text === true,
           limit:
             typeof args.limit === "number" ? args.limit : args.limit ? Number(args.limit) : undefined,
         });

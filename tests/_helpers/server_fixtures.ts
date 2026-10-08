@@ -119,6 +119,62 @@ function defaultFixtureForSlug(slug: string): PrefectureFixture {
   );
 }
 
+
+/**
+ * One campground with stored official-page text, so the get_hotels
+ * `official_page` surface (DATA_SOURCES.md #45) has something to assert
+ * against. Fictional operator and domain — fixtures never copy a real page.
+ */
+export const FIXTURE_CAMPGROUND = {
+  "id": "fixture-campground-1",
+  "confidence": "confirmed",
+  "name": "フィクスチャキャンプ場",
+  "name_en": "Fixture Campground",
+  "name_zh": null,
+  "name_ko": null,
+  "coordinates": {
+    "lat": 35.5,
+    "lng": 134.2
+  },
+  "phone": null,
+  "website": "https://fixture-camp.example.jp/",
+  "type": "camp_site",
+  "postal_code": null,
+  "street": null,
+  "prefecture_code": "31",
+  "sources": [
+    {
+      "source": "osm",
+      "id": "node/1",
+      "url": "https://www.openstreetmap.org/node/1"
+    }
+  ]
+} as const;
+
+export const FIXTURE_OFFICIAL_PAGES = {
+  "id": "fixture-campground-1",
+  "name": "フィクスチャキャンプ場",
+  "prefecture_code": "31",
+  "homepage": "https://fixture-camp.example.jp/",
+  "pages": [
+    {
+      "url": "https://fixture-camp.example.jp/price.html",
+      "final_url": "https://fixture-camp.example.jp/price.html",
+      "title": "ご利用料金",
+      "http_status": 200,
+      "content_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "chars": 24,
+      "charset": "shift_jis",
+      "text": "ご利用料金 1区画 4,000円 営業期間 4月〜11月",
+      "fetched_at": "2026-10-08T00:00:00Z"
+    }
+  ],
+  "pages_attempted": 2,
+  "pages_failed": 0,
+  "crawled_at": "2026-10-08T00:00:00Z",
+  "pages_fetched_at": "2026-10-08T00:00:00Z"
+} as const;
+
 export function pickFixtureContent(rel: string): string {
   if (rel.startsWith("prefectures/")) {
     const fx = defaultFixtureForSlug(basename(rel, ".json"));
@@ -131,7 +187,13 @@ export function pickFixtureContent(rel: string): string {
     });
   }
   if (rel === "hotels/master.json") {
-    return JSON.stringify({ generated_at: "2026-01-01", hotels: [] });
+    return JSON.stringify({
+      generated_at: "2026-01-01",
+      hotels: [FIXTURE_CAMPGROUND],
+    });
+  }
+  if (rel === "campgrounds/official_pages.jsonl") {
+    return `${JSON.stringify(FIXTURE_OFFICIAL_PAGES)}\n`;
   }
   if (rel === "_state/wikidata_attractions.json") {
     return JSON.stringify({ attractions: [] });

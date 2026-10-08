@@ -202,6 +202,35 @@ describe("buildServer() — MCP integration smoke", () => {
     ).toBe(true);
   });
 
+  it("get_hotels carries the official-page list without the text", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
+    const hotels = (json.hotels ?? []) as Record<string, any>[];
+    const withPages = hotels.find((h) => h.official_page);
+    expect(withPages, "the fixture campground should carry official_page").toBeTruthy();
+    const block = withPages!.official_page;
+    expect(block.page_count).toBe(1);
+    expect(block.pages[0].content_sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(block.pages_fetched_at).toBe("2026-10-08T00:00:00Z");
+    expect(block.source_note).toMatch(/Rights remain with the operator/);
+    // The point of the default: an agent learns an answer exists without the
+    // response carrying every page of it.
+    expect(block.pages[0].text).toBeUndefined();
+    expect(JSON.stringify(json)).not.toContain("営業期間 4月〜11月");
+  });
+
+  it("get_hotels attaches the official-page text when asked", async () => {
+    const json = await callToolOk("get_hotels", {
+      prefecture: "tottori",
+      hotel_type: "campground",
+      include_official_page_text: true,
+    });
+    const hotels = (json.hotels ?? []) as Record<string, any>[];
+    const block = hotels.find((h) => h.official_page)?.official_page;
+    expect(block.pages[0].text).toContain("ご利用料金");
+    expect(block.pages[0].text).toContain("営業期間 4月〜11月");
+    expect(block.pages[0].text_truncated).toBeUndefined();
+  });
+
   it("get_transport surfaces a structured response without a spot_id", async () => {
     await callToolOk("get_transport");
   });

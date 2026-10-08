@@ -171,7 +171,7 @@ Both transports share the same registry via `buildServer()`.
 | `search_semantic` | Vector search over `multilingual-e5-small` embeddings |
 | `search_hybrid` | BM25 + vector + RRF fusion — preferred general-purpose retriever |
 | `get_spots` | Tourist spots in a prefecture / municipality (municipal scrape ∪ Wikidata) |
-| `get_hotels` | Accommodations (Wikidata ∪ OSM, with confirmed-cluster flagging) |
+| `get_hotels` | Accommodations (Wikidata ∪ OSM, with confirmed-cluster flagging) + `official_page` block from the #45 campground layer (page list always, text under `include_official_page_text`) |
 | `get_transport` | Coordinates + official URL for a spot |
 | `get_events` | Festivals via live Wikidata SPARQL (in-memory cache, optional month filter) |
 | `get_festivals` | Festivals from R-3 + scrape Schema.org Events (broader coverage than `get_events`) |
@@ -263,7 +263,10 @@ What lives **only on Hugging Face** (downloaded at runtime, written by scrapers)
 data/prefectures/<slug>.json       # 47 files — per-prefecture spots + wikidata_attractions
 data/hotels/master.json            # Merged Wikidata + OSM hotels
 data/hotels/raw/{wikidata,osm}.jsonl
-data/campgrounds/official_pages.jsonl           # Campground official-page text (#45)
+data/campgrounds/official_pages.jsonl           # Campground official-page text (#45;
+                                                #   OPTIONAL_RUNTIME_FILES — a dataset
+                                                #   without it degrades to "no official
+                                                #   page text", never a boot failure)
 data/translations/descriptions_complete.jsonl   # 17-lang descriptions
 data/translations/multilingual_complete.jsonl   # 17-lang names
 data/embeddings/spots.{f16.bin,index.json}      # Vector index (~50 MB)
