@@ -21,6 +21,14 @@ We do not collect:
 - OTA (Online Travel Agency) inventory or pricing data
 - User reviews or user-generated content
 
+We do sometimes **link** to a booking directory without collecting from it.
+Most campgrounds in Japan have no website of their own, and the honest answer
+to "where can I read about this place" is the directory where it may be listed.
+Those pointers are computed from what we already hold — the prefecture and the
+facility name — plus a page the directory publishes in its own sitemap. We do
+not crawl those pages, we hold none of their content, and the pointer says in
+the record that we have not verified the listing exists.
+
 ---
 
 ## How we think about robots.txt

@@ -91,9 +91,11 @@ import {
 import { classifyLodging, type LodgingType } from "./lib/lodging.js";
 import {
   loadOfficialPages,
+  loadOfficialPageStatus,
   officialPageMeta,
   TextBudget,
 } from "./lib/official_pages.js";
+import { isDirectoryUrl, listingPointer } from "./lib/listing_pointer.js";
 import { pickR3Name, pickR3Description, r3Translation } from "./lib/r3.js";
 import {
   compileKeywordMatcher,
@@ -6491,14 +6493,50 @@ async function getHotels(args: {
   const officialPages = await loadOfficialPages(
     resolve(dataRoot(), "campgrounds", "official_pages.jsonl"),
   );
+  const officialPageStatus = await loadOfficialPageStatus(
+    resolve(dataRoot(), "_state", "campground_site_status.json"),
+  );
   const budget = args.include_official_page_text ? new TextBudget() : null;
   const withOfficialPages = blended.map((h) => {
-    const rec = officialPages.get((h as { id?: string }).id ?? "");
-    if (!rec || rec.pages.length === 0) return h;
-    return {
-      ...h,
-      official_page: budget ? budget.attach(rec) : officialPageMeta(rec),
+    const row = h as {
+      id?: string;
+      website?: string | null;
+      name?: string | null;
+      name_en?: string | null;
+      prefecture_code?: string | null;
+      lodging_type?: string;
     };
+    const rec = officialPages.get(row.id ?? "");
+    if (rec && rec.pages.length > 0) {
+      return {
+        ...h,
+        official_page: budget ? budget.attach(rec) : officialPageMeta(rec),
+      };
+    }
+    // Nothing of this campground's own could be read — most of the layer, since
+    // 1,877 of 2,163 campgrounds carry no website at all. Point at where a
+    // traveller can look instead of returning a record with nothing in it.
+    // Computed from the prefecture and the name we already hold; the directory
+    // itself is never crawled (see src/lib/listing_pointer.ts).
+    // "Nothing of its own to read" covers a campground with no URL, one whose
+    // URL is a directory listing, and one whose site has gone — but not one
+    // whose page is live and merely waiting for the crawl, since its own
+    // `website` is the right answer for that.
+    const verdict = officialPageStatus.get(row.id ?? "");
+    const nothingOwnToRead =
+      !row.website ||
+      isDirectoryUrl(row.website) ||
+      verdict === "url_dead" ||
+      verdict === "ota_listing";
+    if (row.lodging_type === "campground" && nothingOwnToRead) {
+      const pointer = listingPointer({
+        prefecture_code: row.prefecture_code ?? null,
+        name: row.name ?? null,
+        name_en: row.name_en ?? null,
+      });
+      if (pointer) return { ...h, listed_elsewhere: pointer };
+    }
+    return h;
   });
 
   return {
@@ -12672,7 +12710,7 @@ const TOOLS = [
   {
     name: "get_hotels",
     description:
-      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nAccommodations whose own pages have been read carry an `official_page` block: the page list with titles, sizes, hashes and the date they were fetched. Pass `include_official_page_text: true` to get the text itself — for campgrounds that text is usually the only public source for season, pitch prices, facilities and rules.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
+      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nAccommodations whose own pages have been read carry an `official_page` block: the page list with titles, sizes, hashes and the date they were fetched. Pass `include_official_page_text: true` to get the text itself — for campgrounds that text is usually the only public source for season, pitch prices, facilities and rules.\n\nA campground with no readable page of its own carries `listed_elsewhere` instead: the booking directory's prefecture page where it may be listed, with the name to look for. That pointer is computed, not crawled — `listing_verified` is always false, and none of the directory's content (prices, availability, reviews) is held here.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
     inputSchema: {
       type: "object",
       properties: {

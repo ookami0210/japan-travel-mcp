@@ -175,6 +175,37 @@ export const FIXTURE_OFFICIAL_PAGES = {
   "pages_fetched_at": "2026-10-08T00:00:00Z"
 } as const;
 
+
+/**
+ * A campground with no website at all — the common case in this layer, and the
+ * one that should come back with a where-to-look pointer rather than nothing.
+ */
+export const FIXTURE_CAMPGROUND_NO_SITE = {
+  "id": "fixture-campground-2",
+  "confidence": "confirmed",
+  "name": "フィクスチャ町営野営場",
+  "name_en": "Fixture Town Campsite",
+  "name_zh": null,
+  "name_ko": null,
+  "coordinates": {
+    "lat": 35.4,
+    "lng": 134.3
+  },
+  "phone": null,
+  "website": null,
+  "type": "camp_site",
+  "postal_code": null,
+  "street": null,
+  "prefecture_code": "31",
+  "sources": [
+    {
+      "source": "osm",
+      "id": "node/2",
+      "url": "https://www.openstreetmap.org/node/2"
+    }
+  ]
+} as const;
+
 export function pickFixtureContent(rel: string): string {
   if (rel.startsWith("prefectures/")) {
     const fx = defaultFixtureForSlug(basename(rel, ".json"));
@@ -189,7 +220,7 @@ export function pickFixtureContent(rel: string): string {
   if (rel === "hotels/master.json") {
     return JSON.stringify({
       generated_at: "2026-01-01",
-      hotels: [FIXTURE_CAMPGROUND],
+      hotels: [FIXTURE_CAMPGROUND, FIXTURE_CAMPGROUND_NO_SITE],
     });
   }
   if (rel === "campgrounds/official_pages.jsonl") {
