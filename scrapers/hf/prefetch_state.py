@@ -148,6 +148,18 @@ PRESETS: dict[str, list[str]] = {
         "hotels/master.json",
         "_state/campground_site_status.json",
         "campgrounds/official_pages.jsonl",
+        # Place context and its geocode cache. Without the cache a fresh runner
+        # would ask the agency's geocoder for all 2,162 coordinates again every
+        # month, which is both rude and pointless — coordinates do not move.
+        "campgrounds/place_context.jsonl",
+        "_state/campground_geocode_cache.json",
+        # Inputs the derivation reads: stations, parks and the attraction
+        # corpus live only on HF.
+        "_state/railway_stations.json",
+        "_state/national_parks.json",
+        "_state/wikidata_attractions.json",
+        "_state/municipalities.json",
+        "hotels/raw/osm.json",
     ],
     # burst-scrape.yml — same as steady, kept here for shared invocation.
     "burst": [

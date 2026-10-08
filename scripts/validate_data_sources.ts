@@ -119,7 +119,10 @@ async function listFetcherFiles(): Promise<string[]> {
     if (!existsSync(abs)) continue;
     const files = await readdir(abs);
     for (const f of files) {
-      if (/^(fetch_|scrape_|find_|discover_|match_|apply_).+\.(ts|py|js)$/.test(f)) {
+      // `enrich_` covers passes that derive fields for records we already
+      // hold rather than fetching a new corpus — they are still sources, and
+      // still have to be documented.
+      if (/^(fetch_|scrape_|find_|discover_|match_|apply_|enrich_).+\.(ts|py|js)$/.test(f)) {
         out.push(`${d}/${f}`);
       }
     }
@@ -199,8 +202,11 @@ async function main(): Promise<void> {
         );
       }
     } else if (!fetcherFiles.has(e.fetcher)) {
+      const onDisk = existsSync(resolve(ROOT, e.fetcher));
       errors.push(
-        `[MISSING FETCHER FILE] ${e.id} references "${e.fetcher}" but file does not exist on disk`,
+        onDisk
+          ? `[FETCHER NOT IN INVENTORY] ${e.id} references "${e.fetcher}", which exists but is not collected by listFetcherFiles() — check its directory and filename prefix`
+          : `[MISSING FETCHER FILE] ${e.id} references "${e.fetcher}" but file does not exist on disk`,
       );
     }
 
