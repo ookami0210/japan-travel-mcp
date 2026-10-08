@@ -986,6 +986,14 @@ contract.
   OOM crash fix (heap guard + load-time compaction) for default-heap
   machines.
 
+- 2026-10-08 — charset-aware decoding became the fetcher default, and a spot
+  whose name or description did not survive decoding is no longer published.
+  The municipal channel was the reason: 395 spot names in the distributed
+  prefecture files were replacement characters, from 10 hosts that declare
+  Shift_JIS in their own headers (魚津市, 高山村, 仙北市 and others) which a
+  UTF-8 read ignored. Existing rows clear as each municipality comes round in
+  the 30-day cycle; the filter keeps any future mis-decode out of the dataset
+  regardless of where it came from.
 - 2026-10-08 — added #45 campground official-page text as the first source of
   a new LODGING channel (`campground-refresh.yml`, monthly). The channel
   exists because an accommodation's own page is a different crawl from a

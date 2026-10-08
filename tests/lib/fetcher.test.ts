@@ -550,7 +550,7 @@ describe("rateLimitedFetch — per-domain rate limit", () => {
   });
 });
 
-describe("rateLimitedFetch — charset-aware decoding (opt-in)", () => {
+describe("rateLimitedFetch — charset-aware decoding (on by default)", () => {
   /**
    * Shift_JIS bytes for a small page saying みどりのキャンプ場 / ご利用料金.
    * Bytes, not a string: a string fixture would be decoded by the test file's
@@ -572,26 +572,26 @@ describe("rateLimitedFetch — charset-aware decoding (opt-in)", () => {
     });
   }
 
-  it("reads the page in its own charset when asked", async () => {
+  it("reads a page in its own charset without being asked", async () => {
     const url = uniqUrl();
     stubBytes(SJIS, "text/html; charset=Shift_JIS", url);
-    const r = await rateLimitedFetch(url, fastOpts({ decodeJapanese: true }), c);
+    const r = await rateLimitedFetch(url, fastOpts(), c);
     expect(r.body).toContain("みどりのキャンプ場");
     expect(r.charset).toBe("shift_jis");
   });
 
-  it("leaves every other caller on the UTF-8 read it already had", async () => {
+  it("can still be opted out of, for a caller that wants the raw UTF-8 read", async () => {
     const url = uniqUrl();
     stubBytes(SJIS, "text/html; charset=Shift_JIS", url);
-    const r = await rateLimitedFetch(url, fastOpts(), c);
+    const r = await rateLimitedFetch(url, fastOpts({ decodeJapanese: false }), c);
     expect(r.body).not.toContain("みどりのキャンプ場");
     expect(r.charset).toBeUndefined();
   });
 
-  it("returns UTF-8 content unchanged under the flag", async () => {
+  it("returns UTF-8 content unchanged", async () => {
     const url = uniqUrl();
     stubBytes(Buffer.from("<html><body>キャンプ場</body></html>", "utf8"), "text/html", url);
-    const r = await rateLimitedFetch(url, fastOpts({ decodeJapanese: true }), c);
+    const r = await rateLimitedFetch(url, fastOpts(), c);
     expect(r.body).toContain("キャンプ場");
     expect(r.charset).toBe("utf-8");
   });
