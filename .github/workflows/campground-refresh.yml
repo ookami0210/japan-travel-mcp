@@ -5,6 +5,8 @@
 #                                                 official page at all
 #   scrapers/sources/scrape_campground_sites.ts   crawl those pages and keep
 #                                                 the text fresh (#45)
+#   scrapers/sources/enrich_campground_places.ts  derive what the coordinate
+#                                                 says for the rest (#46)
 #
 # The order matters: the crawl reads the status pass's verdicts and refuses to
 # run without them, so a status failure stops the run rather than letting the
@@ -99,6 +101,16 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DEADLINE_MINUTES: ${{ inputs.deadline_minutes || '120' }}
         run: npm run scrape:campground_sites
+
+      # Derives what a coordinate can say: the municipality it falls in (one
+      # request per coordinate not already cached, to a national agency's
+      # geocoder), the nearest station and park from layers already in the
+      # dataset, what is worth seeing nearby, and the facility tags OSM
+      # carries. This is the only data most campgrounds have, so it runs every
+      # month even when the crawl found nothing new.
+      - name: Place context (#46)
+        timeout-minutes: 180
+        run: npm run enrich:campground_places
 
       - name: Commit operational state
         run: |

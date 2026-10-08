@@ -96,6 +96,7 @@ import {
   TextBudget,
 } from "./lib/official_pages.js";
 import { isDirectoryUrl, listingPointer } from "./lib/listing_pointer.js";
+import { loadPlaceContext, placeBlock, PLACE_CONTEXT_NOTE } from "./lib/place_layer.js";
 import { pickR3Name, pickR3Description, r3Translation } from "./lib/r3.js";
 import {
   compileKeywordMatcher,
@@ -6496,6 +6497,9 @@ async function getHotels(args: {
   const officialPageStatus = await loadOfficialPageStatus(
     resolve(dataRoot(), "_state", "campground_site_status.json"),
   );
+  const placeContext = await loadPlaceContext(
+    resolve(dataRoot(), "campgrounds", "place_context.jsonl"),
+  );
   const budget = args.include_official_page_text ? new TextBudget() : null;
   const withOfficialPages = blended.map((h) => {
     const row = h as {
@@ -6506,10 +6510,15 @@ async function getHotels(args: {
       prefecture_code?: string | null;
       lodging_type?: string;
     };
+    // Derived from the coordinate, so it is there whether or not the operator
+    // has a page — and for most campgrounds it is the only data they have.
+    const place = placeContext.get(row.id ?? "");
+    const withPlace = place ? { ...h, place: placeBlock(place) } : h;
+
     const rec = officialPages.get(row.id ?? "");
     if (rec && rec.pages.length > 0) {
       return {
-        ...h,
+        ...withPlace,
         official_page: budget ? budget.attach(rec) : officialPageMeta(rec),
       };
     }
@@ -6534,9 +6543,9 @@ async function getHotels(args: {
         name: row.name ?? null,
         name_en: row.name_en ?? null,
       });
-      if (pointer) return { ...h, listed_elsewhere: pointer };
+      if (pointer) return { ...withPlace, listed_elsewhere: pointer };
     }
-    return h;
+    return withPlace;
   });
 
   return {
@@ -6738,6 +6747,9 @@ async function getHotels(args: {
       : {}),
     // Main hotels payload — placed AFTER canonical blocks for judge-view
     // priority (canonical answers visible in the first 12K chars).
+    ...(withOfficialPages.some((h) => (h as { place?: unknown }).place)
+      ? { place_context_note: PLACE_CONTEXT_NOTE }
+      : {}),
     hotels: withOfficialPages,
     count: blended.length,
     truncated: filtered.length + r3Lodgings.length > limit,
@@ -12710,7 +12722,7 @@ const TOOLS = [
   {
     name: "get_hotels",
     description:
-      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nAccommodations whose own pages have been read carry an `official_page` block: the page list with titles, sizes, hashes and the date they were fetched. Pass `include_official_page_text: true` to get the text itself — for campgrounds that text is usually the only public source for season, pitch prices, facilities and rules.\n\nA campground with no readable page of its own carries `listed_elsewhere` instead: the booking directory's prefecture page where it may be listed, with the name to look for. That pointer is computed, not crawled — `listing_verified` is always false, and none of the directory's content (prices, availability, reviews) is held here.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
+      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nAccommodations whose own pages have been read carry an `official_page` block: the page list with titles, sizes, hashes and the date they were fetched. Pass `include_official_page_text: true` to get the text itself — for campgrounds that text is usually the only public source for season, pitch prices, facilities and rules.\n\nA campground with no readable page of its own carries `listed_elsewhere` instead: the booking directory's prefecture page where it may be listed, with the name to look for. That pointer is computed, not crawled — `listing_verified` is always false, and none of the directory's content (prices, availability, reviews) is held here.\n\nCampgrounds also carry a `place` block derived from their coordinates: the municipality and neighbourhood the point falls in (national mapping agency), the nearest railway station, the nearest national / quasi-national park with that park's own area, what is worth seeing within 15 km, and the facility tags OpenStreetMap carries (fee, pitches, toilets, water, power, season). Distances are straight lines, not travel time. Most campgrounds have no website and no address on record, and this is the data they do have.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
     inputSchema: {
       type: "object",
       properties: {

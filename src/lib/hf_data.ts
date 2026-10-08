@@ -73,6 +73,9 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // listing / none). get_hotels needs it to tell a campground whose own page
   // we simply have not crawled yet from one whose page is gone.
   "_state/campground_site_status.json",
+  // Derived place context per campground (municipality, nearest station, park,
+  // what is nearby, OSM facility tags) — the only data most of them have.
+  "campgrounds/place_context.jsonl",
 ];
 
 /** Where the cached data lives. */

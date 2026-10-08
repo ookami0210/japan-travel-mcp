@@ -206,6 +206,55 @@ export const FIXTURE_CAMPGROUND_NO_SITE = {
   ]
 } as const;
 
+
+/** Place context for the website-less fixture campground (DATA_SOURCES #46). */
+export const FIXTURE_PLACE_CONTEXT = {
+  "id": "fixture-campground-2",
+  "name": "フィクスチャ町営野営場",
+  "prefecture_code": "31",
+  "coordinates": {
+    "lat": 35.4,
+    "lng": 134.3
+  },
+  "municipality": {
+    "muni_code": "31201",
+    "name": "鳥取市",
+    "prefecture_name": "鳥取県",
+    "locality": "国府町",
+    "source": "国土地理院 (Geospatial Information Authority of Japan) reverse geocoder",
+    "source_url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress",
+    "retrieved_at": "2026-10-08T00:00:00Z"
+  },
+  "nearest_station": {
+    "name_ja": "フィクスチャ駅",
+    "name_en": "Fixture Station",
+    "qid": "Q-TEST-ST-1",
+    "straight_line_m": 3200
+  },
+  "nearest_park": {
+    "name_ja": "フィクスチャ国定公園",
+    "name_en": "Fixture Quasi-National Park",
+    "qid": "Q-TEST-PARK-1",
+    "straight_line_m": 8100,
+    "park_kind": "quasi_national_park",
+    "park_area_km2": 123.4
+  },
+  "nearby_attractions": [
+    {
+      "name_ja": "フィクスチャ滝",
+      "name_en": "Fixture Falls",
+      "qid": "Q-TEST-ATT-1",
+      "straight_line_m": 1800
+    }
+  ],
+  "osm_facts": {
+    "fee": "no",
+    "toilets": "yes",
+    "capacity_tents": "20"
+  },
+  "derived_at": "2026-10-08T00:00:00Z"
+} as const;
+
 export function pickFixtureContent(rel: string): string {
   if (rel.startsWith("prefectures/")) {
     const fx = defaultFixtureForSlug(basename(rel, ".json"));
@@ -222,6 +271,9 @@ export function pickFixtureContent(rel: string): string {
       generated_at: "2026-01-01",
       hotels: [FIXTURE_CAMPGROUND, FIXTURE_CAMPGROUND_NO_SITE],
     });
+  }
+  if (rel === "campgrounds/place_context.jsonl") {
+    return `${JSON.stringify(FIXTURE_PLACE_CONTEXT)}\n`;
   }
   if (rel === "campgrounds/official_pages.jsonl") {
     return `${JSON.stringify(FIXTURE_OFFICIAL_PAGES)}\n`;

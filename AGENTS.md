@@ -149,6 +149,10 @@ npm run quality:campground_status  # Read each campground's official page once a
 npm run scrape:campground_sites    # Crawl the campgrounds the status pass found live
                                    #   (homepage + up to 7 info pages, 30-day recheck,
                                    #   LIMIT / ONLY / DEADLINE_MINUTES env overrides)
+npm run enrich:campground_places   # Derive place context from each campground's coordinate
+                                   #   (municipality via 国土地理院, nearest station / park,
+                                   #   nearby attractions, OSM facility tags).
+                                   #   SKIP_GEOCODE=1 for the offline parts only
 ```
 
 Smoke scripts (run directly with `tsx`, not via npm script): `scripts/smoke_intent.ts`,
@@ -171,7 +175,7 @@ Both transports share the same registry via `buildServer()`.
 | `search_semantic` | Vector search over `multilingual-e5-small` embeddings |
 | `search_hybrid` | BM25 + vector + RRF fusion — preferred general-purpose retriever |
 | `get_spots` | Tourist spots in a prefecture / municipality (municipal scrape ∪ Wikidata) |
-| `get_hotels` | Accommodations (Wikidata ∪ OSM, with confirmed-cluster flagging) + `official_page` block from the #45 campground layer (page list always, text under `include_official_page_text`), or `listed_elsewhere` when a campground has no readable page of its own (computed pointer, never a crawl — see `src/lib/listing_pointer.ts`) |
+| `get_hotels` | Accommodations (Wikidata ∪ OSM, with confirmed-cluster flagging) + `official_page` block from the #45 campground layer (page list always, text under `include_official_page_text`), or `listed_elsewhere` when a campground has no readable page of its own (computed pointer, never a crawl — see `src/lib/listing_pointer.ts`), plus a `place` block derived from the coordinate (#46: municipality via 国土地理院, nearest station / park, nearby attractions, OSM facility tags) |
 | `get_transport` | Coordinates + official URL for a spot |
 | `get_events` | Festivals via live Wikidata SPARQL (in-memory cache, optional month filter) |
 | `get_festivals` | Festivals from R-3 + scrape Schema.org Events (broader coverage than `get_events`) |
@@ -263,6 +267,7 @@ What lives **only on Hugging Face** (downloaded at runtime, written by scrapers)
 data/prefectures/<slug>.json       # 47 files — per-prefecture spots + wikidata_attractions
 data/hotels/master.json            # Merged Wikidata + OSM hotels
 data/hotels/raw/{wikidata,osm}.jsonl
+data/campgrounds/place_context.jsonl            # Derived place context per campground (#46)
 data/campgrounds/official_pages.jsonl           # Campground official-page text (#45;
                                                 #   OPTIONAL_RUNTIME_FILES — a dataset
                                                 #   without it degrades to "no official
