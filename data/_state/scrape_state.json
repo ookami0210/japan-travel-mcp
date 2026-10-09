@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "last_run_at": "2026-10-09T01:26:49.299Z",
+  "last_run_at": "2026-10-09T14:04:23.882Z",
   "per_municipality": {
     "102016": {
       "last_scraped_at": "2026-10-04T20:06:38.919Z",
@@ -382,12 +382,12 @@
     },
     "111074": {
       "last_scraped_at": "2026-10-03T19:04:01.429Z",
-      "last_status": "partial",
-      "pages_fetched": 54,
-      "spots_found": 17,
-      "error_count": 37,
+      "last_status": "in_progress",
+      "pages_fetched": 102,
+      "spots_found": 35,
+      "error_count": 67,
       "truncated_at_cap": false,
-      "total_pages": 154
+      "total_pages": 157
     },
     "111082": {
       "last_scraped_at": "2026-10-04T17:06:50.017Z",
@@ -2984,11 +2984,11 @@
     "162043": {
       "last_scraped_at": "2026-10-02T21:10:30.118Z",
       "last_status": "in_progress",
-      "pages_fetched": 0,
-      "spots_found": 0,
-      "error_count": 0,
+      "pages_fetched": 416,
+      "spots_found": 391,
+      "error_count": 255,
       "truncated_at_cap": false,
-      "total_pages": 1833
+      "total_pages": 1947
     },
     "162051": {
       "last_scraped_at": "2026-10-05T12:41:49.992Z",
@@ -5106,11 +5106,11 @@
       "total_pages": 75
     },
     "231002": {
-      "last_scraped_at": "2026-10-03T11:35:52.816Z",
-      "last_status": "in_progress",
-      "pages_fetched": 1329,
-      "spots_found": 1105,
-      "error_count": 226,
+      "last_scraped_at": "2026-10-09T12:46:09.910Z",
+      "last_status": "partial",
+      "pages_fetched": 1753,
+      "spots_found": 802,
+      "error_count": 961,
       "truncated_at_cap": false,
       "total_pages": 3094
     },
@@ -5754,11 +5754,11 @@
       "total_pages": 15
     },
     "242039": {
-      "last_scraped_at": "2026-10-03T16:36:00.416Z",
-      "last_status": "in_progress",
-      "pages_fetched": 668,
-      "spots_found": 602,
-      "error_count": 66,
+      "last_scraped_at": "2026-10-09T11:26:16.194Z",
+      "last_status": "partial",
+      "pages_fetched": 1748,
+      "spots_found": 1522,
+      "error_count": 227,
       "truncated_at_cap": false,
       "total_pages": 2417
     },
@@ -8256,13 +8256,13 @@
       "total_pages": 73
     },
     "312037": {
-      "last_scraped_at": "2026-10-03T17:13:08.286Z",
+      "last_scraped_at": "2026-10-09T12:07:36.667Z",
       "last_status": "partial",
-      "pages_fetched": 427,
-      "spots_found": 422,
+      "pages_fetched": 420,
+      "spots_found": 415,
       "error_count": 6,
       "truncated_at_cap": false,
-      "total_pages": 428
+      "total_pages": 421
     },
     "312045": {
       "last_scraped_at": "2026-10-06T19:31:51.277Z",
@@ -8868,19 +8868,19 @@
       "total_pages": 1910
     },
     "341011": {
-      "last_scraped_at": "2026-10-03T16:49:42.175Z",
-      "last_status": "in_progress",
-      "pages_fetched": 242,
-      "spots_found": 238,
-      "error_count": 4,
+      "last_scraped_at": "2026-10-09T10:22:09.363Z",
+      "last_status": "success",
+      "pages_fetched": 35,
+      "spots_found": 35,
+      "error_count": 0,
       "truncated_at_cap": false,
       "total_pages": 277
     },
     "341029": {
-      "last_scraped_at": "2026-10-03T16:53:03.039Z",
-      "last_status": "in_progress",
-      "pages_fetched": 61,
-      "spots_found": 59,
+      "last_scraped_at": "2026-10-09T10:37:29.087Z",
+      "last_status": "partial",
+      "pages_fetched": 218,
+      "spots_found": 216,
       "error_count": 2,
       "truncated_at_cap": false,
       "total_pages": 279
@@ -8913,31 +8913,31 @@
       "total_pages": 277
     },
     "341061": {
-      "last_scraped_at": "2026-10-03T17:36:58.634Z",
+      "last_scraped_at": "2026-10-09T12:37:15.082Z",
       "last_status": "partial",
-      "pages_fetched": 273,
-      "spots_found": 269,
+      "pages_fetched": 274,
+      "spots_found": 270,
       "error_count": 4,
       "truncated_at_cap": false,
-      "total_pages": 273
+      "total_pages": 274
     },
     "341070": {
-      "last_scraped_at": "2026-10-03T17:02:28.207Z",
-      "last_status": "in_progress",
-      "pages_fetched": 0,
-      "spots_found": 0,
-      "error_count": 0,
-      "truncated_at_cap": false,
-      "total_pages": 71
-    },
-    "341088": {
-      "last_scraped_at": "2026-10-03T17:04:17.797Z",
+      "last_scraped_at": "2026-10-09T10:59:10.404Z",
       "last_status": "partial",
-      "pages_fetched": 279,
-      "spots_found": 275,
+      "pages_fetched": 274,
+      "spots_found": 270,
       "error_count": 4,
       "truncated_at_cap": false,
-      "total_pages": 279
+      "total_pages": 274
+    },
+    "341088": {
+      "last_scraped_at": "2026-10-09T11:09:45.623Z",
+      "last_status": "partial",
+      "pages_fetched": 280,
+      "spots_found": 276,
+      "error_count": 4,
+      "truncated_at_cap": false,
+      "total_pages": 280
     },
     "342025": {
       "last_scraped_at": "2026-10-07T11:43:12.622Z",
@@ -9048,7 +9048,7 @@
       "total_pages": 282
     },
     "342157": {
-      "last_scraped_at": "2026-10-03T17:16:03.888Z",
+      "last_scraped_at": "2026-10-09T11:36:51.706Z",
       "last_status": "partial",
       "pages_fetched": 26,
       "spots_found": 8,
@@ -10308,13 +10308,13 @@
       "total_pages": 68
     },
     "402028": {
-      "last_scraped_at": "2026-10-03T17:09:37.364Z",
+      "last_scraped_at": "2026-10-09T11:01:01.906Z",
       "last_status": "partial",
-      "pages_fetched": 132,
-      "spots_found": 123,
+      "pages_fetched": 134,
+      "spots_found": 125,
       "error_count": 12,
       "truncated_at_cap": false,
-      "total_pages": 135
+      "total_pages": 137
     },
     "402036": {
       "last_scraped_at": "2026-10-07T20:48:46.259Z",
@@ -10452,13 +10452,13 @@
       "total_pages": 8
     },
     "402206": {
-      "last_scraped_at": "2026-10-03T17:22:47.990Z",
+      "last_scraped_at": "2026-10-09T12:08:11.752Z",
       "last_status": "success",
-      "pages_fetched": 93,
-      "spots_found": 93,
+      "pages_fetched": 92,
+      "spots_found": 92,
       "error_count": 0,
       "truncated_at_cap": false,
-      "total_pages": 93
+      "total_pages": 92
     },
     "402214": {
       "last_scraped_at": "2026-10-07T15:57:18.951Z",
@@ -12405,16 +12405,16 @@
       "total_pages": 245
     },
     "465330": {
-      "last_scraped_at": "2026-10-03T17:18:12.176Z",
-      "last_status": "partial",
-      "pages_fetched": 4,
-      "spots_found": 1,
-      "error_count": 3,
+      "last_scraped_at": "2026-10-09T11:33:36.927Z",
+      "last_status": "failed",
+      "pages_fetched": 2,
+      "spots_found": 0,
+      "error_count": 2,
       "truncated_at_cap": false,
-      "total_pages": 4
+      "total_pages": 2
     },
     "465348": {
-      "last_scraped_at": "2026-10-03T17:16:31.073Z",
+      "last_scraped_at": "2026-10-09T12:06:47.408Z",
       "last_status": "partial",
       "pages_fetched": 236,
       "spots_found": 163,
@@ -12468,13 +12468,13 @@
       "total_pages": 96
     },
     "472093": {
-      "last_scraped_at": "2026-10-03T17:16:30.462Z",
+      "last_scraped_at": "2026-10-09T11:49:53.670Z",
       "last_status": "partial",
-      "pages_fetched": 133,
+      "pages_fetched": 135,
       "spots_found": 3,
-      "error_count": 130,
+      "error_count": 132,
       "truncated_at_cap": false,
-      "total_pages": 133
+      "total_pages": 135
     },
     "472107": {
       "last_scraped_at": "2026-10-08T10:22:43.708Z",
@@ -12621,22 +12621,22 @@
       "total_pages": 136
     },
     "473251": {
-      "last_scraped_at": "2026-10-03T17:03:11.975Z",
-      "last_status": "in_progress",
-      "pages_fetched": 0,
-      "spots_found": 0,
-      "error_count": 0,
+      "last_scraped_at": "2026-10-09T10:44:39.060Z",
+      "last_status": "partial",
+      "pages_fetched": 163,
+      "spots_found": 158,
+      "error_count": 5,
       "truncated_at_cap": false,
-      "total_pages": 25
+      "total_pages": 163
     },
     "473260": {
-      "last_scraped_at": "2026-10-03T17:51:00.122Z",
+      "last_scraped_at": "2026-10-09T13:47:41.158Z",
       "last_status": "partial",
-      "pages_fetched": 414,
-      "spots_found": 255,
-      "error_count": 159,
+      "pages_fetched": 369,
+      "spots_found": 257,
+      "error_count": 112,
       "truncated_at_cap": false,
-      "total_pages": 414
+      "total_pages": 369
     },
     "473278": {
       "last_scraped_at": "2026-10-07T22:58:09.857Z",
@@ -12783,13 +12783,13 @@
       "total_pages": 28
     },
     "473812": {
-      "last_scraped_at": "2026-10-03T17:39:24.946Z",
+      "last_scraped_at": "2026-10-09T12:43:33.917Z",
       "last_status": "partial",
-      "pages_fetched": 215,
-      "spots_found": 213,
+      "pages_fetched": 209,
+      "spots_found": 207,
       "error_count": 2,
       "truncated_at_cap": false,
-      "total_pages": 215
+      "total_pages": 209
     },
     "473821": {
       "last_scraped_at": "2026-10-07T21:33:49.962Z",
@@ -12945,13 +12945,13 @@
       "total_pages": 101
     },
     "012041": {
-      "last_scraped_at": "2026-10-03T17:15:58.646Z",
+      "last_scraped_at": "2026-10-09T11:23:37.640Z",
       "last_status": "partial",
-      "pages_fetched": 131,
-      "spots_found": 85,
-      "error_count": 46,
+      "pages_fetched": 129,
+      "spots_found": 87,
+      "error_count": 42,
       "truncated_at_cap": false,
-      "total_pages": 131
+      "total_pages": 129
     },
     "012084": {
       "last_scraped_at": "2026-10-08T12:32:41.630Z",
@@ -12963,13 +12963,13 @@
       "total_pages": 30
     },
     "012050": {
-      "last_scraped_at": "2026-10-03T17:45:12.139Z",
+      "last_scraped_at": "2026-10-09T13:22:42.403Z",
       "last_status": "partial",
-      "pages_fetched": 244,
-      "spots_found": 242,
-      "error_count": 32,
+      "pages_fetched": 239,
+      "spots_found": 237,
+      "error_count": 30,
       "truncated_at_cap": false,
-      "total_pages": 274
+      "total_pages": 267
     },
     "012114": {
       "last_scraped_at": "2026-10-08T19:53:47.979Z",
@@ -13053,13 +13053,13 @@
       "total_pages": 0
     },
     "012131": {
-      "last_scraped_at": "2026-10-03T17:14:08.007Z",
+      "last_scraped_at": "2026-10-09T11:32:16.279Z",
       "last_status": "partial",
-      "pages_fetched": 177,
-      "spots_found": 128,
-      "error_count": 49,
+      "pages_fetched": 192,
+      "spots_found": 133,
+      "error_count": 59,
       "truncated_at_cap": false,
-      "total_pages": 177
+      "total_pages": 192
     },
     "012211": {
       "last_scraped_at": "2026-10-08T10:48:46.374Z",
@@ -13180,12 +13180,12 @@
     },
     "012335": {
       "last_scraped_at": "2026-10-03T18:19:02.005Z",
-      "last_status": "partial",
-      "pages_fetched": 308,
-      "spots_found": 305,
-      "error_count": 3,
+      "last_status": "in_progress",
+      "pages_fetched": 116,
+      "spots_found": 116,
+      "error_count": 0,
       "truncated_at_cap": false,
-      "total_pages": 308
+      "total_pages": 334
     },
     "013323": {
       "last_scraped_at": "2026-10-08T10:53:52.682Z",
@@ -13260,7 +13260,7 @@
       "total_pages": 52
     },
     "013331": {
-      "last_scraped_at": "2026-10-03T17:51:40.103Z",
+      "last_scraped_at": "2026-10-09T13:21:35.634Z",
       "last_status": "partial",
       "pages_fetched": 201,
       "spots_found": 195,
@@ -13287,7 +13287,7 @@
       "total_pages": 385
     },
     "013048": {
-      "last_scraped_at": "2026-10-03T17:40:38.734Z",
+      "last_scraped_at": "2026-10-09T12:56:17.982Z",
       "last_status": "partial",
       "pages_fetched": 20,
       "spots_found": 16,
@@ -13405,12 +13405,12 @@
     },
     "013951": {
       "last_scraped_at": "2026-10-03T19:04:27.847Z",
-      "last_status": "partial",
-      "pages_fetched": 59,
-      "spots_found": 35,
-      "error_count": 24,
+      "last_status": "in_progress",
+      "pages_fetched": 0,
+      "spots_found": 0,
+      "error_count": 0,
       "truncated_at_cap": false,
-      "total_pages": 372
+      "total_pages": 163
     },
     "013960": {
       "last_scraped_at": "2026-10-08T15:22:41.550Z",
@@ -13422,7 +13422,7 @@
       "total_pages": 90
     },
     "013978": {
-      "last_scraped_at": "2026-10-03T17:38:49.313Z",
+      "last_scraped_at": "2026-10-09T12:32:28.201Z",
       "last_status": "partial",
       "pages_fetched": 3,
       "spots_found": 2,
@@ -13746,13 +13746,13 @@
       "total_pages": 15
     },
     "014613": {
-      "last_scraped_at": "2026-10-03T18:11:43.429Z",
+      "last_scraped_at": "2026-10-09T13:37:26.035Z",
       "last_status": "partial",
-      "pages_fetched": 233,
-      "spots_found": 231,
+      "pages_fetched": 239,
+      "spots_found": 237,
       "error_count": 3,
       "truncated_at_cap": false,
-      "total_pages": 234
+      "total_pages": 240
     },
     "014621": {
       "last_scraped_at": "2026-10-08T12:45:18.342Z",
@@ -14233,12 +14233,12 @@
     },
     "016101": {
       "last_scraped_at": "2026-10-03T18:23:20.760Z",
-      "last_status": "partial",
-      "pages_fetched": 213,
-      "spots_found": 208,
-      "error_count": 5,
+      "last_status": "in_progress",
+      "pages_fetched": 5,
+      "spots_found": 5,
+      "error_count": 0,
       "truncated_at_cap": false,
-      "total_pages": 213
+      "total_pages": 182
     },
     "016314": {
       "last_scraped_at": "2026-10-08T20:03:18.421Z",
@@ -14286,13 +14286,13 @@
       "total_pages": 44
     },
     "016365": {
-      "last_scraped_at": "2026-10-03T17:44:07.551Z",
+      "last_scraped_at": "2026-10-09T13:00:00.666Z",
       "last_status": "partial",
-      "pages_fetched": 145,
-      "spots_found": 137,
+      "pages_fetched": 144,
+      "spots_found": 136,
       "error_count": 8,
       "truncated_at_cap": false,
-      "total_pages": 145
+      "total_pages": 144
     },
     "016373": {
       "last_scraped_at": "2026-10-08T15:20:18.035Z",
@@ -14799,7 +14799,7 @@
       "total_pages": 17
     },
     "024261": {
-      "last_scraped_at": "2026-10-03T18:16:33.690Z",
+      "last_scraped_at": "2026-10-09T13:59:24.971Z",
       "last_status": "partial",
       "pages_fetched": 184,
       "spots_found": 175,
@@ -15042,13 +15042,13 @@
       "total_pages": 43
     },
     "033812": {
-      "last_scraped_at": "2026-10-03T17:40:18.236Z",
+      "last_scraped_at": "2026-10-09T12:30:32.663Z",
       "last_status": "partial",
-      "pages_fetched": 70,
+      "pages_fetched": 71,
       "spots_found": 12,
-      "error_count": 58,
+      "error_count": 59,
       "truncated_at_cap": false,
-      "total_pages": 70
+      "total_pages": 71
     },
     "034029": {
       "last_scraped_at": "2026-10-08T21:35:44.994Z",
@@ -15232,12 +15232,12 @@
     },
     "042056": {
       "last_scraped_at": "2026-10-03T17:31:40.456Z",
-      "last_status": "partial",
-      "pages_fetched": 885,
-      "spots_found": 582,
-      "error_count": 303,
+      "last_status": "in_progress",
+      "pages_fetched": 836,
+      "spots_found": 553,
+      "error_count": 283,
       "truncated_at_cap": false,
-      "total_pages": 885
+      "total_pages": 881
     },
     "042064": {
       "last_scraped_at": "2026-10-08T20:20:12.020Z",
@@ -15331,12 +15331,12 @@
     },
     "043010": {
       "last_scraped_at": "2026-10-03T19:06:36.477Z",
-      "last_status": "partial",
-      "pages_fetched": 85,
-      "spots_found": 8,
-      "error_count": 77,
+      "last_status": "in_progress",
+      "pages_fetched": 0,
+      "spots_found": 0,
+      "error_count": 0,
       "truncated_at_cap": false,
-      "total_pages": 189
+      "total_pages": 15
     },
     "043028": {
       "last_scraped_at": "2026-10-04T00:26:18.248Z",
@@ -15726,13 +15726,13 @@
       "total_pages": 103
     },
     "054631": {
-      "last_scraped_at": "2026-10-03T18:16:04.585Z",
+      "last_scraped_at": "2026-10-09T13:36:18.226Z",
       "last_status": "partial",
-      "pages_fetched": 203,
+      "pages_fetched": 208,
       "spots_found": 151,
-      "error_count": 52,
+      "error_count": 57,
       "truncated_at_cap": false,
-      "total_pages": 203
+      "total_pages": 208
     },
     "054640": {
       "last_scraped_at": "2026-10-03T21:31:01.455Z",
@@ -16644,13 +16644,13 @@
       "total_pages": 47
     },
     "082082": {
-      "last_scraped_at": "2026-10-03T18:09:03.063Z",
+      "last_scraped_at": "2026-10-09T13:18:15.161Z",
       "last_status": "partial",
-      "pages_fetched": 163,
-      "spots_found": 119,
-      "error_count": 44,
+      "pages_fetched": 183,
+      "spots_found": 130,
+      "error_count": 53,
       "truncated_at_cap": false,
-      "total_pages": 163
+      "total_pages": 183
     },
     "082104": {
       "last_scraped_at": "2026-10-04T14:23:30.134Z",
@@ -16726,12 +16726,12 @@
     },
     "082201": {
       "last_scraped_at": "2026-10-03T19:06:06.622Z",
-      "last_status": "partial",
-      "pages_fetched": 80,
-      "spots_found": 62,
-      "error_count": 18,
+      "last_status": "in_progress",
+      "pages_fetched": 0,
+      "spots_found": 0,
+      "error_count": 0,
       "truncated_at_cap": false,
-      "total_pages": 124
+      "total_pages": 29
     },
     "082210": {
       "last_scraped_at": "2026-10-04T16:45:09.120Z",
@@ -17040,13 +17040,13 @@
       "total_pages": 18
     },
     "092088": {
-      "last_scraped_at": "2026-10-03T18:16:08.312Z",
+      "last_scraped_at": "2026-10-09T13:41:15.932Z",
       "last_status": "partial",
-      "pages_fetched": 185,
-      "spots_found": 169,
-      "error_count": 16,
+      "pages_fetched": 131,
+      "spots_found": 128,
+      "error_count": 3,
       "truncated_at_cap": false,
-      "total_pages": 185
+      "total_pages": 131
     },
     "092096": {
       "last_scraped_at": "2026-10-04T16:26:53.507Z",
@@ -17067,13 +17067,13 @@
       "total_pages": 18
     },
     "092118": {
-      "last_scraped_at": "2026-10-03T18:32:23.559Z",
+      "last_scraped_at": "2026-10-09T14:02:06.697Z",
       "last_status": "partial",
-      "pages_fetched": 134,
-      "spots_found": 22,
-      "error_count": 112,
+      "pages_fetched": 142,
+      "spots_found": 29,
+      "error_count": 113,
       "truncated_at_cap": false,
-      "total_pages": 134
+      "total_pages": 142
     },
     "092134": {
       "last_scraped_at": "2026-10-05T15:51:12.031Z",
@@ -17217,8 +17217,8 @@
     "triggered_at": null
   },
   "coverage": {
-    "last_check_at": "2026-10-09T01:26:50.989Z",
-    "max_age_days": 6.2,
+    "last_check_at": "2026-10-09T14:04:25.520Z",
+    "max_age_days": 6.7,
     "count_over_sla": 0,
     "never_scraped": 0
   }
