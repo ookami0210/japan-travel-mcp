@@ -7,6 +7,8 @@
 #                                                 the text fresh (#45)
 #   scrapers/sources/enrich_campground_places.ts  derive what the coordinate
 #                                                 says for the rest (#46)
+#   scrapers/sources/import_campground_list.ts    a compiled campground list
+#                                                 into the layer (#47)
 #
 # The order matters: the crawl reads the status pass's verdicts and refuses to
 # run without them, so a status failure stops the run rather than letting the
@@ -77,6 +79,14 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_DATASET_REPO: ${{ secrets.HF_DATASET_REPO || 'open-travel/japan-travel-mcp-data' }}
         run: python3 scrapers/hf/prefetch_state.py --preset campground
+
+      # Takes the compiled campground list into the lodging layer: a coordinate
+      # for each address, the record it already is where it is one of ours, and
+      # the rest to the review queue. Crawls nothing. Runs first so the status
+      # pass sees any new operator URL this month.
+      - name: Compiled campground list (#47)
+        timeout-minutes: 60
+        run: npm run import:campground_list
 
       # Reads each campground's URL once per 30 days and labels it: a live
       # official page, a closure notice for a human to read, a dead URL, a

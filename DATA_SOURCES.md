@@ -80,7 +80,7 @@ corresponding workflow flips ON.
 | **WD-FOUNDATION** | `wd-foundation.yml` (matrix legs) | monthly (1st) 05:00 JST | gh-actions (cron OFF until launch) | #1–4, #15–19, #24, #25, #29–38, #39 |
 | **GLOSSARY** | `wd-foundation.yml` (leg `glossary`) | monthly | gh-actions (cron OFF until launch) | #20–22 |
 | **WIKIPEDIA-ABSTRACT** | `wd-foundation.yml` (leg `wikipedia-summaries`) | monthly | gh-actions (cron OFF until launch) | #34 / #35 / #36 (live) / #P1 (planned alias) |
-| **LODGING** | `campground-refresh.yml` | monthly (8th) 05:00 JST | gh-actions | #45, #46 |
+| **LODGING** | `campground-refresh.yml` | monthly (8th) 05:00 JST | gh-actions | #45, #46, #47 |
 | **EVENTS** | (planned) | weekly during seasons | local (cold-start, planned) | #P4, #P10, #P14 |
 | **SEASONAL** | (planned) | weekly during seasons | gh-actions (planned) | #P9 |
 
@@ -459,6 +459,58 @@ requires either extending an existing channel or creating a new one.
 - **Why derived and not scraped**: the operator has no page to read. Distances
   are straight lines and a park's distance is to its recorded point, never a
   claim of containment; OSM tags are published as tagged, not normalised.
+- **Status**: `active`
+
+#### #47 — Compiled campground list (name, address, phone, operator URL)
+- **Authority**: each campground operator, for the facts the list carries —
+  that the facility exists, where it is, and where its own site is.
+- **URL**: none to fetch. The list is compiled and deduplicated outside this
+  repository and arrives as one file, `data/_state/campground_list.json`.
+  Coordinates for entries that arrive without one come from 国土地理院 address
+  search (https://msearch.gsi.go.jp/address-search/AddressSearch).
+- **License**: facts about a place — a name, an address, a phone number and the
+  operator's own URL. Nothing a guest would read is held here: the operator's
+  page is crawled from the operator's own server by #45, under the ordinary
+  politeness rules. This is the line that keeps the dataset inside
+  `DATA_POLICY.md` — the list may say a campground exists, it is not a source
+  of what the campground is like.
+- **Fetcher**: `scrapers/sources/import_campground_list.ts`
+- **Output**: `data/hotels/raw/campground_list.json` (a third matcher input
+  beside wikidata.json and osm.json) and
+  `data/_state/campground_list_geocode.json` (address → coordinate cache)
+- **Cadence**: monthly (`campground-refresh.yml`, before the status pass, so a
+  newly listed operator URL is read the same month; the geocode cache makes a
+  re-run cheap). The import is idempotent — an entry keeps its list id, so a
+  re-import updates rather than duplicates.
+- **Channel**: LODGING
+- **Coverage**: this exists because the OSM-derived layer misses the commercial
+  side of the sector. The list holds **1,346 campgrounds**, of which 101 carry
+  an address and are therefore placeable; of those, **5 merged** into rows
+  already held (operator domain 3, name in prefecture 2), **9 went to the
+  review queue** as possible duplicates under another name, and the rest were
+  new — 戸隠キャンプ場, くるみの森キャンプ場, ペンギン村オートキャンプ場 among
+  them. 84 carry the operator's own URL, which is why so few campgrounds had a
+  readable official page: the segment that keeps a website was the segment
+  missing from the ledger. Measured effect on what can be crawled: campgrounds
+  with a live official page went **176 → 244**, and a crawl of those read 1,224
+  pages from 205 operator sites.
+- **The 1,245 entries with no address**: they are on the list because they
+  exist, and they are deliberately **not** imported. The lodging tools filter
+  on prefecture, so a row with neither a coordinate nor a prefecture would be
+  invisible to every caller while carrying nothing — the opposite of the point.
+  They wait for an address; filling that in is the next piece of work on this
+  layer.
+- **Why the matcher and not a sidecar**: a campground we already hold must
+  merge and contribute only its URL, not append a second row. Identity is
+  decided at import (`scrapers/lib/campground_identity.ts`), which is the only
+  place that has the prefecture, and handed to the matcher as an explicit
+  `matches_held` reference to an OSM or Wikidata id. The matcher honours it
+  rather than re-deriving identity from a distance and a name: an address
+  geocodes to the block, commonly hundreds of metres and sometimes kilometres
+  from the facility node, so geometry pairs nothing. Entries that merely
+  resemble a row we hold go to `data/hotels/review/` for a person — one of the
+  nine candidates is a hotel that shares a name with a campground, which an
+  automatic merge would have collapsed into one row.
 - **Status**: `active`
 
 #### #34 — Wikipedia ja summaries (description_ja upgrade)
@@ -1016,6 +1068,14 @@ contract.
   OOM crash fix (heap guard + load-time compaction) for default-heap
   machines.
 
+- 2026-10-11 — added #47, a compiled campground list, as a source of two facts:
+  that a campground exists, and where its own site is. The OSM-derived layer
+  covers the public side of this sector and misses the commercial one — 86 of a
+  101-entry list were absent, and 87% of the list carried an operator URL,
+  which is the real reason the official-page count sat at 176. The list is
+  compiled outside this repository; nothing about what a campground is like is
+  held here, and the operator's page is crawled from the operator's own server
+  by #45.
 - 2026-10-11 — audited the campground layer and removed 86 rows that were not
   campgrounds: 74 from the 2011 emergency-shelter import (prefectural shelter
   lists mapped as `tourism=camp_site` with `temporary=yes` / `refugee=<count>`

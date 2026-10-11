@@ -153,6 +153,12 @@ PRESETS: dict[str, list[str]] = {
         # month, which is both rude and pointless — coordinates do not move.
         "campgrounds/place_context.jsonl",
         "_state/campground_geocode_cache.json",
+        # The compiled list, its imported form and the address→coordinate
+        # cache. Without the cache a fresh runner re-geocodes every address at
+        # the agency every month, for answers that cannot have changed.
+        "_state/campground_list.json",
+        "hotels/raw/campground_list.json",
+        "_state/campground_list_geocode.json",
         # Inputs the derivation reads: stations, parks and the attraction
         # corpus live only on HF.
         "_state/railway_stations.json",

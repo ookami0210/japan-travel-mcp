@@ -1,42 +1,87 @@
 {
-  "id": "324c9d038771",
+  "id": "88a73eefb9e1",
   "confidence": "likely",
   "match_reasons": [
-    "distance 98m",
+    "distance 7m",
     "name similarity 0.83 (likely)"
   ],
   "candidates": [
     {
       "source": "osm",
-      "source_id": "way/193446469",
-      "source_url": "https://www.openstreetmap.org/way/193446469",
-      "name": "Gensei",
+      "source_id": "node/14103524238",
+      "source_url": "https://www.openstreetmap.org/node/14103524238",
+      "name": "カヤ・リゾート古宇利",
       "name_en": null,
       "name_zh": null,
       "name_ko": null,
       "coordinates": {
-        "lat": 42.8563705,
-        "lng": 140.7093898
+        "lat": 26.7024462,
+        "lng": 128.0104935
       },
       "phone": null,
       "street": null,
       "postal_code": null,
       "website": null,
-      "type": "chalet",
-      "prefecture_code": "01",
+      "type": "hotel",
+      "prefecture_code": "47",
       "seasonal": null,
       "hours_raw": null,
       "raw": {
-        "osm_id": "way/193446469",
-        "osm_url": "https://www.openstreetmap.org/way/193446469",
-        "type": "chalet",
-        "name": "Gensei",
+        "osm_id": "node/14103524238",
+        "osm_url": "https://www.openstreetmap.org/node/14103524238",
+        "type": "hotel",
+        "name": "カヤ・リゾート古宇利",
         "name_en": null,
         "name_zh": null,
         "name_ko": null,
         "coordinates": {
-          "lat": 42.8563705,
-          "lng": 140.7093898
+          "lat": 26.7024462,
+          "lng": 128.0104935
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "カヤ・リゾート古宇利",
+          "tourism": "hotel"
+        }
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/1550618844",
+      "source_url": "https://www.openstreetmap.org/way/1550618844",
+      "name": "カヤ・リゾート古宇利島",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 26.7024097,
+        "lng": 128.0104365
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "hotel",
+      "prefecture_code": "47",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "way/1550618844",
+        "osm_url": "https://www.openstreetmap.org/way/1550618844",
+        "type": "hotel",
+        "name": "カヤ・リゾート古宇利島",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 26.7024097,
+          "lng": 128.0104365
         },
         "postal_code": null,
         "full_address": null,
@@ -47,56 +92,8 @@
         "stars": null,
         "raw_tags": {
           "building": "yes",
-          "name": "Gensei",
-          "source": "Bing",
-          "tourism": "chalet"
-        }
-      }
-    },
-    {
-      "source": "osm",
-      "source_id": "way/193446517",
-      "source_url": "https://www.openstreetmap.org/way/193446517",
-      "name": "Sensei",
-      "name_en": null,
-      "name_zh": null,
-      "name_ko": null,
-      "coordinates": {
-        "lat": 42.8570531,
-        "lng": 140.7086326
-      },
-      "phone": null,
-      "street": null,
-      "postal_code": null,
-      "website": null,
-      "type": "apartment",
-      "prefecture_code": "01",
-      "seasonal": null,
-      "hours_raw": null,
-      "raw": {
-        "osm_id": "way/193446517",
-        "osm_url": "https://www.openstreetmap.org/way/193446517",
-        "type": "apartment",
-        "name": "Sensei",
-        "name_en": null,
-        "name_zh": null,
-        "name_ko": null,
-        "coordinates": {
-          "lat": 42.8570531,
-          "lng": 140.7086326
-        },
-        "postal_code": null,
-        "full_address": null,
-        "city": null,
-        "street": null,
-        "phone": null,
-        "website": null,
-        "stars": null,
-        "raw_tags": {
-          "building": "apartments",
-          "name": "Sensei",
-          "source": "Bing",
-          "tourism": "apartment"
+          "name": "カヤ・リゾート古宇利島",
+          "tourism": "hotel"
         }
       }
     }

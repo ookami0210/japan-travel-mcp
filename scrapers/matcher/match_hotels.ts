@@ -3,6 +3,8 @@
  *
  * Inputs:  data/hotels/raw/wikidata.json
  *          data/hotels/raw/osm.json
+ *          data/hotels/raw/campground_list.json  (a compiled list of
+ *            campgrounds — see scrapers/sources/import_campground_list.ts)
  *
  * Algorithm:
  *   1st pass: group records within ~100m by coordinates (grid bucketing)
@@ -31,6 +33,7 @@ import { createHash } from "node:crypto";
 const ROOT = new URL("../../", import.meta.url);
 const WIKIDATA_PATH = new URL("data/hotels/raw/wikidata.json", ROOT);
 const OSM_PATH = new URL("data/hotels/raw/osm.json", ROOT);
+const LIST_PATH = new URL("data/hotels/raw/campground_list.json", ROOT);
 const CENTROIDS_PATH = new URL(
   "data/_state/municipality_centroids.json",
   ROOT,
@@ -39,7 +42,7 @@ const MASTER_PATH = new URL("data/hotels/master.json", ROOT);
 const REVIEW_DIR = new URL("data/hotels/review/", ROOT);
 
 interface BaseHotel {
-  source: "wikidata" | "osm";
+  source: "wikidata" | "osm" | "list";
   source_id: string;
   source_url: string;
   name: string | null;
@@ -112,7 +115,7 @@ interface MatchedRecord {
   seasonal: string | null;
   /** Raw OSM opening_hours where tagged (machine-parseable spec). */
   hours_raw: string | null;
-  sources: { source: "wikidata" | "osm"; id: string; url: string }[];
+  sources: { source: "wikidata" | "osm" | "list"; id: string; url: string }[];
 }
 
 interface ReviewRecord {
@@ -140,9 +143,26 @@ function normalizeName(name: string | null): string {
     .trim();
 }
 
+/**
+ * A Japanese phone number in one comparable form.
+ *
+ * Sources write the same line three ways: `+81 883 86 3077` in OpenStreetMap,
+ * `0883-86-3077` on the operator's own page, `(0883) 86-3077` in a directory.
+ * Taking the last ten digits — which is what this did — turns the first into
+ * `1883863077` and the second into `0883863077`, so the one signal the matcher
+ * trusts most never fired across those two sources. The country code is
+ * replaced by the trunk zero instead, which is what the two forms actually
+ * mean, and the whole number is then compared.
+ */
+
 function normalizePhone(p: string | null): string {
   if (!p) return "";
-  return p.replace(/\D/g, "").slice(-10);
+  let d = p.replace(/\D/g, "");
+  // +81 / 0081 → domestic form with its trunk zero.
+  d = d.replace(/^(?:00)?81(?=\d{9,10}$)/, "0");
+  if (!d.startsWith("0") && d.length >= 9 && d.length <= 10) d = `0${d}`;
+  // A domestic Japanese number is 10 or 11 digits including the trunk zero.
+  return d.length >= 10 && d.length <= 11 ? d : "";
 }
 
 function levenshtein(a: string, b: string): number {
@@ -278,6 +298,57 @@ async function loadOsm(): Promise<BaseHotel[]> {
   }
 }
 
+
+/**
+ * A compiled list of campgrounds: a name, an address, a phone number, the
+ * operator's own URL and a coordinate. Everything a guest would read comes
+ * later, from the operator's own page, crawled by the campground pass.
+ *
+ * The list arrives already deduplicated, and each entry says which record it
+ * already is when it is one of ours, so this matcher merges rather than
+ * appending a second row for a campground we hold.
+ */
+async function loadCampgroundList(): Promise<BaseHotel[]> {
+  try {
+    const f = JSON.parse(await readFile(fileURLToPath(LIST_PATH), "utf8")) as {
+      campgrounds: {
+        id: string;
+        name: string;
+        address?: string | null;
+        phone?: string | null;
+        website?: string | null;
+        coordinates?: { lat: number; lng: number } | null;
+        prefecture_code?: string | null;
+        matches_held?: { source_ref: string; how: string } | null;
+        possible_duplicates?: { source_ref: string; name: string; how: string }[];
+      }[];
+    };
+    return f.campgrounds.map((h) => ({
+      source: "list" as const,
+      source_id: h.id,
+      // The list is a local artefact, not a page: there is nothing to link to.
+      source_url: "",
+      name: h.name,
+      name_en: null,
+      name_zh: null,
+      name_ko: null,
+      coordinates: h.coordinates ?? null,
+      phone: h.phone ?? null,
+      street: h.address ?? null,
+      postal_code: null,
+      website: h.website ?? null,
+      type: "camp_site",
+      prefecture_code: h.prefecture_code ?? null,
+      seasonal: null,
+      hours_raw: null,
+      raw: h,
+    }));
+  } catch (err) {
+    console.error("[matcher] no compiled campground list:", (err as Error).message);
+    return [];
+  }
+}
+
 // ─── Prefecture proximity helper ──────────────────────────────────────
 
 /**
@@ -311,9 +382,11 @@ export function nearestPrefecture(
 async function main(): Promise<void> {
   const wd = await loadWikidata();
   const osm = await loadOsm();
-  const all = [...wd, ...osm];
+  const list = await loadCampgroundList();
+  const all = [...wd, ...osm, ...list];
   console.error(
-    `[matcher] inputs: wikidata=${wd.length}, osm=${osm.length}, total=${all.length}`,
+    `[matcher] inputs: wikidata=${wd.length}, osm=${osm.length},` +
+      ` list=${list.length}, total=${all.length}`,
   );
 
   // Load municipality centroids so we can attach a prefecture_code to OSM
@@ -444,6 +517,73 @@ async function main(): Promise<void> {
         }
       }
     }
+  }
+
+  // List entries carry the record they already are, decided when the list was
+  // compiled (scrapers/lib/campground_identity.ts) with the prefecture in
+  // hand. Identity is honoured here rather than re-derived from a distance and
+  // a name, or the entry stands alone.
+  //
+  // Why not geometry: a list entry's coordinate comes from geocoding a postal
+  // address, which lands on the block — commonly hundreds of metres and
+  // sometimes kilometres from the facility node — so the 100 m grid above
+  // would never pair the two and a campground we already hold would arrive as
+  // a second row.
+  const bySourceRef = new Map<string, BaseHotel>();
+  for (const h of inJapan) {
+    if (h.source === "osm") bySourceRef.set(`osm:${h.source_id}`, h);
+    else if (h.source === "wikidata") bySourceRef.set(`wikidata:${h.source_id}`, h);
+  }
+  let linkedPairs = 0;
+  const linkReasons = new Map<string, number>();
+  for (const d of inJapan) {
+    if (d.source !== "list") continue;
+    const link = (d.raw as { matches_held?: { source_ref: string; how: string } | null })
+      ?.matches_held;
+    if (!link) continue;
+    const other = bySourceRef.get(link.source_ref);
+    if (!other) continue;
+    const pairKey = [idOf(d), idOf(other)].sort().join("//");
+    if (seen.has(pairKey)) continue;
+    seen.add(pairKey);
+    union(idOf(d), idOf(other));
+    confirmedPairs += 1;
+    linkedPairs += 1;
+    linkReasons.set(link.how, (linkReasons.get(link.how) ?? 0) + 1);
+  }
+  if (linkedPairs > 0) {
+    console.error(
+      `[matcher] list entries merged into rows already held: ${linkedPairs}` +
+        ` (${[...linkReasons].map(([k, v]) => `${k} ${v}`).join(", ")})`,
+    );
+  }
+
+  // Rows a list entry might be under another name go to the review queue
+  // rather than being merged or silently duplicated. One name containing the
+  // other is a question for a person; `data/hotels/review/` is where this
+  // project already puts those.
+  let listReview = 0;
+  for (const d of inJapan) {
+    if (d.source !== "list") continue;
+    const raw = d.raw as {
+      matches_held?: unknown;
+      possible_duplicates?: { source_ref: string; name: string; how: string }[];
+    };
+    if (raw?.matches_held) continue;
+    for (const cand of raw?.possible_duplicates ?? []) {
+      const other = bySourceRef.get(cand.source_ref);
+      if (!other) continue;
+      const pairKey = [idOf(d), idOf(other)].sort().join("//");
+      if (seen.has(pairKey)) continue;
+      seen.add(pairKey);
+      reviewPairs.push({ a: d, b: other, reasons: [cand.how, "compiled-list candidate"] });
+      listReview += 1;
+    }
+  }
+  if (listReview > 0) {
+    console.error(
+      `[matcher] list entries sent to review as possible duplicates: ${listReview}`,
+    );
   }
 
   // Group by union-find root
