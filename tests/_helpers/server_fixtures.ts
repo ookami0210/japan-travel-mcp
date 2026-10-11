@@ -255,6 +255,64 @@ export const FIXTURE_PLACE_CONTEXT = {
   "derived_at": "2026-10-08T00:00:00Z"
 } as const;
 
+
+/**
+ * Two rows carrying ids the lodging audit acts on (src/lib/excluded_lodgings.ts):
+ * one it deletes, one it reclassifies. Real ids, fictional names — the point is
+ * that the server applies the audit to whatever master it is given.
+ */
+export const FIXTURE_AUDITED_OUT = {
+  "id": "b39095fa1910",
+  "confidence": "confirmed",
+  "name": "フィクスチャ市立第一小学校",
+  "name_en": null,
+  "name_zh": null,
+  "name_ko": null,
+  "coordinates": {
+    "lat": 35.45,
+    "lng": 134.25
+  },
+  "phone": null,
+  "website": null,
+  "type": "camp_site",
+  "postal_code": null,
+  "street": null,
+  "prefecture_code": "31",
+  "sources": [
+    {
+      "source": "osm",
+      "id": "node/3",
+      "url": "https://www.openstreetmap.org/node/3"
+    }
+  ]
+} as const;
+
+export const FIXTURE_AUDITED_RELABEL = {
+  "id": "179ec251dd73",
+  "confidence": "confirmed",
+  "name": "フィクスチャホテル",
+  "name_en": null,
+  "name_zh": null,
+  "name_ko": null,
+  "coordinates": {
+    "lat": 35.46,
+    "lng": 134.26
+  },
+  "phone": null,
+  "website": null,
+  "type": "camp_site",
+  "postal_code": null,
+  "street": null,
+  "prefecture_code": "31",
+  "sources": [
+    {
+      "source": "osm",
+      "id": "node/4",
+      "url": "https://www.openstreetmap.org/node/4"
+    }
+  ]
+} as const;
+
 export function pickFixtureContent(rel: string): string {
   if (rel.startsWith("prefectures/")) {
     const fx = defaultFixtureForSlug(basename(rel, ".json"));
@@ -269,7 +327,12 @@ export function pickFixtureContent(rel: string): string {
   if (rel === "hotels/master.json") {
     return JSON.stringify({
       generated_at: "2026-01-01",
-      hotels: [FIXTURE_CAMPGROUND, FIXTURE_CAMPGROUND_NO_SITE],
+      hotels: [
+        FIXTURE_CAMPGROUND,
+        FIXTURE_CAMPGROUND_NO_SITE,
+        FIXTURE_AUDITED_OUT,
+        FIXTURE_AUDITED_RELABEL,
+      ],
     });
   }
   if (rel === "campgrounds/place_context.jsonl") {

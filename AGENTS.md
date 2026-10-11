@@ -283,6 +283,14 @@ data/_state/{municipalities,municipality_centroids,official_urls,wikidata_attrac
 but be aware that `git status` after a scrape run will look quiet even when
 many MB have been written.
 
+`src/lib/excluded_lodgings.ts` is the reviewed list of rows removed from the
+lodging layer by the 2026-10 audit — the 2011 emergency-shelter import and bare
+duplicate nodes — plus the two rows reclassified rather than deleted. It is
+applied in three places (the matcher when it writes the master, the server when
+it loads it, and the campground passes) so the dataset is consistent whether or
+not the master has been regenerated. Add to it only after reading what OSM
+actually says about the row.
+
 ---
 
 ## Hard rules — do NOT violate without an ADR

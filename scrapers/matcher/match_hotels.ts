@@ -20,6 +20,10 @@
  */
 
 import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
+import {
+  DELETED_LODGINGS,
+  LODGING_TYPE_OVERRIDES,
+} from "../../src/lib/excluded_lodgings.js";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
@@ -503,6 +507,27 @@ async function main(): Promise<void> {
       return x.confidence === "confirmed" ? -1 : 1;
     return (x.name ?? "").localeCompare(y.name ?? "");
   });
+
+  // The lodging audit (src/lib/excluded_lodgings.ts) removes rows that are not
+  // what they were tagged as — the 2011 emergency-shelter import and bare
+  // duplicate nodes — and corrects the type of the two that are real
+  // accommodations wearing a campground label. Applied before the master is
+  // written so a regenerated master is clean at the source.
+  const beforeAudit = master.length;
+  const audited = master.filter((m) => !DELETED_LODGINGS.has(m.id));
+  let relabelled = 0;
+  for (const m of audited) {
+    const override = LODGING_TYPE_OVERRIDES.get(m.id);
+    if (override) {
+      (m as { type: string | null }).type = override.type;
+      relabelled++;
+    }
+  }
+  master.length = 0;
+  master.push(...audited);
+  console.error(
+    `[matcher] lodging audit: dropped ${beforeAudit - master.length}, reclassified ${relabelled}`,
+  );
 
   // Stats
   const stats = {
