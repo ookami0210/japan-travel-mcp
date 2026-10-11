@@ -80,7 +80,7 @@ corresponding workflow flips ON.
 | **WD-FOUNDATION** | `wd-foundation.yml` (matrix legs) | monthly (1st) 05:00 JST | gh-actions (cron OFF until launch) | #1–4, #15–19, #24, #25, #29–38, #39 |
 | **GLOSSARY** | `wd-foundation.yml` (leg `glossary`) | monthly | gh-actions (cron OFF until launch) | #20–22 |
 | **WIKIPEDIA-ABSTRACT** | `wd-foundation.yml` (leg `wikipedia-summaries`) | monthly | gh-actions (cron OFF until launch) | #34 / #35 / #36 (live) / #P1 (planned alias) |
-| **LODGING** | `campground-refresh.yml` | monthly (8th) 05:00 JST | gh-actions | #45 |
+| **LODGING** | `campground-refresh.yml` | monthly (8th) 05:00 JST | gh-actions | #45, #46 |
 | **EVENTS** | (planned) | weekly during seasons | local (cold-start, planned) | #P4, #P10, #P14 |
 | **SEASONAL** | (planned) | weekly during seasons | gh-actions (planned) | #P9 |
 
@@ -429,6 +429,36 @@ requires either extending an existing channel or creating a new one.
   #41, where JSON-LD exists and only facts are kept). The text is stored
   verbatim and interpreted by consumers; `content_sha256` per page lets a
   consumer re-format only what changed.
+- **Status**: `active`
+
+#### #46 — Campground place context (coordinates → municipality, station, park, surroundings)
+- **Authority**: 国土地理院 (Geospatial Information Authority of Japan) for the
+  municipality a coordinate falls in; the dataset's own station (#30-series
+  Wikidata railway stations), national-park and Wikidata-attraction layers for
+  everything else; OpenStreetMap for the facility tags.
+- **URL**: https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress
+  (one request per distinct coordinate, 1.2 s apart, cached permanently —
+  coordinates do not move)
+- **License**: 国土地理院 public service; attribution recorded in every record
+  (`municipality.source` + `source_url`). OSM tags remain ODbL, attributed in
+  the block that carries them.
+- **Fetcher**: `scrapers/sources/enrich_campground_places.ts`
+- **Output**: `data/campgrounds/place_context.jsonl` (per campground:
+  municipality + locality, nearest_station, nearest_park with the park's own
+  area, nearby_attractions within 15 km, osm_facts) and
+  `data/_state/campground_geocode_cache.json` (coordinate → municipality)
+- **Cadence**: monthly (`campground-refresh.yml`, chained after the crawl;
+  incremental — only coordinates not already in the cache are geocoded)
+- **Channel**: LODGING
+- **Coverage**: this exists because 1,877 of 2,163 campgrounds have no website
+  and 2,145 have no address, while every one has a coordinate. Measured on the
+  full set: nearest station within 30 km for 2,054, nearest park within 20 km
+  for 572, attractions within 15 km for 2,097, OSM facility tags for 544 —
+  **at least one fact for 2,154 of 2,162**, before the municipality pass that
+  covers the rest.
+- **Why derived and not scraped**: the operator has no page to read. Distances
+  are straight lines and a park's distance is to its recorded point, never a
+  claim of containment; OSM tags are published as tagged, not normalised.
 - **Status**: `active`
 
 #### #34 — Wikipedia ja summaries (description_ja upgrade)
@@ -986,6 +1016,12 @@ contract.
   OOM crash fix (heap guard + load-time compaction) for default-heap
   machines.
 
+- 2026-10-08 — added #46 campground place context. Most of this layer has no
+  page to read: 1,877 of 2,163 campgrounds carry no website and 2,145 no
+  address, so a record was a name and a point on the map. The point, placed
+  against the station, park and attraction layers already in the dataset plus
+  the national mapping agency's reverse geocoder, gives at least one usable
+  fact for 2,154 of 2,162 of them.
 - 2026-10-08 — charset-aware decoding became the fetcher default, and a spot
   whose name or description did not survive decoding is no longer published.
   The municipal channel was the reason: 395 spot names in the distributed

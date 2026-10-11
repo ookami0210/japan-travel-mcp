@@ -76,6 +76,15 @@ campgrounds/
                                   # prices, facilities, access and rules; verbatim
                                   # text with a sha256 per page so a consumer can
                                   # re-read only what changed. Refreshed monthly.
+  place_context.jsonl             # What every campground's coordinate can say:
+                                  # the municipality and neighbourhood it falls in
+                                  # (国土地理院 reverse geocoder), the nearest
+                                  # railway station, the nearest national /
+                                  # quasi-national park with that park's own area,
+                                  # attractions within 15 km, and the facility tags
+                                  # OpenStreetMap carries. Exists because 1,877 of
+                                  # the 2,163 campgrounds have no website and 2,145
+                                  # no address — this is the data they do have.
 
 r3/                               # Official designation registries
   maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
@@ -110,6 +119,7 @@ no AI-curated lists, no UGC.
 | Wikidata attractions | Wikidata, Wikimedia Foundation | CC0 |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
 | Campground official pages | each campground operator, from its own public site | Operator's own text, kept as a dated snapshot with source URL and retrieval time. Rights remain with the operator; removal on request within 48 h |
+| Campground place context | 国土地理院 (municipality per coordinate) + this dataset's own station / park / attraction layers + OpenStreetMap (facility tags) | 国土地理院 public service, attributed per record; OSM parts ODbL |
 | Tourist descriptions (17-lang) | AI-generated from Wikidata-derived structured data + project glossary | CC BY 4.0 (this compilation) |
 | Geographical Indications (GI) | Ministry of Agriculture, Forestry and Fisheries (MAFF) | Government Standard Terms of Use 2.0 (CC BY 4.0 compatible) |
 | Traditional Crafts (Dentō Kōgeihin) | Ministry of Economy, Trade and Industry (METI) / Association for the Promotion of Traditional Craft Industries | Public designation; cited |
