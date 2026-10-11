@@ -30,6 +30,7 @@
 
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { isDeletedLodging, lodgingTypeOverride } from "../../src/lib/excluded_lodgings.js";
 import { classifyLodging } from "../../src/lib/lodging.js";
 import {
   nearest,
@@ -168,7 +169,12 @@ async function main(): Promise<void> {
     return;
   }
   const campgrounds = master.hotels.filter(
-    (h) => classifyLodging(h) === "campground" && h.coordinates,
+    // The lodging audit removes rows that are not campgrounds at all
+    // (src/lib/excluded_lodgings.ts); a pass must not re-add them.
+    (h) =>
+      !isDeletedLodging(h.id) &&
+      !lodgingTypeOverride(h.id) &&
+      classifyLodging(h) === "campground" && h.coordinates,
   );
 
   const stationsFile = await loadJson<{ stations?: NamedPlace[] }>(STATIONS_URL);

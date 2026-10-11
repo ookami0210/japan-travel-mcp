@@ -89,6 +89,7 @@ import {
   applyWikidataPrefCorrections,
 } from "./lib/prefecture.js";
 import { classifyLodging, type LodgingType } from "./lib/lodging.js";
+import { DELETED_LODGINGS, LODGING_TYPE_OVERRIDES } from "./lib/excluded_lodgings.js";
 import {
   loadOfficialPages,
   loadOfficialPageStatus,
@@ -833,6 +834,28 @@ async function loadHotels(): Promise<HotelsFile | null> {
     const path = findHotelsMasterPath();
     const content = await readFile(path, "utf8");
     const file = JSON.parse(content) as HotelsFile;
+    // Rows the audit found are not what they were tagged as: emergency
+    // shelters imported as campgrounds in 2011, and bare duplicate nodes.
+    // Dropped here as well as in the matcher, so a master generated before
+    // the audit still serves a clean dataset. See src/lib/excluded_lodgings.ts.
+    const beforeExclusions = file.hotels.length;
+    file.hotels = file.hotels.filter((h) => !DELETED_LODGINGS.has(h.id));
+    const dropped = beforeExclusions - file.hotels.length;
+    // A real accommodation that wore the wrong label keeps its row and gets
+    // the right type instead.
+    let relabelled = 0;
+    for (const h of file.hotels) {
+      const override = LODGING_TYPE_OVERRIDES.get(h.id);
+      if (override) {
+        h.type = override.type;
+        relabelled++;
+      }
+    }
+    if (dropped > 0 || relabelled > 0) {
+      console.error(
+        `[japan-travel-mcp] lodging audit: dropped ${dropped}, reclassified ${relabelled}`,
+      );
+    }
     // Iter 19: apply hand-curated corrections for known mis-tagged hotels.
     let corrections = 0;
     for (const h of file.hotels) {

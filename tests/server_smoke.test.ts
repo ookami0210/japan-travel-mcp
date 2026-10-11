@@ -273,6 +273,24 @@ describe("buildServer() — MCP integration smoke", () => {
     expect(noteBlock.municipality_source).toMatch(/国土地理院/);
   });
 
+  it("never serves a row the lodging audit deleted", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", limit: 500 });
+    const hotels = (json.hotels ?? []) as Record<string, any>[];
+    // A 2011 emergency shelter imported as a campground: gone from every view,
+    // not merely filtered out of the campground one.
+    expect(hotels.find((h) => h.id === "b39095fa1910")).toBeUndefined();
+    const camps = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
+    expect(((camps.hotels ?? []) as Record<string, any>[]).find((h) => h.id === "b39095fa1910")).toBeUndefined();
+  });
+
+  it("keeps a real accommodation the audit only reclassified", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", limit: 500 });
+    const row = ((json.hotels ?? []) as Record<string, any>[]).find((h) => h.id === "179ec251dd73");
+    expect(row, "the reclassified row must still be served").toBeTruthy();
+    expect(row!.lodging_type).not.toBe("campground");
+    expect(row!.lodging_type).toBe("hotel");
+  });
+
   it("get_transport surfaces a structured response without a spot_id", async () => {
     await callToolOk("get_transport");
   });
