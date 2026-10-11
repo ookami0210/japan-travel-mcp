@@ -76,6 +76,8 @@ export const PAGE_TEXT_LIMIT = 6_000;
 
 let cache: Map<string, OfficialPageRecord> | null = null;
 let cachedPath: string | null = null;
+let statusCache: Map<string, string> | null = null;
+let statusCachedPath: string | null = null;
 
 /**
  * Read and index the corpus by accommodation id. Parsed once per process;
@@ -113,6 +115,8 @@ export async function loadOfficialPages(
 export function resetOfficialPagesCache(): void {
   cache = null;
   cachedPath = null;
+  statusCache = null;
+  statusCachedPath = null;
 }
 
 /** Page list, dates and hashes — no text. */
@@ -171,4 +175,32 @@ export class TextBudget {
     });
     return { ...meta, pages };
   }
+}
+
+/**
+ * The verdict per accommodation id from the official-page status pass
+ * (`scrapers/quality/campground_site_status.ts`): active / closed_suspected /
+ * url_dead / ota_listing / no_official_site / unchecked.
+ *
+ * The server needs it for one distinction it cannot make otherwise: a
+ * campground whose own page is readable but has not been crawled yet looks
+ * exactly like one whose domain lapsed, and only the second should be sent
+ * somewhere else to look.
+ */
+export async function loadOfficialPageStatus(path: string): Promise<Map<string, string>> {
+  if (statusCache && statusCachedPath === path) return statusCache;
+  const index = new Map<string, string>();
+  try {
+    const parsed = JSON.parse(await readFile(path, "utf8")) as {
+      entries?: Record<string, { status?: string }>;
+    };
+    for (const [id, entry] of Object.entries(parsed.entries ?? {})) {
+      if (entry && typeof entry.status === "string") index.set(id, entry.status);
+    }
+  } catch {
+    // absent layer is a coverage gap, not an error
+  }
+  statusCache = index;
+  statusCachedPath = path;
+  return index;
 }

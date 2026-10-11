@@ -231,6 +231,66 @@ describe("buildServer() — MCP integration smoke", () => {
     expect(block.pages[0].text_truncated).toBeUndefined();
   });
 
+  it("points a campground with no page of its own at where to look", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
+    const hotels = (json.hotels ?? []) as Record<string, any>[];
+    const noSite = hotels.find((h) => h.id === "fixture-campground-2");
+    expect(noSite, "the website-less fixture campground should come back").toBeTruthy();
+    const pointer = noSite!.listed_elsewhere;
+    expect(pointer.directory_prefecture_url).toBe("https://www.nap-camp.com/tottori/list");
+    expect(pointer.search_for).toBe("フィクスチャ町営野営場");
+    // Never asserted as a fact, and never carrying the directory's content.
+    expect(pointer.listing_verified).toBe(false);
+    expect(noSite!.official_page).toBeUndefined();
+  });
+
+  it("does not send a campground elsewhere when its own pages are held", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
+    const hotels = (json.hotels ?? []) as Record<string, any>[];
+    const withPages = hotels.find((h) => h.id === "fixture-campground-1");
+    expect(withPages!.official_page).toBeTruthy();
+    expect(withPages!.listed_elsewhere).toBeUndefined();
+  });
+
+  it("gives a campground with no page of its own what its coordinate can say", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
+    const hotels = (json.hotels ?? []) as Record<string, any>[];
+    const place = hotels.find((h) => h.id === "fixture-campground-2")?.place;
+    expect(place, "the website-less fixture campground should carry a place block").toBeTruthy();
+    expect(place.municipality.name).toBe("鳥取市");
+    expect(place.municipality.locality).toBe("国府町");
+    // Who the geocoder is does not vary per row, so it is not repeated per row.
+    expect(place.municipality.source).toBeUndefined();
+    expect(place.municipality.retrieved_at).toBe("2026-10-08T00:00:00Z");
+    expect(place.nearest_station.straight_line_m).toBe(3200);
+    expect(place.nearest_park.park_area_km2).toBe(123.4);
+    expect(place.nearby_attractions).toHaveLength(1);
+    expect(place.osm_facts.fee).toBe("no");
+    // Said once per response, not repeated on every row.
+    expect(place.note).toBeUndefined();
+    const noteBlock = json.place_context_note as Record<string, string>;
+    expect(noteBlock.distances).toMatch(/Straight lines, not travel time/);
+    expect(noteBlock.municipality_source).toMatch(/国土地理院/);
+  });
+
+  it("never serves a row the lodging audit deleted", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", limit: 500 });
+    const hotels = (json.hotels ?? []) as Record<string, any>[];
+    // A 2011 emergency shelter imported as a campground: gone from every view,
+    // not merely filtered out of the campground one.
+    expect(hotels.find((h) => h.id === "b39095fa1910")).toBeUndefined();
+    const camps = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
+    expect(((camps.hotels ?? []) as Record<string, any>[]).find((h) => h.id === "b39095fa1910")).toBeUndefined();
+  });
+
+  it("keeps a real accommodation the audit only reclassified", async () => {
+    const json = await callToolOk("get_hotels", { prefecture: "tottori", limit: 500 });
+    const row = ((json.hotels ?? []) as Record<string, any>[]).find((h) => h.id === "179ec251dd73");
+    expect(row, "the reclassified row must still be served").toBeTruthy();
+    expect(row!.lodging_type).not.toBe("campground");
+    expect(row!.lodging_type).toBe("hotel");
+  });
+
   it("get_transport surfaces a structured response without a spot_id", async () => {
     await callToolOk("get_transport");
   });

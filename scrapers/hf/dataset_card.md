@@ -69,13 +69,22 @@ hotels/
   master.json                     # ~20,000 accommodations (Wikidata + OSM merged)
 
 campgrounds/
-  official_pages.jsonl            # Official-page text for 177 campgrounds whose
-                                  # own site is live (2,163 campgrounds in the
-                                  # lodging layer, 286 with a URL on record).
+  official_pages.jsonl            # Official-page text for 176 campgrounds whose
+                                  # own site is live (2,075 campgrounds in the
+                                  # lodging layer, 285 with a URL on record).
                                   # Homepage + up to 7 pages carrying season, pitch
                                   # prices, facilities, access and rules; verbatim
                                   # text with a sha256 per page so a consumer can
                                   # re-read only what changed. Refreshed monthly.
+  place_context.jsonl             # What every campground's coordinate can say:
+                                  # the municipality and neighbourhood it falls in
+                                  # (国土地理院 reverse geocoder), the nearest
+                                  # railway station, the nearest national /
+                                  # quasi-national park with that park's own area,
+                                  # attractions within 15 km, and the facility tags
+                                  # OpenStreetMap carries. Exists because 1,790 of
+                                  # the 2,075 campgrounds have no website — this is
+                                  # the data they do have.
 
 r3/                               # Official designation registries
   maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
@@ -110,6 +119,7 @@ no AI-curated lists, no UGC.
 | Wikidata attractions | Wikidata, Wikimedia Foundation | CC0 |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
 | Campground official pages | each campground operator, from its own public site | Operator's own text, kept as a dated snapshot with source URL and retrieval time. Rights remain with the operator; removal on request within 48 h |
+| Campground place context | 国土地理院 (municipality per coordinate) + this dataset's own station / park / attraction layers + OpenStreetMap (facility tags) | 国土地理院 public service, attributed per record; OSM parts ODbL |
 | Tourist descriptions (17-lang) | AI-generated from Wikidata-derived structured data + project glossary | CC BY 4.0 (this compilation) |
 | Geographical Indications (GI) | Ministry of Agriculture, Forestry and Fisheries (MAFF) | Government Standard Terms of Use 2.0 (CC BY 4.0 compatible) |
 | Traditional Crafts (Dentō Kōgeihin) | Ministry of Economy, Trade and Industry (METI) / Association for the Promotion of Traditional Craft Industries | Public designation; cited |
@@ -154,7 +164,7 @@ refreshes data on two tracks and re-publishes to this dataset:
 |:---|:---|:---|:---|
 | Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
 | Official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
-| Campground official pages | 177 sites | rolling 30 days | monthly batch |
+| Campground official pages | 176 sites | rolling 30 days | monthly batch |
 
 Each domain is hit at most once per cycle.
 

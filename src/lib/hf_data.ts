@@ -69,6 +69,13 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // Campground official-page text (DATA_SOURCES.md #45) — feeds the
   // official_page block on get_hotels results.
   "campgrounds/official_pages.jsonl",
+  // The verdict per campground URL (live official page / dead / portal
+  // listing / none). get_hotels needs it to tell a campground whose own page
+  // we simply have not crawled yet from one whose page is gone.
+  "_state/campground_site_status.json",
+  // Derived place context per campground (municipality, nearest station, park,
+  // what is nearby, OSM facility tags) — the only data most of them have.
+  "campgrounds/place_context.jsonl",
 ];
 
 /** Where the cached data lives. */

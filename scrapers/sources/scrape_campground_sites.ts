@@ -51,6 +51,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import pLimit from "p-limit";
+import { isDeletedLodging, lodgingTypeOverride } from "../../src/lib/excluded_lodgings.js";
 import { classifyLodging } from "../../src/lib/lodging.js";
 import {
   contentHash,
@@ -236,7 +237,14 @@ async function main(): Promise<void> {
   const deadline = Date.now() + deadlineMinutes * 60_000;
 
   const master = JSON.parse(await readFile(MASTER_URL, "utf8")) as { hotels: MasterHotel[] };
-  const campgrounds = master.hotels.filter((h) => classifyLodging(h) === "campground");
+  const campgrounds = master.hotels.filter(
+    // The lodging audit removes rows that are not campgrounds at all
+    // (src/lib/excluded_lodgings.ts); a pass must not re-add them.
+    (h) =>
+      !isDeletedLodging(h.id) &&
+      !lodgingTypeOverride(h.id) &&
+      classifyLodging(h) === "campground",
+  );
 
   let status: Record<string, StatusEntry>;
   try {
