@@ -414,14 +414,15 @@ requires either extending an existing channel or creating a new one.
 - **Cadence**: monthly (`campground-refresh.yml`, 8th 05:00 JST; 30-day
   recheck window enforced in-job, oldest-first, soft deadline, resumable)
 - **Channel**: LODGING
-- **Coverage**: 2,075 campgrounds in the lodging layer (2,163 before the
-  2026-10-11 audit removed 86 rows that were not campgrounds), 285 with a
-  website on record (13.7%). The gate is the status pass
+- **Coverage**: 2,178 campgrounds and glamping sites in the lodging layer,
+  370 with a website on record (17.0%) — up from 285 of 2,075 once #47 brought
+  in the commercial segment, which is the segment that keeps a site. The gate
+  is the status pass
   (`scrapers/quality/campground_site_status.ts`,
   `npm run quality:campground_status`), which reads each URL once per 30 days
   and labels it active / closed_suspected / url_dead / ota_listing /
   no_official_site; only `active` pages are crawled, so dead domains and
-  portal listings cost nothing. 55 of the 286 sit on a municipality's own
+  portal listings cost nothing. 55 of the 370 sit on a municipality's own
   domain, where the municipal crawl also visits: the crawl doubles its
   per-domain interval on those hosts so the combined rate stays inside the
   published 5-second floor.
@@ -484,7 +485,7 @@ requires either extending an existing channel or creating a new one.
   re-import updates rather than duplicates.
 - **Channel**: LODGING
 - **Coverage**: this exists because the OSM-derived layer misses the commercial
-  side of the sector. The list holds **1,346 campgrounds**, of which 101 carry
+  side of the sector. The list holds **1,345 campgrounds**, of which 101 carry
   an address and are therefore placeable; of those, **5 merged** into rows
   already held (operator domain 3, name in prefecture 2), **9 went to the
   review queue** as possible duplicates under another name, and the rest were
@@ -492,9 +493,10 @@ requires either extending an existing channel or creating a new one.
   them. 84 carry the operator's own URL, which is why so few campgrounds had a
   readable official page: the segment that keeps a website was the segment
   missing from the ledger. Measured effect on what can be crawled: campgrounds
-  with a live official page went **176 → 244**, and a crawl of those read 1,224
-  pages from 205 operator sites.
-- **The 1,245 entries with no address**: they are on the list because they
+  with a live official page went **176 → 306** (counting glamping as camping),
+  and a crawl of those read 1,429 pages across 241 campgrounds on 234 distinct
+  operator hosts.
+- **The 1,244 entries with no address**: they are on the list because they
   exist, and they are deliberately **not** imported. The lodging tools filter
   on prefecture, so a row with neither a coordinate nor a prefecture would be
   invisible to every caller while carrying nothing — the opposite of the point.

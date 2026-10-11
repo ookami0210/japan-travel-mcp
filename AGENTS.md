@@ -255,6 +255,10 @@ data/_state/
   tourism_org_urls.json            # Resolved multi-source URLs per muni (ADR 0001 A)
   tourism_org_overrides.json       # Manual/researched tourism-org seeds (fills discovery gaps; merged by daily.ts)
   campground_site_status.json      # Per-campground official-page verdict (gate for the #45 crawl)
+  campground_list.json             # Compiled campground list (#47): name, and where known
+                                   #   address, phone and the operator's own site. Compiled
+                                   #   outside this repo; read by import_campground_list.ts
+  campground_list_geocode.json     # Address -> coordinate cache for that import (国土地理院)
   dmo_website_overrides.json       # Manual DMO URL corrections
   translation_batch.json           # Anthropic batch IDs (transient)
   r3_translation_batch.json        # Same, for R-3 sources
