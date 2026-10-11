@@ -414,8 +414,9 @@ requires either extending an existing channel or creating a new one.
 - **Cadence**: monthly (`campground-refresh.yml`, 8th 05:00 JST; 30-day
   recheck window enforced in-job, oldest-first, soft deadline, resumable)
 - **Channel**: LODGING
-- **Coverage**: 2,163 campgrounds in the lodging layer, 286 with a website on
-  record (13%). The gate is the status pass
+- **Coverage**: 2,075 campgrounds in the lodging layer (2,163 before the
+  2026-10-11 audit removed 86 rows that were not campgrounds), 285 with a
+  website on record (13.7%). The gate is the status pass
   (`scrapers/quality/campground_site_status.ts`,
   `npm run quality:campground_status`), which reads each URL once per 30 days
   and labels it active / closed_suspected / url_dead / ota_listing /
@@ -450,12 +451,11 @@ requires either extending an existing channel or creating a new one.
 - **Cadence**: monthly (`campground-refresh.yml`, chained after the crawl;
   incremental — only coordinates not already in the cache are geocoded)
 - **Channel**: LODGING
-- **Coverage**: this exists because 1,877 of 2,163 campgrounds have no website
-  and 2,145 have no address, while every one has a coordinate. Measured on the
-  full set: nearest station within 30 km for 2,054, nearest park within 20 km
-  for 572, attractions within 15 km for 2,097, OSM facility tags for 544 —
-  **at least one fact for 2,154 of 2,162**, before the municipality pass that
-  covers the rest.
+- **Coverage**: this exists because 1,790 of 2,075 campgrounds have no website,
+  while every one has a coordinate. Measured after the 2026-10-11 audit:
+  municipality for 2,069, nearest station within 30 km for 1,968, nearest park
+  within 20 km for 552, attractions within 15 km for 2,012, OSM facility tags
+  for 505 — **at least one fact for every row**.
 - **Why derived and not scraped**: the operator has no page to read. Distances
   are straight lines and a park's distance is to its recorded point, never a
   claim of containment; OSM tags are published as tagged, not normalised.
@@ -1016,6 +1016,14 @@ contract.
   OOM crash fix (heap guard + load-time compaction) for default-heap
   machines.
 
+- 2026-10-11 — audited the campground layer and removed 86 rows that were not
+  campgrounds: 74 from the 2011 emergency-shelter import (prefectural shelter
+  lists mapped as `tourism=camp_site` with `temporary=yes` / `refugee=<count>`
+  — schools, gymnasiums, community centres) and 12 bare duplicate nodes beside
+  a named campground. Two rows that are real accommodations wearing the wrong
+  label were reclassified rather than deleted. The list is
+  `src/lib/excluded_lodgings.ts`, applied by the matcher, the server and the
+  campground passes. Layer: 2,163 → 2,075.
 - 2026-10-08 — added #46 campground place context. Most of this layer has no
   page to read: 1,877 of 2,163 campgrounds carry no website and 2,145 no
   address, so a record was a name and a point on the map. The point, placed

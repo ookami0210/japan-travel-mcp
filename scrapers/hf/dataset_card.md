@@ -69,9 +69,9 @@ hotels/
   master.json                     # ~20,000 accommodations (Wikidata + OSM merged)
 
 campgrounds/
-  official_pages.jsonl            # Official-page text for 177 campgrounds whose
-                                  # own site is live (2,163 campgrounds in the
-                                  # lodging layer, 286 with a URL on record).
+  official_pages.jsonl            # Official-page text for 176 campgrounds whose
+                                  # own site is live (2,075 campgrounds in the
+                                  # lodging layer, 285 with a URL on record).
                                   # Homepage + up to 7 pages carrying season, pitch
                                   # prices, facilities, access and rules; verbatim
                                   # text with a sha256 per page so a consumer can
@@ -82,9 +82,9 @@ campgrounds/
                                   # railway station, the nearest national /
                                   # quasi-national park with that park's own area,
                                   # attractions within 15 km, and the facility tags
-                                  # OpenStreetMap carries. Exists because 1,877 of
-                                  # the 2,163 campgrounds have no website and 2,145
-                                  # no address — this is the data they do have.
+                                  # OpenStreetMap carries. Exists because 1,790 of
+                                  # the 2,075 campgrounds have no website — this is
+                                  # the data they do have.
 
 r3/                               # Official designation registries
   maff_gi.json                    # 172 MAFF Geographical Indications (food / agri-products)
@@ -164,7 +164,7 @@ refreshes data on two tracks and re-publishes to this dataset:
 |:---|:---|:---|:---|
 | Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
 | Official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
-| Campground official pages | 177 sites | rolling 30 days | monthly batch |
+| Campground official pages | 176 sites | rolling 30 days | monthly batch |
 
 Each domain is hit at most once per cycle.
 
