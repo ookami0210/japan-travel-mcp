@@ -1,40 +1,42 @@
 {
-  "id": "2293abb70613",
+  "id": "40cb4dd59100",
   "confidence": "likely",
   "match_reasons": [
-    "distance 50m",
-    "name similarity 0.88 (likely)"
+    "distance 4m",
+    "name similarity 0.83 (likely)"
   ],
   "candidates": [
     {
       "source": "osm",
-      "source_id": "node/11928769839",
-      "source_url": "https://www.openstreetmap.org/node/11928769839",
-      "name": "ホテルルートインコート松本インター",
+      "source_id": "node/14103480905",
+      "source_url": "https://www.openstreetmap.org/node/14103480905",
+      "name": "プチリゾート古宇利",
       "name_en": null,
       "name_zh": null,
       "name_ko": null,
       "coordinates": {
-        "lat": 36.2328065,
-        "lng": 137.9447566
+        "lat": 26.6974415,
+        "lng": 128.0177592
       },
       "phone": null,
       "street": null,
       "postal_code": null,
       "website": null,
       "type": "hotel",
-      "prefecture_code": "20",
+      "prefecture_code": "47",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
-        "osm_id": "node/11928769839",
-        "osm_url": "https://www.openstreetmap.org/node/11928769839",
+        "osm_id": "node/14103480905",
+        "osm_url": "https://www.openstreetmap.org/node/14103480905",
         "type": "hotel",
-        "name": "ホテルルートインコート松本インター",
+        "name": "プチリゾート古宇利",
         "name_en": null,
         "name_zh": null,
         "name_ko": null,
         "coordinates": {
-          "lat": 36.2328065,
-          "lng": 137.9447566
+          "lat": 26.6974415,
+          "lng": 128.0177592
         },
         "postal_code": null,
         "full_address": null,
@@ -44,40 +46,42 @@
         "website": null,
         "stars": null,
         "raw_tags": {
-          "name": "ホテルルートインコート松本インター",
+          "name": "プチリゾート古宇利",
           "tourism": "hotel"
         }
       }
     },
     {
       "source": "osm",
-      "source_id": "node/11928769852",
-      "source_url": "https://www.openstreetmap.org/node/11928769852",
-      "name": "ホテルルートインコート松本インター別館",
+      "source_id": "way/1550613947",
+      "source_url": "https://www.openstreetmap.org/way/1550613947",
+      "name": "プチリゾート古宇利島",
       "name_en": null,
       "name_zh": null,
       "name_ko": null,
       "coordinates": {
-        "lat": 36.2328288,
-        "lng": 137.9441959
+        "lat": 26.697427,
+        "lng": 128.0177915
       },
       "phone": null,
       "street": null,
       "postal_code": null,
       "website": null,
       "type": "hotel",
-      "prefecture_code": "20",
+      "prefecture_code": "47",
+      "seasonal": null,
+      "hours_raw": null,
       "raw": {
-        "osm_id": "node/11928769852",
-        "osm_url": "https://www.openstreetmap.org/node/11928769852",
+        "osm_id": "way/1550613947",
+        "osm_url": "https://www.openstreetmap.org/way/1550613947",
         "type": "hotel",
-        "name": "ホテルルートインコート松本インター別館",
+        "name": "プチリゾート古宇利島",
         "name_en": null,
         "name_zh": null,
         "name_ko": null,
         "coordinates": {
-          "lat": 36.2328288,
-          "lng": 137.9441959
+          "lat": 26.697427,
+          "lng": 128.0177915
         },
         "postal_code": null,
         "full_address": null,
@@ -87,7 +91,8 @@
         "website": null,
         "stars": null,
         "raw_tags": {
-          "name": "ホテルルートインコート松本インター別館",
+          "building": "yes",
+          "name": "プチリゾート古宇利島",
           "tourism": "hotel"
         }
       }

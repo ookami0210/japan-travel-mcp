@@ -120,9 +120,10 @@ async function listFetcherFiles(): Promise<string[]> {
     const files = await readdir(abs);
     for (const f of files) {
       // `enrich_` covers passes that derive fields for records we already
-      // hold rather than fetching a new corpus — they are still sources, and
-      // still have to be documented.
-      if (/^(fetch_|scrape_|find_|discover_|match_|apply_|enrich_).+\.(ts|py|js)$/.test(f)) {
+      // hold rather than fetching a new corpus; `import_` covers passes that
+      // take in a file compiled elsewhere. Both are sources, and both still
+      // have to be documented.
+      if (/^(fetch_|scrape_|find_|discover_|match_|apply_|enrich_|import_).+\.(ts|py|js)$/.test(f)) {
         out.push(`${d}/${f}`);
       }
     }

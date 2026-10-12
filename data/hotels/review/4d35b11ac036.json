@@ -1,0 +1,100 @@
+{
+  "id": "4d35b11ac036",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-8615e34c77",
+      "source_url": "",
+      "name": "あさひプライム 野俣沢林間キャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.102406,
+        "lng": 137.803391
+      },
+      "phone": "0263993700",
+      "street": "長野県東筑摩郡朝日村古見7-1",
+      "postal_code": null,
+      "website": "https://asahivalley.jp/nomatazawarinkan-campfield/",
+      "type": "camp_site",
+      "prefecture_code": "20",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-8615e34c77",
+        "name": "あさひプライム 野俣沢林間キャンプ場",
+        "address": "長野県東筑摩郡朝日村古見7-1",
+        "phone": "0263993700",
+        "website": "https://asahivalley.jp/nomatazawarinkan-campfield/",
+        "coordinates": {
+          "lat": 36.102406,
+          "lng": 137.803391
+        },
+        "prefecture_code": "20",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:node/4427064790",
+            "name": "あさひプライム",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/4427064790",
+      "source_url": "https://www.openstreetmap.org/node/4427064790",
+      "name": "あさひプライム",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 36.1135172,
+        "lng": 137.8337689
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "camp_site",
+      "prefecture_code": "20",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/4427064790",
+        "osm_url": "https://www.openstreetmap.org/node/4427064790",
+        "type": "camp_site",
+        "name": "あさひプライム",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 36.1135172,
+          "lng": 137.8337689
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "internet_access": "wlan",
+          "name": "あさひプライム",
+          "tourism": "camp_site",
+          "wikidata": "Q11257215",
+          "wikipedia": "ja:あさひプライムスキー場"
+        }
+      }
+    }
+  ]
+}

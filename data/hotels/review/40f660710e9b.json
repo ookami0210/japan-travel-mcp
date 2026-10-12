@@ -1,0 +1,97 @@
+{
+  "id": "40f660710e9b",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-2721175a61",
+      "source_url": "",
+      "name": "ART×OUTDOOR VILLAGE 栗山-アートアウトドア ヴィレッジ",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.036446,
+        "lng": 141.878403
+      },
+      "phone": "08035498704",
+      "street": "北海道夕張郡栗山町継立189-2",
+      "postal_code": null,
+      "website": "https://aovkuriyama.com",
+      "type": "camp_site",
+      "prefecture_code": "01",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-2721175a61",
+        "name": "ART×OUTDOOR VILLAGE 栗山-アートアウトドア ヴィレッジ",
+        "address": "北海道夕張郡栗山町継立189-2",
+        "phone": "08035498704",
+        "website": "https://aovkuriyama.com",
+        "coordinates": {
+          "lat": 43.036446,
+          "lng": 141.878403
+        },
+        "prefecture_code": "01",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:node/12025211804",
+            "name": "ＡＲＴ×ＯＵＴＤＯＯＲＶＩＬＬＡＧＥ栗山",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/12025211804",
+      "source_url": "https://www.openstreetmap.org/node/12025211804",
+      "name": "ＡＲＴ×ＯＵＴＤＯＯＲＶＩＬＬＡＧＥ栗山",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.0180721,
+        "lng": 141.8597878
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "camp_site",
+      "prefecture_code": "01",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/12025211804",
+        "osm_url": "https://www.openstreetmap.org/node/12025211804",
+        "type": "camp_site",
+        "name": "ＡＲＴ×ＯＵＴＤＯＯＲＶＩＬＬＡＧＥ栗山",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 43.0180721,
+          "lng": 141.8597878
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "ＡＲＴ×ＯＵＴＤＯＯＲＶＩＬＬＡＧＥ栗山",
+          "tourism": "camp_site"
+        }
+      }
+    }
+  ]
+}
