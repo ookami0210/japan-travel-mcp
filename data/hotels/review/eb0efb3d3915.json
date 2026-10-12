@@ -1,0 +1,98 @@
+{
+  "id": "eb0efb3d3915",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-55f52c09c3",
+      "source_url": "",
+      "name": "N.A.O.明野高原キャンプ場&Cottage",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.947414,
+        "lng": 136.854538
+      },
+      "phone": "0575-72-6758",
+      "street": "岐阜県郡上市高鷲町鮎立5434番地",
+      "postal_code": null,
+      "website": "https://www.naocorp.jp/",
+      "type": "camp_site",
+      "prefecture_code": "21",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-55f52c09c3",
+        "name": "N.A.O.明野高原キャンプ場&Cottage",
+        "address": "岐阜県郡上市高鷲町鮎立5434番地",
+        "phone": "0575-72-6758",
+        "website": "https://www.naocorp.jp/",
+        "coordinates": {
+          "lat": 35.947414,
+          "lng": 136.854538
+        },
+        "prefecture_code": "21",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:node/4893903627",
+            "name": "NAO明野高原キャンプ場",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/4893903627",
+      "source_url": "https://www.openstreetmap.org/node/4893903627",
+      "name": "NAO明野高原キャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 35.9296761,
+        "lng": 136.9001505
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "camp_site",
+      "prefecture_code": "21",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/4893903627",
+        "osm_url": "https://www.openstreetmap.org/node/4893903627",
+        "type": "camp_site",
+        "name": "NAO明野高原キャンプ場",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 35.9296761,
+          "lng": 136.9001505
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "NAO明野高原キャンプ場",
+          "name:ja": "NAO明野高原キャンプ場",
+          "tourism": "camp_site"
+        }
+      }
+    }
+  ]
+}

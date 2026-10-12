@@ -416,8 +416,8 @@ requires either extending an existing channel or creating a new one.
 - **Channel**: LODGING
 - **Coverage**: 2,178 campgrounds and glamping sites in the lodging layer,
   370 with a website on record (17.0%) — up from 285 of 2,075 once #47 brought
-  in the commercial segment, which is the segment that keeps a site. The gate
-  is the status pass
+  in the commercial segment, which is the segment that keeps a site. 241 have
+  had their own site read. The gate is the status pass
   (`scrapers/quality/campground_site_status.ts`,
   `npm run quality:campground_status`), which reads each URL once per 30 days
   and labels it active / closed_suspected / url_dead / ota_listing /
@@ -486,16 +486,17 @@ requires either extending an existing channel or creating a new one.
 - **Channel**: LODGING
 - **Coverage**: this exists because the OSM-derived layer misses the commercial
   side of the sector. The list holds **1,345 campgrounds**, of which 101 carry
-  an address and are therefore placeable; of those, **5 merged** into rows
-  already held (operator domain 3, name in prefecture 2), **9 went to the
-  review queue** as possible duplicates under another name, and the rest were
-  new — 戸隠キャンプ場, くるみの森キャンプ場, ペンギン村オートキャンプ場 among
+  an address and are therefore placeable; of those, **6 merged** into rows
+  already held (operator domain 4, name in prefecture 2), **9 went to the
+  review queue** as possible duplicates under another name, and **95 were
+  new** — 戸隠キャンプ場, くるみの森キャンプ場, ペンギン村オートキャンプ場 among
   them. 84 carry the operator's own URL, which is why so few campgrounds had a
   readable official page: the segment that keeps a website was the segment
   missing from the ledger. Measured effect on what can be crawled: campgrounds
-  with a live official page went **176 → 306** (counting glamping as camping),
-  and a crawl of those read 1,429 pages across 241 campgrounds on 234 distinct
-  operator hosts.
+  whose own site has been read went **176 → 241**, over 1,429 pages on 234
+  distinct operator hosts. (The status pass reports a higher `active` count,
+  but that cache is cumulative and still holds ids the 2026-10-11 audit
+  removed, so the corpus size is the figure to quote.)
 - **The 1,244 entries with no address**: they are on the list because they
   exist, and they are deliberately **not** imported. The lodging tools filter
   on prefecture, so a row with neither a coordinate nor a prefecture would be

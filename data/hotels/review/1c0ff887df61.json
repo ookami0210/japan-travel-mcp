@@ -1,0 +1,102 @@
+{
+  "id": "1c0ff887df61",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-ce772318de",
+      "source_url": "",
+      "name": "宮古姉ヶ崎オートキャンプ場（休暇村陸中宮古）",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 39.683849,
+        "lng": 141.983734
+      },
+      "phone": "0193629911",
+      "street": "岩手県宮古市崎鍬ケ崎18-25-3",
+      "postal_code": null,
+      "website": "https://www.qkamura.or.jp/miyako/camp/",
+      "type": "camp_site",
+      "prefecture_code": "03",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-ce772318de",
+        "name": "宮古姉ヶ崎オートキャンプ場（休暇村陸中宮古）",
+        "address": "岩手県宮古市崎鍬ケ崎18-25-3",
+        "phone": "0193629911",
+        "website": "https://www.qkamura.or.jp/miyako/camp/",
+        "coordinates": {
+          "lat": 39.683849,
+          "lng": 141.983734
+        },
+        "prefecture_code": "03",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:node/13370778648",
+            "name": "宮古姉ヶ崎オートキャンプ場",
+            "how": "one name contains the other, same prefecture"
+          },
+          {
+            "source_ref": "osm:way/1049347426",
+            "name": "休暇村陸中宮古",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/13370778648",
+      "source_url": "https://www.openstreetmap.org/node/13370778648",
+      "name": "宮古姉ヶ崎オートキャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 39.6859047,
+        "lng": 141.982301
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "caravan_site",
+      "prefecture_code": "03",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/13370778648",
+        "osm_url": "https://www.openstreetmap.org/node/13370778648",
+        "type": "caravan_site",
+        "name": "宮古姉ヶ崎オートキャンプ場",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 39.6859047,
+          "lng": 141.982301
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "宮古姉ヶ崎オートキャンプ場",
+          "tourism": "caravan_site"
+        }
+      }
+    }
+  ]
+}

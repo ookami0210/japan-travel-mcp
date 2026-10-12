@@ -1,0 +1,99 @@
+{
+  "id": "14f11a2b99b6",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-1e10f49f32",
+      "source_url": "",
+      "name": "南伊豆・入間キャンプ村",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.629391,
+        "lng": 138.808929
+      },
+      "phone": "090-7602-4070(",
+      "street": "静岡県賀茂郡南伊豆町入間873-1",
+      "postal_code": null,
+      "website": "http://www3.tokai.or.jp/irumaso/",
+      "type": "camp_site",
+      "prefecture_code": "22",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-1e10f49f32",
+        "name": "南伊豆・入間キャンプ村",
+        "address": "静岡県賀茂郡南伊豆町入間873-1",
+        "phone": "090-7602-4070(",
+        "website": "http://www3.tokai.or.jp/irumaso/",
+        "coordinates": {
+          "lat": 34.629391,
+          "lng": 138.808929
+        },
+        "prefecture_code": "22",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:way/549293216",
+            "name": "伊豆入間キャンプ村",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/549293216",
+      "source_url": "https://www.openstreetmap.org/way/549293216",
+      "name": "伊豆入間キャンプ村",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.6299956,
+        "lng": 138.8129333
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "camp_site",
+      "prefecture_code": "22",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "way/549293216",
+        "osm_url": "https://www.openstreetmap.org/way/549293216",
+        "type": "camp_site",
+        "name": "伊豆入間キャンプ村",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.6299956,
+          "lng": 138.8129333
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "伊豆入間キャンプ村",
+          "operator": "伊豆入間キャンプ村",
+          "source": "GSImaps/ort",
+          "tourism": "camp_site"
+        }
+      }
+    }
+  ]
+}

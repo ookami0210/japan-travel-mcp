@@ -725,9 +725,17 @@ async function main(): Promise<void> {
   }
   await mkdir(fileURLToPath(REVIEW_DIR), { recursive: true });
 
-  // Cap review file count to keep PR review tractable
+  // Cap review file count to keep PR review tractable. Compiled-list
+  // candidates go first: there are a handful of them, they are the pairs a
+  // person was promised an answer on, and appending them left them outside
+  // the cap, so the queue claimed them and never held one.
   const MAX_REVIEW = 200;
-  const reviewToWrite = reviewPairs.slice(0, MAX_REVIEW);
+  const isListPair = (p: { reasons: string[] }) =>
+    p.reasons.includes("compiled-list candidate");
+  const reviewToWrite = [
+    ...reviewPairs.filter(isListPair),
+    ...reviewPairs.filter((p) => !isListPair(p)),
+  ].slice(0, MAX_REVIEW);
   for (const pair of reviewToWrite) {
     const id = makeId(idOf(pair.a), idOf(pair.b));
     const review: ReviewRecord = {
