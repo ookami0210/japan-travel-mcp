@@ -5899,7 +5899,7 @@ async function getHotels(args: {
   //   "traditional"  → ryokan | onsen_ryokan | shukubo | kominka | minshuku
   //   "onsen"        → onsen_ryokan
   //   "budget"       → hostel | guest_house | apartment
-  //   "camping"      → campground
+  //   "camping"      → campground | glamping
   let lodgingFilter: Set<LodgingType> | null = null;
   const requested = args.hotel_type?.trim().toLowerCase();
   if (requested) {
@@ -5910,7 +5910,10 @@ async function getHotels(args: {
     } else if (requested === "budget") {
       lodgingFilter = new Set(["hostel","guest_house","apartment"]);
     } else if (requested === "camping" || requested === "camp") {
-      lodgingFilter = new Set(["campground"]);
+      // Glamping is camping with the kit provided: a traveller asking for
+      // "camping" means both, while one asking for `glamping` or `campground`
+      // by name means exactly that one.
+      lodgingFilter = new Set(["campground", "glamping"]);
     } else {
       lodgingFilter = new Set([requested as LodgingType]);
     }
@@ -12745,7 +12748,7 @@ const TOOLS = [
   {
     name: "get_hotels",
     description:
-      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nAccommodations whose own pages have been read carry an `official_page` block: the page list with titles, sizes, hashes and the date they were fetched. Pass `include_official_page_text: true` to get the text itself — for campgrounds that text is usually the only public source for season, pitch prices, facilities and rules.\n\nA campground with no readable page of its own carries `listed_elsewhere` instead: the booking directory's prefecture page where it may be listed, with the name to look for. That pointer is computed, not crawled — `listing_verified` is always false, and none of the directory's content (prices, availability, reviews) is held here.\n\nCampgrounds also carry a `place` block derived from their coordinates: the municipality and neighbourhood the point falls in (national mapping agency), the nearest railway station, the nearest national / quasi-national park with that park's own area, what is worth seeing within 15 km, and the facility tags OpenStreetMap carries (fee, pitches, toilets, water, power, season). Distances are straight lines, not travel time. Most campgrounds have no website and no address on record, and this is the data they do have.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
+      "Returns accommodations (hotels, ryokan, onsen ryokan, shukubo, hostels, guest houses, kominka, campgrounds) in Japan.\n\nData is merged from Wikidata (CC0) and OpenStreetMap (ODbL). Records carry multilingual names, coordinates, phone, website, and a `lodging_type` classification derived from name keywords (旅館 → ryokan, 温泉旅館 → onsen_ryokan, 宿坊 → shukubo, 古民家/町家 → kominka, 民宿 → minshuku, plus OSM hostel/guest_house/apartment/motel/hotel/camp_site, and グランピング/グランドーム/glamping → glamping, which OSM tags inconsistently).\n\nFilter by prefecture, city (substring match), coordinate radius, or hotel_type (specific value or group alias 'traditional' / 'onsen' / 'budget' / 'camping').\n\nAccommodations whose own pages have been read carry an `official_page` block: the page list with titles, sizes, hashes and the date they were fetched. Pass `include_official_page_text: true` to get the text itself — for campgrounds that text is usually the only public source for season, pitch prices, facilities and rules.\n\nA campground with no readable page of its own carries `listed_elsewhere` instead: the booking directory's prefecture page where it may be listed, with the name to look for. That pointer is computed, not crawled — `listing_verified` is always false, and none of the directory's content (prices, availability, reviews) is held here.\n\nCampgrounds also carry a `place` block derived from their coordinates: the municipality and neighbourhood the point falls in (national mapping agency), the nearest railway station, the nearest national / quasi-national park with that park's own area, what is worth seeing within 15 km, and the facility tags OpenStreetMap carries (fee, pitches, toilets, water, power, season). Distances are straight lines, not travel time. Most campgrounds have no website and no address on record, and this is the data they do have.\n\nDoes NOT return availability or pricing. For bookings, visit the property's official site.",
     inputSchema: {
       type: "object",
       properties: {
@@ -12766,7 +12769,7 @@ const TOOLS = [
         hotel_type: {
           type: "string",
           description:
-            "Lodging-type filter. Specific values: ryokan, onsen_ryokan, shukubo, kominka, minshuku, hostel, guest_house, apartment, motel, hotel, campground. Group aliases: 'traditional' (ryokan|onsen_ryokan|shukubo|kominka|minshuku), 'onsen' (onsen_ryokan), 'budget' (hostel|guest_house|apartment), 'camping' (campground).",
+            "Lodging-type filter. Specific values: ryokan, onsen_ryokan, shukubo, kominka, minshuku, hostel, guest_house, apartment, motel, hotel, campground, glamping. Group aliases: 'traditional' (ryokan|onsen_ryokan|shukubo|kominka|minshuku), 'onsen' (onsen_ryokan), 'budget' (hostel|guest_house|apartment), 'camping' (campground|glamping — a pitch you bring a tent to and a furnished tent you do not; ask for either by name to get only that one).",
         },
         limit: {
           type: "number",

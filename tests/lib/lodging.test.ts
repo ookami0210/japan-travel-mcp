@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  classifyLodging,
-  type LodgingType,
-  type LodgingInput,
-} from "../../src/lib/lodging.js";
+import { classifyLodging, type LodgingType, type LodgingInput, isCampingFamily } from "../../src/lib/lodging.js";
 
 function input(over: Partial<LodgingInput> = {}): LodgingInput {
   return {
@@ -130,5 +126,42 @@ describe("classifyLodging — fallback to OSM `type` field", () => {
 
   it("falls back to 'hotel' when both name fields are null and type is null", () => {
     expect(classifyLodging(input())).toBe("hotel");
+  });
+});
+
+describe("glamping", () => {
+  const camp = (name: string, type: string | null = "camp_site") =>
+    classifyLodging({ name, name_en: null, type });
+
+  it("is its own type, not a campground", () => {
+    expect(camp("グランドーム千葉富津")).toBe("glamping");
+    expect(camp("グランピングヒルズ アウラテラス茨城")).toBe("glamping");
+    expect(classifyLodging({ name: null, name_en: "Mount Fuji Panorama Glamping", type: "camp_site" })).toBe("glamping");
+  });
+
+  it("wins over the OSM tag, because the tag is unreliable for this kind", () => {
+    // Observed in the data: glamping sites tagged motel, hostel, hotel and chalet.
+    expect(camp("glampark つるぎの湯", "motel")).toBe("glamping");
+    expect(camp("グランピングログコテージ ヴィラ", "hotel")).toBe("glamping");
+    expect(camp("プライベートヴィラグランピング富士山中湖", "chalet")).toBe("glamping");
+  });
+
+  it("belongs to the camping family together with campgrounds", () => {
+    expect(isCampingFamily("glamping")).toBe(true);
+    expect(isCampingFamily("campground")).toBe(true);
+    expect(isCampingFamily("ryokan")).toBe(false);
+    expect(isCampingFamily("hotel")).toBe(false);
+  });
+
+  it("does not swallow a hotel whose name merely rhymes with camping", () => {
+    // Real rows: a hotel brand (Campana), a US base, a hostel called BASE CAMP.
+    expect(camp("ベッセルホテルカンパーナ京都五条", "hotel")).toBe("hotel");
+    expect(classifyLodging({ name: null, name_en: "Inns of the Corps Camp Foster", type: "hotel" })).toBe("hotel");
+    expect(classifyLodging({ name: null, name_en: "Mt.TAKAO BASE CAMP hostel", type: "hostel" })).toBe("hostel");
+  });
+
+  it("reads the unambiguous camping compounds as campgrounds", () => {
+    expect(camp("箱根キャンプ村", "hotel")).toBe("campground");
+    expect(camp("ほたるのキャンプフィールド", null)).toBe("campground");
   });
 });

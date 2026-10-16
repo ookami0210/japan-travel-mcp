@@ -11,6 +11,7 @@
 
 export type LodgingType =
   | "campground"
+  | "glamping"
   | "ryokan"
   | "onsen_ryokan"
   | "shukubo"
@@ -44,9 +45,25 @@ export function classifyLodging(h: LodgingInput): LodgingType {
   // Order matters — most specific first.
   // Camping first: a name can carry both 温泉 and キャンプ場, and the pitch is
   // what the guest books.
+  // Glamping before the camping tags: a glamping dome is tagged
+  // `tourism=camp_site` as often as not, and a guest books a furnished tent
+  // with a bed in it rather than a pitch for their own. It belongs to the
+  // camping family — the `camping` group alias returns both — but a traveller
+  // asking for one does not want the other, so the distinction is kept.
+  if (
+    name.includes("グランピング") ||
+    name.includes("グランドーム") ||
+    name.toLowerCase().includes("glamping") ||
+    name.toLowerCase().includes("glamp ") ||
+    name.toLowerCase().includes("glampark")
+  ) {
+    return "glamping";
+  }
   if (tag === "camp_site" || tag === "caravan_site") return "campground";
   if (
     name.includes("キャンプ場") ||
+    name.includes("キャンプ村") ||
+    name.includes("キャンプフィールド") ||
     name.includes("オートキャンプ") ||
     name.includes("野営場") ||
     name.toLowerCase().includes("campground") ||
@@ -70,4 +87,15 @@ export function classifyLodging(h: LodgingInput): LodgingType {
   const t = (h.type ?? "hotel") as LodgingType;
   if (["hostel","guest_house","apartment","motel","hotel"].includes(t)) return t;
   return "hotel";
+}
+
+/**
+ * The camping family: a pitch you bring a tent to, and a furnished tent you
+ * do not. Both are crawled, geocoded and served together, because a guest
+ * looking for one will accept the other far more readily than they would a
+ * business hotel — while the two types stay distinct so a query for either on
+ * its own still means what it says.
+ */
+export function isCampingFamily(type: LodgingType): boolean {
+  return type === "campground" || type === "glamping";
 }
