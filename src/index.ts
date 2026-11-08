@@ -168,6 +168,10 @@ interface WikidataAttraction {
   // national/international heritage designation are higher-confidence
   // tourist destinations.
   heritage_designations?: string[];
+  // Wikidata skos:altLabel values (ja / en) recorded by the v2 fetcher's
+  // alias pass. Popular names (金閣寺 for 鹿苑寺) live here, not in the
+  // formal labels. Older datasets lack the field; treat as optional.
+  aliases?: string[];
   // "v2" | "p1435" | "direct_p31" | combinations like "p1435+v2"
   source_anchor?: string;
   // Iter 58: OSM-derived structured fields, joined to
@@ -945,6 +949,10 @@ async function buildEntityResolveIndex(): Promise<ResolveIndex> {
       const wt = (a as { wikipedia_titles?: Record<string, string> })
         .wikipedia_titles;
       if (wt) for (const t of Object.values(wt)) if (t) names.push(t);
+      // Popular names from Wikidata aliases (金閣寺 → 鹿苑寺). Without these
+      // the resolver knows a temple only by its formal name and falls
+      // through to fuzzy matches on unrelated entries.
+      for (const alias of a.aliases ?? []) if (alias) names.push(alias);
       if (names.length === 0) continue;
       const e: ResolveEntry = {
         id: a.qid,
@@ -1130,6 +1138,12 @@ async function resolveEntity(args: {
       lat: m.entry.lat,
       lng: m.entry.lng,
       prefecture_code: m.entry.prefecture_code,
+      // Present only when the exact name also exists in other prefectures
+      // and no area / coordinate hint was given. Callers should treat the
+      // match as a name hit, not a place hit, and re-ask with area_hint.
+      ...(m.ambiguous_with_prefectures
+        ? { ambiguous_with_prefectures: m.ambiguous_with_prefectures }
+        : {}),
       category: m.entry.category,
       official_url: m.entry.official_url,
       reference_url: m.entry.reference_url,
@@ -12653,7 +12667,7 @@ const TOOLS = [
         area_hint: {
           type: "string",
           description:
-            "Optional prefecture/region hint to disambiguate (e.g. '京都', 'kyoto', 'Kansai'). Boosts in-area candidates, demotes out-of-area ones.",
+            "Optional prefecture/region hint (e.g. '京都', 'kyoto', 'Kansai'). A constraint, not a nudge: candidates in other prefectures are excluded, so a name that only exists elsewhere returns no_match instead of a far-away pin. Entries with no prefecture on record are kept. Without a hint, an exact name that exists in several prefectures is reported with `ambiguous_with_prefectures` and confidence capped at medium.",
         },
         lat: { type: "number", description: "Optional latitude hint — boosts nearby candidates." },
         lng: { type: "number", description: "Optional longitude hint." },
