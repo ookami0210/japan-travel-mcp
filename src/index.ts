@@ -168,6 +168,10 @@ interface WikidataAttraction {
   // national/international heritage designation are higher-confidence
   // tourist destinations.
   heritage_designations?: string[];
+  // Wikidata skos:altLabel values (ja / en) recorded by the v2 fetcher's
+  // alias pass. Popular names (金閣寺 for 鹿苑寺) live here, not in the
+  // formal labels. Older datasets lack the field; treat as optional.
+  aliases?: string[];
   // "v2" | "p1435" | "direct_p31" | combinations like "p1435+v2"
   source_anchor?: string;
   // Iter 58: OSM-derived structured fields, joined to
@@ -945,6 +949,10 @@ async function buildEntityResolveIndex(): Promise<ResolveIndex> {
       const wt = (a as { wikipedia_titles?: Record<string, string> })
         .wikipedia_titles;
       if (wt) for (const t of Object.values(wt)) if (t) names.push(t);
+      // Popular names from Wikidata aliases (金閣寺 → 鹿苑寺). Without these
+      // the resolver knows a temple only by its formal name and falls
+      // through to fuzzy matches on unrelated entries.
+      for (const alias of a.aliases ?? []) if (alias) names.push(alias);
       if (names.length === 0) continue;
       const e: ResolveEntry = {
         id: a.qid,

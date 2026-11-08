@@ -114,6 +114,10 @@ interface AttractionRecord {
   admin_code: string | null;
   admin_name: string | null;
   types: string[];
+  // Wikidata skos:altLabel values in ja and en. This is where the names
+  // people actually use live: 金閣寺 is an alias of 鹿苑寺, 銀閣寺 of 慈照寺,
+  // 浅草観音 of 浅草寺. rdfs:label alone carries the formal name only.
+  aliases?: string[];
 }
 
 interface SparqlValue {
@@ -269,63 +273,173 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
-async function fetchPrefecture(
+/**
+ * A (prefix, types) query the endpoint could not answer even after the
+ * narrowing below. Recorded in the output so a thin prefecture can be told
+ * apart from a prefecture that simply has fewer items.
+ */
+interface DroppedQuery {
+  admin_prefix: string;
+  types: string[];
+  error: string;
+}
+
+const RETRIES_PER_QUERY = 3;
+
+/**
+ * Run one query with retries. Returns null when every attempt failed; the
+ * caller decides how to narrow the question.
+ */
+async function queryWithRetries(
   prefix: string,
-): Promise<AttractionRecord[]> {
-  const byQid = new Map<string, AttractionRecord>();
-  const typeBatches = chunk(ATTRACTION_TYPES, TYPE_BATCH_SIZE);
-
-  for (let bi = 0; bi < typeBatches.length; bi += 1) {
-    const batch = typeBatches[bi];
-    const query = buildQuery(prefix, batch);
-
-    let attempt = 0;
-    let success = false;
-    while (attempt < 4 && !success) {
-      try {
-        const bindings = await querySparql(query);
-        processBindings(bindings, byQid);
-        process.stderr.write(
-          `  pref ${prefix} batch ${bi + 1}/${typeBatches.length} (types ${batch.length}): ${bindings.length} bindings, byQid=${byQid.size}\n`,
-        );
-        success = true;
-      } catch (err) {
-        attempt += 1;
-        process.stderr.write(
-          `  pref ${prefix} batch ${bi + 1} attempt ${attempt} failed: ${(err as Error).message}\n`,
-        );
-        if (attempt >= 4) {
-          // Fall back: split this batch in half
-          process.stderr.write(
-            `  pref ${prefix} batch ${bi + 1} GIVING UP — splitting types\n`,
-          );
-          const half = Math.max(1, Math.floor(batch.length / 2));
-          const sub = chunk(batch, half);
-          for (const subBatch of sub) {
-            try {
-              const bindings = await querySparql(buildQuery(prefix, subBatch));
-              processBindings(bindings, byQid);
-              process.stderr.write(
-                `    pref ${prefix} sub-batch (${subBatch.length} types): ${bindings.length} bindings\n`,
-              );
-            } catch (err2) {
-              process.stderr.write(
-                `    pref ${prefix} sub-batch FAILED: ${(err2 as Error).message}\n`,
-              );
-            }
-            await new Promise((r) => setTimeout(r, 1500));
-          }
-          success = true;
-        } else {
-          await new Promise((r) => setTimeout(r, 3000 * attempt));
-        }
+  types: string[],
+  label: string,
+): Promise<SparqlBinding[] | null> {
+  let lastErr = "";
+  for (let attempt = 1; attempt <= RETRIES_PER_QUERY; attempt += 1) {
+    try {
+      return await querySparql(buildQuery(prefix, types));
+    } catch (err) {
+      lastErr = (err as Error).message;
+      process.stderr.write(
+        `  ${label} attempt ${attempt} failed: ${lastErr}\n`,
+      );
+      if (attempt < RETRIES_PER_QUERY) {
+        await new Promise((r) => setTimeout(r, 3000 * attempt));
       }
     }
-    // Be nice to the public endpoint between batches.
-    await new Promise((r) => setTimeout(r, 600));
   }
+  return null;
+}
 
-  return Array.from(byQid.values()).sort((a, b) => a.qid.localeCompare(b.qid));
+/**
+ * Fetch (prefix, types), narrowing the question until the endpoint answers.
+ *
+ * Wikidata returns 504 on the dense prefectures (Tokyo, Kanagawa, Aichi)
+ * for a six-type batch, and the earlier fallback split the batch in half
+ * once and then dropped whatever still failed. Those silent drops are how
+ * 浅草寺 went missing from Tokyo for months while the run reported success.
+ *
+ * Narrowing order:
+ *   1. split the type list until a single type remains;
+ *   2. for a single type, split the municipality-code prefix one digit
+ *      deeper (13 → 130..139), which bounds the P131* walk to a slice of
+ *      the prefecture. Codes are five digits, so this is finite.
+ * Only a single type on a full five-digit prefix is ever given up on, and
+ * that is recorded in `dropped` rather than lost.
+ */
+async function fetchSlice(
+  prefix: string,
+  types: string[],
+  byQid: Map<string, AttractionRecord>,
+  dropped: DroppedQuery[],
+  depth = 0,
+): Promise<void> {
+  const label = `pref ${prefix} types=${types.length}${depth ? ` depth=${depth}` : ""}`;
+  const bindings = await queryWithRetries(prefix, types, label);
+  await new Promise((r) => setTimeout(r, 600));
+  if (bindings) {
+    processBindings(bindings, byQid);
+    process.stderr.write(
+      `  ${label}: ${bindings.length} bindings, byQid=${byQid.size}\n`,
+    );
+    return;
+  }
+  if (types.length > 1) {
+    const half = Math.ceil(types.length / 2);
+    process.stderr.write(`  ${label}: narrowing by type\n`);
+    for (const sub of chunk(types, half)) {
+      await fetchSlice(prefix, sub, byQid, dropped, depth + 1);
+    }
+    return;
+  }
+  if (prefix.length < 5) {
+    process.stderr.write(`  ${label}: narrowing by municipality code\n`);
+    for (let d = 0; d <= 9; d += 1) {
+      await fetchSlice(`${prefix}${d}`, types, byQid, dropped, depth + 1);
+    }
+    return;
+  }
+  process.stderr.write(`  ${label}: GIVING UP on this slice\n`);
+  dropped.push({ admin_prefix: prefix, types, error: "every attempt failed" });
+}
+
+async function fetchPrefecture(
+  prefix: string,
+): Promise<{ records: AttractionRecord[]; dropped: DroppedQuery[] }> {
+  const byQid = new Map<string, AttractionRecord>();
+  const dropped: DroppedQuery[] = [];
+  for (const batch of chunk(ATTRACTION_TYPES, TYPE_BATCH_SIZE)) {
+    await fetchSlice(prefix, batch, byQid, dropped);
+  }
+  return {
+    records: Array.from(byQid.values()).sort((a, b) => a.qid.localeCompare(b.qid)),
+    dropped,
+  };
+}
+
+/**
+ * Attach skos:altLabel (ja, en) to the collected records.
+ *
+ * Aliases are fetched in a separate pass over the QIDs already collected:
+ * joining them into the main query multiplies the DISTINCT rows per item
+ * and makes the dense-prefecture timeouts worse. A VALUES list of QIDs with
+ * no path expression is cheap, and a batch that fails is retried then
+ * skipped (those records keep an empty alias list; nothing else is lost).
+ * Set WD_SKIP_ALIASES=1 to skip the pass.
+ */
+const ALIAS_BATCH = Number(process.env.WD_ALIAS_BATCH ?? "150");
+
+async function attachAliases(records: AttractionRecord[]): Promise<number> {
+  const byQid = new Map(records.map((r) => [r.qid, r]));
+  const qids = Array.from(byQid.keys());
+  let attached = 0;
+  const batches = chunk(qids, ALIAS_BATCH);
+  for (let i = 0; i < batches.length; i += 1) {
+    const values = batches[i].map((q) => `wd:${q}`).join(" ");
+    const query = `
+SELECT ?item ?alt WHERE {
+  VALUES ?item { ${values} }
+  ?item skos:altLabel ?alt .
+  FILTER(LANG(?alt) IN ("ja", "en"))
+}`.trim();
+    let bindings: Array<{ item?: SparqlValue; alt?: SparqlValue }> | null = null;
+    for (let attempt = 1; attempt <= RETRIES_PER_QUERY && !bindings; attempt += 1) {
+      try {
+        bindings = (await querySparql(query, 60_000)) as Array<{
+          item?: SparqlValue;
+          alt?: SparqlValue;
+        }>;
+      } catch (err) {
+        process.stderr.write(
+          `  aliases batch ${i + 1}/${batches.length} attempt ${attempt} failed: ${(err as Error).message}\n`,
+        );
+        await new Promise((r) => setTimeout(r, 2000 * attempt));
+      }
+    }
+    if (!bindings) continue;
+    for (const b of bindings) {
+      const qid = qidFromUri(b.item?.value ?? "");
+      const alt = b.alt?.value?.trim();
+      const rec = byQid.get(qid);
+      if (!rec || !alt) continue;
+      const known = new Set(
+        [rec.name_ja, rec.name_en, rec.name_zh, rec.name_ko, ...(rec.aliases ?? [])].filter(
+          (x): x is string => !!x,
+        ),
+      );
+      if (known.has(alt)) continue;
+      rec.aliases = [...(rec.aliases ?? []), alt];
+      attached += 1;
+    }
+    if ((i + 1) % 50 === 0 || i + 1 === batches.length) {
+      process.stderr.write(
+        `  aliases: ${i + 1}/${batches.length} batches, ${attached} aliases attached\n`,
+      );
+    }
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  return attached;
 }
 
 async function main(): Promise<void> {
@@ -358,10 +472,12 @@ async function main(): Promise<void> {
     }
 
     const t0 = Date.now();
-    const records = await fetchPrefecture(prefix);
+    const { records, dropped } = await fetchPrefecture(prefix);
     const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
     process.stderr.write(
-      `[wd_v2] pref ${prefix}: ${records.length} attractions in ${elapsed}s\n`,
+      `[wd_v2] pref ${prefix}: ${records.length} attractions in ${elapsed}s` +
+        (dropped.length ? ` (${dropped.length} slice(s) dropped)` : "") +
+        `\n`,
     );
 
     await writeFile(
@@ -371,6 +487,7 @@ async function main(): Promise<void> {
           prefecture_prefix: prefix,
           fetched_at: new Date().toISOString(),
           types: ATTRACTION_TYPES,
+          dropped,
           attractions: records,
         },
         null,
@@ -385,10 +502,12 @@ async function main(): Promise<void> {
     .filter((f) => /^\d\d\.json$/.test(f))
     .sort();
   const all = new Map<string, AttractionRecord>();
+  const droppedAll: DroppedQuery[] = [];
   for (const f of files) {
     const data = JSON.parse(
       await readFile(`${partialDir}${f}`, "utf8"),
-    ) as { attractions: AttractionRecord[] };
+    ) as { attractions: AttractionRecord[]; dropped?: DroppedQuery[] };
+    droppedAll.push(...(data.dropped ?? []));
     for (const r of data.attractions) {
       const cur = all.get(r.qid);
       if (!cur) {
@@ -402,6 +521,13 @@ async function main(): Promise<void> {
     }
   }
   const records = Array.from(all.values()).sort((a, b) => a.qid.localeCompare(b.qid));
+
+  let aliasesAttached = 0;
+  if (process.env.WD_SKIP_ALIASES !== "1") {
+    process.stderr.write(`[wd_v2] alias pass over ${records.length} items\n`);
+    aliasesAttached = await attachAliases(records);
+    process.stderr.write(`[wd_v2] aliases attached: ${aliasesAttached}\n`);
+  }
 
   const byPref: Record<string, number> = {};
   let withEn = 0, withZh = 0, withKo = 0, withCoord = 0;
@@ -426,6 +552,7 @@ async function main(): Promise<void> {
         "P625 (coordinates)",
         "P856 (official website)",
         "rdfs:label (multilingual)",
+        "skos:altLabel (ja, en aliases)",
       ],
       types: ATTRACTION_TYPES,
       type_count: ATTRACTION_TYPES.length,
@@ -437,6 +564,11 @@ async function main(): Promise<void> {
     fetched_at: new Date().toISOString(),
     started_at: startedAt,
     prefecture_prefixes_fetched: PREFECTURE_PREFIXES,
+    // Slices the endpoint never answered, after narrowing to a single type
+    // on a five-digit municipality prefix. Empty means complete coverage of
+    // the type list for every prefecture fetched.
+    dropped_queries: droppedAll,
+    aliases_attached: aliasesAttached,
     total_attractions: records.length,
     multilingual_coverage: { en: withEn, zh: withZh, ko: withKo },
     coordinate_coverage: withCoord,
