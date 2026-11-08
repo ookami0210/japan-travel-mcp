@@ -31,7 +31,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { isDeletedLodging, lodgingTypeOverride } from "../../src/lib/excluded_lodgings.js";
-import { classifyLodging } from "../../src/lib/lodging.js";
+import { classifyLodging, isCampingFamily } from "../../src/lib/lodging.js";
 import {
   nearest,
   nearestFew,
@@ -174,7 +174,7 @@ async function main(): Promise<void> {
     (h) =>
       !isDeletedLodging(h.id) &&
       !lodgingTypeOverride(h.id) &&
-      classifyLodging(h) === "campground" && h.coordinates,
+      isCampingFamily(classifyLodging(h)) && h.coordinates,
   );
 
   const stationsFile = await loadJson<{ stations?: NamedPlace[] }>(STATIONS_URL);

@@ -52,7 +52,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import pLimit from "p-limit";
 import { isDeletedLodging, lodgingTypeOverride } from "../../src/lib/excluded_lodgings.js";
-import { classifyLodging } from "../../src/lib/lodging.js";
+import { classifyLodging, isCampingFamily } from "../../src/lib/lodging.js";
 import {
   contentHash,
   isStale,
@@ -243,7 +243,7 @@ async function main(): Promise<void> {
     (h) =>
       !isDeletedLodging(h.id) &&
       !lodgingTypeOverride(h.id) &&
-      classifyLodging(h) === "campground",
+      isCampingFamily(classifyLodging(h)),
   );
 
   let status: Record<string, StatusEntry>;
