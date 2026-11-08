@@ -199,6 +199,7 @@ def prefetch(files: list[str], repo: str, token: str | None, dest_root: Path) ->
     from huggingface_hub import hf_hub_download
 
     ok, miss = 0, 0
+    manifest: dict[str, str] = load_manifest(dest_root)
     for rel in files:
         try:
             src = hf_hub_download(
@@ -214,9 +215,53 @@ def prefetch(files: list[str], repo: str, token: str | None, dest_root: Path) ->
         dst = dest_root / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dst)
+        manifest[rel] = sha256_of(dst)
         print(f"[prefetch] OK   {rel}")
         ok += 1
+    save_manifest(dest_root, manifest)
     return ok, miss
+
+
+# Every workflow prefetches the state it needs, runs its job, then uploads
+# the whole data/ tree. A file this job only downloaded is therefore
+# re-uploaded unchanged, and when another job refreshed that same file in
+# between, the stale copy overwrites the fresh one. That is how a monthly
+# attractions refresh landed on the dataset and was replaced by an older
+# copy within the hour. The manifest below records what was downloaded and
+# its content hash; upload_dataset.py skips files that still match, so a job
+# publishes only what it produced.
+MANIFEST_REL = Path("_state/.prefetch_manifest.json")
+
+
+def sha256_of(path: Path) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def load_manifest(dest_root: Path) -> dict[str, str]:
+    import json
+
+    p = dest_root / MANIFEST_REL
+    if not p.exists():
+        return {}
+    try:
+        data = json.loads(p.read_text("utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_manifest(dest_root: Path, manifest: dict[str, str]) -> None:
+    import json
+
+    p = dest_root / MANIFEST_REL
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(manifest, indent=1, sort_keys=True), "utf-8")
 
 
 def main() -> int:

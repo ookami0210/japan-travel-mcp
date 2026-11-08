@@ -86,6 +86,7 @@ IGNORE_GLOBS = [
     "_state/translation_batch_descriptions.json",
     "_state/translation_batch_multilingual.json",
     "_state/*.log",
+    "_state/.prefetch_manifest.json",  # local bookkeeping, see collect_files()
     "hotels/review/**",  # public review queue stays in git for contributors
     ".DS_Store",
     "**/.DS_Store",
@@ -121,16 +122,57 @@ def _glob_match(s: str, pat: str) -> bool:
 
 
 def collect_files() -> list[Path]:
-    """Walk data/ and return every file that is NOT ignored."""
+    """Walk data/ and return every file that is NOT ignored.
+
+    Files that prefetch_state.py downloaded and that are byte-identical to
+    what it downloaded are left out: this job did not produce them, and
+    re-uploading them would overwrite whatever another job published since.
+    Set UPLOAD_INCLUDE_PREFETCHED=1 to upload them anyway.
+    """
+    prefetched = _prefetched_unchanged() if os.environ.get("UPLOAD_INCLUDE_PREFETCHED") != "1" else set()
     out: list[Path] = []
+    skipped = 0
     for p in sorted(DATA.rglob("*")):
         if not p.is_file():
             continue
         rel = p.relative_to(DATA)
         if is_ignored(rel):
             continue
+        if rel.as_posix() in prefetched:
+            skipped += 1
+            continue
         out.append(p)
+    if skipped:
+        print(f"[upload] skipping {skipped} prefetched file(s) this job did not change")
     return out
+
+
+def _prefetched_unchanged() -> set[str]:
+    """Relative paths whose content still matches the prefetch manifest."""
+    import hashlib
+    import json
+
+    manifest_path = DATA / "_state" / ".prefetch_manifest.json"
+    if not manifest_path.exists():
+        return set()
+    try:
+        manifest = json.loads(manifest_path.read_text("utf-8"))
+    except (OSError, ValueError):
+        return set()
+    if not isinstance(manifest, dict):
+        return set()
+    unchanged: set[str] = set()
+    for rel, digest in manifest.items():
+        p = DATA / rel
+        if not p.is_file():
+            continue
+        h = hashlib.sha256()
+        with p.open("rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                h.update(chunk)
+        if h.hexdigest() == digest:
+            unchanged.add(rel)
+    return unchanged
 
 
 def human_size(n: int) -> str:
