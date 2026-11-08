@@ -359,6 +359,30 @@ The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data
 
 ---
 
+## What is in the attraction layer, and what is not
+
+The Wikidata attraction layer is built by class, not by prominence. An item
+is included when Wikidata records it as an instance (or subclass instance)
+of one of about forty tourism-relevant classes (temple, shrine, castle,
+museum, park, garden, waterfall, hot spring, designated cultural property,
+and so on) and places it, through `located in (P131)`, inside a Japanese
+municipality. Two consequences worth knowing before you query:
+
+- Coverage follows Wikidata's tagging. A nationally designated kofun with a
+  Wikidata item is in; a famous commercial complex or a privately run
+  attraction whose item carries none of those classes is not, however many
+  visitors it gets. Where the official municipal pages describe such a place
+  it appears in the municipal spot layer instead.
+- Names come from Wikidata labels and aliases. The formal name is the
+  canonical record (鹿苑寺); the names in everyday use (金閣寺, Kinkaku-ji)
+  are carried as aliases and resolve to the same entity. The 18-language
+  translation layer translates the formal name faithfully and does not
+  invent popular names, so an alias missing on Wikidata is missing here too.
+
+Each refresh records any query slices Wikidata could not answer in
+`dropped_queries` inside `_state/wikidata_attractions.json`; an empty list
+means every class was fetched for every prefecture.
+
 ## Multilingual data and translation pipeline
 
 The project ships **18 languages** as a first-class feature, not an afterthought.
