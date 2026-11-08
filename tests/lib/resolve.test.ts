@@ -118,3 +118,59 @@ describe("resolveByName", () => {
     expect(r[0].entry.id).toBe("Q1");
   });
 });
+
+describe("resolveByName: area_hint is a constraint", () => {
+  const AMBIG = buildResolveIndex([
+    entry({ id: "KYOTO", names: ["清水寺", "Kiyomizu-dera"], prefecture_code: "26", lat: 34.9949, lng: 135.785 }),
+    entry({ id: "OITA", names: ["清水寺"], prefecture_code: "44", lat: 33.5325, lng: 131.3501 }),
+    entry({ id: "NOPREF", names: ["清水寺"], prefecture_code: null }),
+    entry({ id: "HOTEL17", source: "hotel", names: ["金閣"], prefecture_code: "17", lat: 36.333, lng: 136.447 }),
+  ]);
+
+  it("drops candidates outside the hinted prefecture instead of demoting them", () => {
+    const r = resolveByName(AMBIG, "清水寺", { prefCodes: new Set(["26"]) });
+    const ids = r.map((m) => m.entry.id);
+    expect(ids).toContain("KYOTO");
+    expect(ids).not.toContain("OITA");
+    expect(r[0].entry.id).toBe("KYOTO");
+    expect(r[0].confidence).toBe("high");
+    expect(r[0].ambiguous_with_prefectures).toBeUndefined();
+  });
+
+  it("keeps entries with no prefecture on record when a hint is given", () => {
+    const r = resolveByName(AMBIG, "清水寺", { prefCodes: new Set(["26"]) });
+    expect(r.map((m) => m.entry.id)).toContain("NOPREF");
+  });
+
+  it("returns no_match rather than an out-of-prefecture fuzzy hit", () => {
+    // 金閣寺 fuzzy-matches the Ishikawa hotel "金閣"; with a Kyoto hint that
+    // hotel is not an answer, and nothing else is, so the result is empty.
+    const r = resolveByName(AMBIG, "金閣寺", { prefCodes: new Set(["26"]) });
+    expect(r).toHaveLength(0);
+    const unhinted = resolveByName(AMBIG, "金閣寺");
+    expect(unhinted.map((m) => m.entry.id)).toContain("HOTEL17");
+  });
+
+  it("caps exact-name matches at medium when the same name exists in other prefectures", () => {
+    const r = resolveByName(AMBIG, "清水寺");
+    const kyoto = r.find((m) => m.entry.id === "KYOTO")!;
+    const oita = r.find((m) => m.entry.id === "OITA")!;
+    expect(kyoto.confidence).toBe("medium");
+    expect(oita.confidence).toBe("medium");
+    expect(kyoto.ambiguous_with_prefectures).toEqual(["44"]);
+    expect(oita.ambiguous_with_prefectures).toEqual(["26"]);
+  });
+
+  it("a coordinate hint lifts the cap and picks the nearby one", () => {
+    const r = resolveByName(AMBIG, "清水寺", { near: { lat: 34.9949, lng: 135.785 } });
+    expect(r[0].entry.id).toBe("KYOTO");
+    expect(r[0].confidence).toBe("high");
+    expect(r[0].ambiguous_with_prefectures).toBeUndefined();
+  });
+
+  it("does not flag ambiguity when the exact name is unique", () => {
+    const r = resolveByName(INDEX, "東京タワー");
+    expect(r[0].confidence).toBe("high");
+    expect(r[0].ambiguous_with_prefectures).toBeUndefined();
+  });
+});

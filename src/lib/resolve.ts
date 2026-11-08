@@ -36,6 +36,15 @@ export interface ResolveMatch {
   score: number;
   confidence: "high" | "medium" | "low";
   matched_name: string;
+  /**
+   * Set when the query matched this entry's name exactly and the index holds
+   * other entries with the same exact name in other prefectures, and the
+   * caller gave no area or coordinate hint to pick between them. The list is
+   * the prefecture codes of the look-alikes. Confidence is capped at
+   * "medium" in that situation: an exact string match is not the same thing
+   * as "this is the place" when the string names several places.
+   */
+  ambiguous_with_prefectures?: string[];
 }
 
 /** Normalize a name for comparison: NFKC, lowercase, strip separators. */
@@ -167,13 +176,45 @@ export function resolveByName(
     }
   }
 
+  const hasAreaHint = !!(opts.prefCodes && opts.prefCodes.size > 0);
+  const hasNear = !!opts.near;
+
+  // Exact-name look-alikes across prefectures. "清水寺" is an exact match in
+  // Kyoto and in Oita; "ドン・キホーテ" exists in every city. Without an area
+  // or coordinate hint the string alone cannot say which one is meant, so
+  // the exact matches are reported with that ambiguity attached and their
+  // confidence capped at "medium".
+  const exactPrefs = new Map<number, Set<string>>();
+  if (!hasAreaHint && !hasNear) {
+    const exactIdx = index.exact.get(qNorm) ?? [];
+    const prefs = new Set<string>();
+    for (const idx of exactIdx) {
+      const code = index.entries[idx].prefecture_code;
+      if (code) prefs.add(code);
+    }
+    if (prefs.size > 1) {
+      for (const idx of exactIdx) {
+        const own = index.entries[idx].prefecture_code;
+        const others = new Set(prefs);
+        if (own) others.delete(own);
+        exactPrefs.set(idx, others);
+      }
+    }
+  }
+
   // Geo / area adjustments.
   const results: ResolveMatch[] = [];
   for (const [idx, { score, name }] of best) {
     const e = index.entries[idx];
     let s = score;
-    if (opts.prefCodes && opts.prefCodes.size > 0 && e.prefecture_code) {
-      s += opts.prefCodes.has(e.prefecture_code) ? 0.08 : -0.15;
+    if (hasAreaHint && e.prefecture_code) {
+      // An area hint is a constraint, not a nudge. A candidate in another
+      // prefecture is not the place the caller asked about, however well its
+      // name matches; returning it with a small penalty still hands the
+      // caller a confidently placed pin hundreds of kilometres away.
+      // Entries with no prefecture on record stay in, unboosted.
+      if (!opts.prefCodes!.has(e.prefecture_code)) continue;
+      s += 0.08;
     }
     if (opts.near && e.lat !== null && e.lng !== null) {
       const km = haversineKmLocal(opts.near.lat, opts.near.lng, e.lat, e.lng);
@@ -183,12 +224,20 @@ export function resolveByName(
     }
     s = Math.min(s, 1.0);
     if (s < SCORE_FLOOR) continue;
-    results.push({
+    let confidence: ResolveMatch["confidence"] =
+      s >= 0.9 ? "high" : s >= 0.72 ? "medium" : "low";
+    const ambiguous = exactPrefs.get(idx);
+    if (ambiguous && confidence === "high") confidence = "medium";
+    const match: ResolveMatch = {
       entry: e,
       score: Math.round(s * 1000) / 1000,
-      confidence: s >= 0.9 ? "high" : s >= 0.72 ? "medium" : "low",
+      confidence,
       matched_name: name,
-    });
+    };
+    if (ambiguous) {
+      match.ambiguous_with_prefectures = Array.from(ambiguous).sort();
+    }
+    results.push(match);
   }
   results.sort((a, b) => b.score - a.score);
   return results.slice(0, limit);

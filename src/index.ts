@@ -1130,6 +1130,12 @@ async function resolveEntity(args: {
       lat: m.entry.lat,
       lng: m.entry.lng,
       prefecture_code: m.entry.prefecture_code,
+      // Present only when the exact name also exists in other prefectures
+      // and no area / coordinate hint was given. Callers should treat the
+      // match as a name hit, not a place hit, and re-ask with area_hint.
+      ...(m.ambiguous_with_prefectures
+        ? { ambiguous_with_prefectures: m.ambiguous_with_prefectures }
+        : {}),
       category: m.entry.category,
       official_url: m.entry.official_url,
       reference_url: m.entry.reference_url,
@@ -12653,7 +12659,7 @@ const TOOLS = [
         area_hint: {
           type: "string",
           description:
-            "Optional prefecture/region hint to disambiguate (e.g. '京都', 'kyoto', 'Kansai'). Boosts in-area candidates, demotes out-of-area ones.",
+            "Optional prefecture/region hint (e.g. '京都', 'kyoto', 'Kansai'). A constraint, not a nudge: candidates in other prefectures are excluded, so a name that only exists elsewhere returns no_match instead of a far-away pin. Entries with no prefecture on record are kept. Without a hint, an exact name that exists in several prefectures is reported with `ambiguous_with_prefectures` and confidence capped at medium.",
         },
         lat: { type: "number", description: "Optional latitude hint — boosts nearby candidates." },
         lng: { type: "number", description: "Optional longitude hint." },
