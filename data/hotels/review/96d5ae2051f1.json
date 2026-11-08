@@ -1,0 +1,102 @@
+{
+  "id": "96d5ae2051f1",
+  "confidence": "likely",
+  "match_reasons": [
+    "distance 23m",
+    "name similarity 0.86 (likely)"
+  ],
+  "candidates": [
+    {
+      "source": "osm",
+      "source_id": "node/980541544",
+      "source_url": "https://www.openstreetmap.org/node/980541544",
+      "name": "せせらぎ公園オートキャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 37.4507131,
+        "lng": 139.9059977
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "caravan_site",
+      "prefecture_code": "07",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/980541544",
+        "osm_url": "https://www.openstreetmap.org/node/980541544",
+        "type": "caravan_site",
+        "name": "せせらぎ公園オートキャンプ場",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 37.4507131,
+          "lng": 139.9059977
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "せせらぎ公園オートキャンプ場",
+          "tourism": "caravan_site"
+        }
+      }
+    },
+    {
+      "source": "list",
+      "source_id": "cg-e71f50874d",
+      "source_url": "",
+      "name": "せせらぎオートキャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 37.450859,
+        "lng": 139.906189
+      },
+      "phone": "0242-57-1225",
+      "street": "福島県大沼郡会津美里町字家東甲4224-2",
+      "postal_code": null,
+      "website": "http://www.aizu-misato.jp/park/seseragi/seseragi_autocamp.html",
+      "type": "camp_site",
+      "prefecture_code": "07",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-e71f50874d",
+        "name": "せせらぎオートキャンプ場",
+        "address": "福島県大沼郡会津美里町字家東甲4224-2",
+        "phone": "0242-57-1225",
+        "website": "http://www.aizu-misato.jp/park/seseragi/seseragi_autocamp.html",
+        "coordinates": {
+          "lat": 37.450859,
+          "lng": 139.906189
+        },
+        "prefecture_code": "07",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:node/980541544",
+            "name": "せせらぎ公園オートキャンプ場",
+            "how": "one name contains the other, same prefecture"
+          },
+          {
+            "source_ref": "osm:node/13898287954",
+            "name": "小豆温泉せせらぎオートキャンプ場Red Bean",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    }
+  ]
+}

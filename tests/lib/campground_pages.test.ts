@@ -52,7 +52,7 @@ describe("selectInfoLinks", () => {
 
   it("stays on the site", () => {
     const got = selectInfoLinks(
-      [link("https://nap-camp.com/aichi/1234", "予約はこちら"), link("/rule.html", "利用規約")],
+      [link("https://booking.example.com/aichi/1234", "予約はこちら"), link("/rule.html", "利用規約")],
       HOME,
       5,
     );

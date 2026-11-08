@@ -69,9 +69,10 @@ hotels/
   master.json                     # ~20,000 accommodations (Wikidata + OSM merged)
 
 campgrounds/
-  official_pages.jsonl            # Official-page text for 176 campgrounds whose
-                                  # own site is live (2,075 campgrounds in the
-                                  # lodging layer, 285 with a URL on record).
+  official_pages.jsonl            # Official-page text for 241 campgrounds whose
+                                  # own site is live (2,178 campgrounds and
+                                  # glamping sites in the lodging layer, 370
+                                  # with a URL on record).
                                   # Homepage + up to 7 pages carrying season, pitch
                                   # prices, facilities, access and rules; verbatim
                                   # text with a sha256 per page so a consumer can
@@ -164,7 +165,7 @@ refreshes data on two tracks and re-publishes to this dataset:
 |:---|:---|:---|:---|
 | Municipal tourism pages | 1,938 entities | rolling 30 days | ~70 / day |
 | Official designation sources | 5 sources | rolling 7 days | 1–2 sources / day |
-| Campground official pages | 176 sites | rolling 30 days | monthly batch |
+| Campground official pages | 241 sites | rolling 30 days | monthly batch |
 
 Each domain is hit at most once per cycle.
 

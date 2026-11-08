@@ -1,0 +1,98 @@
+{
+  "id": "2cf11dea53d6",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-52acc64b62",
+      "source_url": "",
+      "name": "会津山村道場 うさぎの森オートキャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 37.11092,
+        "lng": 139.711578
+      },
+      "phone": "0241-66-2108",
+      "street": "福島県南会津郡南会津町糸沢字西沢山3692-20",
+      "postal_code": null,
+      "website": "http://www.aizukogen-yume.jp/sanson/",
+      "type": "camp_site",
+      "prefecture_code": "07",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-52acc64b62",
+        "name": "会津山村道場 うさぎの森オートキャンプ場",
+        "address": "福島県南会津郡南会津町糸沢字西沢山3692-20",
+        "phone": "0241-66-2108",
+        "website": "http://www.aizukogen-yume.jp/sanson/",
+        "coordinates": {
+          "lat": 37.11092,
+          "lng": 139.711578
+        },
+        "prefecture_code": "07",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:node/3585979193",
+            "name": "うさぎの森オートキャンプ場",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/3585979193",
+      "source_url": "https://www.openstreetmap.org/node/3585979193",
+      "name": "うさぎの森オートキャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 37.1478083,
+        "lng": 139.717674
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "camp_site",
+      "prefecture_code": "07",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/3585979193",
+        "osm_url": "https://www.openstreetmap.org/node/3585979193",
+        "type": "camp_site",
+        "name": "うさぎの森オートキャンプ場",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 37.1478083,
+          "lng": 139.717674
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "うさぎの森オートキャンプ場",
+          "operator": "会津山村道場",
+          "tourism": "camp_site"
+        }
+      }
+    }
+  ]
+}

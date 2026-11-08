@@ -47,7 +47,7 @@ export interface SiteStatusResult {
  * that exists — but it is not the operator's own site, and its terms decide
  * whether it may be fetched at all, so it is labelled rather than crawled.
  */
-const LISTING_HOSTS = [
+export const LISTING_HOST_SUFFIXES = [
   "nap-camp.com",
   "hatinosu.net",
   "jalan.net",
@@ -122,7 +122,7 @@ function hostOf(url: string): string | null {
 export function isListingHost(url: string): boolean {
   const host = hostOf(url);
   if (!host) return false;
-  return LISTING_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
+  return LISTING_HOST_SUFFIXES.some((h) => host === h || host.endsWith(`.${h}`));
 }
 
 /** Loose name match: punctuation and spacing differ between sources. */

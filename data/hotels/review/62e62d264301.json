@@ -1,0 +1,97 @@
+{
+  "id": "62e62d264301",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-ec9f2274ea",
+      "source_url": "",
+      "name": "とれた小屋ふじいキャンプ場「para-to sunset river」",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.169556,
+        "lng": 141.385391
+      },
+      "phone": "090-8903-9958",
+      "street": "北海道札幌市北区篠路町拓北243-2",
+      "postal_code": null,
+      "website": "http://toreta-fujii.com",
+      "type": "camp_site",
+      "prefecture_code": "01",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-ec9f2274ea",
+        "name": "とれた小屋ふじいキャンプ場「para-to sunset river」",
+        "address": "北海道札幌市北区篠路町拓北243-2",
+        "phone": "090-8903-9958",
+        "website": "http://toreta-fujii.com",
+        "coordinates": {
+          "lat": 43.169556,
+          "lng": 141.385391
+        },
+        "prefecture_code": "01",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:way/1166072105",
+            "name": "para-to sunset river",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "way/1166072105",
+      "source_url": "https://www.openstreetmap.org/way/1166072105",
+      "name": "para-to sunset river",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 43.1697125,
+        "lng": 141.3820358
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": null,
+      "website": null,
+      "type": "camp_site",
+      "prefecture_code": "01",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "way/1166072105",
+        "osm_url": "https://www.openstreetmap.org/way/1166072105",
+        "type": "camp_site",
+        "name": "para-to sunset river",
+        "name_en": null,
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 43.1697125,
+          "lng": 141.3820358
+        },
+        "postal_code": null,
+        "full_address": null,
+        "city": null,
+        "street": null,
+        "phone": null,
+        "website": null,
+        "stars": null,
+        "raw_tags": {
+          "name": "para-to sunset river",
+          "tourism": "camp_site"
+        }
+      }
+    }
+  ]
+}

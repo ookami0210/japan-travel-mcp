@@ -1,0 +1,105 @@
+{
+  "id": "f40c6719de9b",
+  "confidence": "likely",
+  "match_reasons": [
+    "one name contains the other, same prefecture",
+    "compiled-list candidate"
+  ],
+  "candidates": [
+    {
+      "source": "list",
+      "source_id": "cg-9574b9b276",
+      "source_url": "",
+      "name": "天城高原オートキャンプ場",
+      "name_en": null,
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.823315,
+        "lng": 139.000473
+      },
+      "phone": "0557-52-3250",
+      "street": "静岡県賀茂郡東伊豆町白田1458-5",
+      "postal_code": null,
+      "website": "https://izu-camp.jp/",
+      "type": "camp_site",
+      "prefecture_code": "22",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "id": "cg-9574b9b276",
+        "name": "天城高原オートキャンプ場",
+        "address": "静岡県賀茂郡東伊豆町白田1458-5",
+        "phone": "0557-52-3250",
+        "website": "https://izu-camp.jp/",
+        "coordinates": {
+          "lat": 34.823315,
+          "lng": 139.000473
+        },
+        "prefecture_code": "22",
+        "coordinate_source": "国土地理院 (Geospatial Information Authority of Japan) address search",
+        "matches_held": null,
+        "possible_duplicates": [
+          {
+            "source_ref": "osm:node/6279906089",
+            "name": "ホテルハーヴェスト天城高原",
+            "how": "one name contains the other, same prefecture"
+          }
+        ]
+      }
+    },
+    {
+      "source": "osm",
+      "source_id": "node/6279906089",
+      "source_url": "https://www.openstreetmap.org/node/6279906089",
+      "name": "ホテルハーヴェスト天城高原",
+      "name_en": "Hotel Harvest Amagikougen",
+      "name_zh": null,
+      "name_ko": null,
+      "coordinates": {
+        "lat": 34.8922642,
+        "lng": 139.0284971
+      },
+      "phone": null,
+      "street": null,
+      "postal_code": "410-2507",
+      "website": "https://www.resorthotels109.com/amagikogen/,http://www.resorthotels109.com/en/amagikogen/index.html",
+      "type": "hotel",
+      "prefecture_code": "22",
+      "seasonal": null,
+      "hours_raw": null,
+      "raw": {
+        "osm_id": "node/6279906089",
+        "osm_url": "https://www.openstreetmap.org/node/6279906089",
+        "type": "hotel",
+        "name": "ホテルハーヴェスト天城高原",
+        "name_en": "Hotel Harvest Amagikougen",
+        "name_zh": null,
+        "name_ko": null,
+        "coordinates": {
+          "lat": 34.8922642,
+          "lng": 139.0284971
+        },
+        "postal_code": "410-2507",
+        "full_address": null,
+        "city": "伊豆市",
+        "street": null,
+        "phone": null,
+        "website": "https://www.resorthotels109.com/amagikogen/,http://www.resorthotels109.com/en/amagikogen/index.html",
+        "stars": null,
+        "raw_tags": {
+          "addr:city": "伊豆市",
+          "addr:housenumber": "1524",
+          "addr:postcode": "410-2507",
+          "addr:province": "静岡県",
+          "addr:quarter": "冷川",
+          "name": "ホテルハーヴェスト天城高原",
+          "name:en": "Hotel Harvest Amagikougen",
+          "name:ja": "ホテルハーヴェスト天城高原",
+          "tourism": "hotel",
+          "website": "https://www.resorthotels109.com/amagikogen/,http://www.resorthotels109.com/en/amagikogen/index.html"
+        }
+      }
+    }
+  ]
+}

@@ -231,25 +231,16 @@ describe("buildServer() — MCP integration smoke", () => {
     expect(block.pages[0].text_truncated).toBeUndefined();
   });
 
-  it("points a campground with no page of its own at where to look", async () => {
+  it("sends a campground with no page of its own nowhere else", async () => {
     const json = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
     const hotels = (json.hotels ?? []) as Record<string, any>[];
     const noSite = hotels.find((h) => h.id === "fixture-campground-2");
     expect(noSite, "the website-less fixture campground should come back").toBeTruthy();
-    const pointer = noSite!.listed_elsewhere;
-    expect(pointer.directory_prefecture_url).toBe("https://www.nap-camp.com/tottori/list");
-    expect(pointer.search_for).toBe("フィクスチャ町営野営場");
-    // Never asserted as a fact, and never carrying the directory's content.
-    expect(pointer.listing_verified).toBe(false);
-    expect(noSite!.official_page).toBeUndefined();
-  });
-
-  it("does not send a campground elsewhere when its own pages are held", async () => {
-    const json = await callToolOk("get_hotels", { prefecture: "tottori", hotel_type: "campground" });
-    const hotels = (json.hotels ?? []) as Record<string, any>[];
-    const withPages = hotels.find((h) => h.id === "fixture-campground-1");
-    expect(withPages!.official_page).toBeTruthy();
-    expect(withPages!.listed_elsewhere).toBeUndefined();
+    // What such a campground carries is what its own coordinate says, and
+    // nothing pointing at a third-party listing.
+    expect(noSite!.listed_elsewhere).toBeUndefined();
+    expect(noSite!.place).toBeTruthy();
+    expect(JSON.stringify(json)).not.toContain("nap-camp");
   });
 
   it("gives a campground with no page of its own what its coordinate can say", async () => {
