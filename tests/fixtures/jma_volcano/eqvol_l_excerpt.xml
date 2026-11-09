@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" lang="ja">
+  <title>長期（地震火山）</title>
+  <subtitle>JMAXML publishing feed</subtitle>
+  <updated>2026-11-09T20:01:10+09:00</updated>
+  <id>https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml#long_1794222070</id>
+  <link rel="related" href="https://www.jma.go.jp/"/>
+  <link rel="self" href="https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml"/>
+  <link rel="hub" href="http://alert-hub.appspot.com/"/>
+  <rights type="html"><![CDATA[
+<a href="https://www.jma.go.jp/jma/kishou/info/coment.html">利用規約</a>,
+<a href="https://www.jma.go.jp/jma/en/copyright.html">Terms of Use</a>
+]]></rights>
+  
+  <entry>
+    <title>降灰予報（定時）</title>
+    <id>https://www.data.jma.go.jp/developer/xml/data/20261109110042_0_VFVO53_010000.xml</id>
+    <updated>2026-11-09T11:00:00Z</updated>
+    <author>
+      <name>気象庁</name>
+    </author>
+    <link type="application/xml" href="https://www.data.jma.go.jp/developer/xml/data/20261109110042_0_VFVO53_010000.xml"/>
+    <content type="text">【火山名　諏訪之瀬島　降灰予報（定時）】　現在、諏訪之瀬島は噴火警戒レベル２（火口周辺規制）です。諏訪之瀬島で噴火が発生した場合には、９日２１時から２４時までは火口から南東方向、１０日０９時から１２時までは火口から南方向に降灰が予想されます。</content>
+  </entry>
+  <entry>
+    <title>火山の状況に関する解説情報</title>
+    <id>https://www.data.jma.go.jp/developer/xml/data/20261109070157_0_VFVO51_400000.xml</id>
+    <updated>2026-11-09T07:01:57Z</updated>
+    <author>
+      <name>福岡管区気象台　鹿児島地方気象台</name>
+    </author>
+    <link type="application/xml" href="https://www.data.jma.go.jp/developer/xml/data/20261109070157_0_VFVO51_400000.xml"/>
+    <content type="text">【火山名  口永良部島  火山の状況に関する解説情報】＜噴火予報（噴火警戒レベル１、活火山であることに留意）が継続＞
+　口永良部島では火山性地震がやや増加しています。今後の火山活動に関する情報に留意してください。</content>
+  </entry>
+  <entry>
+    <title>震度速報</title>
+    <id>https://www.data.jma.go.jp/developer/xml/data/20261109045531_0_VXSE51_010000.xml</id>
+    <updated>2026-11-09T04:55:30Z</updated>
+    <author>
+      <name>気象庁</name>
+    </author>
+    <link type="application/xml" href="https://www.data.jma.go.jp/developer/xml/data/20261109045531_0_VXSE51_010000.xml"/>
+    <content type="text">【震度速報】　９日１３時５２分ころ、地震による強い揺れを感じました。震度３以上が観測された地域をお知らせします。</content>
+  </entry>
+  <entry>
+    <title>噴火に関する火山観測報</title>
+    <id>https://www.data.jma.go.jp/developer/xml/data/20261105133148_0_VFVO52_400000.xml</id>
+    <updated>2026-11-05T13:31:48Z</updated>
+    <author>
+      <name>福岡管区気象台　鹿児島地方気象台</name>
+    </author>
+    <link type="application/xml" href="https://www.data.jma.go.jp/developer/xml/data/20261105133148_0_VFVO52_400000.xml"/>
+    <content type="text">【火山名　桜島　噴火に関する火山観測報】火　　山：桜島
+日　　時：2026年11月05日22時17分(051317UTC) 第2報
+現　　象：爆発</content>
+  </entry>
+  <entry>
+    <title>噴火警報・予報</title>
+    <id>https://www.data.jma.go.jp/developer/xml/data/20261104010017_0_VFVO50_016000.xml</id>
+    <updated>2026-11-04T01:00:16Z</updated>
+    <author>
+      <name>札幌管区気象台</name>
+    </author>
+    <link type="application/xml" href="https://www.data.jma.go.jp/developer/xml/data/20261104010017_0_VFVO50_016000.xml"/>
+    <content type="text">【火山名  雌阿寒岳  噴火予報：警報解除】＜雌阿寒岳に噴火予報（噴火警戒レベル１、活火山であることに留意）：警報解除を発表＞
+　雌阿寒岳では、ポンマチネシリ火口から約５００ｍの範囲に影響を及ぼす噴火の可能性は低くなりました。
+＜噴火警戒レベルを２（火口周辺規制）から１（活火山であることに留意）に引下げ＞</content>
+  </entry>
+</feed>

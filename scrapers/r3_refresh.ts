@@ -6,7 +6,9 @@
  *   Tue — METI Traditional Crafts (slow, ~6 min)
  *   Wed — Japan Heritage (slow, ~5 min)
  *   Thu — Bunka intangible + UNESCO (fast SPARQL, ~30 s)
- *   Fri/Sat/Sun — skip
+ *   Fri/Sat/Sun — no weekly source
+ *   Every day — JMA volcanic alert levels (~3 min; the alert in effect can
+ *               change any day, so this one source runs daily)
  *
  * Every R-3 source refresh that produces new keys triggers an INCREMENTAL
  * translation pass (`translate_r3.ts`) so the 17-language file stays current
@@ -33,6 +35,10 @@ import { fetchMetiDensan } from "./sources/fetch_meti_densan.js";
 import { fetchJapanHeritage } from "./sources/fetch_japan_heritage.js";
 import { fetchBunkaIntangible } from "./sources/fetch_bunka_intangible.js";
 import { fetchUnescoJapan } from "./sources/fetch_unesco_japan.js";
+import {
+  fetchJmaVolcano,
+  JMA_VOLCANO_SOURCE,
+} from "./sources/fetch_jma_volcano.js";
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { notify } from "./lib/slack.js";
@@ -45,16 +51,17 @@ type SourceKey =
   | "meti_densan"
   | "japan_heritage"
   | "bunka_intangible"
-  | "unesco_japan";
+  | "unesco_japan"
+  | "jma_volcano";
 
 const DAY_TO_SOURCES: Record<number, SourceKey[]> = {
-  0: [], // Sun
-  1: ["maff_gi"], // Mon
-  2: ["meti_densan"], // Tue
-  3: ["japan_heritage"], // Wed
-  4: ["bunka_intangible", "unesco_japan"], // Thu
-  5: [], // Fri
-  6: [], // Sat
+  0: ["jma_volcano"], // Sun
+  1: ["maff_gi", "jma_volcano"], // Mon
+  2: ["meti_densan", "jma_volcano"], // Tue
+  3: ["japan_heritage", "jma_volcano"], // Wed
+  4: ["bunka_intangible", "unesco_japan", "jma_volcano"], // Thu
+  5: ["jma_volcano"], // Fri
+  6: ["jma_volcano"], // Sat
 };
 
 const SOURCE_INFO: Record<SourceKey, {
@@ -156,6 +163,21 @@ const SOURCE_INFO: Record<SourceKey, {
             origin: "Wikidata SPARQL (mirrors official UNESCO inventory; CC0)",
             license: "CC0",
           },
+          records,
+        },
+      };
+    },
+  },
+  jma_volcano: {
+    label: "JMA Volcanic Alert Levels",
+    outFile: "jma_volcano.json",
+    run: async () => {
+      const { records, channels } = await fetchJmaVolcano();
+      return {
+        total: records.length,
+        sourceMeta: {
+          source: JMA_VOLCANO_SOURCE,
+          channels,
           records,
         },
       };

@@ -75,7 +75,7 @@ corresponding workflow flips ON.
 | Channel | Workflow (steady) | Cadence | Current venue | Sources |
 |:---|:---|:---|:---|:---|
 | **MUNI** | `steady-scrape.yml` | daily cron 03:00 JST, 65–130 munis/day, 30-day SLA | gh-actions (cron OFF until launch) | #23 |
-| **R3** | `steady-scrape.yml` (chained `r3_refresh.ts`) | weekly per-source rotation (Mon/Tue/Wed/Thu) | gh-actions (chained) | #5–9 |
+| **R3** | `steady-scrape.yml` (chained `r3_refresh.ts`) | weekly per-source rotation (Mon/Tue/Wed/Thu); #48 daily | gh-actions (chained) | #5–9, #48 |
 | **DMO** | `dmo-refresh.yml` | bi-weekly (1st + 15th) 04:00 JST | gh-actions (cron OFF until launch) | #10–13 |
 | **WD-FOUNDATION** | `wd-foundation.yml` (matrix legs) | monthly (1st) 05:00 JST | gh-actions (cron OFF until launch) | #1–4, #15–19, #24, #25, #29–38, #39 |
 | **GLOSSARY** | `wd-foundation.yml` (leg `glossary`) | monthly | gh-actions (cron OFF until launch) | #20–22 |
@@ -846,6 +846,43 @@ requires either extending an existing channel or creating a new one.
   when the query mentions the golden route), embedding index
   (`harvestR3` in `scrapers/embed/build_embeddings.ts`).
 
+### Natural hazards (気象庁)
+
+#### #48 — 気象庁 噴火警報・予報 / 噴火警戒レベル (JMA volcanic alert levels)
+- **Authority**: 気象庁 (Japan Meteorological Agency)
+- **URL**: https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml + `eqvol_l.xml`
+  (JMA XML Atom feed, primary) / https://www.jma.go.jp/bosai/volcano/const/volcano_list.json
+  + `https://www.jma.go.jp/bosai/volcano/data/{warning,info}/<code>.json` (JMA bosai JSON, secondary)
+- **License**: 公共データ利用規約 (第1.0版) per the 気象庁ホームページ terms
+  (https://www.jma.go.jp/jma/kishou/info/coment.html). Attribution
+  「出典：気象庁ホームページ」 plus a note that the data was restructured, both
+  carried in the output's `source` block. Neither host serves a robots.txt
+  (both return 404).
+- **Fetcher**: `scrapers/sources/fetch_jma_volcano.ts` (decisions in `scrapers/lib/jma_volcano.ts`)
+- **Output**: `data/r3/jma_volcano.json`
+- **Cadence (steady)**: daily (every day of the R3 rotation — the alert in effect can change any day)
+- **Channel**: R3
+- **Coverage**: one record per volcano in JMA's volcano list (117 after
+  dropping the 900-series grouping entries), each with `status`
+  (`reported` / `unknown`), `alert_level` (1–5, or null when the kind is not
+  a level, e.g. 火口周辺危険), `alert_kind`, `issued_at`, `bulletin_url` and `as_of`.
+- **How the level in effect is derived**: the Atom feeds list only the last
+  few days of bulletins, so they cannot speak for every volcano. Every
+  VFVO50 (噴火警報・予報) and VFVO51 (火山の状況に関する解説情報) bulletin in
+  the feeds is read, then the latest 噴火警報・予報 JMA has on file for each
+  volcano is read from bosai, and for a volcano still without a bulletin,
+  the latest 解説情報 on file (it restates the alert in effect; the level
+  itself only changes through a 噴火警報・予報). The newest bulletin across both channels
+  decides; on a tie the XML wins because its URL is the bulletin itself.
+  A volcano for which neither channel has a bulletin, whose lookup failed,
+  or whose newest bulletin is a cancellation is written as `unknown` —
+  never as Level 1. Consumers read a record whose `as_of` is older than 48 h
+  as unknown (`readAlert` in `scrapers/lib/jma_volcano.ts`).
+- **Scope**: volcanic alert levels only. Weather warnings change by the hour
+  and would need a live lookup, which this project does not do.
+- **Consumers**: none yet (data-only; no MCP tool reads it).
+- **Status**: `active`
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape
@@ -1055,6 +1092,12 @@ contract.
 ---
 
 ## Change log
+
+- 2026-11-09 — added #48, JMA volcanic alert levels (噴火警報・予報 /
+  噴火警戒レベル), to the R3 rotation as its one daily source. It reads JMA
+  directly: the XML Atom feed for recent bulletins and the bosai JSON for the
+  latest bulletin on file per volcano. A volcano no bulletin speaks for is
+  written as unknown rather than Level 1. Data-only for now — no tool reads it.
 
 - 2026-08-15 — consumer-feedback pass (measured against real itinerary
   generation): (1) dataset-integrity fix — the nightly merge was collapsing
