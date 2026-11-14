@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+<Control>
+<Title>噴火警報・予報</Title>
+<DateTime>2026-11-04T01:00:16Z</DateTime>
+<Status>通常</Status>
+<EditorialOffice>札幌管区気象台</EditorialOffice>
+<PublishingOffice>札幌管区気象台</PublishingOffice>
+</Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+<Title>火山名  雌阿寒岳  噴火予報：警報解除</Title>
+<ReportDateTime>2026-11-04T10:00:00+09:00</ReportDateTime>
+<TargetDateTime>2026-11-04T10:00:00+09:00</TargetDateTime>
+<EventID>105</EventID>
+<InfoType>発表</InfoType>
+<Serial />
+<InfoKind>噴火警報・予報</InfoKind>
+<InfoKindVersion>1.0_0</InfoKindVersion>
+<Headline>
+<Text>＜雌阿寒岳に噴火予報（噴火警戒レベル１、活火山であることに留意）：警報解除を発表＞
+　雌阿寒岳では、ポンマチネシリ火口から約５００ｍの範囲に影響を及ぼす噴火の可能性は低くなりました。
+＜噴火警戒レベルを２（火口周辺規制）から１（活火山であることに留意）に引下げ＞</Text>
+<Information type="噴火警報・予報（対象火山）">
+<Item>
+<Kind>
+<Name>レベル１（活火山であることに留意）</Name>
+<Code>11</Code>
+<Condition>引下げ</Condition>
+</Kind>
+<LastKind>
+<Name>レベル２（火口周辺規制）</Name>
+<Code>12</Code>
+<Condition />
+</LastKind>
+<Areas codeType="火山名">
+<Area>
+<Name>雌阿寒岳</Name>
+<Code>105</Code>
+</Area>
+</Areas>
+</Item>
+</Information>
+<Information type="噴火警報・予報（対象市町村等）">
+<Item>
+<Kind>
+<Name>噴火予報：警報解除</Name>
+<Code>04</Code>
+<Condition>解除</Condition>
+</Kind>
+<LastKind>
+<Name>火口周辺警報</Name>
+<Code>02</Code>
+<Condition />
+</LastKind>
+<Areas codeType="気象・地震・火山情報／市町村等">
+<Area>
+<Name>北海道釧路市</Name>
+<Code>0120600</Code>
+</Area>
+<Area>
+<Name>北海道足寄町</Name>
+<Code>0164700</Code>
+</Area>
+</Areas>
+</Item>
+</Information>
+<Information type="噴火警報・予報（対象市町村の防災対応等）">
+<Item>
+<Kind>
+<Name>活火山であることに留意</Name>
+<Code>45</Code>
+<Condition>解除</Condition>
+</Kind>
+<LastKind>
+<Name>火口周辺警報：入山規制等</Name>
+<Code>43</Code>
+<Condition />
+</LastKind>
+<Areas codeType="気象・地震・火山情報／市町村等">
+<Area>
+<Name>北海道釧路市</Name>
+<Code>0120600</Code>
+</Area>
+<Area>
+<Name>北海道足寄町</Name>
+<Code>0164700</Code>
+</Area>
+</Areas>
+</Item>
+</Information>
+</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/volcanology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+<VolcanoInfo type="噴火警報・予報（対象火山）">
+<Item>
+<Kind>
+<Name>レベル１（活火山であることに留意）</Name>
+<Code>11</Code>
+<Condition>引下げ</Condition>
+</Kind>
+<LastKind>
+<Name>レベル２（火口周辺規制）</Name>
+<Code>12</Code>
+<Condition />
+</LastKind>
+<Areas codeType="火山名">
+<Area>
+<Name>雌阿寒岳</Name>
+<Code>105</Code>
+<Coordinate description="北緯４３度２３．１８分　東経１４４度００．５１分　標高１４９９ｍ">+4323.18+14400.51+1499/</Coordinate>
+</Area>
+</Areas>
+</Item>
+</VolcanoInfo>
+<VolcanoInfo type="噴火警報・予報（対象市町村等）">
+<Item>
+<Kind>
+<Name>噴火予報：警報解除</Name>
+<Code>04</Code>
+<Condition>解除</Condition>
+</Kind>
+<LastKind>
+<Name>火口周辺警報</Name>
+<Code>02</Code>
+<Condition />
+</LastKind>
+<Areas codeType="気象・地震・火山情報／市町村等">
+<Area>
+<Name>北海道釧路市</Name>
+<Code>0120600</Code>
+</Area>
+<Area>
+<Name>北海道足寄町</Name>
+<Code>0164700</Code>
+</Area>
+</Areas>
+</Item>
+</VolcanoInfo>
+<VolcanoInfo type="噴火警報・予報（対象市町村の防災対応等）">
+<Item>
+<Kind>
+<Name>活火山であることに留意</Name>
+<Code>45</Code>
+<Condition>解除</Condition>
+</Kind>
+<LastKind>
+<Name>火口周辺警報：入山規制等</Name>
+<Code>43</Code>
+<Condition />
+</LastKind>
+<Areas codeType="気象・地震・火山情報／市町村等">
+<Area>
+<Name>北海道釧路市</Name>
+<Code>0120600</Code>
+</Area>
+<Area>
+<Name>北海道足寄町</Name>
+<Code>0164700</Code>
+</Area>
+</Areas>
+</Item>
+</VolcanoInfo>
+<VolcanoInfoContent>
+<VolcanoHeadline>＜雌阿寒岳に噴火予報（噴火警戒レベル１、活火山であることに留意）：警報解除を発表＞
+　雌阿寒岳では、ポンマチネシリ火口から約５００ｍの範囲に影響を及ぼす噴火の可能性は低くなりました。
+＜噴火警戒レベルを２（火口周辺規制）から１（活火山であることに留意）に引下げ＞</VolcanoHeadline>
+<VolcanoActivity>　雌阿寒岳では、２０２５年９月以降、火山活動が活発化した状態が継続していましたが、２０２６年５月以降低下傾向が認められます。
+
+　このため、ポンマチネシリ火口から約５００ｍの範囲に影響を及ぼす噴火の可能性は低くなりました。</VolcanoActivity>
+<VolcanoPrevention>　活火山であることから、火口内に影響する程度の噴出現象が突発的に発生する可能性がありますので、火口内や近傍では火山ガスや火山灰噴出に注意してください。</VolcanoPrevention>
+<Appendix>＊＊（参考：噴火警戒レベルの説明）＊＊
+【レベル５（避難）】：危険な居住地域からの避難等が必要。
+【レベル４（高齢者等避難）】：警戒が必要な居住地域での高齢者等の要配慮者の避難、住民の避難の準備等が必要。
+【レベル３（入山規制）】：登山禁止や入山規制等危険な地域への立入規制等。状況に応じて高齢者等の要配慮者の避難の準備等。
+【レベル２（火口周辺規制）】：火口周辺への立入規制等。
+【レベル１（活火山であることに留意）】：状況に応じて火口内への立入規制等。
+（注：避難や規制の対象地域は、地域の状況や火山活動状況により異なる）</Appendix>
+</VolcanoInfoContent>
+</Body>
+</Report>

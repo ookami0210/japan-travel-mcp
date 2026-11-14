@@ -213,6 +213,13 @@ provenance is verifiable.
 All 690 designation records are translated to the same 18 languages by an
 incremental Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
 
+`data/r3/jma_volcano.json` also holds the volcanic alert level (噴火警戒レベル)
+JMA has in effect for each volcano, refreshed daily from the Japan
+Meteorological Agency's own feeds, with the bulletin URL and an `as_of` time
+on every record. A volcano with no JMA bulletin available is `unknown`, never
+Level 1. Source: Japan Meteorological Agency (出典：気象庁ホームページ),
+restructured per volcano. It is data-only for now; no tool reads it yet.
+
 ---
 
 ## How the hotel master list is built
@@ -352,7 +359,7 @@ data/hotels/master    # ~20,000 unified hotels & ryokan
 data/hotels/raw/      # OSM + Wikidata pre-merge sources
 data/glossary/        # canonical terms used at translation time
 data/_state/wikidata_attractions.json + 3 muni files
-data/r3/              # MAFF GI, METI crafts, Japan Heritage, Bunka-cho intangible records, UNESCO ICH
+data/r3/              # MAFF GI, METI crafts, Japan Heritage, Bunka-cho intangible records, UNESCO ICH, JMA volcanic alert levels
 ```
 
 The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data/`).
