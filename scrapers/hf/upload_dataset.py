@@ -87,6 +87,8 @@ IGNORE_GLOBS = [
     "_state/translation_batch_multilingual.json",
     "_state/*.log",
     "_state/.prefetch_manifest.json",  # local bookkeeping, see collect_files()
+    "_state/wikidata_attractions.partial/**",  # per-prefecture checkpoints of the attractions fetcher
+    "_state/wikidata_attractions.rejected.json",  # a refused (collapsed) attractions run
     "hotels/review/**",  # public review queue stays in git for contributors
     ".DS_Store",
     "**/.DS_Store",

@@ -269,7 +269,7 @@ requires either extending an existing channel or creating a new one.
 - **Output**: `data/_state/wikidata_attractions.json` (master file)
 - **Cadence**: monthly+ (one-shot per schema change)
 - **Channel**: WD-FOUNDATION (manual)
-- **Coverage**: 67,862 items (v2.2 with 39 P31 types). Each item also carries `official_url` (P856) when Wikidata publishes one — an honest null otherwise. The current snapshot is topped up between full fetches by `scrapers/backfill_attraction_official_urls.ts` (P856 via the wbgetentities REST API, non-destructive).
+- **Coverage**: 34 P31 classes, listed with their Wikidata labels in `scrapers/lib/wikidata_attraction_types.ts` (`npx tsx scripts/check_wikidata_type_labels.ts` checks them against live Wikidata). The published snapshot is still the v1 fetch of 2026-04-25 (62,715 items); the first v2.3 refresh replaces it. Each item also carries `official_url` (P856) when Wikidata publishes one — an honest null otherwise. The current snapshot is topped up between full fetches by `scrapers/backfill_attraction_official_urls.ts` (P856 via the wbgetentities REST API, non-destructive).
 - **Status**: `active`
 
 #### #16 — Wikidata P1435 heritage anchor

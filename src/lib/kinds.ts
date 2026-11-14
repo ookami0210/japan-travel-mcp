@@ -13,41 +13,41 @@
 // ──────────────────────────────────────────────────────────────────────
 // Wikidata type QID → kind label
 //
-// Coverage follows fetch_wikidata_attractions_v2.ATTRACTION_TYPES. Verified
-// QIDs against rdfs:label@ja (earlier draft had typos that mapped to
-// Hungarian opera singers, etc., now removed).
+// Coverage follows scrapers/lib/wikidata_attraction_types.ts, where every
+// fetched QID is recorded with the label Wikidata returns for it and
+// scripts/check_wikidata_type_labels.ts checks the two still agree. The
+// entries below that are not in that list are classes seen in master.types[]
+// through P279* (a Japanese castle is reached through "castle") and are
+// mapped so the tag is specific.
 
 export const WD_TYPE_KIND: Record<string, string> = {
   Q570116: "tourist_attraction",
-  Q15303351: "historic_site",
   Q839954: "archaeological_site",
-  Q44613: "buddhist_temple",
+  Q44613: "buddhist_temple",        // monastery; the Japanese items under it are temple complexes
   Q845945: "shinto_shrine",
   Q23413: "castle",
   Q33506: "museum",
   Q22698: "park",
   Q1107656: "garden",
   Q4989906: "monument",
-  Q4087053: "natural_monument",
+  Q23790: "natural_monument",
   Q174782: "plaza",
   Q34038: "waterfall",
   Q23397: "lake",
   Q35509: "cave",
   Q40080: "beach",
-  Q204324: "volcano",
+  Q8072: "volcano",
+  Q1330974: "active_volcano",
   Q39816: "valley",
   Q46831: "mountain_range",
-  Q14888011: "onsen_resort",
-  Q12536: "hot_spring",
-  Q1542076: "national_park",
-  Q1370978: "great_buddha",
-  Q488205: "designated_cultural_property_jp",
-  Q1496967: "pilgrimage_site",
+  Q655311: "onsen_resort",
+  Q177380: "hot_spring",
+  Q46169: "national_park",
+  Q15135589: "pilgrimage_site",
   Q15243209: "preservation_district",
-  Q3960: "lighthouse",
-  Q1500350: "resort",
-  Q2087181: "memorial",
-  Q635155: "theater",
+  Q875157: "resort",
+  Q2087181: "historic_house",
+  Q24354: "theater",
   Q1248784: "airport",
   // Japanese castle subclasses (P31 chain to Q23413 does not reach these —
   // fetcher v2 silently dropped 2,047 of these).
@@ -57,16 +57,10 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q15710038: "mountain_castle",
   Q11588709: "sacred_mountain",
   Q1051606: "great_buddha",
-  // Alt-type QIDs that v2 fetcher uses but were missing from the kind map.
-  // Many items have ONLY these types in their `types` array.
-  Q5393308: "buddhist_temple",        // alt to Q44613 — Kōtoku-in tagged here
-  Q697295: "shinto_shrine",           // alt to Q845945
-  Q24398318: "religious_building",    // broader (some items only have this)
-  Q830356: "designated_cultural_property_jp",  // alt to Q488205
+  Q5393308: "buddhist_temple",        // Kōtoku-in is tagged here
+  Q697295: "shinto_shrine",           // "shrine" as a class
   Q8502: "mountain",
-  Q11197: "active_volcano",            // alt to Q204324
   Q16560: "palace",
-  Q39614: "buddhist_monastery",        // alt to Q44613
   Q11455614: "shukubo",                // shukubō (Japanese Buddhist lodging)
   Q1071482: "national_park",           // national park of Japan (環境省指定)
   Q11832860: "quasi_national_park",    // quasi-national park of Japan (国定公園)
@@ -90,7 +84,7 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q1152199: "midden",                  // 貝塚 (52 hits)
   Q4312270: "railway_station",         // 鉄道の地上駅 (48 hits) — alt to Q55488
   Q55488: "railway_station",           // 鉄道駅 (56 hits)
-  Q1081138: "historic_site",           // 史跡 — alt to Q15303351 (37 hits)
+  Q1081138: "historic_site",           // 史跡
   Q207694: "art_museum",               // 美術館 — narrower alt to Q33506 (42 hits)
   Q811534: "remarkable_tree",          // 著名な木 (44 hits)
   Q11479807: "giant_tree",             // 巨樹 (30 hits)
@@ -106,7 +100,7 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q1129474: "cultural_landscape",      // 文化的景観 (27 hits)
   Q1044204: "gusuku",                  // グスク (Ryukyu castle, 22 hits)
   Q11504353: "square_kofun",           // 方墳 (26 hits)
-  Q39715: "lighthouse",                // 灯台 — alt to Q3960 (24 hits)
+  Q39715: "lighthouse",                // 灯台
   Q10624527: "biographical_museum",    // 人物記念館 (26 hits)
   Q537127: "road_bridge",              // 道路橋 (21 hits)
   Q96086399: "former_school_building", // 旧学校施設 (24 hits)
@@ -144,9 +138,9 @@ export const NAME_KIND_RE: { kinds: string[]; re: RegExp }[] = [
   // ── Industrial / mining heritage ────────────────────────────────────
   { kinds: ["mining_heritage"], re: /(鉱山|銀山|金山|炭鉱|炭礦|鉱業)/u },
   { kinds: ["industrial_heritage"], re: /(製鉄所|工場跡|紡績|造船|発電所跡)/u },
-  // ── Active volcanoes (most-famous JMA-monitored peaks). Wikidata types
-  //    Q204324 / Q11197 only catch ~24 crater-lakes; the famous active
-  //    volcanoes themselves are typed Q8502 (mountain). Anchored name
+  // ── Active volcanoes (most-famous JMA-monitored peaks). Many of the
+  //    famous ones are typed Q8502 (mountain) rather than volcano on
+  //    Wikidata, so the name is the only signal. Anchored name
   //    match — name must equal the volcano name exactly, else ~600 false
   //    positives on shrines/visitor centres.
   { kinds: ["active_volcano", "volcano", "mountain"],

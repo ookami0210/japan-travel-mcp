@@ -1,34 +1,47 @@
 /**
- * v2 of the Wikidata SPARQL attraction fetcher with broader type coverage,
- * type-batching, per-prefecture checkpointing, and RESUME support.
+ * Wikidata SPARQL attraction fetcher (v2 line).
  *
- * Why v2:
- *   v1 (fetch_wikidata_attractions.ts) used 12 type QIDs and missed many
- *   famous landmarks because the P31/P279* recursion didn't reach them
- *   (e.g. 鎌倉大仏 Q177380 is `instance of: 大仏 Q1370978`, which is not a
- *   subclass of "tourist attraction" / "monument" / etc.). The 19-iter
- *   quality push hit a Sat plateau at 24-28% partly because random-r2
- *   showed `coverage failure` (server lacks the asset entirely) was the
- *   dominant failure mode for famous Japanese attractions.
- *
- * Strategy:
- *   - 24 type QIDs, batched 6-per-query to avoid SPARQL timeouts on
- *     dense prefectures (Tokyo / Kyoto have 3000-5000+ items in v1 already).
- *   - Per-prefecture checkpoint to data/_state/wikidata_attractions.partial/<NN>.json
- *   - RESUME=1 skips prefectures with an existing checkpoint (any non-empty file).
- *   - Final: merge all per-pref checkpoints into data/_state/wikidata_attractions.json
- *   - Output is a strict superset of v1 (we only add types).
+ * What it does:
+ *   - For each prefecture, asks Wikidata for every item whose class (P31,
+ *     followed through P279*) is one of the classes in
+ *     scrapers/lib/wikidata_attraction_types.ts and whose P131 chain reaches
+ *     a municipality with a JIS code (P429) in that prefecture.
+ *   - Classes are queried in batches (WD_TYPE_BATCH, default 6).
+ *   - When the endpoint cannot answer a (prefecture, classes) question, the
+ *     question is narrowed until it can: first by class, then by listing the
+ *     prefecture's municipality codes explicitly (see fetchSlice). Anything
+ *     still unanswered is recorded in `dropped_queries`, never lost silently.
+ *   - A second pass attaches skos:altLabel aliases (金閣寺 for 鹿苑寺).
+ *   - Per-prefecture checkpoints go to
+ *     data/_state/wikidata_attractions.partial/<NN>.json; RESUME=1 skips
+ *     prefectures that already have one.
+ *   - The master file data/_state/wikidata_attractions.json is only replaced
+ *     when a full run collected at least WD_MIN_KEEP_RATIO (default 0.5) of
+ *     the items the previous file held; a collapsed run is written next to it
+ *     as wikidata_attractions.rejected.json and the process exits 1.
  *
  * Run:
  *   npx tsx scrapers/sources/fetch_wikidata_attractions_v2.ts
  *   RESUME=1 npx tsx scrapers/sources/fetch_wikidata_attractions_v2.ts
  *   WD_PREFECTURES=13,26 npx tsx scrapers/sources/fetch_wikidata_attractions_v2.ts
+ *
+ * Env:
+ *   WD_TYPE_BATCH       classes per query (6)
+ *   WD_LIMIT            SPARQL LIMIT per query (8000); hitting it counts as
+ *                       an unanswered question and triggers narrowing
+ *   WD_CODE_CHUNK       municipality codes per narrowed query (8)
+ *   WD_RUN_BUDGET_MIN   after this many minutes, stop narrowing and retrying
+ *                       and record the rest as dropped (270)
+ *   WD_CONCURRENCY      prefectures fetched at the same time (2)
+ *   WD_MIN_KEEP_RATIO   see above (0.5)
+ *   WD_SKIP_ALIASES=1   skip the alias pass
  */
 
 import { writeFile, mkdir, readFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ATTRACTION_TYPE_QIDS } from "../lib/wikidata_attraction_types.js";
 
 const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
 const USER_AGENT =
@@ -41,61 +54,20 @@ const PREFECTURE_PREFIXES =
 const RESUME = process.env.RESUME === "1";
 const PER_QUERY_LIMIT = Number(process.env.WD_LIMIT ?? "8000");
 const TYPE_BATCH_SIZE = Number(process.env.WD_TYPE_BATCH ?? "6");
+const CODE_CHUNK = Number(process.env.WD_CODE_CHUNK ?? "8");
+const CONCURRENCY = Math.max(1, Number(process.env.WD_CONCURRENCY ?? "2"));
+const RUN_BUDGET_MS = Number(process.env.WD_RUN_BUDGET_MIN ?? "270") * 60_000;
+const MIN_KEEP_RATIO = Number(process.env.WD_MIN_KEEP_RATIO ?? "0.5");
+const FULL_RUN = !process.env.WD_PREFECTURES;
+const RUN_STARTED_MS = Date.now();
+function withinBudget(): boolean {
+  return Date.now() - RUN_STARTED_MS < RUN_BUDGET_MS;
+}
 
-/**
- * Type QIDs treated as tourist-attraction-like.
- * v1 set is preserved; new entries are documented inline.
- */
-const ATTRACTION_TYPES: string[] = [
-  // --- v1 (kept verbatim) ---
-  "Q570116",   // tourist attraction
-  "Q15303351", // historic site
-  "Q839954",   // archaeological site
-  "Q44613",    // Buddhist temple (monastery)
-  "Q845945",   // Shinto shrine
-  "Q23413",    // castle
-  "Q33506",    // museum
-  "Q22698",    // park
-  "Q1107656",  // garden
-  "Q4989906",  // monument
-  "Q4087053",  // natural monument
-  "Q174782",   // plaza / square
-  // --- v2 additions: natural landmarks ---
-  "Q34038",    // waterfall (那智の滝)
-  "Q23397",    // lake
-  "Q35509",    // cave
-  "Q40080",    // beach
-  "Q204324",   // volcano
-  "Q39816",    // valley / gorge
-  "Q46831",    // mountain range
-  "Q14888011", // onsen / hot spring resort area
-  "Q12536",    // hot spring (geological)
-  "Q1542076",  // national park
-  // --- v2 additions: cultural landmarks ---
-  "Q1370978",  // 大仏 (Daibutsu, large Buddha statue) — 鎌倉大仏 etc.
-  "Q488205",   // designated cultural property of Japan (国宝/重文 catch-all)
-  "Q1496967",  // pilgrimage site
-  "Q15243209", // historic district / preservation district
-  "Q3960",     // lighthouse
-  "Q1500350",  // resort
-  "Q2087181",  // memorial (戦没者慰霊・原爆ドーム類)
-  "Q635155",   // theater (歌舞伎座 etc.)
-  "Q1248784",  // airport (touristic gateway; rare false positives)
-  // --- v2.1 additions: duplicate-concept QIDs spotted in audit ---
-  "Q5393308",  // Buddhist temple (alt to Q44613 — Kōtoku-in tagged here)
-  "Q697295",   // shrine (alt to Q845945)
-  "Q24398318", // religious building (broader)
-  "Q830356",   // designated cultural property (alt to Q488205)
-  // --- v2.2 additions (post iter30 audit): famous landmarks still missing ---
-  // Skipped Q9259 (UNESCO WHS), Q1370598 (Buddhist place of worship),
-  // Q11691 (Imperial palace) — caused 504 Gateway Timeout on Wikidata
-  // SPARQL when batched with other types. Will pick up the WHS-tagged
-  // landmarks via the more-specific type chains.
-  "Q8502",     // mountain (Mt. Fuji Q5798 etc.)
-  "Q11197",    // active volcano (alt to Q204324)
-  "Q16560",    // palace (Kyoto Imperial Palace Q1147029)
-  "Q39614",    // Buddhist monastery (alt to Q44613)
-];
+// The class list lives in scrapers/lib/wikidata_attraction_types.ts, with
+// the Wikidata label of every QID recorded next to it and a script that
+// checks the two still agree (scripts/check_wikidata_type_labels.ts).
+const ATTRACTION_TYPES: string[] = [...ATTRACTION_TYPE_QIDS];
 
 interface AttractionRecord {
   qid: string;
@@ -137,14 +109,26 @@ interface SparqlBinding {
   official?: SparqlValue;
 }
 
-function buildQuery(prefix: string, types: string[]): string {
+/**
+ * One SPARQL question. `codes` null asks for every municipality whose P429
+ * code starts with `prefix`; a list of codes asks for exactly those
+ * municipalities. The explicit form is what the narrowing falls back to:
+ * Wikidata answers "religious sites in these eight Tokyo wards" in seconds
+ * while the prefix form for the same wards times out, because the prefix
+ * filter cannot drive the join and the class side is evaluated first.
+ */
+function buildQuery(prefix: string, types: string[], codes: string[] | null = null): string {
   const typesValues = types.map((q) => `wd:${q}`).join(" ");
+  const adminClause = codes
+    ? `VALUES ?adminCode { ${codes.map((c) => JSON.stringify(c)).join(" ")} }
+  ?adminEntity wdt:P429 ?adminCode .`
+    : `?adminEntity wdt:P429 ?adminCode .
+  FILTER(STRSTARTS(?adminCode, "${prefix}"))`;
   return `
 SELECT DISTINCT ?item ?coord ?adminCode ?adminLabel ?type
   ?label_ja ?label_en ?label_zh ?label_ko ?desc_en ?official
 WHERE {
-  ?adminEntity wdt:P429 ?adminCode .
-  FILTER(STRSTARTS(?adminCode, "${prefix}"))
+  ${adminClause}
 
   ?item wdt:P131* ?adminEntity .
   ?item wdt:P31/wdt:P279* ?type .
@@ -163,7 +147,7 @@ LIMIT ${PER_QUERY_LIMIT}
 `.trim();
 }
 
-async function querySparql(query: string, timeoutMs = 90_000): Promise<SparqlBinding[]> {
+async function querySparql(query: string, timeoutMs = 70_000): Promise<SparqlBinding[]> {
   const url = `${SPARQL_ENDPOINT}?query=${encodeURIComponent(query)}&format=json`;
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
@@ -280,101 +264,250 @@ function chunk<T>(arr: T[], size: number): T[][] {
  */
 interface DroppedQuery {
   admin_prefix: string;
+  /** Set when the slice had already been narrowed to explicit P429 codes. */
+  admin_codes?: string[];
   types: string[];
   error: string;
 }
 
 const RETRIES_PER_QUERY = 3;
+const RETRIES_WHEN_NARROWED = 2;
+
+interface QueryOutcome {
+  bindings: SparqlBinding[] | null;
+  error: string;
+  /** The request never reached Wikidata (DNS, connection reset, no route). */
+  network: boolean;
+}
 
 /**
- * Run one query with retries. Returns null when every attempt failed; the
- * caller decides how to narrow the question.
+ * A failure of the connection rather than of the query. Asking a narrower
+ * question does nothing for these; waiting does.
+ */
+function isNetworkError(message: string): boolean {
+  return /fetch failed|ECONNRESET|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|socket hang up|network/i.test(
+    message,
+  );
+}
+
+/**
+ * Run one question with retries. A response that fills the LIMIT is treated
+ * as unanswered too: the rows past the limit are missing and nothing in the
+ * response says which, so the caller has to ask a narrower question.
  */
 async function queryWithRetries(
   prefix: string,
   types: string[],
+  codes: string[] | null,
   label: string,
-): Promise<SparqlBinding[] | null> {
+  attempts: number,
+): Promise<QueryOutcome> {
   let lastErr = "";
-  for (let attempt = 1; attempt <= RETRIES_PER_QUERY; attempt += 1) {
+  let network = false;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      return await querySparql(buildQuery(prefix, types));
+      const bindings = await querySparql(buildQuery(prefix, types, codes));
+      if (bindings.length >= PER_QUERY_LIMIT) {
+        lastErr = `LIMIT ${PER_QUERY_LIMIT} reached`;
+        process.stderr.write(`  ${label}: ${lastErr}, narrowing\n`);
+        return { bindings: null, error: lastErr, network: false };
+      }
+      return { bindings, error: "", network: false };
     } catch (err) {
       lastErr = (err as Error).message;
+      network = isNetworkError(lastErr);
       process.stderr.write(
-        `  ${label} attempt ${attempt} failed: ${lastErr}\n`,
+        `  ${label} attempt ${attempt}/${attempts} failed: ${lastErr}\n`,
       );
-      if (attempt < RETRIES_PER_QUERY) {
-        await new Promise((r) => setTimeout(r, 3000 * attempt));
+      if (attempt < attempts) {
+        // A connection failure gets a real pause; a slow query gets a short one.
+        await new Promise((r) => setTimeout(r, (network ? 20_000 : 3000) * attempt));
       }
     }
   }
-  return null;
+  return { bindings: null, error: lastErr, network };
+}
+
+const adminCodeCache = new Map<string, string[] | null>();
+
+/**
+ * Every P429 code under `prefix`, as Wikidata has them (six digits, the
+ * prefecture's own code first since it is the heaviest to walk). Null when
+ * Wikidata could not even answer that.
+ */
+async function listAdminCodes(prefix: string): Promise<string[] | null> {
+  if (adminCodeCache.has(prefix)) return adminCodeCache.get(prefix) ?? null;
+  const query = `
+SELECT DISTINCT ?c WHERE {
+  ?e wdt:P429 ?c .
+  FILTER(STRSTARTS(?c, "${prefix}"))
+} ORDER BY ?c`.trim();
+  let codes: string[] | null = null;
+  for (let attempt = 1; attempt <= RETRIES_PER_QUERY && codes === null; attempt += 1) {
+    try {
+      const rows = (await querySparql(query, 60_000)) as Array<{ c?: SparqlValue }>;
+      codes = rows.map((r) => r.c?.value ?? "").filter((c) => c.length > 0);
+    } catch (err) {
+      process.stderr.write(
+        `  pref ${prefix}: listing P429 codes attempt ${attempt} failed: ${(err as Error).message}\n`,
+      );
+      await new Promise((r) => setTimeout(r, 3000 * attempt));
+    }
+  }
+  if (codes) {
+    const isPrefectureLevel = (c: string) => /^\d\d000\d$/.test(c);
+    codes.sort((a, b) =>
+      Number(isPrefectureLevel(b)) - Number(isPrefectureLevel(a)) || a.localeCompare(b),
+    );
+  }
+  adminCodeCache.set(prefix, codes);
+  return codes;
 }
 
 /**
- * Fetch (prefix, types), narrowing the question until the endpoint answers.
+ * Split a municipality-code list into chunks, keeping prefecture-level
+ * codes (the whole prefecture as one P131 target) in chunks of their own.
+ */
+function chunkCodes(codes: string[]): string[][] {
+  const pref = codes.filter((c) => /^\d\d000\d$/.test(c));
+  const rest = codes.filter((c) => !/^\d\d000\d$/.test(c));
+  return [...pref.map((c) => [c]), ...chunk(rest, CODE_CHUNK)];
+}
+
+/**
+ * Fetch one (prefecture, classes) question, narrowing it until Wikidata
+ * answers or nothing narrower is left to ask.
  *
- * Wikidata returns 504 on the dense prefectures (Tokyo, Kanagawa, Aichi)
- * for a six-type batch, and the earlier fallback split the batch in half
- * once and then dropped whatever still failed. Those silent drops are how
- * 浅草寺 went missing from Tokyo for months while the run reported success.
+ * Wikidata gives up after 60 s. For the dense prefectures (Tokyo, Kanagawa,
+ * Aichi, Osaka) a six-class batch over the whole prefecture is past that,
+ * and the earlier fallback, which split the type list once and then dropped
+ * whatever still failed, is how 浅草寺 went missing from Tokyo for months
+ * while the run reported success.
  *
  * Narrowing order:
- *   1. split the type list until a single type remains;
- *   2. for a single type, split the municipality-code prefix one digit
- *      deeper (13 → 130..139), which bounds the P131* walk to a slice of
- *      the prefecture. Codes are five digits, so this is finite.
- * Only a single type on a full five-digit prefix is ever given up on, and
- * that is recorded in `dropped` rather than lost.
+ *   1. split the class list in halves until a single class remains;
+ *   2. for a single class, list the prefecture's P429 codes and ask for
+ *      them explicitly, WD_CODE_CHUNK at a time, halving a chunk that still
+ *      fails down to a single municipality.
+ * A single class on a single municipality that still fails is recorded in
+ * `dropped`. The narrowing is bounded: a prefecture has at most a few dozen
+ * codes, so the fan-out is tens of questions, not thousands. (An earlier
+ * version split the code *prefix* one digit at a time, which asked for
+ * codes that do not exist and took five hours on Tokyo alone.)
+ *
+ * Two things are not narrowed: a connection failure (narrowing cannot fix
+ * the network; the question is retried after a pause and then dropped), and
+ * anything once the run is past WD_RUN_BUDGET_MIN (one attempt, then
+ * dropped), so the job finishes with an honest record of what it could not
+ * get rather than being killed by the workflow timeout.
  */
+interface PrefectureContext {
+  byQid: Map<string, AttractionRecord>;
+  dropped: DroppedQuery[];
+  /**
+   * Set once a prefecture-wide question has timed out. From then on every
+   * batch for this prefecture is asked per municipality straight away: the
+   * prefecture is evidently too dense for the wide form, and each further
+   * wide attempt costs a minute before it fails.
+   */
+  wideFailed: boolean;
+}
+
 async function fetchSlice(
   prefix: string,
   types: string[],
-  byQid: Map<string, AttractionRecord>,
-  dropped: DroppedQuery[],
+  codes: string[] | null,
+  ctx: PrefectureContext,
   depth = 0,
 ): Promise<void> {
-  const label = `pref ${prefix} types=${types.length}${depth ? ` depth=${depth}` : ""}`;
-  const bindings = await queryWithRetries(prefix, types, label);
+  const { byQid, dropped } = ctx;
+  const scope = codes ? `pref ${prefix} codes=${codes.length}` : `pref ${prefix}`;
+  const label = `${scope} types=${types.length}${depth ? ` depth=${depth}` : ""}`;
+  if (!codes && ctx.wideFailed && withinBudget()) {
+    const all = await listAdminCodes(prefix);
+    if (all && all.length > 0) {
+      process.stderr.write(`  ${label}: asking per municipality (${all.length} codes)\n`);
+      for (const part of chunkCodes(all)) {
+        await fetchSlice(prefix, types, part, ctx, depth + 1);
+      }
+      return;
+    }
+  }
+  const attempts = !withinBudget() ? 1 : depth === 0 ? RETRIES_PER_QUERY : RETRIES_WHEN_NARROWED;
+  const outcome = await queryWithRetries(prefix, types, codes, label, attempts);
   await new Promise((r) => setTimeout(r, 600));
-  if (bindings) {
-    processBindings(bindings, byQid);
+  if (outcome.bindings) {
+    processBindings(outcome.bindings, byQid);
     process.stderr.write(
-      `  ${label}: ${bindings.length} bindings, byQid=${byQid.size}\n`,
+      `  ${label}: ${outcome.bindings.length} bindings, byQid=${byQid.size}\n`,
     );
     return;
   }
+  const giveUp = (why: string) => {
+    process.stderr.write(`  ${label}: GIVING UP (${why})\n`);
+    dropped.push({
+      admin_prefix: prefix,
+      ...(codes ? { admin_codes: codes } : {}),
+      types,
+      error: why,
+    });
+  };
+  if (outcome.network) {
+    giveUp(`network: ${outcome.error}`);
+    return;
+  }
+  if (!withinBudget()) {
+    giveUp(`run budget exhausted; last error: ${outcome.error}`);
+    return;
+  }
+  if (!codes) ctx.wideFailed = true;
   if (types.length > 1) {
     const half = Math.ceil(types.length / 2);
     process.stderr.write(`  ${label}: narrowing by type\n`);
     for (const sub of chunk(types, half)) {
-      await fetchSlice(prefix, sub, byQid, dropped, depth + 1);
+      await fetchSlice(prefix, sub, codes, ctx, depth + 1);
     }
     return;
   }
-  if (prefix.length < 5) {
-    process.stderr.write(`  ${label}: narrowing by municipality code\n`);
-    for (let d = 0; d <= 9; d += 1) {
-      await fetchSlice(`${prefix}${d}`, types, byQid, dropped, depth + 1);
+  if (!codes) {
+    const all = await listAdminCodes(prefix);
+    if (!all || all.length === 0) {
+      giveUp(`could not list P429 codes; last error: ${outcome.error}`);
+      return;
+    }
+    process.stderr.write(
+      `  ${label}: narrowing to ${all.length} explicit municipality codes\n`,
+    );
+    for (const part of chunkCodes(all)) {
+      await fetchSlice(prefix, types, part, ctx, depth + 1);
     }
     return;
   }
-  process.stderr.write(`  ${label}: GIVING UP on this slice\n`);
-  dropped.push({ admin_prefix: prefix, types, error: "every attempt failed" });
+  if (codes.length > 1) {
+    const half = Math.ceil(codes.length / 2);
+    process.stderr.write(`  ${label}: narrowing by municipality\n`);
+    for (const part of chunk(codes, half)) {
+      await fetchSlice(prefix, types, part, ctx, depth + 1);
+    }
+    return;
+  }
+  giveUp(outcome.error);
 }
 
 async function fetchPrefecture(
   prefix: string,
 ): Promise<{ records: AttractionRecord[]; dropped: DroppedQuery[] }> {
-  const byQid = new Map<string, AttractionRecord>();
-  const dropped: DroppedQuery[] = [];
+  const ctx: PrefectureContext = {
+    byQid: new Map<string, AttractionRecord>(),
+    dropped: [],
+    wideFailed: false,
+  };
   for (const batch of chunk(ATTRACTION_TYPES, TYPE_BATCH_SIZE)) {
-    await fetchSlice(prefix, batch, byQid, dropped);
+    await fetchSlice(prefix, batch, null, ctx);
   }
   return {
-    records: Array.from(byQid.values()).sort((a, b) => a.qid.localeCompare(b.qid)),
-    dropped,
+    records: Array.from(ctx.byQid.values()).sort((a, b) => a.qid.localeCompare(b.qid)),
+    dropped: ctx.dropped,
   };
 }
 
@@ -450,10 +583,10 @@ async function main(): Promise<void> {
 
   const startedAt = new Date().toISOString();
   process.stderr.write(
-    `[wd_v2] start at ${startedAt} | prefectures=${PREFECTURE_PREFIXES.length} | types=${ATTRACTION_TYPES.length} | type_batch=${TYPE_BATCH_SIZE} | resume=${RESUME}\n`,
+    `[wd_v2] start at ${startedAt} | prefectures=${PREFECTURE_PREFIXES.length} | types=${ATTRACTION_TYPES.length} | type_batch=${TYPE_BATCH_SIZE} | code_chunk=${CODE_CHUNK} | budget_min=${RUN_BUDGET_MS / 60_000} | resume=${RESUME}\n`,
   );
 
-  for (const prefix of PREFECTURE_PREFIXES) {
+  const processPrefecture = async (prefix: string): Promise<void> => {
     const partialPath = `${partialDir}${prefix}.json`;
     if (RESUME && existsSync(partialPath)) {
       try {
@@ -464,7 +597,7 @@ async function main(): Promise<void> {
           process.stderr.write(
             `[wd_v2] pref ${prefix} SKIP (resume, ${existing.attractions.length} cached)\n`,
           );
-          continue;
+          return;
         }
       } catch {
         // fall through to refetch
@@ -495,7 +628,18 @@ async function main(): Promise<void> {
       ),
       "utf8",
     );
-  }
+  };
+
+  // A small pool: Wikidata tolerates a couple of parallel queries from one
+  // client, and the dense prefectures would otherwise set the wall time alone.
+  const queue = [...PREFECTURE_PREFIXES];
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+      for (let prefix = queue.shift(); prefix !== undefined; prefix = queue.shift()) {
+        await processPrefecture(prefix);
+      }
+    }),
+  );
 
   // Aggregate all checkpoints into the master file expected by merge_wikidata.ts
   const files = (await readdir(partialDir))
@@ -521,6 +665,44 @@ async function main(): Promise<void> {
     }
   }
   const records = Array.from(all.values()).sort((a, b) => a.qid.localeCompare(b.qid));
+
+  const outPath = fileURLToPath(
+    new URL("../../data/_state/wikidata_attractions.json", import.meta.url),
+  );
+  await mkdir(dirname(outPath), { recursive: true });
+
+  // A full run that collected far fewer items than the file it would replace
+  // is a broken run, not a smaller Japan. Keep the previous file. (The
+  // previous file may also carry items the P1435 heritage merge added after
+  // the class fetch, which is why the ratio is lenient.)
+  if (FULL_RUN && existsSync(outPath)) {
+    let previousCount = 0;
+    try {
+      const prev = JSON.parse(await readFile(outPath, "utf8")) as {
+        attractions?: unknown[];
+        total_attractions?: number;
+      };
+      previousCount = prev.attractions?.length ?? prev.total_attractions ?? 0;
+    } catch {
+      previousCount = 0;
+    }
+    if (previousCount > 0 && records.length < previousCount * MIN_KEEP_RATIO) {
+      const rejectedPath = outPath.replace(/\.json$/, ".rejected.json");
+      await writeFile(
+        rejectedPath,
+        JSON.stringify(
+          { collected: records.length, previous: previousCount, dropped_queries: droppedAll },
+          null,
+          2,
+        ),
+        "utf8",
+      );
+      throw new Error(
+        `collected ${records.length} attractions but the current file holds ${previousCount}; ` +
+          `refusing to replace it (WD_MIN_KEEP_RATIO=${MIN_KEEP_RATIO}). Details: ${rejectedPath}`,
+      );
+    }
+  }
 
   let aliasesAttached = 0;
   if (process.env.WD_SKIP_ALIASES !== "1") {
@@ -559,14 +741,14 @@ async function main(): Promise<void> {
       type_batch_size: TYPE_BATCH_SIZE,
       per_query_limit: PER_QUERY_LIMIT,
       license: "CC0",
-      fetcher_version: "v2",
+      fetcher_version: "v2.3",
     },
     fetched_at: new Date().toISOString(),
     started_at: startedAt,
     prefecture_prefixes_fetched: PREFECTURE_PREFIXES,
-    // Slices the endpoint never answered, after narrowing to a single type
-    // on a five-digit municipality prefix. Empty means complete coverage of
-    // the type list for every prefecture fetched.
+    // Questions Wikidata never answered, after narrowing to a single class
+    // on a single municipality (or cut short by WD_RUN_BUDGET_MIN). Empty
+    // means complete coverage of the class list for every prefecture fetched.
     dropped_queries: droppedAll,
     aliases_attached: aliasesAttached,
     total_attractions: records.length,
@@ -575,12 +757,10 @@ async function main(): Promise<void> {
     attractions: records,
   };
 
-  const outPath = fileURLToPath(
-    new URL("../../data/_state/wikidata_attractions.json", import.meta.url),
-  );
-  await mkdir(dirname(outPath), { recursive: true });
   await writeFile(outPath, JSON.stringify(out, null, 2), "utf8");
-  process.stderr.write(`[wd_v2] saved → ${outPath}\n`);
+  process.stderr.write(
+    `[wd_v2] saved → ${outPath} (${records.length} attractions, ${droppedAll.length} dropped question(s))\n`,
+  );
 }
 
 main().catch((err) => {
