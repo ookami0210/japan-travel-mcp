@@ -255,7 +255,8 @@ export function parseDays(fragment: string): { days: Weekday[]; unmodelled: bool
   // "祝日の場合は営業" / "祝日営業" means open on holidays: not a closed day.
   // Then 祝日 is the holiday word, not 祝 + Sunday; 祝前日 is not a holiday.
   let s = body
-    .replace(/祝(?:祭)?日(?:の場合|の時|の際)?(?:は|も)?営業/g, " ")
+    .replace(/祝(?:祭)?日[^。、\n]{0,10}?(?:営業|開館|開園|開場)/g, " ")
+    .replace(/祝(?:祭)?日の翌(?:平)?日|翌(?:平)?日/g, " ")
     .replace(/祝前日/g, " ")
     .replace(/祝祭日|祝日|祭日/g, "祝")
     .replace(/\bMon(?:day)?\b/gi, "月曜")
@@ -536,7 +537,9 @@ export function extractHours(text: string): HoursResult | null {
         const days = parseDays(m[1].replace("休日", "日祝"));
         if (!r || !days) continue;
         if (days.days.length === 0) continue;
-        if (OFF_TOPIC_CONTEXT.test(text.slice(Math.max(0, m.index - 16), m.index))) continue;
+        const ctx = text.slice(Math.max(0, m.index - 16), m.index);
+        if (OFF_TOPIC_CONTEXT.test(ctx)) continue;
+        if (ctx.lastIndexOf("(") > ctx.lastIndexOf(")")) continue;
         rules.push({ days: days.days, open: fmt(r.open), close: fmt(r.close) });
         if (!ev) ev = text.slice(m.index, m.index + 80);
       }
@@ -567,18 +570,20 @@ export function extractHours(text: string): HoursResult | null {
   );
 
   // 年中無休 / 無休 can stand on its own, without a closed-day label.
-  const everyDay = text.match(/年中無休|(?<![はにみ月間])無休/);
-  if (everyDay && everyDay.index !== undefined) {
+  const everyDay = text.match(/年中無休|(?<![はにみ月間、,])無休/);
+  if (everyDay && everyDay.index !== undefined && !/期間|中|のみ|月は|シーズン/.test(text.slice(Math.max(0, everyDay.index - 8), everyDay.index))) {
     openEveryDay = true;
     evidence.push(text.slice(Math.max(0, everyDay.index - 6), everyDay.index + everyDay[0].length).trim());
   }
 
   // Closed days: strong labels first, then the weaker words.
   const closedBlocks: Weekday[][] = [];
+  const strongAt = new RegExp(`^${CLOSED_LABEL_STRONG}`);
   for (const label of [CLOSED_LABEL_STRONG, CLOSED_LABEL_WEAK]) {
     const closedRe = new RegExp(label, "g");
     let cseen = 0;
     while ((m = closedRe.exec(text)) !== null && cseen < 6) {
+      if (label === CLOSED_LABEL_WEAK && strongAt.test(text.slice(m.index))) continue;
       cseen += 1;
       const frag = windowAfter(text, m.index, 60);
       let after = frag.slice(m[0].length);
@@ -605,9 +610,10 @@ export function extractHours(text: string): HoursResult | null {
   }
   // "日曜日・祭日 休業", "月曜 定休": the days come before the closed word.
   if (closedBlocks.length === 0) {
-    const beforeRe = /((?:[月火水木金土日祝祭](?:曜日?)?(?:\s*[・,、/と]\s*)?){1,4})\s*(?:は|:|：)?\s*(?:休業|定休|休み|お休み|休館|休園|休日)/g;
+    const beforeRe = /(?<![翌の平一-龥])((?:[月火水木金土日祝祭](?:曜日?)?(?:\s*[・,、/と]\s*)?){1,4})\s*(?:は|:|：)?\s*(?:休業|定休|休み|お休み|休館|休園|休日)/g;
+    const scan = text.replace(/祝(?:祭)?日の翌(?:平)?日|翌(?:平)?日/g, "  ");
     let bm: RegExpExecArray | null;
-    while ((bm = beforeRe.exec(text)) !== null && closedBlocks.length < 2) {
+    while ((bm = beforeRe.exec(scan)) !== null && closedBlocks.length < 2) {
       const days = parseDays(bm[1] + "曜");
       if (days && days.days.length > 0) {
         closedBlocks.push(days.days);
@@ -627,6 +633,12 @@ export function extractHours(text: string): HoursResult | null {
   }
 
   if (rules.length === 0 && closed.size === 0 && !openEveryDay) return null;
+  // "年中無休" next to stated closed days belongs to another facility on the
+  // page; the closed days win and the record is marked partial.
+  if (openEveryDay && closed.size > 0) {
+    openEveryDay = false;
+    partial = true;
+  }
 
   // In OSM syntax a later "We off" overrides the Wednesday of "Mo-Fr", so
   // the day sets are written as the page gave them.
@@ -668,8 +680,8 @@ const PRICE_LABEL =
   "(?:入場料|入館料|入園料|拝観料|観覧料|見学料|参拝料|利用料金|利用料|入場料金|入館料金|料金|参加費|乗船料|入浴料|入湯料)";
 const LODGING_PRICE_LABEL = "(?:宿泊料金|宿泊料|宿泊費|1泊|一泊|お一人様|1名様|おひとり様|室料)";
 const YEN = "(\\d{1,3}(?:,\\d{3})+|\\d{1,6})\\s*円";
-const ADULT = "(?:大人|一般|おとな|成人|中学生以上|高校生以上)";
-const CHILD = "(?:小人|こども|子供|子ども|小学生|児童|小中学生)";
+const ADULT = "(?:大\\s*人|一\\s*般|おとな|成人|中学生以上|高校生以上)";
+const CHILD = "(?:小\\s*人|こども|子供|子ども|小学生|児童|小中学生)";
 const PRICE_OFF_TOPIC = /駐車|パーキング|キャンセル|タオル|レンタル|貸出|送迎|シャトル|WiFi|Wi-Fi|改定|変更|延長|追加|深夜|割増|税/;
 
 function yen(s: string): number {
@@ -715,12 +727,16 @@ export function extractPrice(text: string, lodging = false): PriceResult | null 
     const frag = windowAfter(text, m.index, 160);
     const a = frag.match(new RegExp(`${ADULT}[^\\d円]{0,12}${YEN}`));
     const c = frag.match(new RegExp(`${CHILD}[^\\d円]{0,12}${YEN}`));
+    const freeAt = frag.search(/無料/);
+    const amountAt = frag.search(/\d\s*円/);
     if (
       !a &&
       !c &&
-      /^[^\n]{0,24}無料/.test(frag) &&
+      freeAt >= 0 &&
+      freeAt <= 24 &&
+      (amountAt < 0 || amountAt > freeAt) &&
       adult === null &&
-      !/無料(?:駐車|Wi|WI|wi|送迎|貸出|レンタル)/.test(frag)
+      !/無料(?:駐車|Wi|WI|wi|送迎|貸出|レンタル|には|では|になりません|ではありません)/.test(frag)
     ) {
       free = true;
       evidence.push(frag.slice(0, 30).trim());
@@ -747,6 +763,7 @@ export function extractPrice(text: string, lodging = false): PriceResult | null 
       }
     }
   }
+  if (adult !== null || child !== null) free = false;
   if (adult === null && child === null && from === null && !free) return null;
   return { adult_jpy: adult, child_jpy: child, free, from_jpy: from, evidence: dedupe(evidence) };
 }

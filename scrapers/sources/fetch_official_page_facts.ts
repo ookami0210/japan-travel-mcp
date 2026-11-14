@@ -183,6 +183,8 @@ function infoLinks(html: string, baseUrl: string): string[] {
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null && out.length < 8) {
     const text = m[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    // Event and news pages carry ticket prices and one-off hours.
+    if (/イベント|催し|ニュース|お知らせ|新着|ブログ|採用|求人|event|news|blog|recruit/i.test(text + " " + m[1])) continue;
     let hrefText = m[1];
     try {
       hrefText = decodeURIComponent(m[1]);
