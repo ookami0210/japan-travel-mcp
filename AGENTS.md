@@ -320,7 +320,7 @@ before merging. The validator cross-checks:
 
 The PR template (`.github/pull_request_template.md`) carries the per-channel
 checklist; don't ship without ticking it. Channels currently in use:
-**MUNI / R3 / DMO / WD-FOUNDATION / GLOSSARY / WIKIPEDIA-ABSTRACT / EVENTS / SEASONAL**.
+**MUNI / R3 / DMO / WD-FOUNDATION / GLOSSARY / WIKIPEDIA-ABSTRACT / EVENTS / SEASONAL / LODGING / FACTS**.
 
 ### Source selection ([`DATA_POLICY.md`](DATA_POLICY.md), [`EDITORIAL_POLICY.md`](docs/EDITORIAL_POLICY.md))
 

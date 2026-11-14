@@ -69,6 +69,10 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // Campground official-page text (DATA_SOURCES.md #45) — feeds the
   // official_page block on get_hotels results.
   "campgrounds/official_pages.jsonl",
+  // Opening hours / prices read from each entity's official page
+  // (DATA_SOURCES.md #49). Optional: a dataset without it simply has no
+  // official-page facts.
+  "facts/official_page_facts.jsonl",
   // The verdict per campground URL (live official page / dead / portal
   // listing / none). get_hotels needs it to tell a campground whose own page
   // we simply have not crawled yet from one whose page is gone.
