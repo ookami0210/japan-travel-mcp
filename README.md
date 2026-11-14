@@ -213,6 +213,13 @@ provenance is verifiable.
 All 690 designation records are translated to the same 18 languages by an
 incremental Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
 
+`data/r3/jma_volcano.json` also holds the volcanic alert level (噴火警戒レベル)
+JMA has in effect for each volcano, refreshed daily from the Japan
+Meteorological Agency's own feeds, with the bulletin URL and an `as_of` time
+on every record. A volcano with no JMA bulletin available is `unknown`, never
+Level 1. Source: Japan Meteorological Agency (出典：気象庁ホームページ),
+restructured per volcano. It is data-only for now; no tool reads it yet.
+
 ---
 
 ## How the hotel master list is built
@@ -352,7 +359,7 @@ data/hotels/master    # ~20,000 unified hotels & ryokan
 data/hotels/raw/      # OSM + Wikidata pre-merge sources
 data/glossary/        # canonical terms used at translation time
 data/_state/wikidata_attractions.json + 3 muni files
-data/r3/              # MAFF GI, METI crafts, Japan Heritage, Bunka-cho intangible records, UNESCO ICH
+data/r3/              # MAFF GI, METI crafts, Japan Heritage, Bunka-cho intangible records, UNESCO ICH, JMA volcanic alert levels
 ```
 
 The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data/`).
@@ -363,10 +370,14 @@ The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data
 
 The Wikidata attraction layer is built by class, not by prominence. An item
 is included when Wikidata records it as an instance (or subclass instance)
-of one of about forty tourism-relevant classes (temple, shrine, castle,
-museum, park, garden, waterfall, hot spring, designated cultural property,
-and so on) and places it, through `located in (P131)`, inside a Japanese
-municipality. Two consequences worth knowing before you query:
+of one of thirty-four tourism-relevant classes (temple, shrine, castle,
+museum, park, garden, waterfall, onsen, natural monument, and so on; the
+full list with Wikidata's own label for each class is in
+`scrapers/lib/wikidata_attraction_types.ts`) and places it, through
+`located in (P131)`, inside a Japanese municipality. Heritage designations
+(国宝, 重要文化財, 史跡) are a separate property (P1435) and are attached to
+items by the heritage anchor, not used as classes. Two consequences worth
+knowing before you query:
 
 - Coverage follows Wikidata's tagging. A nationally designated kofun with a
   Wikidata item is in; a famous commercial complex or a privately run
@@ -379,9 +390,10 @@ municipality. Two consequences worth knowing before you query:
   translation layer translates the formal name faithfully and does not
   invent popular names, so an alias missing on Wikidata is missing here too.
 
-Each refresh records any query slices Wikidata could not answer in
-`dropped_queries` inside `_state/wikidata_attractions.json`; an empty list
-means every class was fetched for every prefecture.
+Each refresh records any question Wikidata could not answer, down to a
+single class in a single municipality, in `dropped_queries` inside
+`_state/wikidata_attractions.json`; an empty list means every class was
+fetched for every prefecture.
 
 ## Multilingual data and translation pipeline
 

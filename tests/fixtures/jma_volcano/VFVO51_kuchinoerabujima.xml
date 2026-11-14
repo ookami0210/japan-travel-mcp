@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+<Control>
+<Title>火山の状況に関する解説情報</Title>
+<DateTime>2026-11-09T07:01:57Z</DateTime>
+<Status>通常</Status>
+<EditorialOffice>福岡管区気象台</EditorialOffice>
+<PublishingOffice>福岡管区気象台　鹿児島地方気象台</PublishingOffice>
+</Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+<Title>火山名  口永良部島  火山の状況に関する解説情報</Title>
+<ReportDateTime>2026-11-09T16:00:00+09:00</ReportDateTime>
+<TargetDateTime>2026-11-09T16:00:00+09:00</TargetDateTime>
+<EventID>509</EventID>
+<InfoType>発表</InfoType>
+<Serial>028</Serial>
+<InfoKind>火山の状況に関する解説情報</InfoKind>
+<InfoKindVersion>1.0_0</InfoKindVersion>
+<Headline>
+<Text>＜噴火予報（噴火警戒レベル１、活火山であることに留意）が継続＞
+　口永良部島では火山性地震がやや増加しています。今後の火山活動に関する情報に留意してください。</Text>
+<Information type="火山の状況に関する解説情報（対象火山）">
+<Item>
+<Kind>
+<Name>レベル１（活火山であることに留意）</Name>
+<Code>11</Code>
+<Condition>継続</Condition>
+</Kind>
+<LastKind>
+<Name>レベル１（活火山であることに留意）</Name>
+<Code>11</Code>
+<Condition />
+</LastKind>
+<Areas codeType="火山名">
+<Area>
+<Name>口永良部島</Name>
+<Code>509</Code>
+</Area>
+</Areas>
+</Item>
+</Information>
+</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/volcanology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+<VolcanoInfo type="火山の状況に関する解説情報（対象火山）">
+<Item>
+<Kind>
+<Name>レベル１（活火山であることに留意）</Name>
+<Code>11</Code>
+<Condition>継続</Condition>
+</Kind>
+<LastKind>
+<Name>レベル１（活火山であることに留意）</Name>
+<Code>11</Code>
+<Condition />
+</LastKind>
+<Areas codeType="火山名">
+<Area>
+<Name>口永良部島</Name>
+<Code>509</Code>
+<Coordinate description="北緯３０度２６．６０分　東経１３０度１３．０３分　標高６５７ｍ">+3026.60+13013.03+657/</Coordinate>
+</Area>
+</Areas>
+</Item>
+</VolcanoInfo>
+<VolcanoInfoContent>
+<VolcanoHeadline>＜噴火予報（噴火警戒レベル１、活火山であることに留意）が継続＞
+　口永良部島では火山性地震がやや増加しています。今後の火山活動に関する情報に留意してください。</VolcanoHeadline>
+<VolcanoActivity>　口永良部島では、主に古岳付近の浅いところを震源とする火山性地震がやや多い状態で経過しています。そのような中、１０月３０日頃から火山性地震がやや増加しており、本日（１１月９日）１５時までの前１０日間で５８回発生しています。
+　
+　火山ガス（二酸化硫黄）の放出量は、１日あたり１００トンを下回り、少ない状態で経過しています。
+　
+　監視カメラによる観測及び地殻変動観測では、特段の変化は認められていません。
+　
+　古岳付近を中心に火山性地震がやや増加していますので、今後の火山活動に関する情報に留意してください。</VolcanoActivity>
+<VolcanoPrevention>　活火山であることから、新岳及び古岳の火口内では、火山灰等が噴出する可能性があります。また、新岳西側割れ目等の地熱域では、高温の噴気や火山ガス等に注意してください。
+　地元自治体等の指示に従って危険な地域には立ち入らないでください。</VolcanoPrevention>
+<NextAdvisory>　次の火山の状況に関する解説情報は、１３日（金）１６時頃に発表の予定です。
+　なお、火山活動の状況に変化があった場合には、随時お知らせします。
+</NextAdvisory>
+</VolcanoInfoContent>
+</Body>
+</Report>
