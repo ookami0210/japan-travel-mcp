@@ -51,6 +51,13 @@ const PACKAGE_VERSION: string = (() => {
   return "unknown";
 })();
 import { compactPrefectureFile } from "./lib/compact_data.js";
+import {
+  applyOfficialFactsToAttractions,
+  applyOfficialFactsToFood,
+  applyOfficialFactsToHotels,
+  loadOfficialFacts,
+  type OfficialFacts,
+} from "./lib/official_facts.js";
 import { ensureHeapHeadroom } from "./lib/heap_guard.js";
 import {
   loadFoodLayer,
@@ -195,6 +202,11 @@ interface WikidataAttraction {
     >;
     partial: boolean;
   };
+  // What the entity's own official page states (DATA_SOURCES.md #49):
+  // closed days, admission, check-in/out, with the page and the fragment
+  // each value was read from. `opening_hours` above is filled from the
+  // same page when the OSM tag is absent.
+  official_facts?: OfficialFacts;
   // Deterministic category derived from raw OSM tags by
   // scrapers/lib/osm_category.ts (food / market / lodging / onsen / worship /
   // culture / activity / nature / sightseeing). The consumer contract is the
@@ -285,6 +297,9 @@ interface HotelRecord {
   street: string | null;
   prefecture_code: string | null;
   sources: { source: "wikidata" | "osm"; id: string; url: string }[];
+  // Check-in/out, a from-rate and any closure notice read from the
+  // operator's own site (DATA_SOURCES.md #49).
+  official_facts?: OfficialFacts;
 }
 
 interface HotelsFile {
@@ -355,6 +370,10 @@ function findDataDir(): string {
 
 function findHotelsMasterPath(): string {
   return resolve(dataRoot(), "hotels/master.json");
+}
+
+function findOfficialFactsPath(): string {
+  return resolve(dataRoot(), "facts/official_page_facts.jsonl");
 }
 
 function findDescriptionsPath(): string {
@@ -716,6 +735,14 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   // tools see the full Wikidata corpus regardless of merge errors.
   await supplementWikidataAttractions(out);
   applyWikidataPrefCorrections(out);
+  // Official-page facts (#49): fill opening_hours where OSM has none and
+  // attach what the entity's own page states. Optional layer.
+  const officialFacts = await loadOfficialFacts(findOfficialFactsPath());
+  if (officialFacts.size > 0) {
+    for (const p of out) {
+      applyOfficialFactsToAttractions(p.wikidata_attractions ?? [], officialFacts);
+    }
+  }
   // Iter 46: build a qid → types index so the hybrid
   // retriever can filter airport-only entries (and similar low-quality
   // generic types) the same way the exact-match path does. Hybrid lib
@@ -875,6 +902,8 @@ async function loadHotels(): Promise<HotelsFile | null> {
       // Silent — visible via per-hotel prefecture_code. Logging would
       // pollute MCP stdout (which is a JSON-RPC channel).
     }
+    const officialFacts = await loadOfficialFacts(findOfficialFactsPath());
+    if (officialFacts.size > 0) applyOfficialFactsToHotels(file.hotels, officialFacts);
     cachedHotels = file;
     return cachedHotels;
   } catch {
@@ -1042,6 +1071,7 @@ async function buildEntityResolveIndex(): Promise<ResolveIndex> {
       resolve(dataRoot(), "food", `${slug}.json`),
       slug,
     );
+    applyOfficialFactsToFood(venues, await loadOfficialFacts(findOfficialFactsPath()));
     for (const v of venues) {
       const names = [v.names.default, v.names.ja, v.names.en].filter(
         (n): n is string => !!n,
@@ -3317,7 +3347,9 @@ async function getSpots(args: {
       const slug = PREFECTURE_SLUGS[parseInt(code, 10) - 1];
       if (!slug) continue;
       const path = resolve(dataRoot(), "food", `${slug}.json`);
-      venues.push(...(await loadFoodLayer(path, slug)));
+      const loaded = await loadFoodLayer(path, slug);
+      applyOfficialFactsToFood(loaded, await loadOfficialFacts(findOfficialFactsPath()));
+      venues.push(...loaded);
     }
     // City scoping is SOFT: OSM addr tags are sparse in Japan, so a hard
     // filter on address would silently drop venues that simply lack the

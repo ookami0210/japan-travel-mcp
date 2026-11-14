@@ -213,6 +213,13 @@ provenance is verifiable.
 All 690 designation records are translated to the same 18 languages by an
 incremental Sonnet 4.6 batch (see `scrapers/translate/translate_r3.ts`).
 
+`data/facts/official_page_facts.jsonl` holds what each entity's own official
+page states about itself: opening hours (OSM `opening_hours` syntax), closed
+days, admission or room prices, and check-in/out, each with the verbatim
+fragment it was read from. Read by deterministic rules from the official URL
+already on the record; review sites and booking portals are never read.
+Missing stays null. Data-only for now.
+
 `data/r3/jma_volcano.json` also holds the volcanic alert level (噴火警戒レベル)
 JMA has in effect for each volcano, refreshed daily from the Japan
 Meteorological Agency's own feeds, with the bulletin URL and an `as_of` time
@@ -360,6 +367,7 @@ data/hotels/raw/      # OSM + Wikidata pre-merge sources
 data/glossary/        # canonical terms used at translation time
 data/_state/wikidata_attractions.json + 3 muni files
 data/r3/              # MAFF GI, METI crafts, Japan Heritage, Bunka-cho intangible records, UNESCO ICH, JMA volcanic alert levels
+data/facts/           # Opening hours / prices read from each entity's official page (#49)
 ```
 
 The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data/`).
