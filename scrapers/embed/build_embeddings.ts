@@ -19,6 +19,15 @@
  *   npm run embed:build                # all entity types
  *   ENTITIES=spots npm run embed:build # only municipal scrape spots
  *   LIMIT=500 npm run embed:build      # quick smoke test
+ *   EMBED_FULL=1 npm run embed:build   # ignore the previous index, embed everything
+ *
+ * Incremental by default: when a previous spots.index.json + spots.f16.bin
+ * built with the same model is present (data/embeddings/, or the HF cache),
+ * every entry whose key and passage text are unchanged takes its vector from
+ * the previous build and only new or changed entries go through the model.
+ * The full corpus (~270k passages) needs 4-5 h on a 2-core runner, which
+ * ran into the 5 h job cap on the weekly rebuild; the monthly delta is a few
+ * thousand passages and finishes in minutes.
  *
  * The MCP server picks up the binary via src/lib/semantic.ts and degrades
  * gracefully (search_semantic returns "not_built" message) when missing.
@@ -504,6 +513,44 @@ function f32ToF16Bits(val: number): number {
   return sign | (exponent << 10) | (mantissa >>> 13);
 }
 
+interface PreviousIndex {
+  rowByKey: Map<string, number>;
+  entries: IndexEntry[];
+  u16: Uint16Array;
+}
+
+/**
+ * The previous build, when one is present and was made with the same model.
+ * Returns null (a full rebuild) when anything about it does not line up.
+ */
+async function loadPreviousIndex(): Promise<PreviousIndex | null> {
+  if (process.env.EMBED_FULL === "1") return null;
+  const idxUrl = findStateRoot("embeddings/spots.index.json");
+  const binUrl = findStateRoot("embeddings/spots.f16.bin");
+  if (!idxUrl || !binUrl) return null;
+  try {
+    const idx = JSON.parse(await readFile(fileURLToPath(idxUrl), "utf8")) as {
+      model?: string;
+      dim?: number;
+      count?: number;
+      entries?: IndexEntry[];
+    };
+    if (idx.model !== MODEL_ID || idx.dim !== DIM || !Array.isArray(idx.entries)) return null;
+    const buf = await readFile(fileURLToPath(binUrl));
+    const u16 = new Uint16Array(buf.buffer, buf.byteOffset, buf.byteLength / 2);
+    if (u16.length !== idx.entries.length * DIM || idx.count !== idx.entries.length) {
+      process.stderr.write(`[embed] previous index does not match its binary; rebuilding in full\n`);
+      return null;
+    }
+    const rowByKey = new Map<string, number>();
+    idx.entries.forEach((e, i) => rowByKey.set(e.key, i));
+    return { rowByKey, entries: idx.entries, u16 };
+  } catch (err) {
+    process.stderr.write(`[embed] previous index unreadable (${(err as Error).message}); rebuilding in full\n`);
+    return null;
+  }
+}
+
 async function main(): Promise<void> {
   const limitEnv = process.env.LIMIT;
   const limit = limitEnv ? Math.max(1, Number(limitEnv)) : null;
@@ -535,34 +582,58 @@ async function main(): Promise<void> {
     throw new Error("no entries to embed — check that data/ is populated");
   }
 
-  process.stderr.write(`[embed] loading model ${MODEL_ID}\n`);
-  const t0 = Date.now();
-  const extractor = await pipeline("feature-extraction", MODEL_ID, { dtype: "q8" });
-  process.stderr.write(`[embed] model ready in ${Date.now() - t0}ms\n`);
-
   const N = entries.length;
   const u16 = new Uint16Array(N * DIM);
-  let processed = 0;
-  const tStart = Date.now();
-  for (let i = 0; i < N; i += BATCH) {
-    const slice = entries.slice(i, i + BATCH);
-    const inputs = slice.map(passageText);
-    const out = await extractor(inputs, { pooling: "mean", normalize: true });
-    const data = out.data as Float32Array;
-    const dim = (out.dims as number[])[1];
-    if (dim !== DIM) throw new Error(`unexpected dim ${dim}`);
-    for (let r = 0; r < slice.length; r++) {
-      for (let c = 0; c < DIM; c++) {
-        u16[(i + r) * DIM + c] = f32ToF16Bits(data[r * DIM + c]);
-      }
+
+  // Reuse: an entry whose key and passage text match the previous build
+  // keeps its vector; only the rest is embedded.
+  const previous = await loadPreviousIndex();
+  const todo: number[] = [];
+  let reused = 0;
+  for (let i = 0; i < N; i++) {
+    const e = entries[i];
+    const row = previous?.rowByKey.get(e.key);
+    if (row !== undefined && passageText(previous!.entries[row]) === passageText(e)) {
+      u16.set(previous!.u16.subarray(row * DIM, (row + 1) * DIM), i * DIM);
+      reused += 1;
+    } else {
+      todo.push(i);
     }
-    processed += slice.length;
-    if (processed % 256 === 0 || processed === N) {
-      const rate = processed / ((Date.now() - tStart) / 1000);
-      const eta = (N - processed) / rate;
-      process.stderr.write(
-        `[embed] ${processed}/${N} (${rate.toFixed(1)}/s, eta ${(eta / 60).toFixed(1)}m)\n`,
-      );
+  }
+  process.stderr.write(
+    previous
+      ? `[embed] ${reused} vectors reused from the previous build, ${todo.length} to embed\n`
+      : `[embed] no previous build to reuse, ${todo.length} to embed\n`,
+  );
+
+  if (todo.length > 0) {
+    process.stderr.write(`[embed] loading model ${MODEL_ID}\n`);
+    const t0 = Date.now();
+    const extractor = await pipeline("feature-extraction", MODEL_ID, { dtype: "q8" });
+    process.stderr.write(`[embed] model ready in ${Date.now() - t0}ms\n`);
+
+    let processed = 0;
+    const tStart = Date.now();
+    for (let i = 0; i < todo.length; i += BATCH) {
+      const rows = todo.slice(i, i + BATCH);
+      const inputs = rows.map((r) => passageText(entries[r]));
+      const out = await extractor(inputs, { pooling: "mean", normalize: true });
+      const data = out.data as Float32Array;
+      const dim = (out.dims as number[])[1];
+      if (dim !== DIM) throw new Error(`unexpected dim ${dim}`);
+      for (let r = 0; r < rows.length; r++) {
+        for (let c = 0; c < DIM; c++) {
+          u16[rows[r] * DIM + c] = f32ToF16Bits(data[r * DIM + c]);
+        }
+      }
+      processed += rows.length;
+      if (processed % 256 === 0 || processed === todo.length) {
+        const rate = processed / ((Date.now() - tStart) / 1000);
+        const eta = (todo.length - processed) / rate;
+        process.stderr.write(
+          `[embed] ${processed}/${todo.length} (${rate.toFixed(1)}/s, eta ${(eta / 60).toFixed(1)}m)\n`,
+        );
+      }
     }
   }
 
@@ -571,20 +642,18 @@ async function main(): Promise<void> {
   const binPath = new URL("spots.f16.bin", outDir);
   const idxPath = new URL("spots.index.json", outDir);
   await writeFile(fileURLToPath(binPath), Buffer.from(u16.buffer));
+  // Compact JSON: the pretty-printed index had grown past 350 MB, which is
+  // a long download for every consumer and a long parse on every rebuild.
   await writeFile(
     fileURLToPath(idxPath),
-    JSON.stringify(
-      {
-        model: MODEL_ID,
-        dim: DIM,
-        dtype: "f16",
-        count: N,
-        built_at: new Date().toISOString(),
-        entries,
-      },
-      null,
-      2,
-    ),
+    JSON.stringify({
+      model: MODEL_ID,
+      dim: DIM,
+      dtype: "f16",
+      count: N,
+      built_at: new Date().toISOString(),
+      entries,
+    }),
     "utf8",
   );
   process.stderr.write(`[embed] wrote ${N} vectors to ${binPath.href}\n`);
