@@ -91,9 +91,14 @@ jobs:
       # Reads each campground's URL once per 30 days and labels it: a live
       # official page, a closure notice for a human to read, a dead URL, a
       # booking-portal listing (labelled from the URL, never fetched), or
-      # nothing on record.
+      # nothing on record. The script reads distinct hosts in parallel and
+      # stops starting new pages at DEADLINE_MINUTES, saving what it has, so
+      # the step ends inside its cap even in a month where every page falls
+      # due at once; whatever is left stays due and leads the next run.
       - name: Official-page status (gate)
         timeout-minutes: 90
+        env:
+          DEADLINE_MINUTES: "75"
         run: |
           if [ "${{ inputs.force_status }}" = "true" ]; then
             npx tsx scrapers/quality/campground_site_status.ts --force
