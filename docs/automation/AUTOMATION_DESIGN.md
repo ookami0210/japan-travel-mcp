@@ -45,7 +45,7 @@ until they reach `active`.
 | **WD-FOUNDATION + GLOSSARY + WIKIPEDIA-SUMMARY** | `wd-foundation.yml` (matrix) | monthly (1st of month) 05:00 JST | 30–180 min per matrix leg | #1–4, #15–22, #24, #25, #29–38 |
 | **EMBEDDINGS rebuild** | `embeddings-rebuild.yml` (`workflow_run` + weekly cron) | on successful `wd-foundation.yml`, plus weekly (Sun 06:00 JST) | 30–60 min | n/a (consumes upstream) |
 | **BURST** (re-scrape) | `burst-scrape.yml` (manual + PR-label) | on demand | 4–12 h (6-batch matrix) | #23 (all munis) |
-| **TRANSLATIONS** (names + descriptions) | `translations-refresh.yml` (`workflow_run` on `wd-foundation` + manual) | monthly (after wd-foundation) | minutes (incremental delta) | — (17-lang names + descriptions for new/changed entities) |
+| **TRANSLATIONS** (names + descriptions) | `translations-refresh.yml` (`workflow_run` on `wd-foundation` + monthly cron on the 5th + manual) | monthly (after wd-foundation, cron as floor) | minutes (incremental delta) | — (17-lang names + descriptions for new/changed entities) |
 | **TRANSLATE** (legacy EN names) | `translate.yml` (manual) | as needed | <30 min (submit; Anthropic Batch is async) | — (fills missing EN attraction names) |
 
 > SEASONAL (#P9) and EVENTS (#P4/#P10/#P14) channels remain unscheduled — their
@@ -235,8 +235,13 @@ Unchanged from v1 design. Manual `workflow_dispatch` (with `mode=shallow|full`,
 
 ### `translations-refresh.yml` — incremental names + descriptions (after WD-FOUNDATION)
 
-**Trigger**: `workflow_run` on a successful `wd-foundation` run (new Wikidata
-attractions are the source of new translatable entities), plus manual dispatch.
+**Trigger**: `workflow_run` on any completed `wd-foundation` run (new Wikidata
+attractions are the source of new translatable entities), a monthly cron on the
+5th (05:00 JST) as the floor, plus manual dispatch. The run is not gated on the
+upstream conclusion: its inputs are prefetched from HF, so a wd-foundation run
+that hit the 6 h cap still leaves fresh material. Gating on success kept the
+translation files frozen for 84 days in autumn 2026 while wd-foundation kept
+timing out.
 
 **Steps**: prefetch the glossary/style inputs + attractions corpus + the
 existing translation outputs from HF; run `translate_multilingual.ts` (17-lang
