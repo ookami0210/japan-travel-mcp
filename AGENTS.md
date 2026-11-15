@@ -95,7 +95,7 @@ japan-travel-mcp/
 ├── tests/lib/                     # Vitest unit tests for scrapers/lib + src/lib
 ├── tests/fixtures/                # Static input fixtures (prefectures, municipalities)
 ├── docs/                          # Policies, ADRs, automation design, quality iterations
-└── .github/workflows/             # 6 workflows: see "Automation" below
+└── .github/workflows/             # 16 workflows: see "Automation" below
 ```
 
 ---
@@ -219,8 +219,8 @@ Three orchestrators you'll touch most often:
   municipalities, seeds each from its official_url plus any discovered
   tourism-association / portal URLs (`tourism_org_urls.json`, ADR 0001), hits
   each domain once with a 5 s interval, and updates
-  `data/_state/scrape_state.json`. Triggered nightly by `scrape.yml` (legacy,
-  active) and slated to migrate to `steady-scrape.yml` once enabled.
+  `data/_state/scrape_state.json`. Run by `steady-scrape.yml` in four daily
+  windows (two night windows with higher parallelism, two day windows gentler).
 - **`r3_refresh.ts`** — refreshes R-3 sources (MAFF GI, METI, Japan Heritage,
   Bunka intangible, UNESCO, DMOs) on a day-of-week rotation, then incrementally
   translates new records via the Anthropic Batch API. Chained after `daily.ts`
@@ -351,9 +351,11 @@ checklist; don't ship without ticking it. Channels currently in use:
 
 ### Concurrency
 
-- `scrape.yml` (legacy), `steady-scrape.yml`, and `burst-scrape.yml` share
-  the GitHub Actions concurrency group `scrape` and **must never run
-  concurrently**. If you add a third scrape workflow, put it in the same group.
+- `steady-scrape.yml` and `burst-scrape.yml` share the GitHub Actions
+  concurrency group `scrape` and **must never run concurrently**. If you add
+  a third scrape workflow, put it in the same group. The other data workflows
+  (`wd-foundation`, `dmo`, `campground`, `translations`, `embeddings`) each
+  own a group of their own so they never wait for, or delay, a scrape window.
 
 ---
 
@@ -422,12 +424,21 @@ If you add a new MCP tool, it must satisfy the Editorial Policy:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
-| `scrape.yml` (legacy) | daily cron 03:00 JST + manual | Active steady scraper today; `daily.ts` + `r3_refresh.ts`, commits state, syncs to HF. To be retired when `steady-scrape.yml` is enabled. |
-| `steady-scrape.yml` | manual + (cron commented; flip when ready)      | Replacement for `scrape.yml` with dynamic muni picker (overdue-first, 65–130 / day). |
-| `burst-scrape.yml` | manual + PR label `burst-required` | Full re-scrape across 6 batches (3-1 … 3-6); `shallow` (~4-6h) or `full` (~12h) mode. |
-| `campground-refresh.yml` | monthly cron (8th 05:00 JST) + manual | LODGING channel: campground official-page status pass, then the official-page crawl (#45). Own concurrency group — never waits for a scrape window, never delays one. |
-| `translate.yml` | manual only | Anthropic Batch API translation pass for missing names. |
+| `steady-scrape.yml` | 4 daily windows (23:30 / 03:15 / 07:30 / 19:00 JST) + manual | MUNI + R3 channels: `daily.ts` (overdue-first muni picker), then `r3_refresh.ts` (day-of-week rotation; `jma_volcano` every day), then `coverage_check.ts`. Commits state, syncs to HF. Group `scrape`. |
+| `burst-scrape.yml` | manual + PR label `burst-required` | Full re-scrape across 6 batches (3-1 … 3-6); `shallow` (~4-6h) or `full` (~12h) mode. Group `scrape`. |
+| `wd-foundation.yml` | monthly cron (1st 05:00 JST) + manual (`legs=` runs a subset) | WD-FOUNDATION + GLOSSARY + WIKIPEDIA-ABSTRACT channels: Wikidata SPARQL, OSM Overpass, Wikipedia REST, hotel matcher. Group `wd-foundation`. |
+| `dmo-refresh.yml` | cron 1st + 15th 04:00 JST + manual | DMO channel (`fetch_dmo` / `fetch_dmo_plans`, each skipped when recent). Group `dmo`. |
+| `campground-refresh.yml` | monthly cron (8th 05:00 JST) + manual | LODGING channel: compiled list import (#47), official-page status pass (soft `DEADLINE_MINUTES`), official-page crawl (#45), place context (#46). Group `campground`. |
+| `translations-refresh.yml` | after any completed `wd-foundation` run + monthly cron (5th 05:00 JST) + manual | Incremental 17-language names + descriptions via the Anthropic Batch API; inputs prefetched from HF, so a cancelled upstream run does not stall it. Group `translations`. |
+| `embeddings-rebuild.yml` | after a successful `wd-foundation` run + weekly cron (Sun 06:00 JST) + manual | Incremental rebuild of `embeddings/spots.*`: vectors are reused for unchanged passages, `EMBED_FULL=1` forces a full build. Group `embeddings`. |
+| `freshness-audit.yml` | weekly cron (Mon 08:00 JST) + manual | Reads HF file dates and sizes against the cadence table in `scrapers/quality/freshness_audit.py`; fails when a monitored file is stale or truncated ("workflow green but data frozen"). |
+| `auto-fix-on-failure.yml` | `workflow_run` failure of steady-scrape / dmo-refresh / wd-foundation / embeddings-rebuild / translate + manual replay | Pulls the failed step logs, asks Claude for a diagnosis; mechanical fixes land on main, the rest opens a PR or only posts to Slack (see `scripts/auto_fix.py`). |
+| `translate.yml` | manual only | Anthropic Batch API pass for attraction names missing English. The scheduled path is `translations-refresh.yml`. |
+| `ci.yml` | push to main + every PR | Build, type-check, vitest. |
 | `validate-data-sources.yml` | PR touching `scrapers/` / `DATA_SOURCES.md` / workflows + manual | Runs `validate:data-sources` — the SSOT gate. |
+| `no-internal-leakage.yml` | push + every PR | Server-side run of `.githooks/_scan.sh`; cannot be bypassed with `--no-verify`. |
+| `pii-guard.yml` | push + every PR | Scans the tracked tree for personal data patterns. |
+| `selection-eval.yml` | manual only | Tool-selection eval: does an LLM pick the right MCP tool for a travel query. Needs `ANTHROPIC_API_KEY`. |
 | `publish.yml` | git tag `v*` (or manual dry-run) | Publishes to npm with provenance. Bump via `npm version <part> && git push --follow-tags`. |
 
 **Required secrets**: `HF_TOKEN`, `ANTHROPIC_API_KEY`, `SLACK_WEBHOOK_URL`,

@@ -335,6 +335,8 @@ in the runner FS**. The state is rebuilt from HF every run.
 | `dmo` | `dmo-refresh.yml` | Independent of MUNI; own group avoids accidental serial wait |
 | `wd-foundation` | `wd-foundation.yml` | Independent of MUNI; own group |
 | `embeddings` | `embeddings-rebuild.yml` | Sequence-gated by `workflow_run` |
+| `campground` | `campground-refresh.yml` | LODGING channel; never waits for a scrape window, never delays one |
+| `translations` | `translations-refresh.yml` | Fires after wd-foundation and on its own monthly cron; inputs come from HF |
 
 `scrape.cancel-in-progress: false` — a steady run already in progress wins
 over a newly-scheduled one; the new run gets skipped, not the active one.
