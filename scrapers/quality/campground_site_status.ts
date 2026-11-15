@@ -23,7 +23,16 @@
  * Checkpointed: safe to interrupt; a re-run only revisits entries older than
  * the recheck window.
  *
+ * Time budget: the pages are read by a small pool of workers, each owning a
+ * set of hosts, so distinct sites are read in parallel while any one host
+ * still sees one request per interval. DEADLINE_MINUTES (default 75) is a
+ * soft stop: no new page is started after it, the state is saved, and the
+ * process exits 0 with the rest left due for the next run. Without it a
+ * month where every entry falls due at once (1,500 pages, one at a time,
+ * five seconds each) outran the step's 90-minute cap and lost the run.
+ *
  * Run: npx tsx scrapers/quality/campground_site_status.ts [--limit N] [--force]
+ * Env: DEADLINE_MINUTES (soft stop), STATUS_CONCURRENCY (hosts in flight, default 6)
  * Output: data/_state/campground_site_status.json
  */
 
@@ -43,6 +52,8 @@ const STATE_URL = new URL("data/_state/campground_site_status.json", ROOT);
 
 const RECHECK_DAYS = 30;
 const CHECKPOINT_EVERY = 100;
+const DEADLINE_MINUTES = Number(process.env.DEADLINE_MINUTES ?? "75");
+const CONCURRENCY = Math.max(1, Number(process.env.STATUS_CONCURRENCY ?? "6"));
 
 const OPTIONS: ScrapeOptions = {
   ...DEFAULT_OPTIONS,
@@ -130,8 +141,27 @@ async function main(): Promise<void> {
     await rename(tmp, fileURLToPath(STATE_URL));
   };
 
-  let done = 0;
+  // One queue per host: a worker drains a host's queue in order, so the
+  // per-domain interval is honoured without any two workers sharing a host.
+  const byHost = new Map<string, MasterHotel[]>();
   for (const c of targets) {
+    let host: string;
+    try {
+      host = new URL(c.website!).hostname;
+    } catch {
+      host = c.website!;
+    }
+    const q = byHost.get(host);
+    if (q) q.push(c);
+    else byHost.set(host, [c]);
+  }
+  const hostQueues = [...byHost.values()];
+  const deadlineAt = Date.now() + DEADLINE_MINUTES * 60_000;
+  let deadlineHit = false;
+  let done = 0;
+  let skippedForDeadline = 0;
+
+  const readOne = async (c: MasterHotel): Promise<void> => {
     const url = c.website!;
     const allowed = await shouldCrawl(url, OPTIONS);
     if (!allowed.allowed) {
@@ -164,8 +194,30 @@ async function main(): Promise<void> {
       await save();
       console.error(`[campground_status] ${done}/${targets.length} checkpointed`);
     }
-  }
+  };
+
+  let nextQueue = 0;
+  const worker = async (): Promise<void> => {
+    while (nextQueue < hostQueues.length) {
+      const queue = hostQueues[nextQueue++];
+      for (const c of queue) {
+        if (Date.now() >= deadlineAt) {
+          deadlineHit = true;
+          skippedForDeadline += 1;
+          continue;
+        }
+        await readOne(c);
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, hostQueues.length) }, worker));
   await save();
+  if (deadlineHit) {
+    console.error(
+      `[campground_status] soft deadline of ${DEADLINE_MINUTES} min reached:` +
+        ` ${done} read, ${skippedForDeadline} left due for the next run`,
+    );
+  }
 
   const counts: Record<string, number> = {};
   for (const e of Object.values(state.entries)) counts[e.status] = (counts[e.status] ?? 0) + 1;
