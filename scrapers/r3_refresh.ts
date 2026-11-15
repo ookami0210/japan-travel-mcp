@@ -42,6 +42,7 @@ import {
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { notify } from "./lib/slack.js";
+import { assertNotCollapsed } from "./lib/r3_write_guard.js";
 
 const ROOT = new URL("../", import.meta.url);
 const R3_DIR = new URL("data/r3/", ROOT);
@@ -211,6 +212,9 @@ async function refreshOne(source: SourceKey): Promise<RefreshResult> {
   const before = await countExistingRecords(info.outFile);
   try {
     const { total, sourceMeta } = await info.run();
+    // A source that is down or has changed its markup yields nothing; the
+    // previous file must survive that (see lib/r3_write_guard.ts).
+    assertNotCollapsed(info.label, before, total);
     const out = {
       ...sourceMeta,
       fetched_at: new Date().toISOString(),

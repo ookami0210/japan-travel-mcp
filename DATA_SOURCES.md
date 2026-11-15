@@ -1145,6 +1145,14 @@ contract.
 
 ## Change log
 
+- 2026-11-15 — registry fetchers (the R3 rotation and the #26 / #27 / #37
+  industry lodging lists) now refuse to replace a populated output with an
+  empty or halved one (`scrapers/lib/r3_write_guard.ts`). Three files had
+  shipped with zero records after a 503 maintenance page (kougeihin.jp), a
+  site rebuild (shukubo.net) and a changed member-list link (hitou.or.jp);
+  the previous good files are restored on the dataset, and #26 reads both
+  link shapes now.
+
 - 2026-11-15 — added #49, official-page facts (opening hours, closed days,
   admission and room prices, check-in/out) read from each entity's own
   official page with deterministic readers (JSON-LD, then Japanese text

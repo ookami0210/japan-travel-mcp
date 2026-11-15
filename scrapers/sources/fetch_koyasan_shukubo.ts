@@ -16,7 +16,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { assertNotCollapsed, countRecordsInFile } from "../lib/r3_write_guard.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../..");
@@ -55,6 +56,12 @@ async function fetchHtml(url: string): Promise<string> {
     signal: AbortSignal.timeout(30_000),
   });
   if (!r.ok) throw new Error(`${url}: ${r.status}`);
+  // The association's site answers 200 with a maintenance page while it is
+  // being rebuilt; that page lists no temples and must not be cached or
+  // treated as the member list.
+  if (/\/maintenance\.html?$/i.test(new URL(r.url).pathname)) {
+    throw new Error(`${url}: site under maintenance (redirected to ${r.url})`);
+  }
   const text = await r.text();
   await mkdir(CACHE_DIR, { recursive: true });
   await writeFile(cachePath, text, "utf8");
@@ -62,7 +69,7 @@ async function fetchHtml(url: string): Promise<string> {
   return text;
 }
 
-function parseListPage(html: string): { id: string; url: string }[] {
+export function parseListPage(html: string): { id: string; url: string }[] {
   const out: { id: string; url: string }[] = [];
   // Detail link pattern: <a href="ekoin.html?modal=1">
   const re = /href="([a-z][a-z0-9_]+)\.html(?:\?[^"]*)?"/gi;
@@ -84,7 +91,7 @@ function parseListPage(html: string): { id: string; url: string }[] {
   return out;
 }
 
-function parseDetail(html: string, id: string): {
+export function parseDetail(html: string, id: string): {
   name_ja: string;
   name_en: string | null;
   address_jp: string | null;
@@ -127,6 +134,8 @@ async function main(): Promise<void> {
   const listHtml = await fetchHtml(LIST_URL);
   const items = parseListPage(listHtml);
   process.stderr.write(`found ${items.length} candidate shukubo entries\n`);
+  const previous = await countRecordsInFile(OUT_FILE);
+  assertNotCollapsed("koyasan_shukubo (list)", previous, items.length);
 
   const records: ShukuboRecord[] = [];
   for (let i = 0; i < items.length; i++) {
@@ -161,6 +170,7 @@ async function main(): Promise<void> {
       fetched_at: fetchedAt,
     });
   }
+  assertNotCollapsed("koyasan_shukubo", previous, records.length);
   await mkdir(dirname(OUT_FILE), { recursive: true });
   const out = {
     source: "koyasan_shukubo",
@@ -173,4 +183,11 @@ async function main(): Promise<void> {
   process.stderr.write(`Wrote ${records.length} records to ${OUT_FILE}\n`);
 }
 
-await main();
+const isMain =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  main().catch((err) => {
+    process.stderr.write(`[koyasan_shukubo] FAILED: ${(err as Error).message}\n`);
+    process.exit(1);
+  });
+}

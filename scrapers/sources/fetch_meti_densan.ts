@@ -28,6 +28,7 @@ import {
   loadMunicipalityRows,
   loadPrefectureRows,
 } from "../lib/prefecture_match.js";
+import { assertNotCollapsed, countRecordsInFile } from "../lib/r3_write_guard.js";
 
 const BASE = "https://kougeihin.jp";
 const TOP_URL = `${BASE}/crafts/`;
@@ -211,6 +212,7 @@ async function main(): Promise<void> {
   const outPath = fileURLToPath(
     new URL("../../data/r3/meti_densan.json", import.meta.url),
   );
+  assertNotCollapsed("meti_densan", await countRecordsInFile(outPath), records.length);
   await mkdir(dirname(outPath), { recursive: true });
   await writeFile(outPath, JSON.stringify(out, null, 2), "utf8");
   console.error(`[meti_densan] wrote ${records.length} records to ${outPath}`);

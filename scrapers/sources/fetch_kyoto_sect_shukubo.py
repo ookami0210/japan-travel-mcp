@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import http.cookiejar
 import json
+import os
 import re
 import sys
 import time
@@ -270,6 +271,7 @@ def main() -> None:
         "count": len(records),
         "records": records,
     }
+    _assert_not_collapsed(_previous_count(), len(records))
     OUT_FILE.write_text(
         json.dumps(out, ensure_ascii=False, indent=2),
         encoding="utf-8",
@@ -277,6 +279,28 @@ def main() -> None:
     sys.stderr.write(
         f"wrote {OUT_FILE} ({len(records)} facilities)\n",
     )
+
+
+def _previous_count() -> int:
+    """Record count of the file about to be replaced, 0 when absent."""
+    try:
+        data = json.loads(OUT_FILE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return 0
+    records = data.get("records") if isinstance(data, dict) else None
+    return len(records) if isinstance(records, list) else 0
+
+
+def _assert_not_collapsed(previous: int, nxt: int) -> None:
+    """Mirror of scrapers/lib/r3_write_guard.ts: an empty or halved result
+    never replaces a good file. R3_ALLOW_COLLAPSE=1 lets a deliberate shrink through."""
+    if os.environ.get("R3_ALLOW_COLLAPSE") == "1" or previous <= 0:
+        return
+    if nxt <= 0 or (previous >= 20 and nxt < previous * 0.5):
+        raise SystemExit(
+            f"kyoto_sect_shukubo: refusing to overwrite {previous} records with {nxt}"
+            " (source down or markup changed?). Set R3_ALLOW_COLLAPSE=1 to force."
+        )
 
 
 if __name__ == "__main__":
