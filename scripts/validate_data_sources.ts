@@ -61,6 +61,7 @@ const KNOWN_CHANNELS = new Set([
   // An accommodation's own official pages (campgrounds today; the same shape
   // fits ryokan and minshuku official sites).
   "LODGING",
+  "FACTS",
 ]);
 
 async function parseDoc(): Promise<DocEntry[]> {

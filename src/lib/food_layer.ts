@@ -11,6 +11,7 @@
  * and are surfaced as explicit nulls, never guessed.
  */
 
+import type { OfficialFacts } from "./official_facts.js";
 import { readFile } from "node:fs/promises";
 
 import {
@@ -33,6 +34,9 @@ export interface FoodVenue {
   // `partial: true` flag marks expressions only partly representable.
   // Mirrors the attraction layer's opening_hours_structured.
   opening_hours_structured?: StructuredOpeningHours | null;
+  // What the venue's own page states (DATA_SOURCES.md #49); hours_raw is
+  // filled from the same page when OSM carries none.
+  official_facts?: OfficialFacts;
   official_url: string | null;
   wheelchair: string | null;
   takeaway: string | null;

@@ -81,6 +81,7 @@ corresponding workflow flips ON.
 | **GLOSSARY** | `wd-foundation.yml` (leg `glossary`) | monthly | gh-actions (cron OFF until launch) | #20–22 |
 | **WIKIPEDIA-ABSTRACT** | `wd-foundation.yml` (leg `wikipedia-summaries`) | monthly | gh-actions (cron OFF until launch) | #34 / #35 / #36 (live) / #P1 (planned alias) |
 | **LODGING** | `campground-refresh.yml` | monthly (8th) 05:00 JST | gh-actions | #45, #46, #47 |
+| **FACTS** | (operator machine; `fetch_official_page_facts.ts`) | monthly, 30-day recheck | local | #49 |
 | **EVENTS** | (planned) | weekly during seasons | local (cold-start, planned) | #P4, #P10, #P14 |
 | **SEASONAL** | (planned) | weekly during seasons | gh-actions (planned) | #P9 |
 
@@ -846,6 +847,57 @@ requires either extending an existing channel or creating a new one.
   when the query mentions the golden route), embedding index
   (`harvestR3` in `scrapers/embed/build_embeddings.ts`).
 
+### Official-page facts (each venue's own site)
+
+#### #49 — Opening hours, closed days and prices read from each entity's official page
+- **Authority**: each entity's own official site, from the URL its record
+  already holds (attractions: Wikidata P856 `official_url`; lodging: the OSM
+  / Wikidata `website`; food venues: the OSM `website`). Review sites,
+  booking portals, social networks and map services are never read, even
+  when a record's website tag points there; a URL shared by three or more
+  entities is a brand site and is skipped.
+- **URL**: per-entity official page (robots-checked per URL), plus at most
+  two same-host info pages (店舗情報 / ご利用案内 / アクセス / 料金) when the
+  first page states no facts.
+- **License**: facts published by the subject itself, stored as values with
+  the verbatim page fragment they were read from and the retrieval time.
+  Rights remain with the operator; the fragments are short quotations kept
+  as evidence under the removal commitment in `DATA_POLICY.md`.
+- **Fetcher**: `scrapers/sources/fetch_official_page_facts.ts` (readers in
+  `scrapers/lib/ja_hours_rules.ts` and `scrapers/lib/official_page_facts.ts`;
+  optional local-model pass `scrapers/llm_local/extract_facts_mlx.py` folded
+  in by `scrapers/merge_llm_facts.ts`)
+- **Output**: `data/facts/official_page_facts.jsonl` (one line per entity:
+  id, layer, url, pages_read, fetched_at, method, opening_hours in OSM
+  syntax, closed_days, open_every_day, hours_partial, hours_ambiguous,
+  hours_evidence, price {adult_jpy, child_jpy, free, from_jpy},
+  price_evidence, lodging {checkin, checkout}, closure_notice, needs_llm)
+- **Cadence (steady)**: monthly (operator machine for now; 30-day recheck
+  window enforced in-job, resumable, `DEADLINE_MINUTES` soft stop)
+- **Channel**: FACTS
+- **How a value is read**: three readers in order of trust, and the first
+  that answers wins. (1) Schema.org JSON-LD the operator embedded
+  (`openingHoursSpecification`, `openingHours`, `priceRange`), read as data.
+  (2) Deterministic Japanese text rules: a time range next to an hours label
+  (営業時間 / 開館時間 / 拝観時間 …) with the day words written in the same
+  fragment, closed days next to 定休日 / 休館日, admission next to 入館料 /
+  拝観料 / 料金 (大人 / 小人), check-in and check-out on lodging pages. Every
+  value carries the verbatim fragment. A page whose hours blocks disagree
+  (a chain's top page listing several stores) is `hours_ambiguous` and
+  yields no hours. Hours labels that belong to a phone desk, parking, a
+  bath or a shuttle are not read. (3) A local instruction model (MLX, on the
+  operator's machine, no page text leaves it) over the pages the first two
+  readers could not parse; it only locates the sentence, the same rules
+  structure it, and every time and amount it returns is checked against
+  the page text before it is kept.
+- **What is never done**: no price is read from a restaurant page (menu
+  items are not an admission), no hours are read from a hotel page (its
+  labels belong to the restaurant or the bath), no value is inferred from
+  a typical schedule. Missing stays null.
+- **Consumers**: none yet (data-only); the server's `opening_hours_structured`
+  parser accepts the OSM syntax as is.
+- **Status**: `active`
+
 ### Natural hazards (気象庁)
 
 #### #48 — 気象庁 噴火警報・予報 / 噴火警戒レベル (JMA volcanic alert levels)
@@ -1092,6 +1144,13 @@ contract.
 ---
 
 ## Change log
+
+- 2026-11-15 — added #49, official-page facts (opening hours, closed days,
+  admission and room prices, check-in/out) read from each entity's own
+  official page with deterministic readers (JSON-LD, then Japanese text
+  rules that keep the verbatim fragment as evidence), and an optional local
+  model pass that only locates sentences for the same rules to structure.
+  New FACTS channel. Data-only for now.
 
 - 2026-11-09 — added #48, JMA volcanic alert levels (噴火警報・予報 /
   噴火警戒レベル), to the R3 rotation as its one daily source. It reads JMA
