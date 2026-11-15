@@ -29,7 +29,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { assertNotCollapsed, countRecordsInFile } from "../lib/r3_write_guard.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../..");
@@ -90,12 +91,13 @@ async function fetchHtml(url: string): Promise<string> {
 }
 
 // Parse the list page → array of (name, detail_url) pairs.
-// The list page uses prefecture-grouped <li><a href="/onsen/<id>/">name</a></li>
-// items. We pull every link with /onsen/<digits-or-slug>/ pattern.
-function parseList(html: string): { id: string; url: string; name_text: string }[] {
+// The member list links each ryokan's detail page. The site has used two
+// shapes for that link: `/provider/detail?providerId=NNN` and, since autumn
+// 2026, `/provider/NNN`. Both are accepted so the next markup change of this
+// kind is a no-op rather than an empty crawl.
+export function parseList(html: string): { id: string; url: string; name_text: string }[] {
   const out: { id: string; url: string; name_text: string }[] = [];
-  // 2026 site: detail links are /provider/detail?providerId=NNN
-  const re = /<a[^>]+href="(\/provider\/detail\?providerId=(\d+))"[^>]*>([\s\S]*?)<\/a>/gi;
+  const re = /<a[^>]+href="(\/provider\/(?:detail\?providerId=)?(\d+))"[^>]*>([\s\S]*?)<\/a>/gi;
   let m: RegExpExecArray | null;
   const seen = new Set<string>();
   while ((m = re.exec(html))) {
@@ -110,22 +112,22 @@ function parseList(html: string): { id: string; url: string; name_text: string }
   return out;
 }
 
-function parseDetail(html: string, fallbackName: string): {
+export function parseDetail(html: string, fallbackName: string): {
   name_ja: string;
   prefecture_jp: string | null;
   address_jp: string | null;
   phone: string | null;
   description_ja: string | null;
 } {
-  // 2026 hito-yu-kai detail layout uses <h2 id="providerName">name</h2>
-  // and table01 for facility metadata. og:title is also reliable: "name -
-  // 日本秘湯を守る会 公式Webサイト".
+  // The detail layout carries the name in a heading with id="providerName"
+  // (an h2 in spring 2026, an h1 since autumn 2026) and facility metadata in
+  // table01. og:title is also reliable: "name - 日本秘湯を守る会 公式Webサイト".
   let name_ja = fallbackName;
   const ogTitle = /<meta\s+property="og:title"\s+content="([^"]+)"/i.exec(html);
   if (ogTitle) {
     name_ja = ogTitle[1].split(/\s*-\s*日本秘湯/)[0].trim();
   }
-  const provName = /<h2[^>]+id="providerName"[^>]*>([\s\S]*?)<\/h2>/i.exec(html);
+  const provName = /<h[1-3][^>]+id="providerName"[^>]*>([\s\S]*?)<\/h[1-3]>/i.exec(html);
   if (provName) {
     const txt = provName[1].replace(/<[^>]+>/g, "").trim();
     if (txt && txt.length > 1) name_ja = txt;
@@ -185,6 +187,10 @@ async function main(): Promise<void> {
   const listHtml = await fetchHtml(LIST_URL);
   const items = parseList(listHtml);
   process.stderr.write(`found ${items.length} member entries on list page\n`);
+  const previous = await countRecordsInFile(OUT_FILE);
+  // Decide on the list before any detail request: a changed list markup
+  // must not cost 180 polite fetches to discover.
+  assertNotCollapsed("hito_yu_kai (list)", previous, items.length);
 
   const records: (Record_ & { prefecture_codes: string[] })[] = [];
   for (let i = 0; i < items.length; i++) {
@@ -216,6 +222,7 @@ async function main(): Promise<void> {
     });
   }
 
+  assertNotCollapsed("hito_yu_kai", previous, records.length);
   await mkdir(dirname(OUT_FILE), { recursive: true });
   const out = {
     source: "hito_yu_kai",
@@ -228,4 +235,11 @@ async function main(): Promise<void> {
   process.stderr.write(`Wrote ${records.length} records to ${OUT_FILE}\n`);
 }
 
-await main();
+const isMain =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  main().catch((err) => {
+    process.stderr.write(`[hito_yu_kai] FAILED: ${(err as Error).message}\n`);
+    process.exit(1);
+  });
+}

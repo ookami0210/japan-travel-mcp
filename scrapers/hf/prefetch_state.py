@@ -125,6 +125,11 @@ PRESETS: dict[str, list[str]] = {
         # runner these must come from HF or the rebuild silently indexes an
         # empty municipal corpus.
         *PREFECTURE_FILES,
+        # The previous build: build_embeddings.ts reuses every vector whose
+        # key and passage text are unchanged, so without these two files a
+        # runner embeds the whole corpus again (4-5 h, past the job cap).
+        "embeddings/spots.index.json",
+        "embeddings/spots.f16.bin",
     ],
     # translations-refresh.yml — incremental 17-language names + descriptions.
     # Needs the glossary/style inputs, the attractions corpus (entity context),
