@@ -1,0 +1,42 @@
+{
+  "run_type": "daily",
+  "municipalities_processed": 122,
+  "municipalities_completed": 106,
+  "municipalities_in_progress": 16,
+  "municipalities_truncated_at_cap": 1,
+  "crawl_checkpoints_open": 16,
+  "candidates_considered": 1932,
+  "time_budget_min": 180,
+  "prefectures_touched": [
+    "11",
+    "10",
+    "03",
+    "08",
+    "27",
+    "12",
+    "23",
+    "01",
+    "06",
+    "13",
+    "24",
+    "14",
+    "36",
+    "04",
+    "16",
+    "05",
+    "34"
+  ],
+  "total_spots": 14190,
+  "total_errors": 2586,
+  "started_at": "2026-11-22T14:37:13.429Z",
+  "finished_at": "2026-11-22T17:37:25.096Z",
+  "elapsed_seconds": 10812,
+  "aborted": false,
+  "abort_reason": null,
+  "http": {
+    "success": 34446,
+    "fivexx": 202,
+    "fourxx": 1664,
+    "network_errors": 135
+  }
+}
