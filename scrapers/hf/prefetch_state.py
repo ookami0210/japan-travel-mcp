@@ -88,6 +88,10 @@ PRESETS: dict[str, list[str]] = {
         "_state/official_urls.json",
         "_state/dmo_seed_urls.json",
         "_state/dmo_website_overrides.json",
+        # The plan / website steps read the registry. When the registry step
+        # fails they must still run on the last published one instead of
+        # failing on a missing file.
+        "r3/dmo.json",
     ],
     # wd-foundation.yml — all upstream Wikidata/OSM/Wikipedia legs read
     # municipalities + the master Wikidata attractions corpus. The
