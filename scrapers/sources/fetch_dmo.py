@@ -53,6 +53,7 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, asdict
@@ -96,6 +97,30 @@ class DmoEntry:
     authority: str
 
 
+def classify_registry_link(label: str) -> str | None:
+    """Which list a registry-page link points to: "registered", "candidate"
+    or None. The page has written the same link as 登録DMO一覧 and as
+    「登録DMO」登録一覧（令和８年11月16日現在）, with a full-width ＤＭＯ on
+    the candidate side, so the label is NFKC-normalised and stripped of
+    brackets before matching.
+
+    >>> classify_registry_link("「登録DMO」登録一覧（令和８年11月16日現在）［PDF:315KB］")
+    'registered'
+    >>> classify_registry_link("「候補ＤＭＯ」登録一覧（令和８年11月16日現在）")
+    'candidate'
+    >>> classify_registry_link("登録DMO一覧")
+    'registered'
+    >>> classify_registry_link("観光地域づくり法人（DMO）登録一覧") is None
+    True
+    """
+    norm = re.sub(r"[「」『』\s]", "", unicodedata.normalize("NFKC", label))
+    if "候補DMO" in norm:
+        return "candidate"
+    if "登録DMO" in norm:
+        return "registered"
+    return None
+
+
 def discover_pdf_urls() -> tuple[str, str]:
     """Resolve the current registered / candidate list PDF URLs from the
     registry page. Falls back to the last known content IDs if the page
@@ -113,10 +138,17 @@ def discover_pdf_urls() -> tuple[str, str]:
         ):
             href, label = m.group(1), re.sub(r"<[^>]+>|\s+", "", m.group(2))
             url = urllib.parse.urljoin(REGISTRY_PAGE, href)
-            if "登録DMO一覧" in label:
+            kind = classify_registry_link(label)
+            if kind == "registered":
                 registered = url
-            elif "候補DMO一覧" in label:
+            elif kind == "candidate":
                 candidate = url
+        if registered == REGISTERED_PDF_FALLBACK or candidate == CANDIDATE_PDF_FALLBACK:
+            print(
+                "[dmo] WARN registry page has no matching list link; falling back"
+                " to the last known PDF URL (check classify_registry_link)",
+                file=sys.stderr,
+            )
     except Exception as exc:  # noqa: BLE001 — discovery is best-effort
         print(f"[dmo] WARN registry-page discovery failed: {exc}", file=sys.stderr)
     print(f"[dmo] registered list: {registered}", file=sys.stderr)
