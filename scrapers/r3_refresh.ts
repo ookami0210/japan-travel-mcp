@@ -28,8 +28,6 @@
 
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import { fetchMaffGi } from "./sources/fetch_maff_gi.js";
 import { fetchMetiDensan } from "./sources/fetch_meti_densan.js";
 import { fetchJapanHeritage } from "./sources/fetch_japan_heritage.js";
@@ -42,7 +40,7 @@ import {
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { notify } from "./lib/slack.js";
-import { assertNotCollapsed } from "./lib/r3_write_guard.js";
+import { assertNotCollapsed, previousRecordCount } from "./lib/r3_write_guard.js";
 
 const ROOT = new URL("../", import.meta.url);
 const R3_DIR = new URL("data/r3/", ROOT);
@@ -194,23 +192,14 @@ interface RefreshResult {
   error?: string;
 }
 
-async function countExistingRecords(file: string): Promise<number> {
-  const path = new URL(file, R3_DIR);
-  if (!existsSync(fileURLToPath(path))) return 0;
-  try {
-    const json = JSON.parse(await readFile(fileURLToPath(path), "utf8")) as {
-      records?: unknown[];
-    };
-    return json.records?.length ?? 0;
-  } catch {
-    return 0;
-  }
-}
-
 async function refreshOne(source: SourceKey): Promise<RefreshResult> {
   const info = SOURCE_INFO[source];
-  const before = await countExistingRecords(info.outFile);
+  let before = 0;
   try {
+    before = await previousRecordCount(
+      info.label,
+      fileURLToPath(new URL(info.outFile, R3_DIR)),
+    );
     const { total, sourceMeta } = await info.run();
     // A source that is down or has changed its markup yields nothing; the
     // previous file must survive that (see lib/r3_write_guard.ts).
