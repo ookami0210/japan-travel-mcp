@@ -63,3 +63,39 @@ export async function countRecordsInFile(path: string): Promise<number> {
     return 0;
   }
 }
+
+export class MissingPreviousFileError extends Error {
+  constructor(
+    public readonly label: string,
+    public readonly path: string,
+  ) {
+    super(
+      `${label}: no previous file at ${path} to compare against. A CI runner` +
+        ` starts empty, so the file must be restored from the dataset before` +
+        ` the fetch (scrapers/hf/prefetch_state.py preset). Set` +
+        ` R3_ALLOW_COLLAPSE=1 for a deliberate first publish.`,
+    );
+    this.name = "MissingPreviousFileError";
+  }
+}
+
+/**
+ * Record count of the file a fetcher is about to replace, to pass to
+ * `assertNotCollapsed`.
+ *
+ * On a fresh CI runner a missing file does not mean "first run", it means the
+ * previous file was never downloaded. Counting it as 0 lets an empty crawl
+ * straight through the guard and onto the dataset, which is how a source that
+ * returned 503 for every page replaced 231 records with none. Workflows set
+ * `R3_REQUIRE_PREVIOUS=1`, and a missing file is then refused.
+ */
+export async function previousRecordCount(label: string, path: string): Promise<number> {
+  if (
+    !existsSync(path) &&
+    process.env.R3_REQUIRE_PREVIOUS === "1" &&
+    process.env.R3_ALLOW_COLLAPSE !== "1"
+  ) {
+    throw new MissingPreviousFileError(label, path);
+  }
+  return countRecordsInFile(path);
+}

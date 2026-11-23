@@ -145,6 +145,10 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # The prefetch step restored every R-3 output; a missing one means
+          # it was not restored, and the collapse guard must not read that
+          # as a first run.
+          R3_REQUIRE_PREVIOUS: "1"
         continue-on-error: true
         run: npx tsx scrapers/r3_refresh.ts
 

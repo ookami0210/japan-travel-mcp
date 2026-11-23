@@ -30,7 +30,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { assertNotCollapsed, countRecordsInFile } from "../lib/r3_write_guard.js";
+import { assertNotCollapsed, previousRecordCount } from "../lib/r3_write_guard.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../..");
@@ -187,7 +187,7 @@ async function main(): Promise<void> {
   const listHtml = await fetchHtml(LIST_URL);
   const items = parseList(listHtml);
   process.stderr.write(`found ${items.length} member entries on list page\n`);
-  const previous = await countRecordsInFile(OUT_FILE);
+  const previous = await previousRecordCount("hito_yu_kai", OUT_FILE);
   // Decide on the list before any detail request: a changed list markup
   // must not cost 180 polite fetches to discover.
   assertNotCollapsed("hito_yu_kai (list)", previous, items.length);

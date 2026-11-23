@@ -39,13 +39,13 @@ until they reach `active`.
 
 | Channel | Workflow file | Cadence | Approx wall time/run | Sources (DATA_SOURCES.md ids) |
 |:---|:---|:---|---:|:---|
-| **MUNI** | `steady-scrape.yml` | daily 03:00 JST | 40–60 min | #23 (1,938 munis @ 65–130/day) |
+| **MUNI** | `steady-scrape.yml` | 4 daily windows (23:30 / 03:15 / 07:30 / 19:00 JST) | 40–60 min | #23 (1,938 munis @ 65–130/day) |
 | **R3** | chained inside `steady-scrape.yml` | day-of-week rotation (Mon/Tue/Wed/Thu) | +5–10 min | #5 / #6 / #7 / #8 / #9 |
-| **DMO** | `dmo-refresh.yml` | bi-weekly (1st + 15th) 04:00 JST | 30–60 min | #10 / #11 / #12 / #13 |
-| **WD-FOUNDATION + GLOSSARY + WIKIPEDIA-SUMMARY** | `wd-foundation.yml` (matrix) | monthly (1st of month) 05:00 JST | 30–180 min per matrix leg | #1–4, #15–22, #24, #25, #29–38 |
-| **EMBEDDINGS rebuild** | `embeddings-rebuild.yml` (`workflow_run` + weekly cron) | on successful `wd-foundation.yml`, plus weekly (Sun 06:00 JST) | minutes (incremental; 4–5 h for a full pass) | n/a (consumes upstream) |
+| **DMO** | `dmo-refresh.yml` | bi-weekly (2nd + 16th) 04:00 JST | 30–60 min | #10 / #11 / #12 / #13 |
+| **WD-FOUNDATION + GLOSSARY + WIKIPEDIA-SUMMARY** | `wd-foundation.yml` (matrix) | monthly (2nd of month) 05:00 JST | 30–180 min per matrix leg | #1–4, #15–22, #24, #25, #29–38 |
+| **EMBEDDINGS rebuild** | `embeddings-rebuild.yml` (`workflow_run` + weekly cron) | on successful `wd-foundation.yml`, plus weekly (Mon 06:00 JST) | minutes (incremental; 4–5 h for a full pass) | n/a (consumes upstream) |
 | **BURST** (re-scrape) | `burst-scrape.yml` (manual + PR-label) | on demand | 4–12 h (6-batch matrix) | #23 (all munis) |
-| **TRANSLATIONS** (names + descriptions) | `translations-refresh.yml` (`workflow_run` on `wd-foundation` + monthly cron on the 5th + manual) | monthly (after wd-foundation, cron as floor) | minutes (incremental delta) | — (17-lang names + descriptions for new/changed entities) |
+| **TRANSLATIONS** (names + descriptions) | `translations-refresh.yml` (`workflow_run` on `wd-foundation` + monthly cron on the 6th JST + manual) | monthly (after wd-foundation, cron as floor) | minutes (incremental delta) | — (17-lang names + descriptions for new/changed entities) |
 | **TRANSLATE** (legacy EN names) | `translate.yml` (manual) | as needed | <30 min (submit; Anthropic Batch is async) | — (fills missing EN attraction names) |
 
 > SEASONAL (#P9) and EVENTS (#P4/#P10/#P14) channels remain unscheduled — their
@@ -142,7 +142,7 @@ last successful run window).
 ```yaml
 on:
   schedule:
-    - cron: "0 19 1,15 * *"     # 04:00 JST, 1st and 15th of each month
+    - cron: "0 19 1,15 * *"     # 04:00 JST on the 2nd and 16th (19:00 UTC on the 1st and 15th)
   workflow_dispatch:
 ```
 
@@ -170,7 +170,7 @@ job ceiling on slow days.
 ```yaml
 on:
   schedule:
-    - cron: "0 20 1 * *"        # 05:00 JST on the 1st of each month
+    - cron: "0 20 1 * *"        # 05:00 JST on the 2nd (20:00 UTC on the 1st)
   workflow_dispatch:
     inputs:
       legs:
@@ -211,7 +211,7 @@ on:
     types: [completed]
     branches: [main]
   schedule:
-    - cron: "0 21 * * 0"   # 06:00 JST every Sunday
+    - cron: "0 21 * * 0"   # 06:00 JST every Monday (21:00 UTC Sunday)
   workflow_dispatch:
 ```
 
@@ -245,7 +245,7 @@ Unchanged from v1 design. Manual `workflow_dispatch` (with `mode=shallow|full`,
 
 **Trigger**: `workflow_run` on any completed `wd-foundation` run (new Wikidata
 attractions are the source of new translatable entities), a monthly cron on the
-5th (05:00 JST) as the floor, plus manual dispatch. The run is not gated on the
+6th (05:00 JST) as the floor, plus manual dispatch. The run is not gated on the
 upstream conclusion: its inputs are prefetched from HF, so a wd-foundation run
 that hit the 6 h cap still leaves fresh material. Gating on success kept the
 translation files frozen for 84 days in autumn 2026 while wd-foundation kept
@@ -335,6 +335,8 @@ in the runner FS**. The state is rebuilt from HF every run.
 | `dmo` | `dmo-refresh.yml` | Independent of MUNI; own group avoids accidental serial wait |
 | `wd-foundation` | `wd-foundation.yml` | Independent of MUNI; own group |
 | `embeddings` | `embeddings-rebuild.yml` | Sequence-gated by `workflow_run` |
+| `campground` | `campground-refresh.yml` | LODGING channel; never waits for a scrape window, never delays one |
+| `translations` | `translations-refresh.yml` | Fires after wd-foundation and on its own monthly cron; inputs come from HF |
 
 `scrape.cancel-in-progress: false` — a steady run already in progress wins
 over a newly-scheduled one; the new run gets skipped, not the active one.

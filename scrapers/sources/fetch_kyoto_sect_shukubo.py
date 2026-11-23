@@ -282,7 +282,21 @@ def main() -> None:
 
 
 def _previous_count() -> int:
-    """Record count of the file about to be replaced, 0 when absent."""
+    """Record count of the file about to be replaced, 0 when absent.
+
+    Mirror of previousRecordCount in scrapers/lib/r3_write_guard.ts: with
+    R3_REQUIRE_PREVIOUS=1 (CI, where the runner starts empty) a missing file
+    means it was never restored from the dataset, not a first run."""
+    if (
+        not OUT_FILE.exists()
+        and os.environ.get("R3_REQUIRE_PREVIOUS") == "1"
+        and os.environ.get("R3_ALLOW_COLLAPSE") != "1"
+    ):
+        raise SystemExit(
+            f"kyoto_sect_shukubo: no previous file at {OUT_FILE} to compare against"
+            " (restore it from the dataset first). Set R3_ALLOW_COLLAPSE=1 for a"
+            " deliberate first publish."
+        )
     try:
         data = json.loads(OUT_FILE.read_text(encoding="utf-8"))
     except (OSError, ValueError):

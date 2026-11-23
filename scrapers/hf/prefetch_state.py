@@ -53,6 +53,17 @@ PREFECTURE_SLUGS: list[str] = [
 ]
 PREFECTURE_FILES: list[str] = [f"prefectures/{s}.json" for s in PREFECTURE_SLUGS]
 
+# Outputs of scrapers/r3_refresh.ts (SOURCE_INFO outFile). Keep in step with
+# that file when a source is added.
+R3_REFRESH_OUTPUTS = [
+    "r3/maff_gi.json",
+    "r3/meti_densan.json",
+    "r3/japan_heritage.json",
+    "r3/bunka_intangible.json",
+    "r3/unesco_japan.json",
+    "r3/jma_volcano.json",
+]
+
 # Presets group the prefetch lists per workflow so each yml stays terse.
 PRESETS: dict[str, list[str]] = {
     # steady-scrape.yml (MUNI + chained R3). Picker reads municipalities +
@@ -77,6 +88,11 @@ PRESETS: dict[str, list[str]] = {
         # (real Batch API cost every night) and the nightly HF sync then
         # clobbers the corpus down to that one source's rows.
         "r3/translations/r3_translations.jsonl",
+        # Every file r3_refresh.ts may rewrite tonight. The collapse guard
+        # compares a fresh crawl against the file it replaces; without the
+        # previous file a source that answers 503 to every page counts as a
+        # first run and its empty result ships to the dataset.
+        *R3_REFRESH_OUTPUTS,
         # The current prefecture files — the nightly merge preserves their
         # wikidata_attractions + unscraped municipality blocks. See
         # PREFECTURE_FILES note above for the data-loss incident this fixes.
@@ -88,6 +104,10 @@ PRESETS: dict[str, list[str]] = {
         "_state/official_urls.json",
         "_state/dmo_seed_urls.json",
         "_state/dmo_website_overrides.json",
+        # The plan / website steps read the registry. When the registry step
+        # fails they must still run on the last published one instead of
+        # failing on a missing file.
+        "r3/dmo.json",
     ],
     # wd-foundation.yml — all upstream Wikidata/OSM/Wikipedia legs read
     # municipalities + the master Wikidata attractions corpus. The
@@ -104,6 +124,11 @@ PRESETS: dict[str, list[str]] = {
         # The wikipedia-summaries leg derives its ja targets from this #33
         # sidecar (the regenerated master carries no wikipedia_titles).
         "_state/wikidata_descriptions.json",
+        # industry-shukubo leg: the collapse guard needs the files it would
+        # replace (see R3_REFRESH_OUTPUTS above for why).
+        "r3/hito_yu_kai.json",
+        "r3/koyasan_shukubo.json",
+        "r3/kyoto_sect_shukubo.json",
     ],
     # embeddings-rebuild.yml — full corpus rebuild needs the entire
     # per-prefecture set + R3 sources to compose the embedding source.

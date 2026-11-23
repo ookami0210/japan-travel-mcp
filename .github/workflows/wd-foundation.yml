@@ -17,7 +17,7 @@ name: wd-foundation
 
 on:
   schedule:
-    - cron: "0 20 1 * *"   # 05:00 JST on the 1st of each month
+    - cron: "0 20 1 * *"   # 05:00 JST on the 2nd (20:00 UTC on the 1st)
   workflow_dispatch:
     inputs:
       legs:
@@ -181,6 +181,10 @@ jobs:
 
       - name: Run leg = industry-shukubo (#26 / #27 / #37)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'industry-shukubo'
+        env:
+          # The previous files come from the prefetch step; refuse to treat a
+          # missing one as a first run (scrapers/lib/r3_write_guard.ts).
+          R3_REQUIRE_PREVIOUS: "1"
         # These niche lodging sources sit on slow/occasionally-unreachable hosts
         # (e.g. www.shukubo.net). Retry each up to 3× so a transient connect
         # timeout does not fail the whole leg; a source that is down for all

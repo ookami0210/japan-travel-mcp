@@ -6,10 +6,13 @@ import {
   assertNotCollapsed,
   CollapsedResultError,
   countRecordsInFile,
+  MissingPreviousFileError,
+  previousRecordCount,
 } from "../../scrapers/lib/r3_write_guard.js";
 
 afterEach(() => {
   delete process.env.R3_ALLOW_COLLAPSE;
+  delete process.env.R3_REQUIRE_PREVIOUS;
 });
 
 describe("assertNotCollapsed", () => {
@@ -42,5 +45,34 @@ describe("countRecordsInFile", () => {
     expect(await countRecordsInFile(good)).toBe(3);
     expect(await countRecordsInFile(torn)).toBe(0);
     expect(await countRecordsInFile(join(dir, "missing.json"))).toBe(0);
+  });
+});
+
+describe("previousRecordCount", () => {
+  it("counts the file it would replace", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "r3prev-"));
+    const good = join(dir, "good.json");
+    await writeFile(good, JSON.stringify({ records: [{}, {}] }), "utf8");
+    process.env.R3_REQUIRE_PREVIOUS = "1";
+    expect(await previousRecordCount("x", good)).toBe(2);
+  });
+  it("treats a missing file as a first run outside CI", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "r3prev-"));
+    expect(await previousRecordCount("x", join(dir, "missing.json"))).toBe(0);
+  });
+  it("refuses a missing file when the runner was meant to restore it", async () => {
+    // A CI runner starts empty. If the previous file was not downloaded, a
+    // count of 0 would wave an empty crawl through to the dataset.
+    const dir = await mkdtemp(join(tmpdir(), "r3prev-"));
+    process.env.R3_REQUIRE_PREVIOUS = "1";
+    await expect(previousRecordCount("x", join(dir, "missing.json"))).rejects.toThrow(
+      MissingPreviousFileError,
+    );
+  });
+  it("lets a deliberate first publish through", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "r3prev-"));
+    process.env.R3_REQUIRE_PREVIOUS = "1";
+    process.env.R3_ALLOW_COLLAPSE = "1";
+    expect(await previousRecordCount("x", join(dir, "missing.json"))).toBe(0);
   });
 });
