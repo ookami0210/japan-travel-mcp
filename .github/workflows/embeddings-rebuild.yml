@@ -22,7 +22,7 @@ on:
     types: [completed]
     branches: [main]
   schedule:
-    - cron: "0 21 * * 0"   # 06:00 JST every Sunday
+    - cron: "0 21 * * 0"   # 06:00 JST every Monday (21:00 UTC Sunday)
   workflow_dispatch:
 
 concurrency:

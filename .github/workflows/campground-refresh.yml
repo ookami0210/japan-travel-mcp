@@ -28,7 +28,7 @@ name: campground-refresh
 
 on:
   schedule:
-    - cron: "0 20 8 * *"   # 05:00 JST on the 8th — off the 1st/15th DMO slots
+    - cron: "0 20 8 * *"   # 05:00 JST on the 9th (20:00 UTC on the 8th), off the DMO slots
   workflow_dispatch:
     inputs:
       deadline_minutes:

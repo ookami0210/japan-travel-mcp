@@ -15,7 +15,7 @@ name: dmo-refresh
 
 on:
   schedule:
-    - cron: "0 19 1,15 * *"   # 04:00 JST on the 1st and 15th of each month
+    - cron: "0 19 1,15 * *"   # 04:00 JST on the 2nd and 16th (19:00 UTC on the 1st and 15th)
   workflow_dispatch:
 
 concurrency:

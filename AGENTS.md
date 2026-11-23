@@ -422,15 +422,17 @@ If you add a new MCP tool, it must satisfy the Editorial Policy:
 
 ## Automation (`.github/workflows/`)
 
+Times are JST. The cron lines are UTC, so a 19:00–23:59 UTC slot lands on the next JST day.
+
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | `steady-scrape.yml` | 4 daily windows (23:30 / 03:15 / 07:30 / 19:00 JST) + manual | MUNI + R3 channels: `daily.ts` (overdue-first muni picker), then `r3_refresh.ts` (day-of-week rotation; `jma_volcano` every day), then `coverage_check.ts`. Commits state, syncs to HF. Group `scrape`. |
 | `burst-scrape.yml` | manual + PR label `burst-required` | Full re-scrape across 6 batches (3-1 … 3-6); `shallow` (~4-6h) or `full` (~12h) mode. Group `scrape`. |
-| `wd-foundation.yml` | monthly cron (1st 05:00 JST) + manual (`legs=` runs a subset) | WD-FOUNDATION + GLOSSARY + WIKIPEDIA-ABSTRACT channels: Wikidata SPARQL, OSM Overpass, Wikipedia REST, hotel matcher. Group `wd-foundation`. |
-| `dmo-refresh.yml` | cron 1st + 15th 04:00 JST + manual | DMO channel (`fetch_dmo` / `fetch_dmo_plans`, each skipped when recent). Group `dmo`. |
-| `campground-refresh.yml` | monthly cron (8th 05:00 JST) + manual | LODGING channel: compiled list import (#47), official-page status pass (soft `DEADLINE_MINUTES`), official-page crawl (#45), place context (#46). Group `campground`. |
-| `translations-refresh.yml` | after any completed `wd-foundation` run + monthly cron (5th 05:00 JST) + manual | Incremental 17-language names + descriptions via the Anthropic Batch API; inputs prefetched from HF, so a cancelled upstream run does not stall it. Group `translations`. |
-| `embeddings-rebuild.yml` | after a successful `wd-foundation` run + weekly cron (Sun 06:00 JST) + manual | Incremental rebuild of `embeddings/spots.*`: vectors are reused for unchanged passages, `EMBED_FULL=1` forces a full build. Group `embeddings`. |
+| `wd-foundation.yml` | monthly cron (2nd 05:00 JST) + manual (`legs=` runs a subset) | WD-FOUNDATION + GLOSSARY + WIKIPEDIA-ABSTRACT channels: Wikidata SPARQL, OSM Overpass, Wikipedia REST, hotel matcher. Group `wd-foundation`. |
+| `dmo-refresh.yml` | cron 2nd + 16th 04:00 JST + manual | DMO channel (`fetch_dmo` / `fetch_dmo_plans`, each skipped when recent). Group `dmo`. |
+| `campground-refresh.yml` | monthly cron (9th 05:00 JST) + manual | LODGING channel: compiled list import (#47), official-page status pass (soft `DEADLINE_MINUTES`), official-page crawl (#45), place context (#46). Group `campground`. |
+| `translations-refresh.yml` | after any completed `wd-foundation` run + monthly cron (6th 05:00 JST) + manual | Incremental 17-language names + descriptions via the Anthropic Batch API; inputs prefetched from HF, so a cancelled upstream run does not stall it. Group `translations`. |
+| `embeddings-rebuild.yml` | after a successful `wd-foundation` run + weekly cron (Mon 06:00 JST) + manual | Incremental rebuild of `embeddings/spots.*`: vectors are reused for unchanged passages, `EMBED_FULL=1` forces a full build. Group `embeddings`. |
 | `freshness-audit.yml` | weekly cron (Mon 08:00 JST) + manual | Reads HF file dates and sizes against the cadence table in `scrapers/quality/freshness_audit.py`; fails when a monitored file is stale or truncated ("workflow green but data frozen"). |
 | `auto-fix-on-failure.yml` | `workflow_run` failure of steady-scrape / dmo-refresh / wd-foundation / embeddings-rebuild / translate + manual replay | Pulls the failed step logs, asks Claude for a diagnosis; mechanical fixes land on main, the rest opens a PR or only posts to Slack (see `scripts/auto_fix.py`). |
 | `translate.yml` | manual only | Anthropic Batch API pass for attraction names missing English. The scheduled path is `translations-refresh.yml`. |

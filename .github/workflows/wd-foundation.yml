@@ -17,7 +17,7 @@ name: wd-foundation
 
 on:
   schedule:
-    - cron: "0 20 1 * *"   # 05:00 JST on the 1st of each month
+    - cron: "0 20 1 * *"   # 05:00 JST on the 2nd (20:00 UTC on the 1st)
   workflow_dispatch:
     inputs:
       legs:

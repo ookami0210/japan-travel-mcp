@@ -29,7 +29,7 @@ on:
     types: [completed]
     branches: [main]
   schedule:
-    - cron: "0 20 5 * *"   # 05:00 JST on the 5th — after the 1st-of-month wd-foundation has had its 6 h
+    - cron: "0 20 5 * *"   # 05:00 JST on the 6th (20:00 UTC on the 5th), well after the monthly wd-foundation run
   workflow_dispatch:
     inputs:
       full_retranslate:
