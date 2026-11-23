@@ -41,6 +41,10 @@ RULES: list[tuple[str, int, int]] = [
     ("r3/japan_heritage.json", 10, 100_000),
     ("r3/bunka_intangible.json", 10, 10_000),
     ("r3/unesco_japan.json", 10, 5_000),
+    # Daily R3 snapshot: jma_volcano is on every day of the rotation, so a
+    # healthy file is never older than one steady window. Three days of grace
+    # absorbs a skipped window without paging; a week of silence is a fault.
+    ("r3/jma_volcano.json", 3, 10_000),
     # Monthly sources (wd-foundation 1st-of-month / dmo-refresh 1st+15th).
     ("r3/dmo.json", 40, 50_000),
     ("r3/west_goldenroute.json", 40, 50_000),
