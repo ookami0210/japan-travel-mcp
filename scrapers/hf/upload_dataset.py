@@ -90,6 +90,13 @@ IGNORE_GLOBS = [
     "_state/wikidata_attractions.partial/**",  # per-prefecture checkpoints of the attractions fetcher
     "_state/wikidata_attractions.rejected.json",  # a refused (collapsed) attractions run
     "hotels/review/**",  # public review queue stays in git for contributors
+    # Residue a local checkout accumulates and must never ship: "name 2.json"
+    # conflict copies written by desktop sync tools, editor / iteration
+    # backups, and checkpoint directories of interrupted fetchers.
+    "**/* 2.*",
+    "**/*.bak",
+    "**/*.bak_*",
+    "**/*.partial/**",
     ".DS_Store",
     "**/.DS_Store",
     "**/.gitkeep",
