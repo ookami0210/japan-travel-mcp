@@ -84,6 +84,8 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // license and credit. Without it, spots simply carry no image.
   "images/wikidata_images.json",
   "images/official_site_images.json",
+  // Municipal page images (#52), one file per prefecture.
+  ...PREFECTURE_SLUGS.map((s) => `images/municipal/${s}.json`),
 ];
 
 /** Where the cached data lives. */

@@ -141,6 +141,8 @@ interface ScrapedSpot {
   /** Image URLs from the source page. Compacted to the first entry at load
    *  time (presence feeds the quality score; responses never include them). */
   images?: string[];
+  /** Spot image layer (#52): the page image that can stand for the place. */
+  layer_images?: SpotImage[];
 }
 
 interface MunicipalityBlock {
@@ -385,6 +387,7 @@ function findSpotImagePaths(): string[] {
   return [
     resolve(dataRoot(), "images/wikidata_images.json"),
     resolve(dataRoot(), "images/official_site_images.json"),
+    ...PREFECTURE_SLUGS.map((s) => resolve(dataRoot(), `images/municipal/${s}.json`)),
   ];
 }
 
@@ -758,7 +761,15 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   // Spot images (#50). Optional layer: no file, no images.
   const spotImages = await loadSpotImages(findSpotImagePaths());
   if (spotImages.size > 0) {
-    for (const p of out) applySpotImagesToAttractions(p.wikidata_attractions ?? [], spotImages);
+    for (const p of out) {
+      applySpotImagesToAttractions(p.wikidata_attractions ?? [], spotImages);
+      for (const m of p.municipalities ?? []) {
+        for (const s of m?.spots ?? []) {
+          const imgs = s && spotImages.get(`spot:${s.id}`);
+          if (imgs) s.layer_images = imgs;
+        }
+      }
+    }
   }
   // Iter 46: build a qid → types index so the hybrid
   // retriever can filter airport-only entries (and similar low-quality
@@ -2936,6 +2947,7 @@ async function populateLegacyLexical(
             municipality: m.municipality.name,
             prefecture: p.prefecture.name,
             language: spot.language,
+            ...(spot.layer_images?.length ? { image: spot.layer_images[0] } : {}),
           });
         }
       }
@@ -3723,6 +3735,7 @@ async function getSpots(args: {
           // only if a legacy record predates the field.
           last_verified: s.last_scraped_at ?? null,
           quality_score: Math.round(q * 100) / 100,
+          ...(s.layer_images?.length ? { image: s.layer_images[0] } : {}),
         };
         if (qRaw) baseRec.q_relevance = Math.max(qNameDesc, qBody);
         const rec = { score: finalScore, record: baseRec };

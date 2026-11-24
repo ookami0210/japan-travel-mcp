@@ -161,6 +161,12 @@ jobs:
         continue-on-error: true
         run: npx tsx scrapers/coverage_check.ts
 
+      - name: Municipal page images (#52; local-only, errors isolated)
+        # Rebuilds data/images/municipal/<slug>.json from the prefecture files.
+        # No network access; an unchanged prefecture yields an identical file.
+        continue-on-error: true
+        run: npx tsx scrapers/sources/enrich_municipal_images.ts
+
       - name: Commit operational state (logs + scrape_state)
         # always(): persist even if the scrape step was killed by its
         # timeout-minutes — daily.ts checkpoints progress to disk, so there is
