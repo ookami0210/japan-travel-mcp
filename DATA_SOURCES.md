@@ -935,6 +935,42 @@ requires either extending an existing channel or creating a new one.
 - **Consumers**: none yet (data-only; no MCP tool reads it).
 - **Status**: `active`
 
+### Spot images (one layer, several sources)
+
+#### #50 — Wikidata P18 and Wikipedia lead images (Wikimedia Commons)
+- **Authority**: Wikidata (the entity's P18 image statement) and the
+  entity's own ja / en Wikipedia article (its lead image), with file
+  metadata from Wikimedia Commons
+- **URL**: https://query.wikidata.org/sparql (P18 with statement rank,
+  ja / en sitelinks), `https://{ja,en}.wikipedia.org/w/api.php`
+  (`prop=pageimages`, free images only), https://commons.wikimedia.org/w/api.php
+  (`prop=imageinfo`: thumbnail URL, size, MIME type, license, author)
+- **License**: each image keeps its own license, stored per image with its
+  Commons file page, author and a credit line (`Photo: <author> / <license>
+  (Wikimedia Commons)`). Only CC0, public domain, CC BY and CC BY-SA files
+  are kept. The dataset carries URLs and metadata, never the image bytes.
+- **Fetcher**: `scrapers/sources/fetch_wikidata_images.ts` (shared shape,
+  checks and ordering in `src/lib/spot_images.ts`)
+- **Output**: `data/images/wikidata_images.json` (`records: [{ qid, images }]`;
+  each image: url, width, height, source, page_url, license, license_url,
+  author, attribution_required, credit)
+- **Cadence (steady)**: monthly
+- **Execution venue (current)**: gh-actions (`wd-foundation.yml`, leg `wikidata-images`)
+- **Channel**: WD-FOUNDATION
+- **How an image is tied to a spot**: only through the spot's own QID: its
+  P18 statement (preferred rank first, deprecated never) or the lead image
+  of the article its sitelink names. No image is found by searching for a
+  name. A file is dropped when it is not on Commons (a local upload), is not
+  a raster photo format (SVG maps and GIFs are out), is narrower than 400 px,
+  or carries a license outside the list above.
+- **Coverage**: a 200-entity random sample of the attraction master had a
+  P18 image for 28% and an image from either source for 33%; 80% of
+  entities with a heritage designation have a P18 image.
+- **Consumers**: `get_spots` and `search_area` (`image`: the primary image),
+  `get_entity_full` / `get_entities_bulk` (`images`: up to three, P18 first).
+  The file is optional at runtime.
+- **Status**: `active`
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape

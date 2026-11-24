@@ -80,6 +80,9 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // Derived place context per campground (municipality, nearest station, park,
   // what is nearby, OSM facility tags) — the only data most of them have.
   "campgrounds/place_context.jsonl",
+  // Spot image layer (DATA_SOURCES.md #50): image URLs with their page,
+  // license and credit. Without it, spots simply carry no image.
+  "images/wikidata_images.json",
 ];
 
 /** Where the cached data lives. */
