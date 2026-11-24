@@ -195,6 +195,25 @@ describe("buildServer() — MCP integration smoke", () => {
     }
   });
 
+  it("get_spots gives a Wikidata spot its primary image with the credit to show", async () => {
+    const json = await callToolOk("get_spots", { prefecture: "tottori" });
+    const spots = json.spots as Array<Record<string, unknown>>;
+    const dunes = spots.find((s) => s.id === "Q-TEST-TOTTORI-1");
+    expect(dunes).toBeDefined();
+    const image = dunes!.image as Record<string, unknown>;
+    expect(image.source).toBe("wikidata_p18");
+    expect(image.license).toBe("CC BY-SA 4.0");
+    expect(image.page_url).toBe("https://commons.wikimedia.org/wiki/File:Fixture_dunes.jpg");
+    expect(image.credit).toBe("Photo: Fixture Author / CC BY-SA 4.0 (Wikimedia Commons)");
+  });
+
+  it("get_entity_full lists every image of a spot, primary first", async () => {
+    const json = await callToolOk("get_entity_full", { qid: "Q900000001" });
+    const card = ((json.entity ?? json) as Record<string, unknown>);
+    const images = card.images as Array<Record<string, unknown>>;
+    expect(images.map((i) => i.source)).toEqual(["wikidata_p18", "wikipedia_lead"]);
+  });
+
   it("get_hotels accepts the prefecture filter against an empty master", async () => {
     const json = await callToolOk("get_hotels", { prefecture: "tottori" });
     expect(

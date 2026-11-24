@@ -48,6 +48,7 @@ jobs:
           - osm-poi-tags
           - wikidata-anchors
           - wikidata-descriptions
+          - wikidata-images
           - wikipedia-summaries
           - wikipedia-lists
           - glossary
@@ -148,6 +149,14 @@ jobs:
           npx tsx scrapers/sources/fetch_enwiki_sitelinks.ts
           npx tsx scrapers/sources/fetch_wikidata_descriptions.ts
           python3 scripts/inject_wikidata_descriptions.py || true
+
+      - name: Run leg = wikidata-images (#50)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikidata-images'
+        env:
+          # The previous file comes from the prefetch step; a missing one is
+          # refused rather than treated as a first run (r3_write_guard.ts).
+          R3_REQUIRE_PREVIOUS: "1"
+        run: npx tsx scrapers/sources/fetch_wikidata_images.ts
 
       - name: Run leg = wikipedia-summaries (#34 / #35)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikipedia-summaries'

@@ -124,6 +124,9 @@ PRESETS: dict[str, list[str]] = {
         # The wikipedia-summaries leg derives its ja targets from this #33
         # sidecar (the regenerated master carries no wikipedia_titles).
         "_state/wikidata_descriptions.json",
+        # wikidata-images leg: the collapse guard compares against the
+        # published file it would replace.
+        "images/wikidata_images.json",
         # industry-shukubo leg: the collapse guard needs the files it would
         # replace (see R3_REFRESH_OUTPUTS above for why).
         "r3/hito_yu_kai.json",
