@@ -97,6 +97,9 @@ PRESETS: dict[str, list[str]] = {
         # wikidata_attractions + unscraped municipality blocks. See
         # PREFECTURE_FILES note above for the data-loss incident this fixes.
         *PREFECTURE_FILES,
+        # Municipal page images (#52): restored so an unchanged prefecture's
+        # rebuilt file matches the published one and is not uploaded again.
+        *[f"images/municipal/{s}.json" for s in PREFECTURE_SLUGS],
     ],
     # dmo-refresh.yml — DMO discover + scrape inputs.
     "dmo": [
@@ -124,6 +127,10 @@ PRESETS: dict[str, list[str]] = {
         # The wikipedia-summaries leg derives its ja targets from this #33
         # sidecar (the regenerated master carries no wikipedia_titles).
         "_state/wikidata_descriptions.json",
+        # wikidata-images leg: the collapse guard compares against the
+        # published file it would replace.
+        "images/wikidata_images.json",
+        "images/official_site_images.json",
         # industry-shukubo leg: the collapse guard needs the files it would
         # replace (see R3_REFRESH_OUTPUTS above for why).
         "r3/hito_yu_kai.json",

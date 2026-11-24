@@ -69,6 +69,20 @@ const SLUG_TO_FIXTURE: Record<string, PrefectureFixture> = {
         admin_name: null,
         types: ["Q207326"],
       },
+      {
+        qid: "Q900000001",
+        wikidata_url: "https://www.wikidata.org/wiki/Q900000001",
+        name_ja: "テスト灯台",
+        name_en: "Test Lighthouse",
+        name_zh: null,
+        name_ko: null,
+        description_en: "Test fixture lighthouse.",
+        coordinates: { lat: 35.55, lng: 134.25 },
+        prefecture_code: "31",
+        admin_code: null,
+        admin_name: null,
+        types: [],
+      },
     ],
     municipalities: [
       {
@@ -313,6 +327,37 @@ export const FIXTURE_AUDITED_RELABEL = {
   ]
 } as const;
 
+/** Image layer record (#50) for the Tottori fixture attraction. */
+export const FIXTURE_SPOT_IMAGES = {
+  qid: "Q-TEST-TOTTORI-1",
+  images: [
+    {
+      url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Fixture_dunes.jpg/960px-Fixture_dunes.jpg",
+      width: 960,
+      height: 640,
+      source: "wikidata_p18",
+      page_url: "https://commons.wikimedia.org/wiki/File:Fixture_dunes.jpg",
+      license: "CC BY-SA 4.0",
+      license_url: "https://creativecommons.org/licenses/by-sa/4.0",
+      author: "Fixture Author",
+      attribution_required: true,
+      credit: "Photo: Fixture Author / CC BY-SA 4.0 (Wikimedia Commons)",
+    },
+    {
+      url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Fixture_lead.jpg/960px-Fixture_lead.jpg",
+      width: 960,
+      height: 720,
+      source: "wikipedia_lead",
+      page_url: "https://commons.wikimedia.org/wiki/File:Fixture_lead.jpg",
+      license: "CC0",
+      license_url: null,
+      author: null,
+      attribution_required: false,
+      credit: "Photo: Wikimedia Commons / CC0 (Wikimedia Commons)",
+    },
+  ],
+};
+
 export function pickFixtureContent(rel: string): string {
   if (rel.startsWith("prefectures/")) {
     const fx = defaultFixtureForSlug(basename(rel, ".json"));
@@ -343,6 +388,28 @@ export function pickFixtureContent(rel: string): string {
   }
   if (rel === "_state/wikidata_attractions.json") {
     return JSON.stringify({ attractions: [] });
+  }
+  if (rel === "images/municipal/tottori.json") {
+    return JSON.stringify({
+      prefecture: "31",
+      records: [
+        {
+          key: "spot:31201-tottori-castle",
+          images: [
+            {
+              url: "https://www.city.tottori.example.jp/kanko/img/castle_ruins.jpg",
+              source: "municipal_page",
+              page_url: "https://www.city.tottori.example.jp/kanko/castle.html",
+            },
+          ],
+        },
+      ],
+    });
+  }
+  if (rel === "images/wikidata_images.json") {
+    return JSON.stringify({
+      records: [FIXTURE_SPOT_IMAGES, { ...FIXTURE_SPOT_IMAGES, qid: "Q900000001" }],
+    });
   }
   if (rel === "translations/descriptions_complete.jsonl") {
     return `${JSON.stringify({

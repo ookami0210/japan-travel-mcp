@@ -74,7 +74,12 @@ export class ErrorCounter {
   }
 }
 
-async function waitForRateLimit(domain: string, intervalMs: number): Promise<void> {
+/**
+ * Wait out the per-domain interval before a request that does not go
+ * through `rateLimitedFetch` (an image probe), so every request to a host
+ * shares one clock.
+ */
+export async function waitForRateLimit(domain: string, intervalMs: number): Promise<void> {
   const last = lastFetchByDomain.get(domain) ?? 0;
   const wait = Math.max(0, last + intervalMs - Date.now());
   if (wait > 0) {

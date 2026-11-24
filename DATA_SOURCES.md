@@ -935,6 +935,104 @@ requires either extending an existing channel or creating a new one.
 - **Consumers**: none yet (data-only; no MCP tool reads it).
 - **Status**: `active`
 
+### Spot images (one layer, several sources)
+
+#### #50 — Wikidata P18 and Wikipedia lead images (Wikimedia Commons)
+- **Authority**: Wikidata (the entity's P18 image statement) and the
+  entity's own ja / en Wikipedia article (its lead image), with file
+  metadata from Wikimedia Commons
+- **URL**: https://query.wikidata.org/sparql (P18 with statement rank,
+  ja / en sitelinks), `https://{ja,en}.wikipedia.org/w/api.php`
+  (`prop=pageimages`, free images only), https://commons.wikimedia.org/w/api.php
+  (`prop=imageinfo`: thumbnail URL, size, MIME type, license, author)
+- **License**: each image keeps its own license, stored per image with its
+  Commons file page, author and a credit line (`Photo: <author> / <license>
+  (Wikimedia Commons)`). Only CC0, public domain, CC BY and CC BY-SA files
+  are kept. The dataset carries URLs and metadata, never the image bytes.
+- **Fetcher**: `scrapers/sources/fetch_wikidata_images.ts` (shared shape,
+  checks and ordering in `src/lib/spot_images.ts`)
+- **Output**: `data/images/wikidata_images.json` (`records: [{ qid, images }]`;
+  each image: url, width, height, source, page_url, license, license_url,
+  author, attribution_required, credit)
+- **Cadence (steady)**: monthly
+- **Execution venue (current)**: gh-actions (`wd-foundation.yml`, leg `wikidata-images`)
+- **Channel**: WD-FOUNDATION
+- **How an image is tied to a spot**: only through the spot's own QID: its
+  P18 statement (preferred rank first, deprecated never) or the lead image
+  of the article its sitelink names. No image is found by searching for a
+  name. A file is dropped when it is not on Commons (a local upload), is not
+  a raster photo format (SVG maps and GIFs are out), is narrower than 400 px,
+  or carries a license outside the list above.
+- **Coverage**: a 200-entity random sample of the attraction master had a
+  P18 image for 28% and an image from either source for 33%; 80% of
+  entities with a heritage designation have a P18 image.
+- **Consumers**: `get_spots` and `search_area` (`image`: the primary image),
+  `get_entity_full` / `get_entities_bulk` (`images`: up to three, P18 first).
+  The file is optional at runtime.
+- **Status**: `active`
+
+#### #51 — Official-site images (the image an attraction's own website names)
+- **Authority**: each attraction's own official website, from the URL its
+  Wikidata record holds (P856, `official_url` in the attraction master).
+  Review sites, booking portals, social networks and map services are never
+  read, and a URL held by three or more entities is a brand site and is
+  skipped (the same rules as #49, `scrapers/lib/official_hosts.ts`).
+- **URL**: per-attraction official page (robots-checked), and the image it
+  names (robots-checked, first 64 KB only, ranged request)
+- **License**: the site's own picture, published by the subject itself.
+  Rights remain with the site; the dataset stores the image URL, its size,
+  the page that names it and a credit line naming the site (`license` is
+  null). Removal on request under `DATA_POLICY.md`.
+- **Fetcher**: `scrapers/sources/fetch_official_site_images.ts` (page image
+  choice and size reading in `scrapers/lib/image_probe.ts`)
+- **Output**: `data/images/official_site_images.json` (`records: [{ qid, images }]`,
+  the same image shape as #50 with `source: "official_site"`)
+- **Cadence (steady)**: monthly
+- **Execution venue (current)**: gh-actions (`wd-foundation.yml`, leg `official-site-images`)
+- **Channel**: WD-FOUNDATION
+- **Which image is kept**: the page's `og:image` (then `twitter:image`).
+  Dropped: data URIs, SVG / GIF / ICO / BMP files, paths that name a logo,
+  icon, banner, button, placeholder or site furniture, a government site's
+  generic share image (`ogp.png` on a city site), an image named by three
+  or more attractions' pages (a site-wide default), and an image that is
+  not JPEG / PNG / WebP, is narrower than 400 px, or is a strip (wider than
+  4:1 or taller than 1:3). An attraction whose page could not be read this
+  run (network error, 5xx, the run's soft deadline) keeps its previous image.
+- **Coverage**: on the first 60 targets, 17 pages named an image and 12
+  passed every check.
+- **Consumers**: the #50 image layer (listed after Wikimedia images).
+- **Status**: `active`
+
+#### #52 — Municipal page images (the picture of the page a municipal spot was read from)
+- **Authority**: the municipal or tourism-association page each municipal
+  spot was scraped from (MUNI channel). The image is one the page itself
+  carries; no other page is read.
+- **URL**: none fetched. The municipal scrape already stores up to five image
+  URLs per page (`og:image` first, then the first body images); this step
+  only chooses among them.
+- **License**: the publishing body's own picture. Rights remain with it; the
+  dataset stores the image URL, the page and a credit line naming the site
+  (`license`, `width` and `height` are null). Removal on request under
+  `DATA_POLICY.md`.
+- **Fetcher**: `scrapers/sources/enrich_municipal_images.ts` (rules in
+  `scrapers/lib/municipal_images.ts` and `scrapers/lib/image_probe.ts`)
+- **Output**: `data/images/municipal/<slug>.json` (one per prefecture,
+  `records: [{ key: "spot:<id>", images }]`, `source: "municipal_page"`)
+- **Cadence (steady)**: every steady-scrape window, after the municipal scrape
+- **Execution venue (current)**: gh-actions (`steady-scrape.yml`)
+- **Channel**: MUNI
+- **Which image is kept**: the first stored image that is not a data URI,
+  SVG / GIF / ICO / BMP, a path naming a logo, icon, banner, button,
+  placeholder or site furniture, a government site's generic share image, a
+  file whose name marks it as a thumbnail (a "thumb" path word, or a
+  WordPress size suffix under 400 px), or an image that appears on three or
+  more pages of the prefecture (site furniture). Images are not downloaded,
+  so their size is unknown.
+- **Coverage**: 72,782 of 230,200 municipal spots (32%) on the local
+  prefecture files of 2026-11.
+- **Consumers**: `get_spots` and `search_area` (`image` on municipal spots).
+- **Status**: `active`
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape

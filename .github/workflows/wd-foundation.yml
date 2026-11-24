@@ -24,6 +24,11 @@ on:
         description: "Comma-separated leg names to run (empty = all)"
         required: false
         default: ""
+      first_publish:
+        description: "Allow a leg whose output is not on HF yet to publish it for the first time"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: wd-foundation
@@ -48,6 +53,8 @@ jobs:
           - osm-poi-tags
           - wikidata-anchors
           - wikidata-descriptions
+          - wikidata-images
+          - official-site-images
           - wikipedia-summaries
           - wikipedia-lists
           - glossary
@@ -148,6 +155,24 @@ jobs:
           npx tsx scrapers/sources/fetch_enwiki_sitelinks.ts
           npx tsx scrapers/sources/fetch_wikidata_descriptions.ts
           python3 scripts/inject_wikidata_descriptions.py || true
+
+      - name: Run leg = wikidata-images (#50)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikidata-images'
+        env:
+          # The previous file comes from the prefetch step; a missing one is
+          # refused rather than treated as a first run (r3_write_guard.ts),
+          # unless a manual run says this is the first publish.
+          R3_REQUIRE_PREVIOUS: ${{ github.event.inputs.first_publish == 'true' && '0' || '1' }}
+        run: npx tsx scrapers/sources/fetch_wikidata_images.ts
+
+      - name: Run leg = official-site-images (#51)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'official-site-images'
+        env:
+          R3_REQUIRE_PREVIOUS: ${{ github.event.inputs.first_publish == 'true' && '0' || '1' }}
+          # Stop reading new pages well inside the job cap; unread pages keep
+          # their previous image.
+          DEADLINE_MINUTES: "240"
+        run: npx tsx scrapers/sources/fetch_official_site_images.ts
 
       - name: Run leg = wikipedia-summaries (#34 / #35)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikipedia-summaries'

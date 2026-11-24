@@ -58,6 +58,7 @@ import {
   loadOfficialFacts,
   type OfficialFacts,
 } from "./lib/official_facts.js";
+import { applySpotImagesToAttractions, loadSpotImages, type SpotImage } from "./lib/spot_images.js";
 import { ensureHeapHeadroom } from "./lib/heap_guard.js";
 import {
   loadFoodLayer,
@@ -140,6 +141,8 @@ interface ScrapedSpot {
   /** Image URLs from the source page. Compacted to the first entry at load
    *  time (presence feeds the quality score; responses never include them). */
   images?: string[];
+  /** Spot image layer (#52): the page image that can stand for the place. */
+  layer_images?: SpotImage[];
 }
 
 interface MunicipalityBlock {
@@ -207,6 +210,9 @@ interface WikidataAttraction {
   // each value was read from. `opening_hours` above is filled from the
   // same page when the OSM tag is absent.
   official_facts?: OfficialFacts;
+  // Spot image layer (DATA_SOURCES.md #50): ordered by source, each with
+  // its page, license and credit. Absent when no source has an image.
+  images?: SpotImage[];
   // Deterministic category derived from raw OSM tags by
   // scrapers/lib/osm_category.ts (food / market / lodging / onsen / worship /
   // culture / activity / nature / sightseeing). The consumer contract is the
@@ -374,6 +380,15 @@ function findHotelsMasterPath(): string {
 
 function findOfficialFactsPath(): string {
   return resolve(dataRoot(), "facts/official_page_facts.jsonl");
+}
+
+/** Image layer files (DATA_SOURCES.md #50); each is optional. */
+function findSpotImagePaths(): string[] {
+  return [
+    resolve(dataRoot(), "images/wikidata_images.json"),
+    resolve(dataRoot(), "images/official_site_images.json"),
+    ...PREFECTURE_SLUGS.map((s) => resolve(dataRoot(), `images/municipal/${s}.json`)),
+  ];
 }
 
 function findDescriptionsPath(): string {
@@ -741,6 +756,19 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   if (officialFacts.size > 0) {
     for (const p of out) {
       applyOfficialFactsToAttractions(p.wikidata_attractions ?? [], officialFacts);
+    }
+  }
+  // Spot images (#50). Optional layer: no file, no images.
+  const spotImages = await loadSpotImages(findSpotImagePaths());
+  if (spotImages.size > 0) {
+    for (const p of out) {
+      applySpotImagesToAttractions(p.wikidata_attractions ?? [], spotImages);
+      for (const m of p.municipalities ?? []) {
+        for (const s of m?.spots ?? []) {
+          const imgs = s && spotImages.get(`spot:${s.id}`);
+          if (imgs) s.layer_images = imgs;
+        }
+      }
     }
   }
   // Iter 46: build a qid → types index so the hybrid
@@ -1504,6 +1532,7 @@ async function searchArea(args: {
         ...(a.cuisine ? { cuisine: a.cuisine } : {}),
         ...(a.fee ? { fee: a.fee } : {}),
         ...(a.internet_access ? { internet_access: a.internet_access } : {}),
+        ...(a.images?.length ? { image: a.images[0] } : {}),
         // Iter 58: kinds-default constraint-encodable fields
         ...(kindsDefaults.typical_visit_minutes !== null
           ? { typical_visit_minutes: kindsDefaults.typical_visit_minutes }
@@ -1581,6 +1610,7 @@ async function searchArea(args: {
             ...(a.phone ? { phone: a.phone } : {}),
             ...(a.website ? { website: a.website } : {}),
             ...(a.fee ? { fee: a.fee } : {}),
+            ...(a.images?.length ? { image: a.images[0] } : {}),
           },
         });
       }
@@ -1678,6 +1708,7 @@ async function searchArea(args: {
             ...(a.phone ? { phone: a.phone } : {}),
             ...(a.website ? { website: a.website } : {}),
             ...(a.fee ? { fee: a.fee } : {}),
+            ...(a.images?.length ? { image: a.images[0] } : {}),
           },
         });
       }
@@ -2916,6 +2947,7 @@ async function populateLegacyLexical(
             municipality: m.municipality.name,
             prefecture: p.prefecture.name,
             language: spot.language,
+            ...(spot.layer_images?.length ? { image: spot.layer_images[0] } : {}),
           });
         }
       }
@@ -3703,6 +3735,7 @@ async function getSpots(args: {
           // only if a legacy record predates the field.
           last_verified: s.last_scraped_at ?? null,
           quality_score: Math.round(q * 100) / 100,
+          ...(s.layer_images?.length ? { image: s.layer_images[0] } : {}),
         };
         if (qRaw) baseRec.q_relevance = Math.max(qNameDesc, qBody);
         const rec = { score: finalScore, record: baseRec };
@@ -3861,6 +3894,8 @@ async function getSpots(args: {
       if (a.fee) wkRec.fee = a.fee;
       if (a.internet_access) wkRec.internet_access = a.internet_access;
       if (a.cuisine) wkRec.cuisine = a.cuisine;
+      // Spot image layer (#50): the primary image; get_entity_full lists all.
+      if (a.images?.length) wkRec.image = a.images[0];
       // Iter 58: kinds-default constraint-encodable fields
       const wkKindsDefaults = enrichKindsDefaults(wkKinds, a.fee);
       if (wkKindsDefaults.typical_visit_minutes !== null) {
@@ -8067,6 +8102,7 @@ async function buildWikidataSeeAlso(
           ...(a.phone ? { phone: a.phone } : {}),
           ...(a.website ? { website: a.website } : {}),
           ...(a.fee ? { fee: a.fee } : {}),
+          ...(a.images?.length ? { image: a.images[0] } : {}),
         },
       });
     }
@@ -9724,6 +9760,9 @@ async function buildEntityCard(
     internet_access: a.internet_access ?? null,
     osm_ids: a.osm_ids ?? null,
     osm_tags_merged_at: a.osm_tags_merged_at ?? null,
+    // Spot image layer (#50): up to three, primary first, each with its
+    // page, license and the credit line to show with it.
+    images: a.images ?? null,
     // Pre-computed transit access (Wikidata stations × haversine, ≤5 km cap)
     nearest_transit: a.nearest_transit
       ? {
