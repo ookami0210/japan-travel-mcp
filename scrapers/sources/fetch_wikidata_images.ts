@@ -61,11 +61,34 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 let calls = 0;
 let failedCalls = 0;
+let throttled = 0;
+
+/** Attempts per lookup before it counts as failed. */
+const MAX_ATTEMPTS = 6;
+/** Longest wait honoured from a Retry-After header. */
+const MAX_RETRY_AFTER_MS = 120_000;
+
+/**
+ * How long to wait before the next attempt. The Wikimedia query service
+ * answers a client that asks too fast with 429 and a Retry-After header;
+ * honouring it is the service's rule, and retrying sooner only extends the
+ * throttle. Without the header, back off 5 s, 10 s, 15 s and so on.
+ */
+export function retryDelayMs(retryAfter: string | null, attempt: number, now = Date.now()): number {
+  const fallback = 5_000 * attempt;
+  if (!retryAfter) return fallback;
+  const secs = Number(retryAfter);
+  if (Number.isFinite(secs) && secs >= 0) return Math.min(Math.max(secs * 1000, 1_000), MAX_RETRY_AFTER_MS);
+  const at = Date.parse(retryAfter);
+  if (Number.isFinite(at)) return Math.min(Math.max(at - now, 1_000), MAX_RETRY_AFTER_MS);
+  return fallback;
+}
 
 async function getJson(url: string, init?: RequestInit): Promise<unknown | null> {
   calls += 1;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     await sleep(DELAY_MS);
+    let retryAfter: string | null = null;
     try {
       const res = await fetch(url, {
         ...init,
@@ -73,10 +96,12 @@ async function getJson(url: string, init?: RequestInit): Promise<unknown | null>
       });
       if (res.ok) return await res.json();
       if (res.status !== 429 && res.status < 500) break;
+      retryAfter = res.headers.get("retry-after");
+      if (res.status === 429) throttled += 1;
     } catch {
       // network error: retry
     }
-    await sleep(2000 * attempt);
+    if (attempt < MAX_ATTEMPTS) await sleep(retryDelayMs(retryAfter, attempt));
   }
   failedCalls += 1;
   return null;
@@ -364,7 +389,7 @@ async function main(): Promise<void> {
   const failedShare = calls > 0 ? failedCalls / calls : 0;
   console.log(
     `[wikidata_images] ${records.length}/${qids.length} entities have an image` +
-      ` (P18 ${withP18}, lead ${withLead}); ${failedCalls}/${calls} lookups failed`,
+      ` (P18 ${withP18}, lead ${withLead}); ${failedCalls}/${calls} lookups failed; ${throttled} answers were 429`,
   );
   if (failedShare > MAX_FAILED_SHARE) {
     console.error(`[wikidata_images] ${(failedShare * 100).toFixed(1)}% of lookups failed; not writing ${OUT_FILE}`);

@@ -234,3 +234,21 @@ describe("fetch_wikidata_images helpers", () => {
     expect(cleanThumbUrl("https://t.example/a.jpg")).toBe("https://t.example/a.jpg");
   });
 });
+
+describe("retryDelayMs", () => {
+  it("honours Retry-After in seconds or as a date, within bounds", async () => {
+    const { retryDelayMs } = await import("../../scrapers/sources/fetch_wikidata_images.js");
+    expect(retryDelayMs("30", 1)).toBe(30_000);
+    expect(retryDelayMs("0", 1)).toBe(1_000);
+    expect(retryDelayMs("3600", 1)).toBe(120_000);
+    const now = Date.parse("2026-11-25T00:00:00Z");
+    expect(retryDelayMs("Wed, 25 Nov 2026 00:00:20 GMT", 1, now)).toBe(20_000);
+  });
+
+  it("backs off 5 s per attempt without the header", async () => {
+    const { retryDelayMs } = await import("../../scrapers/sources/fetch_wikidata_images.js");
+    expect(retryDelayMs(null, 1)).toBe(5_000);
+    expect(retryDelayMs(null, 3)).toBe(15_000);
+    expect(retryDelayMs("soon", 2)).toBe(10_000);
+  });
+});
