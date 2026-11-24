@@ -382,7 +382,10 @@ function findOfficialFactsPath(): string {
 
 /** Image layer files (DATA_SOURCES.md #50); each is optional. */
 function findSpotImagePaths(): string[] {
-  return [resolve(dataRoot(), "images/wikidata_images.json")];
+  return [
+    resolve(dataRoot(), "images/wikidata_images.json"),
+    resolve(dataRoot(), "images/official_site_images.json"),
+  ];
 }
 
 function findDescriptionsPath(): string {

@@ -971,6 +971,38 @@ requires either extending an existing channel or creating a new one.
   The file is optional at runtime.
 - **Status**: `active`
 
+#### #51 — Official-site images (the image an attraction's own website names)
+- **Authority**: each attraction's own official website, from the URL its
+  Wikidata record holds (P856, `official_url` in the attraction master).
+  Review sites, booking portals, social networks and map services are never
+  read, and a URL held by three or more entities is a brand site and is
+  skipped (the same rules as #49, `scrapers/lib/official_hosts.ts`).
+- **URL**: per-attraction official page (robots-checked), and the image it
+  names (robots-checked, first 64 KB only, ranged request)
+- **License**: the site's own picture, published by the subject itself.
+  Rights remain with the site; the dataset stores the image URL, its size,
+  the page that names it and a credit line naming the site (`license` is
+  null). Removal on request under `DATA_POLICY.md`.
+- **Fetcher**: `scrapers/sources/fetch_official_site_images.ts` (page image
+  choice and size reading in `scrapers/lib/image_probe.ts`)
+- **Output**: `data/images/official_site_images.json` (`records: [{ qid, images }]`,
+  the same image shape as #50 with `source: "official_site"`)
+- **Cadence (steady)**: monthly
+- **Execution venue (current)**: gh-actions (`wd-foundation.yml`, leg `official-site-images`)
+- **Channel**: WD-FOUNDATION
+- **Which image is kept**: the page's `og:image` (then `twitter:image`).
+  Dropped: data URIs, SVG / GIF / ICO / BMP files, paths that name a logo,
+  icon, banner, button, placeholder or site furniture, a government site's
+  generic share image (`ogp.png` on a city site), an image named by three
+  or more attractions' pages (a site-wide default), and an image that is
+  not JPEG / PNG / WebP, is narrower than 400 px, or is a strip (wider than
+  4:1 or taller than 1:3). An attraction whose page could not be read this
+  run (network error, 5xx, the run's soft deadline) keeps its previous image.
+- **Coverage**: on the first 60 targets, 17 pages named an image and 12
+  passed every check.
+- **Consumers**: the #50 image layer (listed after Wikimedia images).
+- **Status**: `active`
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape

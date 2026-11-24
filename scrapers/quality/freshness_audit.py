@@ -62,6 +62,7 @@ RULES: list[tuple[str, int, int]] = [
     ("_state/wikipedia_ja_summaries.json", 40, 100_000),
     ("_state/wikipedia_en_summaries.json", 40, 100_000),
     ("images/wikidata_images.json", 40, 1_000_000),
+    ("images/official_site_images.json", 40, 100_000),
     # Campground official pages (campground-refresh, monthly + grace). A
     # stalled crawl is invisible otherwise: the file stays readable and simply
     # stops being true.

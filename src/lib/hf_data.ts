@@ -83,6 +83,7 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // Spot image layer (DATA_SOURCES.md #50): image URLs with their page,
   // license and credit. Without it, spots simply carry no image.
   "images/wikidata_images.json",
+  "images/official_site_images.json",
 ];
 
 /** Where the cached data lives. */

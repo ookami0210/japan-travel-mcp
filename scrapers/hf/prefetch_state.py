@@ -127,6 +127,7 @@ PRESETS: dict[str, list[str]] = {
         # wikidata-images leg: the collapse guard compares against the
         # published file it would replace.
         "images/wikidata_images.json",
+        "images/official_site_images.json",
         # industry-shukubo leg: the collapse guard needs the files it would
         # replace (see R3_REFRESH_OUTPUTS above for why).
         "r3/hito_yu_kai.json",
