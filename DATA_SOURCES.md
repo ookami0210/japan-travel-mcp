@@ -1003,6 +1003,36 @@ requires either extending an existing channel or creating a new one.
 - **Consumers**: the #50 image layer (listed after Wikimedia images).
 - **Status**: `active`
 
+#### #52 — Municipal page images (the picture of the page a municipal spot was read from)
+- **Authority**: the municipal or tourism-association page each municipal
+  spot was scraped from (MUNI channel). The image is one the page itself
+  carries; no other page is read.
+- **URL**: none fetched. The municipal scrape already stores up to five image
+  URLs per page (`og:image` first, then the first body images); this step
+  only chooses among them.
+- **License**: the publishing body's own picture. Rights remain with it; the
+  dataset stores the image URL, the page and a credit line naming the site
+  (`license`, `width` and `height` are null). Removal on request under
+  `DATA_POLICY.md`.
+- **Fetcher**: `scrapers/sources/enrich_municipal_images.ts` (rules in
+  `scrapers/lib/municipal_images.ts` and `scrapers/lib/image_probe.ts`)
+- **Output**: `data/images/municipal/<slug>.json` (one per prefecture,
+  `records: [{ key: "spot:<id>", images }]`, `source: "municipal_page"`)
+- **Cadence (steady)**: every steady-scrape window, after the municipal scrape
+- **Execution venue (current)**: gh-actions (`steady-scrape.yml`)
+- **Channel**: MUNI
+- **Which image is kept**: the first stored image that is not a data URI,
+  SVG / GIF / ICO / BMP, a path naming a logo, icon, banner, button,
+  placeholder or site furniture, a government site's generic share image, a
+  file whose name marks it as a thumbnail (a "thumb" path word, or a
+  WordPress size suffix under 400 px), or an image that appears on three or
+  more pages of the prefecture (site furniture). Images are not downloaded,
+  so their size is unknown.
+- **Coverage**: 72,782 of 230,200 municipal spots (32%) on the local
+  prefecture files of 2026-11.
+- **Consumers**: `get_spots` and `search_area` (`image` on municipal spots).
+- **Status**: `active`
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape

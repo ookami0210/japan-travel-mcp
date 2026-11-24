@@ -207,6 +207,16 @@ describe("buildServer() — MCP integration smoke", () => {
     expect(image.credit).toBe("Photo: Fixture Author / CC BY-SA 4.0 (Wikimedia Commons)");
   });
 
+  it("get_spots gives a municipal spot its page image, credited to the site", async () => {
+    const json = await callToolOk("get_spots", { prefecture: "tottori" });
+    const spots = json.spots as Array<Record<string, unknown>>;
+    const castle = spots.find((s) => s.id === "31201-tottori-castle");
+    const image = castle!.image as Record<string, unknown>;
+    expect(image.source).toBe("municipal_page");
+    expect(image.license).toBeNull();
+    expect(image.credit).toBe("Source: www.city.tottori.example.jp");
+  });
+
   it("get_entity_full lists every image of a spot, primary first", async () => {
     const json = await callToolOk("get_entity_full", { qid: "Q900000001" });
     const card = ((json.entity ?? json) as Record<string, unknown>);

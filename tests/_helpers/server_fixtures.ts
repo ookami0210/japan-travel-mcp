@@ -389,6 +389,23 @@ export function pickFixtureContent(rel: string): string {
   if (rel === "_state/wikidata_attractions.json") {
     return JSON.stringify({ attractions: [] });
   }
+  if (rel === "images/municipal/tottori.json") {
+    return JSON.stringify({
+      prefecture: "31",
+      records: [
+        {
+          key: "spot:31201-tottori-castle",
+          images: [
+            {
+              url: "https://www.city.tottori.example.jp/kanko/img/castle_ruins.jpg",
+              source: "municipal_page",
+              page_url: "https://www.city.tottori.example.jp/kanko/castle.html",
+            },
+          ],
+        },
+      ],
+    });
+  }
   if (rel === "images/wikidata_images.json") {
     return JSON.stringify({
       records: [FIXTURE_SPOT_IMAGES, { ...FIXTURE_SPOT_IMAGES, qid: "Q900000001" }],

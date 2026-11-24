@@ -97,6 +97,9 @@ PRESETS: dict[str, list[str]] = {
         # wikidata_attractions + unscraped municipality blocks. See
         # PREFECTURE_FILES note above for the data-loss incident this fixes.
         *PREFECTURE_FILES,
+        # Municipal page images (#52): restored so an unchanged prefecture's
+        # rebuilt file matches the published one and is not uploaded again.
+        *[f"images/municipal/{s}.json" for s in PREFECTURE_SLUGS],
     ],
     # dmo-refresh.yml — DMO discover + scrape inputs.
     "dmo": [
