@@ -119,6 +119,7 @@ no AI-curated lists, no UGC.
 | Municipal tourism pages | 1,938 city / town / ward governments of Japan | Public information; per-page robots.txt respected |
 | Wikidata attractions | Wikidata, Wikimedia Foundation | CC0 |
 | Spot images (`images/`) | Wikidata P18 and the entity's own ja / en Wikipedia lead image, file metadata from Wikimedia Commons | Each image keeps its own license (CC0 / public domain / CC BY / CC BY-SA), stored per image with author, Commons file page and a credit line. The dataset holds URLs and metadata only, never image files |
+| Official-site images (`images/official_site_images.json`) | The image each attraction's own official website (Wikidata P856) names for itself (`og:image`) | Rights remain with the site; stored as URL, size, source page and a credit line naming the site. Removal on request |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
 | Campground official pages | each campground operator, from its own public site | Operator's own text, kept as a dated snapshot with source URL and retrieval time. Rights remain with the operator; removal on request within 48 h |
 | Campground place context | 国土地理院 (municipality per coordinate) + this dataset's own station / park / attraction layers + OpenStreetMap (facility tags) | 国土地理院 public service, attributed per record; OSM parts ODbL |

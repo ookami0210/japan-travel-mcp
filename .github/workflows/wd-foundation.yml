@@ -54,6 +54,7 @@ jobs:
           - wikidata-anchors
           - wikidata-descriptions
           - wikidata-images
+          - official-site-images
           - wikipedia-summaries
           - wikipedia-lists
           - glossary
@@ -163,6 +164,15 @@ jobs:
           # unless a manual run says this is the first publish.
           R3_REQUIRE_PREVIOUS: ${{ github.event.inputs.first_publish == 'true' && '0' || '1' }}
         run: npx tsx scrapers/sources/fetch_wikidata_images.ts
+
+      - name: Run leg = official-site-images (#51)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'official-site-images'
+        env:
+          R3_REQUIRE_PREVIOUS: ${{ github.event.inputs.first_publish == 'true' && '0' || '1' }}
+          # Stop reading new pages well inside the job cap; unread pages keep
+          # their previous image.
+          DEADLINE_MINUTES: "240"
+        run: npx tsx scrapers/sources/fetch_official_site_images.ts
 
       - name: Run leg = wikipedia-summaries (#34 / #35)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikipedia-summaries'

@@ -42,6 +42,7 @@ import pLimit from "p-limit";
 import { sharedWithMunicipalCrawl } from "../lib/campground_pages.js";
 import { ErrorCounter, rateLimitedFetch } from "../lib/fetcher.js";
 import { readOfficialPage, type FactsLayer, type OfficialPageFacts } from "../lib/official_page_facts.js";
+import { NOT_OFFICIAL_HOST_RE, SHARED_URL_MIN } from "../lib/official_hosts.js";
 import { pageText } from "../lib/page_text.js";
 import { shouldCrawl } from "../lib/robots.js";
 import { notify } from "../lib/slack.js";
@@ -57,18 +58,8 @@ const LOG_DIR = new URL("data/_logs/", ROOT);
 
 const MAX_TEXT_CHARS = 60_000;
 const CHECKPOINT_EVERY = 100;
-/** A URL held by this many entities or more is a brand site, not a venue page. */
-const SHARED_URL_MIN = 3;
 /** Info pages followed from the official URL when it states no facts. */
 const MAX_FOLLOW = 2;
-
-/**
- * Hosts that are not the venue's own page: review sites, booking portals,
- * social networks, map services. The data policy keeps them out even when
- * a record's website tag points there.
- */
-const NOT_OFFICIAL_HOST_RE =
-  /(^|\.)(tabelog\.com|retty\.me|gnavi\.co\.jp|hotpepper\.jp|ikyu\.com|jalan\.net|rakuten\.co\.jp|rakuten\.com|booking\.com|expedia\.(com|co\.jp)|agoda\.com|hotels\.com|tripadvisor\.(com|jp)|trip\.com|airbnb\.(com|jp)|google\.(com|co\.jp)|goo\.gl|instagram\.com|facebook\.com|fb\.com|twitter\.com|x\.com|youtube\.com|tiktok\.com|yelp\.(com|co\.jp)|foursquare\.com|hitosara\.com|ozmall\.co\.jp|tablecheck\.com|toreta\.in|ebica\.jp|omakase\.in|autoreserve\.com|ameblo\.jp|note\.com|wikipedia\.org|wikidata\.org|yahoo\.co\.jp|line\.me|lin\.ee)$/i;
 
 /** Anchor text of the one or two pages that carry hours and prices. */
 const INFO_LINK_RE =
