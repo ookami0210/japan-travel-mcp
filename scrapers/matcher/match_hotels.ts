@@ -26,7 +26,7 @@ import {
   DELETED_LODGINGS,
   LODGING_TYPE_OVERRIDES,
 } from "../../src/lib/excluded_lodgings.js";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 
@@ -755,7 +755,12 @@ async function main(): Promise<void> {
   );
 }
 
-main().catch((err) => {
-  console.error("[matcher] FAILED:", err);
-  process.exit(1);
-});
+// Run only when executed directly. Tests import nearestPrefecture from this
+// file, and a run started on import would rewrite the hotel master and
+// remove data/hotels/review/.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error("[matcher] FAILED:", err);
+    process.exit(1);
+  });
+}

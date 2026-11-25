@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   nearestPrefecture,
   MAX_NEAREST_PREFECTURE_M,
@@ -33,5 +33,20 @@ describe("nearestPrefecture", () => {
 
   it("exposes the threshold as a module constant for transparency", () => {
     expect(MAX_NEAREST_PREFECTURE_M).toBe(30_000);
+  });
+});
+
+describe("match_hotels module", () => {
+  it("does not start a matcher run when imported", async () => {
+    vi.resetModules();
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await import("../../scrapers/matcher/match_hotels.js");
+      await new Promise((r) => setTimeout(r, 200));
+      const calls = spy.mock.calls.filter((c) => String(c[0]).startsWith("[matcher]"));
+      expect(calls).toEqual([]);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
