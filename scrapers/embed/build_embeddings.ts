@@ -328,6 +328,21 @@ async function harvestR3(limit: number | null): Promise<IndexEntry[]> {
       });
     }
   }
+  // 観光庁 多言語解説文 (#53): one entry per explanatory text.
+  const tagengo = await loadJson<{ records: Array<{ entry_id: string; url: string; title_ja: string | null; texts: Record<string, { title: string | null; body: string } | undefined> }> }>("official_texts/mlit_tagengo.json");
+  for (const r of tagengo?.records ?? []) {
+    if (limit !== null && out.length >= limit) break;
+    const name = r.title_ja || r.texts.en?.title;
+    if (!name) continue;
+    out.push({
+      key: `mlit_tagengo:${r.entry_id}`,
+      kind: "r3",
+      source: "mlit_tagengo",
+      name,
+      description: r.texts.ja?.body || r.texts.en?.body || null,
+      url: r.url,
+    });
+  }
   // DMO index entries — minimal "name + area" rows for DMO discoverability
   // (the get_dmo tool surface). The richer regional positioning content
   // lives in data/dmo/<id>/plan.json and is harvested by harvestDmoPlans()

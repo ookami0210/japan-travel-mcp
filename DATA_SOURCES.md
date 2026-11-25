@@ -1033,6 +1033,51 @@ requires either extending an existing channel or creating a new one.
 - **Consumers**: `get_spots` and `search_area` (`image` on municipal spots).
 - **Status**: `active`
 
+### Official explanatory texts
+
+#### #53 — 観光庁 地域観光資源の多言語解説文データベース (Japan Tourism Agency multilingual explanatory texts)
+- **Authority**: 観光庁 (Japan Tourism Agency). Each entry was commissioned by a
+  regional council (a DMO, municipality or national-park office) for signs,
+  pamphlets, web pages and apps at the place itself; the page names the
+  council.
+- **URL**: https://www.mlit.go.jp/tagengo-db/ (search listing
+  `cgi-bin/search.cgi`, entry pages `/tagengo-db/<id>.html`)
+- **License**: 政府標準利用規約 (第2.0版) based site policy: reuse, including
+  commercial reuse, with the credit `出典：地域観光資源の多言語解説文データベース
+  <entry URL>` (https://www.mlit.go.jp/tagengo-db/sitepolicy.html). The usage
+  notes (attention.html) ask that texts not be rewritten and that English
+  texts carry "This English-language text was created by the Japan Tourism
+  Agency." Texts are therefore stored and served verbatim with both lines,
+  and never enter the translation pipeline.
+- **Fetcher**: `scrapers/sources/fetch_mlit_tagengo.ts` (page parsing in
+  `scrapers/lib/mlit_tagengo.ts`)
+- **Output**: `data/official_texts/mlit_tagengo.json` (`records: [{ entry_id,
+  url, title_ja, prefectures, prefecture_codes, genres, media, fiscal_year,
+  council, address, texts: { en, ja, zh-Hans, zh-Hant, ko } }]`)
+- **Cadence (steady)**: monthly (new entries; each entry re-read after 180 days)
+- **Execution venue (current)**: gh-actions (`wd-foundation.yml`, leg `mlit-tagengo`)
+- **Channel**: WD-FOUNDATION
+- **How it is read**: every listing page (100 entries a page) for the entry
+  ids, then each entry page that is new or older than 180 days, one request
+  every 5 s, until the run's soft deadline. Entries not read this run keep
+  their record, so the first build fills over several runs. An entry that
+  returns 404 is dropped; entries missing from a complete listing are
+  dropped.
+- **Linking to spots** (server, at load time, `src/lib/official_texts.ts`):
+  an entry is attached to a spot only when its title (or the part after the
+  title's last colon, or a name in parentheses) names exactly one Wikidata
+  attraction, or failing that one municipal spot, in the entry's
+  prefectures; the entry's location picks between same-named spots in
+  different municipalities. Entries about a theme or an area stay unlinked
+  and are found by title in `search_area` and by text in `search_hybrid`.
+- **Coverage**: the listing reports 9,369 entries (FY2018 to FY2024), all
+  with English and Japanese; later years add Simplified / Traditional
+  Chinese and Korean.
+- **Consumers**: `get_entity_full` / `get_entities_bulk` (`official_texts`,
+  full texts with credit), `get_spots` (`official_text` pointer),
+  `search_area` (`type: "official_text"`), embedding index.
+- **Status**: `active`
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape

@@ -121,6 +121,7 @@ no AI-curated lists, no UGC.
 | Spot images (`images/`) | Wikidata P18 and the entity's own ja / en Wikipedia lead image, file metadata from Wikimedia Commons | Each image keeps its own license (CC0 / public domain / CC BY / CC BY-SA), stored per image with author, Commons file page and a credit line. The dataset holds URLs and metadata only, never image files |
 | Official-site images (`images/official_site_images.json`) | The image each attraction's own official website (Wikidata P856) names for itself (`og:image`) | Rights remain with the site; stored as URL, size, source page and a credit line naming the site. Removal on request |
 | Municipal page images (`images/municipal/<prefecture>.json`) | The picture of the municipal or tourism-association page a municipal spot was read from (its `og:image`, else the first body image that is not site furniture) | Rights remain with the publishing body; stored as URL, source page and a credit line naming the site. Removal on request |
+| Official explanatory texts (`official_texts/mlit_tagengo.json`) | 観光庁 地域観光資源の多言語解説文データベース: texts regional councils had written for inbound visitors (en / ja, later years zh-Hans / zh-Hant / ko) | 政府標準利用規約 based terms: reuse with the credit line stored on each record; texts are kept verbatim because the source asks that they not be rewritten |
 | Hotels | Wikidata (CC0) + OpenStreetMap (ODbL) | CC0 + ODbL |
 | Campground official pages | each campground operator, from its own public site | Operator's own text, kept as a dated snapshot with source URL and retrieval time. Rights remain with the operator; removal on request within 48 h |
 | Campground place context | 国土地理院 (municipality per coordinate) + this dataset's own station / park / attraction layers + OpenStreetMap (facility tags) | 国土地理院 public service, attributed per record; OSM parts ODbL |
@@ -219,3 +220,5 @@ including commercially, attribution required.
 Underlying source data carries its own licenses (see source-policy table above).
 Images are not covered by the dataset license: show each image with its `credit`
 and follow its own `license`.
+Official explanatory texts (`official_texts/`) are the Japan Tourism Agency's: show
+them unchanged with each record's `credit`.

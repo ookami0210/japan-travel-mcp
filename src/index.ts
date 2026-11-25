@@ -59,6 +59,16 @@ import {
   type OfficialFacts,
 } from "./lib/official_facts.js";
 import { applySpotImagesToAttractions, loadSpotImages, type SpotImage } from "./lib/spot_images.js";
+import {
+  loadTagengoRecords,
+  matchOfficialTexts,
+  officialTextsByEntity,
+  officialTextsFor,
+  tagengoCredit,
+  type MatchableEntity,
+  type MlitTagengoRecord,
+  type OfficialText,
+} from "./lib/official_texts.js";
 import { ensureHeapHeadroom } from "./lib/heap_guard.js";
 import {
   loadFoodLayer,
@@ -143,6 +153,8 @@ interface ScrapedSpot {
   images?: string[];
   /** Spot image layer (#52): the page image that can stand for the place. */
   layer_images?: SpotImage[];
+  /** Official explanatory texts (#53) whose title names this spot. */
+  official_texts?: OfficialText[];
 }
 
 interface MunicipalityBlock {
@@ -213,6 +225,9 @@ interface WikidataAttraction {
   // Spot image layer (DATA_SOURCES.md #50): ordered by source, each with
   // its page, license and credit. Absent when no source has an image.
   images?: SpotImage[];
+  // Official explanatory texts (DATA_SOURCES.md #53), verbatim with their
+  // credit line. Absent when no entry names this attraction.
+  official_texts?: OfficialText[];
   // Deterministic category derived from raw OSM tags by
   // scrapers/lib/osm_category.ts (food / market / lodging / onsen / worship /
   // culture / activity / nature / sightseeing). The consumer contract is the
@@ -389,6 +404,11 @@ function findSpotImagePaths(): string[] {
     resolve(dataRoot(), "images/official_site_images.json"),
     ...PREFECTURE_SLUGS.map((s) => resolve(dataRoot(), `images/municipal/${s}.json`)),
   ];
+}
+
+/** Official explanatory texts (DATA_SOURCES.md #53); optional. */
+function findOfficialTextsPath(): string {
+  return resolve(dataRoot(), "official_texts/mlit_tagengo.json");
 }
 
 function findDescriptionsPath(): string {
@@ -681,6 +701,10 @@ let cachedDmo: DmoFile | null = null;
 let cachedHitoYuKai: R3SourceFile<HitoYuKaiRecord> | null = null;
 let cachedKoyasanShukubo: R3SourceFile<KoyasanShukuboRecord> | null = null;
 let cachedWestGoldenroute: R3SourceFile<WestGoldenrouteRecord> | null = null;
+// Official explanatory texts (#53) and their entry_id -> entity key links,
+// set when the prefecture files load.
+let cachedTagengo: MlitTagengoRecord[] | null = null;
+let tagengoLinks = new Map<string, string>();
 // Iter83: cache for wikipedia_lists.json (hanabi/yuki_matsuri/etc)
 interface WikiListPage {
   qid: string | null;
@@ -770,6 +794,52 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
         }
       }
     }
+  }
+  // Official explanatory texts (#53). Optional layer: linked to a spot only
+  // when its title names exactly one spot in the entry's prefectures.
+  try {
+    const tagengo = await loadTagengo();
+    if (tagengo.length > 0) {
+      const entities: MatchableEntity[] = [];
+      for (const p of out) {
+        for (const a of p.wikidata_attractions ?? []) {
+          if (!a?.qid) continue;
+          entities.push({
+            key: `wd:${a.qid}`,
+            prefecture_code: a.prefecture_code,
+            names: [a.name_ja, a.name_en, ...(a.aliases ?? [])],
+            municipality: a.admin_name,
+          });
+        }
+        for (const m of p.municipalities ?? []) {
+          for (const s of m?.spots ?? []) {
+            if (!s?.id) continue;
+            entities.push({
+              key: `spot:${s.id}`,
+              prefecture_code: m.municipality.prefecture_code,
+              names: [s.name],
+              municipality: m.municipality.name,
+            });
+          }
+        }
+      }
+      tagengoLinks = matchOfficialTexts(tagengo, entities);
+      const byEntity = officialTextsByEntity(tagengo, tagengoLinks);
+      for (const p of out) {
+        for (const a of p.wikidata_attractions ?? []) {
+          const t = a?.qid && officialTextsFor(byEntity, `wd:${a.qid}`, a.prefecture_code);
+          if (t) a.official_texts = t;
+        }
+        for (const m of p.municipalities ?? []) {
+          for (const s of m?.spots ?? []) {
+            const t = s && officialTextsFor(byEntity, `spot:${s.id}`, m.municipality.prefecture_code);
+            if (t) s.official_texts = t;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[official_texts] skipped:", err instanceof Error ? err.message : err);
   }
   // Iter 46: build a qid → types index so the hybrid
   // retriever can filter airport-only entries (and similar low-quality
@@ -3297,6 +3367,39 @@ async function searchR3Registries(
     }
   }
 
+  // 観光庁 多言語解説文 (#53): every entry is searchable by its title,
+  // linked or not. Bodies are long; they reach search through the semantic
+  // index (search_hybrid) instead of lexical substring hits here.
+  const tagengo = await loadTagengo();
+  for (const r of tagengo) {
+    const s = scoreOne({
+      name_ja: r.title_ja ?? r.texts.ja?.title,
+      name_en: r.texts.en?.title,
+    });
+    if (s <= 0) continue;
+    out.push({
+      score: s,
+      record: {
+        type: "official_text",
+        source: "mlit_tagengo",
+        key: `mlit_tagengo:${r.entry_id}`,
+        entity_key: tagengoLinks.get(r.entry_id) ?? null,
+        name_ja: r.title_ja ?? r.texts.ja?.title ?? null,
+        name_en: r.texts.en?.title ?? null,
+        summary_en: firstParagraph(r.texts.en?.body),
+        summary_ja: firstParagraph(r.texts.ja?.body),
+        languages: Object.keys(r.texts),
+        genres: r.genres,
+        prefecture_codes: r.prefecture_codes,
+        address: r.address,
+        council: r.council,
+        authority: "観光庁 (Japan Tourism Agency)",
+        source_url: r.url,
+        credit: tagengoCredit(r.url),
+      },
+    });
+  }
+
   return out;
 }
 
@@ -3736,6 +3839,7 @@ async function getSpots(args: {
           last_verified: s.last_scraped_at ?? null,
           quality_score: Math.round(q * 100) / 100,
           ...(s.layer_images?.length ? { image: s.layer_images[0] } : {}),
+          ...(s.official_texts?.length ? { official_text: officialTextPointer(s.official_texts[0]) } : {}),
         };
         if (qRaw) baseRec.q_relevance = Math.max(qNameDesc, qBody);
         const rec = { score: finalScore, record: baseRec };
@@ -3896,6 +4000,8 @@ async function getSpots(args: {
       if (a.cuisine) wkRec.cuisine = a.cuisine;
       // Spot image layer (#50): the primary image; get_entity_full lists all.
       if (a.images?.length) wkRec.image = a.images[0];
+      // Official explanatory text (#53): a pointer; get_entity_full has the texts.
+      if (a.official_texts?.length) wkRec.official_text = officialTextPointer(a.official_texts[0]);
       // Iter 58: kinds-default constraint-encodable fields
       const wkKindsDefaults = enrichKindsDefaults(wkKinds, a.fee);
       if (wkKindsDefaults.typical_visit_minutes !== null) {
@@ -7961,6 +8067,22 @@ async function loadWestGoldenroute(): Promise<
   return cachedWestGoldenroute;
 }
 
+async function loadTagengo(): Promise<MlitTagengoRecord[]> {
+  if (cachedTagengo) return cachedTagengo;
+  cachedTagengo = await loadTagengoRecords(findOfficialTextsPath());
+  return cachedTagengo;
+}
+
+/** The short pointer search and get_spots carry; get_entity_full has the texts. */
+function officialTextPointer(t: OfficialText): Record<string, unknown> {
+  return { title_en: t.title_en, title_ja: t.title_ja, source_url: t.source_url };
+}
+
+function firstParagraph(body: string | undefined): string | null {
+  if (!body) return null;
+  return body.split(/\n\n/)[0] ?? null;
+}
+
 async function loadDmo(): Promise<DmoFile | null> {
   if (cachedDmo) return cachedDmo;
   try {
@@ -9763,6 +9885,9 @@ async function buildEntityCard(
     // Spot image layer (#50): up to three, primary first, each with its
     // page, license and the credit line to show with it.
     images: a.images ?? null,
+    // Official explanatory texts (#53): verbatim, every language the entry
+    // carries, each with the credit line the source terms ask for.
+    official_texts: a.official_texts ?? null,
     // Pre-computed transit access (Wikidata stations × haversine, ≤5 km cap)
     nearest_transit: a.nearest_transit
       ? {

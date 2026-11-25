@@ -327,6 +327,58 @@ export const FIXTURE_AUDITED_RELABEL = {
   ]
 } as const;
 
+/** Official explanatory texts (#53): two that name one spot, one theme text. */
+export const FIXTURE_OFFICIAL_TEXTS = {
+  records: [
+    {
+      entry_id: "R6-90001",
+      url: "https://www.mlit.go.jp/tagengo-db/R6-90001.html",
+      title_ja: "テスト灯台",
+      prefectures: ["鳥取県"],
+      prefecture_codes: ["31"],
+      genres: ["建造物・施設"],
+      media: ["看板"],
+      fiscal_year: 2024,
+      council: "テスト観光協議会",
+      address: "鳥取県鳥取市テスト町1",
+      texts: {
+        en: { title: "Test Lighthouse", body: "The lighthouse first lit in 1900.\n\nIt still guides ships." },
+        ja: { title: "テスト灯台", body: "灯台は1900年に初点灯しました。\n\n今も船を導いています。" },
+        ko: { title: "테스트 등대", body: "등대는 1900년에 처음 켜졌습니다." },
+      },
+      fetched_at: "2026-11-25T00:00:00.000Z",
+    },
+    {
+      entry_id: "R6-90002",
+      url: "https://www.mlit.go.jp/tagengo-db/R6-90002.html",
+      title_ja: "鳥取城跡 - 概要",
+      prefectures: ["鳥取県"],
+      prefecture_codes: ["31"],
+      genres: ["史跡・城跡"],
+      media: ["パンフレット"],
+      fiscal_year: 2023,
+      council: "テスト観光協議会",
+      address: "鳥取県鳥取市東町",
+      texts: { en: { title: "Tottori Castle Ruins", body: "The castle stood on Mt. Kyusho." } },
+      fetched_at: "2026-11-25T00:00:00.000Z",
+    },
+    {
+      entry_id: "R6-90003",
+      url: "https://www.mlit.go.jp/tagengo-db/R6-90003.html",
+      title_ja: "因幡の白うさぎの物語",
+      prefectures: ["鳥取県"],
+      prefecture_codes: ["31"],
+      genres: ["集落・街"],
+      media: ["Webページ"],
+      fiscal_year: 2022,
+      council: "テスト観光協議会",
+      address: null,
+      texts: { en: { title: "The Hare of Inaba", body: "A myth told along this coast." } },
+      fetched_at: "2026-11-25T00:00:00.000Z",
+    },
+  ],
+} as const;
+
 /** Image layer record (#50) for the Tottori fixture attraction. */
 export const FIXTURE_SPOT_IMAGES = {
   qid: "Q-TEST-TOTTORI-1",
@@ -405,6 +457,9 @@ export function pickFixtureContent(rel: string): string {
         },
       ],
     });
+  }
+  if (rel === "official_texts/mlit_tagengo.json") {
+    return JSON.stringify(FIXTURE_OFFICIAL_TEXTS);
   }
   if (rel === "images/wikidata_images.json") {
     return JSON.stringify({
