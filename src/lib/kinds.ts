@@ -49,6 +49,12 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q2087181: "historic_house",
   Q24354: "theater",
   Q1248784: "airport",
+  Q202509: "chinatown",
+  Q96288605: "shotengai",             // 商店街 with an arcade roof; same tag as the name rule
+  Q66364404: "entertainment_district", // 繁華街
+  Q11374182: "kagai",                  // Kyoto geisha district
+  Q676050: "old_town",
+  Q11166728: "tv_tower",
   // Japanese castle subclasses (P31 chain to Q23413 does not reach these —
   // fetcher v2 silently dropped 2,047 of these).
   Q92026: "japanese_castle",

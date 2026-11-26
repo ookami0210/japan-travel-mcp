@@ -50,6 +50,13 @@ export const ATTRACTION_TYPES: readonly AttractionType[] = [
   { qid: "Q39715", label: "lighthouse", note: "replaces Q3960 (Australian continent)" },
   { qid: "Q875157", label: "resort", note: "replaces Q1500350 (township of China)" },
   { qid: "Q1248784", label: "airport" },
+  // --- town districts ---
+  { qid: "Q202509", label: "Chinatown" },
+  { qid: "Q96288605", label: "shopping arcade in Japan", note: "商店街 with an arcade roof" },
+  { qid: "Q66364404", label: "prosperous area", note: "繁華街, a city's entertainment and shopping district" },
+  { qid: "Q11374182", label: "Kagai of Kyoto", note: "Kyoto's five geisha districts and Shimabara" },
+  { qid: "Q676050", label: "old town" },
+  { qid: "Q11166728", label: "television tower" },
   // --- religion ---
   { qid: "Q845945", label: "Shinto shrine" },
   { qid: "Q697295", label: "shrine" },
