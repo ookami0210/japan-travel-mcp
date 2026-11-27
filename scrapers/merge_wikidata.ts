@@ -12,46 +12,49 @@
  * refresh reaches it only through this merge; the steady scrape runs it every
  * night, after the prefecture files are restored from the dataset.
  *
- * The master decides the Wikidata rows: a row the refreshed master no longer
- * holds leaves the prefecture file. Rows that the inject scripts put into the
- * files (`INJECTED_ANCHORS`) are not fetched from Wikidata, so a master
+ * The master decides which Wikidata rows a file holds: a row the refreshed
+ * master no longer holds leaves the file. A row both hold keeps the fields
+ * only the file has (OSM tags, opening hours, descriptions, written by the
+ * enrichment scripts), with the master's values over them. Rows the inject
+ * scripts added (`isInjected`) are not fetched from Wikidata, so a master
  * refresh does not carry them; they stay.
+ *
+ * A file is written only when its rows change, so an unchanged prefecture
+ * keeps its bytes and the upload skips it.
  */
 
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { PREFECTURE_SLUGS } from "./lib/prefectures.js";
+import { notify } from "./lib/slack.js";
 
 const ROOT = new URL("../", import.meta.url);
 const PREF_DIR = new URL("data/prefectures/", ROOT);
 const WIKIDATA_PATH = new URL("data/_state/wikidata_attractions.json", ROOT);
 
-const PREFECTURE_SLUGS: Record<string, string> = {
-  "01": "hokkaido", "02": "aomori", "03": "iwate", "04": "miyagi",
-  "05": "akita", "06": "yamagata", "07": "fukushima", "08": "ibaraki",
-  "09": "tochigi", "10": "gunma", "11": "saitama", "12": "chiba",
-  "13": "tokyo", "14": "kanagawa", "15": "niigata", "16": "toyama",
-  "17": "ishikawa", "18": "fukui", "19": "yamanashi", "20": "nagano",
-  "21": "gifu", "22": "shizuoka", "23": "aichi", "24": "mie",
-  "25": "shiga", "26": "kyoto", "27": "osaka", "28": "hyogo",
-  "29": "nara", "30": "wakayama", "31": "tottori", "32": "shimane",
-  "33": "okayama", "34": "hiroshima", "35": "yamaguchi", "36": "tokushima",
-  "37": "kagawa", "38": "ehime", "39": "kochi", "40": "fukuoka",
-  "41": "saga", "42": "nagasaki", "43": "kumamoto", "44": "oita",
-  "45": "miyazaki", "46": "kagoshima", "47": "okinawa",
-};
-
 /** `source_anchor` values the scripts in `scripts/inject_*.py` give the rows they add. */
 export const INJECTED_ANCHORS: ReadonlySet<string> = new Set([
   "bunka_kunishitei",
   "landmark_by_name",
+  "manual_canonical_injection",
   "wikidata_national_park",
   "wikidata_shukubo",
+  "wikipedia_category",
 ]);
 
+/** `inject_wikipedia_lists.py` anchors its rows as `wikipedia_list:<list title>`. */
+const INJECTED_PREFIXES: readonly string[] = ["wikipedia_list:"];
+
+export function isInjected(anchor: unknown): boolean {
+  const a = String(anchor ?? "");
+  return INJECTED_ANCHORS.has(a) || INJECTED_PREFIXES.some((p) => a.startsWith(p));
+}
+
 /**
- * A prefecture whose merged layer would be smaller than this share of the
- * current one is left as it is: a master that lost most of a prefecture is a
- * broken fetch, not a change in Wikidata.
+ * A prefecture whose master rows are fewer than this share of the file's
+ * current Wikidata rows (injected ones aside) is left as it is: a master that
+ * lost most of a prefecture is a broken fetch, not a change in Wikidata.
+ * `MERGE_WIKIDATA_ALLOW_SHRINK=1` lets an intended shrink through.
  */
 export const MIN_KEPT_SHARE = 0.5;
 
@@ -66,31 +69,48 @@ export interface PrefectureMerge {
   rows: WikidataAttraction[];
   /** Injected rows the master does not hold, kept from the current file. */
   keptInjected: number;
-  /** Current rows the master no longer holds, dropped. */
+  /** Current Wikidata rows the master no longer holds, dropped. */
   dropped: number;
   /** True when the merge was refused by the collapse guard. */
   refused: boolean;
+  /** True when `rows` differ from the current file's. */
+  changed: boolean;
+}
+
+/** The file's row with the master's values over it; a master null does not erase a value. */
+function overlay(current: WikidataAttraction | undefined, master: WikidataAttraction): WikidataAttraction {
+  if (!current) return master;
+  const row: WikidataAttraction = { ...current };
+  for (const [key, value] of Object.entries(master)) {
+    if (value !== null && value !== undefined) row[key] = value;
+  }
+  return row;
 }
 
 /** The prefecture's new `wikidata_attractions`: the master's rows, then the injected rows it lacks. */
 export function mergePrefecture(
   current: readonly WikidataAttraction[],
   fromMaster: readonly WikidataAttraction[],
+  { allowShrink = false }: { allowShrink?: boolean } = {},
 ): PrefectureMerge {
+  const byQid = new Map(current.map((a) => [a.qid, a]));
   const inMaster = new Set(fromMaster.map((a) => a.qid));
   const notInMaster = current.filter((a) => !inMaster.has(a.qid));
-  const injected = notInMaster.filter((a) => INJECTED_ANCHORS.has(String(a.source_anchor ?? "")));
-  const rows = [...fromMaster, ...injected];
-  const refused = current.length > 0 && rows.length < current.length * MIN_KEPT_SHARE;
+  const injected = notInMaster.filter((a) => isInjected(a.source_anchor));
+  const wikidataNow = current.filter((a) => !isInjected(a.source_anchor)).length;
+  const refused = !allowShrink && wikidataNow > 0 && fromMaster.length < wikidataNow * MIN_KEPT_SHARE;
+  const rows = refused ? [...current] : [...fromMaster.map((m) => overlay(byQid.get(m.qid), m)), ...injected];
   return {
-    rows: refused ? [...current] : rows,
+    rows,
     keptInjected: injected.length,
     dropped: notInMaster.length - injected.length,
     refused,
+    changed: !refused && JSON.stringify(rows) !== JSON.stringify(current),
   };
 }
 
 async function main(): Promise<void> {
+  const allowShrink = process.env.MERGE_WIKIDATA_ALLOW_SHRINK === "1";
   const wdRaw = JSON.parse(
     await readFile(fileURLToPath(WIKIDATA_PATH), "utf8"),
   ) as { attractions: WikidataAttraction[] };
@@ -103,7 +123,8 @@ async function main(): Promise<void> {
   }
 
   let updated = 0;
-  let refused = 0;
+  let unchanged = 0;
+  const refused: string[] = [];
   for (const [code, attractions] of byPref) {
     const slug = PREFECTURE_SLUGS[code];
     if (!slug) continue;
@@ -122,12 +143,16 @@ async function main(): Promise<void> {
     }
 
     const current = (pref.wikidata_attractions as WikidataAttraction[] | undefined) ?? [];
-    const merged = mergePrefecture(current, attractions);
+    const merged = mergePrefecture(current, attractions, { allowShrink });
     if (merged.refused) {
       console.error(
-        `[merge_wikidata] ${slug}: REFUSED (${current.length} → ${merged.keptInjected + attractions.length} rows); file left as it is`,
+        `[merge_wikidata] ${slug}: REFUSED (master ${attractions.length} rows against ${current.length} in the file); file left as it is`,
       );
-      refused += 1;
+      refused.push(`${slug} (${current.length} → master ${attractions.length})`);
+      continue;
+    }
+    if (!merged.changed) {
+      unchanged += 1;
       continue;
     }
 
@@ -140,7 +165,16 @@ async function main(): Promise<void> {
     updated += 1;
   }
 
-  console.error(`[merge_wikidata] updated ${updated} prefecture files, refused ${refused}`);
+  console.error(
+    `[merge_wikidata] updated ${updated} prefecture files, unchanged ${unchanged}, refused ${refused.length}`,
+  );
+  if (refused.length > 0) {
+    await notify(
+      `merge_wikidata refused ${refused.length} prefecture file(s), left stale: ${refused.join(", ")}. ` +
+        "If the shrink is intended, run it with MERGE_WIKIDATA_ALLOW_SHRINK=1.",
+      "warn",
+    );
+  }
 }
 
 const isMain = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;

@@ -165,7 +165,11 @@ jobs:
         # get_spots reads the prefecture files, so a wd-foundation master
         # refresh reaches it only through this merge. Both inputs were restored
         # by the prefetch; the merge keeps the rows the inject scripts added
-        # and leaves a prefecture as it is when the master lost most of it.
+        # and the fields only the files carry, writes only the files whose
+        # rows changed, and leaves a prefecture as it is (with a Slack warning)
+        # when the master lost most of it.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true
         run: npx tsx scrapers/merge_wikidata.ts
 
