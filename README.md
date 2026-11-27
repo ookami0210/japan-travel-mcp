@@ -378,7 +378,7 @@ The MCP server downloads these on first run (cached in `~/.japan-travel-mcp/data
 
 The Wikidata attraction layer is built by class, not by prominence. An item
 is included when Wikidata records it as an instance (or subclass instance)
-of one of thirty-four tourism-relevant classes (temple, shrine, castle,
+of one of forty tourism-relevant classes (temple, shrine, castle,
 museum, park, garden, waterfall, onsen, natural monument, and so on; the
 full list with Wikidata's own label for each class is in
 `scrapers/lib/wikidata_attraction_types.ts`) and places it, through

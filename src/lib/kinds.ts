@@ -54,7 +54,7 @@ export const WD_TYPE_KIND: Record<string, string> = {
   Q66364404: "entertainment_district", // 繁華街
   Q11374182: "kagai",                  // Kyoto geisha district
   Q676050: "old_town",
-  Q11166728: "tv_tower",
+  Q11166728: "observation",           // television tower; its deck is why it is visited
   // Japanese castle subclasses (P31 chain to Q23413 does not reach these —
   // fetcher v2 silently dropped 2,047 of these).
   Q92026: "japanese_castle",
