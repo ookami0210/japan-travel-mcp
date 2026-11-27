@@ -37,3 +37,31 @@ describe("wikidata attraction type list", () => {
     }
   });
 });
+
+describe("town-district classes reach search", async () => {
+  const { enrichKindsDefaults, passesPriceBandCap } = await import("../../src/lib/kinds_defaults.js");
+  const { extractTravelIntent } = await import("../../src/lib/intent.js");
+
+  it("gives each town-district tag a visit time and a price band", () => {
+    for (const q of ["Q202509", "Q96288605", "Q66364404", "Q11374182", "Q676050", "Q11166728"]) {
+      const r = enrichKindsDefaults([WD_TYPE_KIND[q]]);
+      expect(r.typical_visit_minutes, q).not.toBeNull();
+      expect(r.price_band, q).not.toBeNull();
+    }
+    // A free-only search keeps an old town; a null band would fail closed.
+    expect(passesPriceBandCap(enrichKindsDefaults(["old_town"]).price_band, "free")).toBe(true);
+  });
+
+  it("files television towers under observation", () => {
+    expect(WD_TYPE_KIND.Q11166728).toBe("observation");
+  });
+
+  it("points townscape, chinatown, geisha and nightlife queries at the new tags", () => {
+    const kinds = (q: string) => extractTravelIntent(q).recommended_kinds;
+    expect(kinds("古い町並みを歩きたい").has("old_town")).toBe(true);
+    expect(kinds("横浜中華街で食べ歩き").has("chinatown")).toBe(true);
+    expect(kinds("祇園で舞妓さんを見たい").has("kagai")).toBe(true);
+    expect(kinds("nightlife in Osaka").has("entertainment_district")).toBe(true);
+    expect(kinds("machiya stay").has("old_town")).toBe(true);
+  });
+});
