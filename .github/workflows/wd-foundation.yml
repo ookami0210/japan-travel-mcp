@@ -61,6 +61,7 @@ jobs:
           - kunishitei
           - industry-shukubo
           - west-goldenroute
+          - mlit-tagengo
           - osm-food
     steps:
       - uses: actions/checkout@v4
@@ -173,6 +174,15 @@ jobs:
           # their previous image.
           DEADLINE_MINUTES: "240"
         run: npx tsx scrapers/sources/fetch_official_site_images.ts
+
+      - name: Run leg = mlit-tagengo (#53)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'mlit-tagengo'
+        env:
+          R3_REQUIRE_PREVIOUS: ${{ github.event.inputs.first_publish == 'true' && '0' || '1' }}
+          # One host at 5 s: about 3,900 entry pages fit a run. A first build
+          # fills over several runs; unread entries keep their record.
+          DEADLINE_MINUTES: "320"
+        run: npx tsx scrapers/sources/fetch_mlit_tagengo.ts
 
       - name: Run leg = wikipedia-summaries (#34 / #35)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikipedia-summaries'

@@ -224,6 +224,39 @@ describe("buildServer() — MCP integration smoke", () => {
     expect(images.map((i) => i.source)).toEqual(["wikidata_p18", "wikipedia_lead"]);
   });
 
+  it("get_entity_full carries the official explanatory text verbatim with its credit", async () => {
+    const json = await callToolOk("get_entity_full", { qid: "Q900000001" });
+    const card = ((json.entity ?? json) as Record<string, unknown>);
+    const texts = card.official_texts as Array<Record<string, any>>;
+    expect(texts).toHaveLength(1);
+    expect(texts[0].entry_id).toBe("R6-90001");
+    expect(texts[0].texts.en.body).toBe("The lighthouse first lit in 1900.\n\nIt still guides ships.");
+    expect(Object.keys(texts[0].texts).sort()).toEqual(["en", "ja", "ko"]);
+    expect(texts[0].credit).toContain("出典：地域観光資源の多言語解説文データベース https://www.mlit.go.jp/tagengo-db/R6-90001.html");
+    expect(texts[0].credit).toContain("This English-language text was created by the Japan Tourism Agency.");
+  });
+
+  it("get_spots points a municipal spot to its official text", async () => {
+    const json = await callToolOk("get_spots", { prefecture: "tottori" });
+    const spots = json.spots as Array<Record<string, unknown>>;
+    const castle = spots.find((s) => s.id === "31201-tottori-castle");
+    expect(castle!.official_text).toEqual({
+      title_en: "Tottori Castle Ruins",
+      title_ja: "鳥取城跡 - 概要",
+      source_url: "https://www.mlit.go.jp/tagengo-db/R6-90002.html",
+    });
+  });
+
+  it("search_area finds an official text about a theme that names no spot", async () => {
+    const json = await callToolOk("search_area", { q: "因幡の白うさぎ" });
+    const all = JSON.stringify(json);
+    expect(all).toContain("mlit_tagengo:R6-90003");
+    const rec = findRecordByKey(json, "mlit_tagengo:R6-90003");
+    expect(rec?.type).toBe("official_text");
+    expect(rec?.entity_key).toBeNull();
+    expect(rec?.summary_en).toBe("A myth told along this coast.");
+  });
+
   it("get_hotels accepts the prefecture filter against an empty master", async () => {
     const json = await callToolOk("get_hotels", { prefecture: "tottori" });
     expect(
@@ -373,3 +406,13 @@ describe("buildServer() — MCP integration smoke", () => {
     await callToolOk("search_hybrid", { q: "sand dunes" });
   });
 });
+
+function findRecordByKey(node: unknown, key: string): Record<string, any> | null {
+  if (!node || typeof node !== "object") return null;
+  if (!Array.isArray(node) && (node as Record<string, unknown>).key === key) return node as Record<string, any>;
+  for (const v of Object.values(node as Record<string, unknown>)) {
+    const hit = findRecordByKey(v, key);
+    if (hit) return hit;
+  }
+  return null;
+}

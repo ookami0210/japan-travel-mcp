@@ -73,6 +73,8 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   // (DATA_SOURCES.md #49). Optional: a dataset without it simply has no
   // official-page facts.
   "facts/official_page_facts.jsonl",
+  // 観光庁 多言語解説文 (DATA_SOURCES.md #53): verbatim official texts.
+  "official_texts/mlit_tagengo.json",
   // The verdict per campground URL (live official page / dead / portal
   // listing / none). get_hotels needs it to tell a campground whose own page
   // we simply have not crawled yet from one whose page is gone.

@@ -13,6 +13,7 @@ What gets uploaded:
   - data/_state/municipality_centroids.json
   - data/_state/official_urls.json
   - data/images/                (spot image layer: URLs + provenance, #50)
+  - data/official_texts/        (観光庁 多言語解説文, verbatim + credit, #53)
 
 What does NOT go to HF (kept in git, or excluded entirely):
   - data/knowledge/taxonomies/  (lightweight reference, kept in git)
