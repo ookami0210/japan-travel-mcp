@@ -1,0 +1,65 @@
+# Continue the 観光庁 多言語解説文 build (DATA_SOURCES.md #53) without anyone
+# dispatching it again.
+#
+# One wd-foundation run reads about 3,900 entry pages (one host, 5 s apart),
+# so a first build of ~9,400 entries, or a month with many new entries, needs
+# several runs. After each completed wd-foundation run this job reads the
+# published file and starts another `mlit-tagengo` run only when:
+#   - the file on HF was written by that run (fetched_at after it started),
+#     so a failed upload cannot loop;
+#   - entries are still pending; and
+#   - that run read at least one entry, so entries that always fail cannot loop.
+#
+# Concurrency: the dispatched run queues in the `wd-foundation` group.
+
+name: mlit-tagengo-continue
+
+on:
+  workflow_run:
+    workflows: ["wd-foundation"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  continue:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Decide whether entries are pending
+        id: check
+        env:
+          RUN_STARTED_AT: ${{ github.event.workflow_run.run_started_at }}
+        run: |
+          set -euo pipefail
+          url="https://huggingface.co/datasets/open-travel/japan-travel-mcp-data/resolve/main/official_texts/mlit_tagengo.json"
+          if ! curl -sfL -o tagengo.json "$url"; then
+            echo "no published file yet"; echo "dispatch=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from datetime import datetime
+          d = json.load(open("tagengo.json"))
+          def ts(s):
+              return datetime.fromisoformat(s.replace("Z", "+00:00"))
+          fresh = ts(d.get("fetched_at", "1970-01-01T00:00:00Z")) > ts(os.environ["RUN_STARTED_AT"])
+          records = len(d.get("records", []))
+          pending = d.get("entries_pending")
+          if pending is None:
+              pending = max(0, (d.get("listing_total") or 0) - records)
+          read = d.get("entries_read", 1)
+          go = fresh and pending > 0 and read > 0
+          import sys
+          print(f"records={records} pending={pending} read={read} fresh={fresh}", file=sys.stderr)
+          print(f"dispatch={'true' if go else 'false'}")
+          PY
+
+      - name: Start the next mlit-tagengo run
+        if: steps.check.outputs.dispatch == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run wd-foundation.yml --repo "${{ github.repository }}" -f legs=mlit-tagengo

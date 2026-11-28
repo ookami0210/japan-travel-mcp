@@ -23,6 +23,10 @@
  * Output: data/official_texts/mlit_tagengo.json, refused when it collapses
  * against the file it would replace.
  *
+ * `entries_pending` / `entries_read` in the output let
+ * `.github/workflows/mlit-tagengo-continue.yml` start the next run until the
+ * build is complete, so a first build needs no one to dispatch it again.
+ *
  * Env: LIMIT=N (entry pages this run), DEADLINE_MINUTES=300, REREAD_DAYS=180.
  */
 
@@ -182,6 +186,10 @@ async function main(): Promise<void> {
     fetcher_version: "v1",
     listing_total: listing.total,
     listing_complete: listing.complete,
+    // Read by mlit-tagengo-continue.yml: another run is started while
+    // entries are pending and this run made progress.
+    entries_read: read,
+    entries_pending: toRead.length - read - gone,
     records: [...records.values()].sort((a, b) => a.entry_id.localeCompare(b.entry_id)),
   };
   await mkdir(dirname(OUT_FILE), { recursive: true });
