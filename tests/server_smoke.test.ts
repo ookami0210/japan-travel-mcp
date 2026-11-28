@@ -247,6 +247,20 @@ describe("buildServer() — MCP integration smoke", () => {
     });
   });
 
+  it("get_spots lists a place an official text named that the master lacked, with its text", async () => {
+    const json = await callToolOk("get_spots", { prefecture: "tottori" });
+    const spots = json.spots as Array<Record<string, unknown>>;
+    const lake = spots.find((s) => s.id === "Q900000777");
+    expect(lake, "the official-text place should be a spot").toBeDefined();
+    expect(lake!.official_text).toEqual({
+      title_en: "Test Dune Lake",
+      title_ja: "テスト砂丘湖",
+      source_url: "https://www.mlit.go.jp/tagengo-db/R6-90004.html",
+    });
+    // A place already held is not added twice.
+    expect(spots.filter((s) => s.id === "Q900000001")).toHaveLength(1);
+  });
+
   it("search_area finds an official text about a theme that names no spot", async () => {
     const json = await callToolOk("search_area", { q: "因幡の白うさぎ" });
     const all = JSON.stringify(json);

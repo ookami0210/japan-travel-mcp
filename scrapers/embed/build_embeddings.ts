@@ -275,6 +275,26 @@ async function harvestSpots(limit: number | null): Promise<IndexEntry[]> {
       });
     }
   }
+  // Places named by official explanatory texts (#54): the server adds them
+  // to their prefecture at load time, so they are indexed here the same way.
+  const held = new Set(out.map((e) => e.key));
+  const places = await loadJson<{ records: Array<{ qid: string; name_ja: string | null; name_en: string | null; description_en: string | null; prefecture_code: string; admin_name: string | null; wikidata_url: string }> }>("_state/official_text_places.json");
+  for (const p of places?.records ?? []) {
+    if (limit !== null && out.length >= limit) break;
+    const name = p.name_ja || p.name_en;
+    if (!name || held.has(`wd:${p.qid}`)) continue;
+    out.push({
+      key: `wd:${p.qid}`,
+      kind: "wikidata",
+      source: "official_text_places",
+      name,
+      description: p.description_en,
+      prefecture_code: p.prefecture_code,
+      prefecture_name: null,
+      municipality: p.admin_name,
+      url: p.wikidata_url,
+    });
+  }
   if (skippedNav > 0) {
     process.stderr.write(`[embed] skipped ${skippedNav} nav-chrome / empty-body spots\n`);
   }

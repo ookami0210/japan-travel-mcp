@@ -69,6 +69,7 @@ import {
   type MlitTagengoRecord,
   type OfficialText,
 } from "./lib/official_texts.js";
+import { loadOfficialTextPlaces, mergeOfficialTextPlaces } from "./lib/official_text_places.js";
 import { ensureHeapHeadroom } from "./lib/heap_guard.js";
 import {
   loadFoodLayer,
@@ -404,6 +405,11 @@ function findSpotImagePaths(): string[] {
     resolve(dataRoot(), "images/official_site_images.json"),
     ...PREFECTURE_SLUGS.map((s) => resolve(dataRoot(), `images/municipal/${s}.json`)),
   ];
+}
+
+/** Places named by official explanatory texts (DATA_SOURCES.md #54); optional. */
+function findOfficialTextPlacesPath(): string {
+  return resolve(dataRoot(), "_state/official_text_places.json");
 }
 
 /** Official explanatory texts (DATA_SOURCES.md #53); optional. */
@@ -773,6 +779,32 @@ async function loadAllPrefectures(): Promise<PrefectureFile[]> {
   // master `_state/wikidata_attractions.json` so search and per-pref
   // tools see the full Wikidata corpus regardless of merge errors.
   await supplementWikidataAttractions(out);
+  // Places an official explanatory text names that the master lacks (#54).
+  // Optional layer; added before every other layer so they get images,
+  // facts and texts like any attraction.
+  try {
+    const places = await loadOfficialTextPlaces(findOfficialTextPlacesPath());
+    if (places.length > 0) {
+      mergeOfficialTextPlaces<WikidataAttraction>(out, places, (p) => ({
+        qid: p.qid,
+        wikidata_url: p.wikidata_url,
+        name_ja: p.name_ja,
+        name_en: p.name_en,
+        name_zh: p.name_zh,
+        name_ko: p.name_ko,
+        description_en: p.description_en,
+        coordinates: p.coordinates,
+        prefecture_code: p.prefecture_code,
+        admin_code: p.admin_code,
+        admin_name: p.admin_name,
+        types: p.types,
+        aliases: p.aliases,
+        source_anchor: p.source_anchor,
+      }));
+    }
+  } catch (err) {
+    console.error("[official_text_places] skipped:", err instanceof Error ? err.message : err);
+  }
   applyWikidataPrefCorrections(out);
   // Official-page facts (#49): fill opening_hours where OSM has none and
   // attach what the entity's own page states. Optional layer.

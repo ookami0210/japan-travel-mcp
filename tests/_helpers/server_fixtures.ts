@@ -376,6 +376,60 @@ export const FIXTURE_OFFICIAL_TEXTS = {
       texts: { en: { title: "The Hare of Inaba", body: "A myth told along this coast." } },
       fetched_at: "2026-11-25T00:00:00.000Z",
     },
+    {
+      entry_id: "R6-90004",
+      url: "https://www.mlit.go.jp/tagengo-db/R6-90004.html",
+      title_ja: "テスト砂丘湖",
+      prefectures: ["鳥取県"],
+      prefecture_codes: ["31"],
+      genres: ["自然"],
+      media: ["看板"],
+      fiscal_year: 2024,
+      council: "テスト観光協議会",
+      address: "鳥取県鳥取市福部町",
+      texts: { en: { title: "Test Dune Lake", body: "A lake behind the dunes." } },
+      fetched_at: "2026-11-25T00:00:00.000Z",
+    },
+  ],
+} as const;
+
+/** A place (#54) the attraction fixtures lack, named by entry R6-90004. */
+export const FIXTURE_OFFICIAL_TEXT_PLACES = {
+  records: [
+    {
+      qid: "Q900000777",
+      wikidata_url: "https://www.wikidata.org/wiki/Q900000777",
+      name_ja: "テスト砂丘湖",
+      name_en: "Test Dune Lake",
+      name_zh: null,
+      name_ko: null,
+      description_en: "lake in Tottori Prefecture, Japan",
+      coordinates: { lat: 35.54, lng: 134.27 },
+      prefecture_code: "31",
+      admin_code: "312011",
+      admin_name: "鳥取市",
+      types: ["Q23397"],
+      aliases: [],
+      source_anchor: "official_text",
+      official_entry_ids: ["R6-90004"],
+    },
+    {
+      qid: "Q900000001",
+      wikidata_url: "https://www.wikidata.org/wiki/Q900000001",
+      name_ja: "テスト灯台",
+      name_en: "Test Lighthouse",
+      name_zh: null,
+      name_ko: null,
+      description_en: null,
+      coordinates: { lat: 35.55, lng: 134.25 },
+      prefecture_code: "31",
+      admin_code: null,
+      admin_name: null,
+      types: [],
+      aliases: ["テスト岬灯台"],
+      source_anchor: "official_text",
+      official_entry_ids: [],
+    },
   ],
 } as const;
 
@@ -457,6 +511,9 @@ export function pickFixtureContent(rel: string): string {
         },
       ],
     });
+  }
+  if (rel === "_state/official_text_places.json") {
+    return JSON.stringify(FIXTURE_OFFICIAL_TEXT_PLACES);
   }
   if (rel === "official_texts/mlit_tagengo.json") {
     return JSON.stringify(FIXTURE_OFFICIAL_TEXTS);

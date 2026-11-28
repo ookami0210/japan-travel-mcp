@@ -133,6 +133,9 @@ PRESETS: dict[str, list[str]] = {
         "images/official_site_images.json",
         # mlit-tagengo leg: entries not read this run keep their record.
         "official_texts/mlit_tagengo.json",
+        # official-text-places leg (collapse guard); wikidata-images leg
+        # reads it for its targets.
+        "_state/official_text_places.json",
         # industry-shukubo leg: the collapse guard needs the files it would
         # replace (see R3_REFRESH_OUTPUTS above for why).
         "r3/hito_yu_kai.json",
@@ -156,6 +159,7 @@ PRESETS: dict[str, list[str]] = {
         "r3/dmo.json",
         "r3/west_goldenroute.json",
         "official_texts/mlit_tagengo.json",
+        "_state/official_text_places.json",
         # The embedding source composes per-prefecture spots — on a fresh
         # runner these must come from HF or the rebuild silently indexes an
         # empty municipal corpus.

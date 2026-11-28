@@ -1,5 +1,6 @@
 # Continue the 観光庁 多言語解説文 build (DATA_SOURCES.md #53) without anyone
-# dispatching it again.
+# dispatching it again, then resolve the places it names (#54) and fetch
+# their images (#50).
 #
 # One wd-foundation run reads about 3,900 entry pages (one host, 5 s apart),
 # so a first build of ~9,400 entries, or a month with many new entries, needs
@@ -9,6 +10,10 @@
 #     so a failed upload cannot loop;
 #   - entries are still pending; and
 #   - that run read at least one entry, so entries that always fail cannot loop.
+#
+# When that run completed the build (no entries pending), it starts the
+# `official-text-places` leg; when a run wrote a new places file, it starts
+# the `wikidata-images` leg so the new spots get their pictures.
 #
 # Concurrency: the dispatched run queues in the `wd-foundation` group.
 
@@ -56,10 +61,40 @@ jobs:
           import sys
           print(f"records={records} pending={pending} read={read} fresh={fresh}", file=sys.stderr)
           print(f"dispatch={'true' if go else 'false'}")
+          print(f"places={'true' if fresh and pending == 0 else 'false'}")
           PY
+          places_url="https://huggingface.co/datasets/open-travel/japan-travel-mcp-data/resolve/main/_state/official_text_places.json"
+          if curl -sfL -o places.json "$places_url"; then
+            echo "places_published=true" >> "$GITHUB_OUTPUT"
+            python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from datetime import datetime
+          d = json.load(open("places.json"))
+          def ts(s):
+              return datetime.fromisoformat(s.replace("Z", "+00:00"))
+          fresh = ts(d.get("fetched_at", "1970-01-01T00:00:00Z")) > ts(os.environ["RUN_STARTED_AT"])
+          print(f"images={'true' if fresh else 'false'}")
+          PY
+          else
+            echo "places_published=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Start the next mlit-tagengo run
         if: steps.check.outputs.dispatch == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run wd-foundation.yml --repo "${{ github.repository }}" -f legs=mlit-tagengo
+
+      - name: Resolve the places the finished build names
+        if: steps.check.outputs.dispatch != 'true' && steps.check.outputs.places == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FIRST: ${{ steps.check.outputs.places_published == 'true' && 'false' || 'true' }}
+        run: gh workflow run wd-foundation.yml --repo "${{ github.repository }}" -f legs=official-text-places -f first_publish="$FIRST"
+
+      - name: Fetch images for newly resolved places
+        # The monthly scheduled run already includes the images leg.
+        if: steps.check.outputs.images == 'true' && github.event.workflow_run.event == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run wd-foundation.yml --repo "${{ github.repository }}" -f legs=wikidata-images
