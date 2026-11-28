@@ -1060,7 +1060,8 @@ requires either extending an existing channel or creating a new one.
 - **How it is read**: every listing page (100 entries a page) for the entry
   ids, then each entry page that is new or older than 180 days, one request
   every 5 s, until the run's soft deadline. Entries not read this run keep
-  their record, so the first build fills over several runs. An entry that
+  their record, so the first build fills over several runs, each started
+  by `mlit-tagengo-continue.yml` while entries are pending. An entry that
   returns 404 is dropped; entries missing from a complete listing are
   dropped.
 - **Linking to spots** (server, at load time, `src/lib/official_texts.ts`):
