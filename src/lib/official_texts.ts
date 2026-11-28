@@ -168,17 +168,17 @@ const LEADING_MARK_RE = /^\s*(No\.?\s*\d+|[\d０-９]+[.．)）]|【[^】]*】)\
 const PAREN_RE = /[（(]([^（）()]*)[）)]/g;
 
 /**
- * The names a title can stand for. "硫黄山（アトサヌプリ）" gives 硫黄山 and
- * アトサヌプリ; "さぎの湯温泉 - 概要" gives さぎの湯温泉. Names shorter than
- * two characters are dropped.
+ * The place names a title can stand for, as written (width-folded, not
+ * otherwise normalised). "硫黄山（アトサヌプリ）" gives the full title, 硫黄山
+ * and アトサヌプリ; "さぎの湯温泉 - 概要" gives さぎの湯温泉.
  */
-export function titleNames(title: string | null | undefined): string[] {
+export function titleForms(title: string | null | undefined): string[] {
   if (!title) return [];
   const base = title.normalize("NFKC").replace(SECTION_SUFFIX_RE, "").replace(LEADING_MARK_RE, "").trim();
-  const out = new Set<string>();
+  const out: string[] = [];
   const add = (s: string) => {
-    const n = normalizeName(s);
-    if (n.length >= 2) out.add(n);
+    const t = s.replace(/\s+/g, " ").trim();
+    if (normalizeName(t).length >= 2 && !out.includes(t)) out.push(t);
   };
   const forms = [base];
   // "<series> パンフレット：０２ 田島弥平旧宅": the part after the last colon,
@@ -195,6 +195,13 @@ export function titleNames(title: string | null | undefined): string[] {
     if (outside !== f) add(outside);
     for (const m of f.matchAll(PAREN_RE)) add(m[1]);
   }
+  return out;
+}
+
+/** titleForms, normalised for comparison. Names under two characters are dropped. */
+export function titleNames(title: string | null | undefined): string[] {
+  const out = new Set<string>();
+  for (const f of titleForms(title)) out.add(normalizeName(f));
   return [...out];
 }
 

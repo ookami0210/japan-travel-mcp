@@ -75,6 +75,8 @@ export const OPTIONAL_RUNTIME_FILES: readonly string[] = [
   "facts/official_page_facts.jsonl",
   // 観光庁 多言語解説文 (DATA_SOURCES.md #53): verbatim official texts.
   "official_texts/mlit_tagengo.json",
+  // Places named by those texts (#54): added to their prefecture at load.
+  "_state/official_text_places.json",
   // The verdict per campground URL (live official page / dead / portal
   // listing / none). get_hotels needs it to tell a campground whose own page
   // we simply have not crawled yet from one whose page is gone.

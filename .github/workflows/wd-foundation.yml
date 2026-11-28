@@ -62,6 +62,7 @@ jobs:
           - industry-shukubo
           - west-goldenroute
           - mlit-tagengo
+          - official-text-places
           - osm-food
     steps:
       - uses: actions/checkout@v4
@@ -183,6 +184,12 @@ jobs:
           # fills over several runs; unread entries keep their record.
           DEADLINE_MINUTES: "320"
         run: npx tsx scrapers/sources/fetch_mlit_tagengo.ts
+
+      - name: Run leg = official-text-places (#54)
+        if: steps.gate.outputs.run == 'true' && matrix.leg == 'official-text-places'
+        env:
+          R3_REQUIRE_PREVIOUS: ${{ github.event.inputs.first_publish == 'true' && '0' || '1' }}
+        run: npx tsx scrapers/sources/match_tagengo_places.ts
 
       - name: Run leg = wikipedia-summaries (#34 / #35)
         if: steps.gate.outputs.run == 'true' && matrix.leg == 'wikipedia-summaries'

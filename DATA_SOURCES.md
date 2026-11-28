@@ -1079,6 +1079,37 @@ requires either extending an existing channel or creating a new one.
   `search_area` (`type: "official_text"`), embedding index.
 - **Status**: `active`
 
+#### #54 — Places named by official explanatory texts (Wikidata items the master lacked)
+- **Authority**: Wikidata (CC0) for the item (names, coordinates, types, English
+  description); the 観光庁 entry (#53) that names it is the reason it is held.
+- **URL**: https://query.wikidata.org/sparql (exact-label lookup) and
+  https://www.wikidata.org/w/api.php (`wbgetentities`)
+- **License**: CC0
+- **Fetcher**: `scrapers/sources/match_tagengo_places.ts`
+- **Output**: `data/_state/official_text_places.json` (`records: [...]` in the
+  attraction shape, plus `official_entry_ids`); added to their prefecture by
+  the server at load time (`src/lib/official_text_places.ts`)
+- **Cadence (steady)**: monthly, and once after each completed #53 build
+  (`mlit-tagengo-continue.yml` starts it, then the `wikidata-images` leg)
+- **Execution venue (current)**: gh-actions (`wd-foundation.yml`, leg `official-text-places`)
+- **Channel**: WD-FOUNDATION
+- **Which items are kept**: for each #53 entry whose title names no master
+  attraction in its prefectures, items in Japan with coordinates whose
+  Japanese label or alias is exactly the title's place name. Kept only when
+  one item lies in the entry's prefectures (nearest municipality centroid
+  within 30 km); when the name is held by several items in Japan, the item's
+  municipality (its P131 label or the centroid's name) must also appear in
+  the entry's location. Administrative units (items with P429) are never
+  kept, and entries whose genres are only events, food, local products or
+  crafts are not looked up. An item the master already holds under another
+  name gets the entry's name as an alias instead.
+- **Coverage**: a dry run over the 8,943 titled entries of the bulk file
+  resolved 553 places (摩周湖, 洞爺湖, 河童橋, 華厳の滝, 銀山温泉, 二本松城 ...),
+  70 of them already held under another name.
+- **Consumers**: every attraction surface (the places are attractions), the
+  #50 image layer (targets), the embedding index, and #53 linking.
+- **Status**: `active`
+
 ### Municipal scrape (the largest channel)
 
 #### #23 — 全 1,938 自治体 観光公式ページ scrape

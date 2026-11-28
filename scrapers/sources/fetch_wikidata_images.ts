@@ -41,6 +41,7 @@ import { assertNotCollapsed, previousRecordCount } from "../lib/r3_write_guard.j
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../..");
 const MASTER = resolve(REPO_ROOT, "data/_state/wikidata_attractions.json");
+const OFFICIAL_TEXT_PLACES = resolve(REPO_ROOT, "data/_state/official_text_places.json");
 const OUT_FILE = resolve(REPO_ROOT, "data/images/wikidata_images.json");
 
 const SPARQL = "https://query.wikidata.org/sparql";
@@ -339,8 +340,15 @@ function toImage(file: CommonsFile, source: ImageSource): SpotImage {
 
 async function main(): Promise<void> {
   const master = JSON.parse(await readFile(MASTER, "utf8")) as { attractions?: Array<{ qid?: string }> };
+  // Places named by official explanatory texts (#54) are spots too.
+  let places: Array<{ qid?: string }> = [];
+  try {
+    places = (JSON.parse(await readFile(OFFICIAL_TEXT_PLACES, "utf8")) as { records?: Array<{ qid?: string }> }).records ?? [];
+  } catch {
+    // optional input
+  }
   let qids = [
-    ...new Set((master.attractions ?? []).map((a) => a.qid).filter((q): q is string => !!q && /^Q\d+$/.test(q))),
+    ...new Set([...(master.attractions ?? []), ...places].map((a) => a.qid).filter((q): q is string => !!q && /^Q\d+$/.test(q))),
   ];
   if (LIMIT > 0) qids = qids.slice(0, LIMIT);
   console.log(`[wikidata_images] ${qids.length} entities`);

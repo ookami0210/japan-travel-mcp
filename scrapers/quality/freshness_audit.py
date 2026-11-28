@@ -49,6 +49,7 @@ RULES: list[tuple[str, int, int]] = [
     ("r3/dmo.json", 40, 50_000),
     ("r3/west_goldenroute.json", 40, 50_000),
     ("official_texts/mlit_tagengo.json", 40, 1_000_000),
+    ("_state/official_text_places.json", 40, 10_000),
     ("r3/hito_yu_kai.json", 40, 10_000),
     ("r3/koyasan_shukubo.json", 40, 10_000),
     ("r3/kyoto_sect_shukubo.json", 40, 1_000),
